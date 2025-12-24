@@ -1,27 +1,43 @@
-# Employee Benefits Portal - Medical Insurance Verification
+# Medical Insurance Renewal - Employee Verification Portal
 
 ## Overview
-A secure employee self-service portal for medical insurance data verification. Employees can log in using their Staff Number and Date of Birth to view and update their personal information and that of their dependents before insurance renewal.
+A secure employee self-service portal for medical insurance renewal verification. Employees authenticate with Staff Number + Date of Birth to review their insurance details and either confirm accuracy OR submit correction requests.
 
 ## Current State
 - **Status**: Complete and functional
 - **Last Updated**: December 24, 2025
+- **Policy Year**: 2026
+- **Verification Deadline**: January 31, 2026
 
 ## Features
-1. **Secure Login** - Two-factor authentication using Staff Number + Date of Birth (DD/MM/YYYY)
-2. **Data Display** - Shows employee and all dependents (spouse, children)
-3. **Edit Capability** - Inline editing for all fields, with missing fields highlighted
-4. **Protected Fields** - Principal's Date of Birth is locked (used for authentication)
-5. **Confirmation System** - Employees can confirm their data is correct
-6. **Microsoft-style Branding** - Professional blue theme, hidden Streamlit elements
-7. **HR Support** - WhatsApp contact button for HR assistance
+
+### Layout Sections
+1. **Header** - Company logo placeholder, title, Policy Year badge
+2. **Section 1: Employee Snapshot** (Read-only) - Employee Number, Name, Job Title, Department
+3. **Section 2: Insurance Details** (Read-only) - Provider, Policy Number, Plan Type, Coverage Category, Dependents table
+4. **Section 3: Confirmation** - Two-path workflow
+5. **Section 4: Correction Request** - Conditionally visible form
+6. **Section 5: Submission Status** - Success messages
+
+### Two-Path Workflow
+- **Path A: Confirmation** - Employee confirms all information is accurate
+- **Path B: Correction Request** - Employee submits change requests with:
+  - Editable fields (Name, DOB, Relationship, Emirates ID, Passport)
+  - Mandatory remarks field
+  - Auto-capture of old value → new value with timestamp
+
+### Security Features
+- Session timeout (15 minutes of inactivity)
+- Link expiration after deadline date
+- Principal's DOB locked (used for authentication)
 
 ## Project Structure
 ```
 /
 ├── app.py                 # Main Streamlit application
 ├── attached_assets/
-│   └── Medical_Insurance_-_Workings_*.csv  # Employee data
+│   ├── Medical_Insurance_-_Workings_*.csv   # Employee data
+│   └── correction_requests.json              # Change requests log
 ├── .streamlit/
 │   └── config.toml        # Streamlit server configuration
 └── replit.md              # This documentation
@@ -30,21 +46,25 @@ A secure employee self-service portal for medical insurance data verification. E
 ## Technical Details
 - **Framework**: Streamlit
 - **Port**: 5000
-- **Data Storage**: CSV file (updates saved to same file)
+- **Data Storage**: CSV file + JSON for correction requests
 - **Authentication**: Staff Number + Date of Birth validation
 
-## Key Fields Tracked
-- Personal info (name, gender, DOB, nationality, marital status)
-- ID documents (Emirates ID, National ID, Passport)
-- Visa information (Visa Unified Number, File Number, Place of issuance)
-- Birth Certificate Number
+## Configuration
+Located at top of app.py:
+- `POLICY_YEAR` - Current policy year (2026)
+- `RENEWAL_DEADLINE` - Cutoff date for verification
+- `SESSION_TIMEOUT_MINUTES` - Inactivity timeout (15 min)
+
+## Sample Staff Numbers for Testing
+- BAYN00002 (Syed Irfan Zakiuddin) - DOB: 11/03/1979
+- BAYN00003 (Michael Rutman) - DOB: 21/07/1979
+- BAYN00008 - DOB: 16/05/1988
 
 ## Running the Application
 ```bash
 streamlit run app.py --server.port 5000
 ```
 
-## Sample Staff Numbers for Testing
-- BAYN00047 (Alexander Manual Vaz) - DOB: 02/06/1958
-- BAYN00014 (Mahmoud Saeed Mohamed) - DOB: 31/12/1979
-- BAYN00038 (Shafeeqe Vakkayil) - DOB: 04/10/1989
+## Future Enhancements (Not Yet Implemented)
+- SharePoint List integration (writeback)
+- Power Automate email trigger for HR notifications
