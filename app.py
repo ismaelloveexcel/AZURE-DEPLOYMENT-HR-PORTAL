@@ -26,175 +26,206 @@ CUSTOM_CSS = """
     
     .stApp {
         font-family: 'Poppins', sans-serif;
-        background-color: #e8e8e8;
+        background-color: #f5f5f5;
     }
     
     .main-header {
-        background: linear-gradient(135deg, #1a1a5e 0%, #2a2a7e 100%);
-        padding: 25px 35px;
-        margin: -80px -80px 30px -80px;
+        background: #1E1B5C;
+        padding: 18px 30px;
+        margin: -80px -80px 0 -80px;
         color: white;
-        border-radius: 0 0 20px 20px;
+        position: sticky;
+        top: 0;
+        z-index: 999;
     }
     
     .header-content {
         display: flex;
         justify-content: space-between;
         align-items: center;
+        max-width: 1200px;
+        margin: 0 auto;
     }
     
     .header-left {
         display: flex;
         align-items: center;
-        gap: 20px;
+        gap: 15px;
     }
     
     .company-logo {
-        width: 50px;
-        height: 50px;
+        width: 42px;
+        height: 42px;
         background: white;
-        border-radius: 12px;
+        border-radius: 10px;
         display: flex;
         align-items: center;
         justify-content: center;
-        font-size: 24px;
-        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        font-size: 20px;
     }
     
     .header-title h1 {
         margin: 0;
-        font-size: 20px;
+        font-size: 16px;
         font-weight: 600;
-        letter-spacing: 0.5px;
     }
     
     .header-title .subtitle {
-        font-size: 12px;
-        opacity: 0.85;
-        margin-top: 4px;
-        font-weight: 300;
+        font-size: 11px;
+        opacity: 0.8;
+        margin-top: 2px;
+        font-weight: 400;
+    }
+    
+    .header-right {
+        display: flex;
+        align-items: center;
+        gap: 25px;
     }
     
     .policy-badge {
-        background: rgba(255,255,255,0.2);
-        padding: 8px 18px;
-        border-radius: 25px;
+        background: rgba(255,255,255,0.15);
+        padding: 6px 14px;
+        border-radius: 20px;
+        font-size: 11px;
+        font-weight: 500;
+    }
+    
+    .user-block {
+        text-align: right;
+    }
+    
+    .user-name {
         font-size: 13px;
         font-weight: 500;
-        letter-spacing: 0.5px;
+    }
+    
+    .user-id {
+        font-size: 10px;
+        opacity: 0.7;
+    }
+    
+    .status-strip {
+        background: #fff;
+        border-bottom: 1px solid #e5e5e5;
+        padding: 10px 30px;
+        margin: 0 -80px 20px -80px;
+        display: flex;
+        justify-content: center;
+        gap: 40px;
+        font-size: 12px;
+        color: #666;
+    }
+    
+    .status-item {
+        display: flex;
+        align-items: center;
+        gap: 6px;
     }
     
     .glass-card {
         background: #fff;
-        border-radius: 20px;
-        padding: 30px;
-        margin-bottom: 20px;
-        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.05);
+        border-radius: 12px;
+        padding: 24px;
+        margin-bottom: 16px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
     }
     
     .card-title {
-        color: #1a1a2e;
-        font-size: 13px;
+        color: #1E1B5C;
+        font-size: 12px;
         font-weight: 600;
         text-transform: uppercase;
-        letter-spacing: 2px;
-        margin-bottom: 25px;
-        padding-bottom: 15px;
-        border-bottom: 1px solid #f0f0f0;
+        letter-spacing: 1.5px;
+        margin-bottom: 20px;
+        padding-bottom: 12px;
+        border-bottom: 1px solid #eee;
     }
     
-    .info-grid {
+    .snapshot-grid {
         display: grid;
-        grid-template-columns: repeat(2, 1fr);
-        gap: 0 40px;
+        grid-template-columns: 1fr 1fr;
+        gap: 16px 40px;
     }
     
-    .info-row {
+    .snapshot-item {
         display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding: 12px 0;
-        border-bottom: 1px solid #f0f0f0;
-        gap: 20px;
+        flex-direction: column;
+        gap: 4px;
     }
     
-    .info-row:last-child {
-        border-bottom: none;
-    }
-    
-    .info-label {
+    .snapshot-label {
         color: #888;
-        font-size: 0.85em;
-        font-weight: 400;
-        white-space: nowrap;
-        flex-shrink: 0;
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
     }
     
-    .info-value {
-        color: #1a1a2e;
-        font-size: 0.85em;
+    .snapshot-value {
+        color: #1E1B5C;
+        font-size: 14px;
         font-weight: 500;
-        text-align: right;
-        flex-grow: 1;
     }
     
     .member-card {
         background: #fafafa;
-        border-radius: 12px;
-        padding: 20px;
-        margin-bottom: 15px;
+        border-radius: 10px;
+        padding: 18px;
+        margin-bottom: 12px;
+        border: 1px solid #eee;
     }
     
     .member-header {
         display: flex;
         justify-content: space-between;
         align-items: center;
-        margin-bottom: 15px;
-        padding-bottom: 12px;
+        margin-bottom: 14px;
+        padding-bottom: 10px;
         border-bottom: 1px solid #eee;
     }
     
     .member-name {
-        color: #1a1a2e;
-        font-size: 1em;
+        color: #1E1B5C;
+        font-size: 14px;
         font-weight: 600;
     }
     
     .member-badge {
-        padding: 4px 14px;
-        border-radius: 20px;
-        font-size: 0.6em;
+        padding: 4px 12px;
+        border-radius: 15px;
+        font-size: 10px;
         font-weight: 600;
         text-transform: uppercase;
-        letter-spacing: 1px;
+        letter-spacing: 0.5px;
     }
     
     .badge-principal {
-        background: rgba(56, 182, 255, 0.15);
-        color: #38b6ff;
+        background: rgba(30, 27, 92, 0.1);
+        color: #1E1B5C;
     }
     
     .badge-spouse {
-        background: rgba(236, 72, 153, 0.15);
-        color: #ec4899;
+        background: rgba(236, 72, 153, 0.1);
+        color: #be185d;
     }
     
     .badge-child {
-        background: rgba(245, 158, 11, 0.15);
-        color: #d97706;
+        background: rgba(245, 158, 11, 0.1);
+        color: #b45309;
     }
     
     .member-details {
         display: grid;
         grid-template-columns: repeat(2, 1fr);
-        gap: 8px 20px;
+        gap: 10px 24px;
     }
     
     .member-detail-item {
         display: flex;
         justify-content: space-between;
-        font-size: 0.8em;
-        padding: 4px 0;
+        align-items: center;
+        font-size: 12px;
+        padding: 2px 0;
     }
     
     .member-detail-label {
@@ -202,76 +233,105 @@ CUSTOM_CSS = """
     }
     
     .member-detail-value {
-        color: #1a1a2e;
+        color: #333;
         font-weight: 500;
     }
     
     .missing-value {
-        color: #ff6b6b;
-        font-style: italic;
+        color: #dc2626;
+        font-size: 11px;
     }
     
     .missing-banner {
-        background: rgba(255, 107, 107, 0.08);
-        border-left: 3px solid #ff6b6b;
+        background: rgba(220, 38, 38, 0.05);
+        border-left: 3px solid #dc2626;
         border-radius: 0 8px 8px 0;
-        padding: 12px 16px;
-        margin-bottom: 20px;
+        padding: 10px 14px;
+        margin-bottom: 16px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        color: #b91c1c;
+        font-size: 12px;
+    }
+    
+    .confirmation-card {
+        background: #fff;
+        border-radius: 12px;
+        padding: 24px;
+        margin-bottom: 16px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+    }
+    
+    .radio-option {
         display: flex;
         align-items: center;
         gap: 10px;
-        color: #d63031;
-        font-size: 0.8em;
+        padding: 14px 16px;
+        border: 2px solid #e5e5e5;
+        border-radius: 10px;
+        margin-bottom: 10px;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+    
+    .radio-option:hover {
+        border-color: #1E1B5C;
+    }
+    
+    .radio-option.selected {
+        border-color: #1E1B5C;
+        background: rgba(30, 27, 92, 0.03);
     }
     
     .success-message {
-        background: rgba(56, 182, 255, 0.08);
-        border-radius: 16px;
-        padding: 35px;
+        background: rgba(22, 163, 74, 0.08);
+        border-radius: 12px;
+        padding: 30px;
         text-align: center;
-        margin: 20px 0;
+        margin: 16px 0;
     }
     
     .success-icon {
-        width: 70px;
-        height: 70px;
-        background: rgba(56, 182, 255, 0.15);
+        width: 60px;
+        height: 60px;
+        background: rgba(22, 163, 74, 0.15);
         border-radius: 50%;
         display: flex;
         align-items: center;
         justify-content: center;
-        margin: 0 auto 20px;
-        font-size: 32px;
+        margin: 0 auto 16px;
+        font-size: 28px;
+        color: #16a34a;
     }
     
     .success-title {
-        color: #1a1a2e;
-        font-size: 1.2em;
+        color: #1E1B5C;
+        font-size: 16px;
         font-weight: 600;
-        margin-bottom: 8px;
-        letter-spacing: 1px;
+        margin-bottom: 6px;
     }
     
     .success-desc {
-        color: #888;
-        font-size: 0.85em;
-        line-height: 1.6;
+        color: #666;
+        font-size: 13px;
+        line-height: 1.5;
     }
     
     .change-log {
         background: #fffbeb;
         border: 1px solid #fcd34d;
-        border-radius: 10px;
-        padding: 15px;
-        margin-top: 15px;
+        border-radius: 8px;
+        padding: 14px;
+        margin-top: 14px;
     }
     
     .change-item {
         display: flex;
-        gap: 10px;
-        padding: 8px 0;
+        gap: 8px;
+        padding: 6px 0;
         border-bottom: 1px solid #fef3c7;
-        font-size: 0.85em;
+        font-size: 12px;
     }
     
     .change-item:last-child {
@@ -289,123 +349,110 @@ CUSTOM_CSS = """
     }
     
     .login-container {
-        max-width: 450px;
+        max-width: 420px;
         margin: 60px auto;
         text-align: center;
     }
     
     .login-header {
-        margin-bottom: 30px;
+        margin-bottom: 25px;
     }
     
     .login-logo {
-        width: 50px;
-        height: 50px;
-        background: linear-gradient(135deg, #1a1a5e, #2a2a7e);
-        border-radius: 14px;
-        margin: 0 auto 20px;
+        width: 48px;
+        height: 48px;
+        background: #1E1B5C;
+        border-radius: 12px;
+        margin: 0 auto 16px;
         display: flex;
         align-items: center;
         justify-content: center;
-        font-size: 24px;
-        box-shadow: 0 8px 20px rgba(26, 26, 94, 0.2);
+        font-size: 22px;
     }
     
     .login-title {
-        color: #1a1a2e;
-        font-size: 20px;
+        color: #1E1B5C;
+        font-size: 18px;
         font-weight: 600;
-        margin-bottom: 5px;
-        letter-spacing: 0.5px;
+        margin-bottom: 4px;
     }
     
     .login-subtitle {
         color: #888;
-        font-size: 13px;
+        font-size: 12px;
         font-weight: 400;
     }
     
     .login-badge {
         display: inline-block;
-        background: rgba(56, 182, 255, 0.1);
-        color: #38b6ff;
-        padding: 6px 16px;
-        border-radius: 20px;
-        font-size: 12px;
+        background: rgba(30, 27, 92, 0.08);
+        color: #1E1B5C;
+        padding: 5px 14px;
+        border-radius: 15px;
+        font-size: 11px;
         font-weight: 600;
-        margin-top: 15px;
+        margin-top: 12px;
     }
     
     .stButton > button {
-        background: #1a1a5e;
+        background: #1E1B5C;
         color: white;
         border: none;
-        padding: 14px 30px;
+        padding: 12px 28px;
         font-weight: 600;
-        font-size: 0.9em;
-        letter-spacing: 2px;
+        font-size: 13px;
+        letter-spacing: 1px;
         text-transform: uppercase;
-        border-radius: 30px;
+        border-radius: 8px;
         width: 100%;
-        transition: all 0.3s ease;
+        transition: all 0.2s ease;
         font-family: 'Poppins', sans-serif;
     }
     
     .stButton > button:hover {
-        background: #2a2a7e;
-        box-shadow: 0 8px 25px rgba(26, 26, 94, 0.3);
+        background: #2d2a6e;
     }
     
     .signout-btn button {
         background: transparent !important;
         border: 1px solid #ddd !important;
         color: #666 !important;
-        padding: 8px 20px !important;
-        font-size: 0.75em !important;
-        letter-spacing: 1px !important;
+        padding: 6px 16px !important;
+        font-size: 11px !important;
+        letter-spacing: 0.5px !important;
     }
     
     .signout-btn button:hover {
         background: #f5f5f5 !important;
-        box-shadow: none !important;
-    }
-    
-    .timeout-info {
-        background: rgba(56, 182, 255, 0.08);
-        border-radius: 10px;
-        padding: 12px 20px;
-        font-size: 0.8em;
-        color: #666;
-        text-align: center;
-        margin-bottom: 25px;
     }
     
     .section-label {
-        color: #888;
-        font-size: 0.65em;
+        color: #666;
+        font-size: 11px;
         text-transform: uppercase;
-        letter-spacing: 1.5px;
+        letter-spacing: 1px;
         margin-bottom: 8px;
         font-weight: 600;
     }
     
     div[data-testid="stForm"] {
         background: white;
-        padding: 25px;
-        border-radius: 16px;
-        box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+        padding: 20px;
+        border-radius: 12px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.04);
     }
     
     .stTextInput > div > div > input {
         border-radius: 8px;
-        border: 1px solid #e0e0e0;
-        padding: 12px 14px;
+        border: 1px solid #ddd;
+        padding: 10px 12px;
         font-family: 'Poppins', sans-serif;
+        font-size: 13px;
     }
     
     .stTextInput > div > div > input:focus {
-        border-color: #38b6ff;
-        box-shadow: 0 0 0 3px rgba(56, 182, 255, 0.1);
+        border-color: #1E1B5C;
+        box-shadow: 0 0 0 2px rgba(30, 27, 92, 0.1);
     }
     
     .stSelectbox > div > div {
@@ -414,23 +461,47 @@ CUSTOM_CSS = """
     
     .stTextArea > div > div > textarea {
         border-radius: 8px;
-        border: 1px solid #e0e0e0;
+        border: 1px solid #ddd;
         font-family: 'Poppins', sans-serif;
+        font-size: 13px;
     }
     
     .stTextArea > div > div > textarea:focus {
-        border-color: #38b6ff;
-        box-shadow: 0 0 0 3px rgba(56, 182, 255, 0.1);
+        border-color: #1E1B5C;
+        box-shadow: 0 0 0 2px rgba(30, 27, 92, 0.1);
+    }
+    
+    .stRadio > div {
+        gap: 8px;
+    }
+    
+    .stRadio label {
+        padding: 12px 16px !important;
+        border: 2px solid #e5e5e5 !important;
+        border-radius: 8px !important;
+        margin-bottom: 8px !important;
     }
     
     .expired-notice {
         background: white;
-        border-radius: 20px;
-        padding: 50px 40px;
+        border-radius: 12px;
+        padding: 40px 30px;
         text-align: center;
-        max-width: 450px;
+        max-width: 420px;
         margin: 80px auto;
-        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.08);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+    }
+    
+    .inline-error {
+        color: #dc2626;
+        font-size: 11px;
+        margin-top: 4px;
+    }
+    
+    .field-hint {
+        color: #888;
+        font-size: 11px;
+        margin-top: 4px;
     }
 </style>
 """
@@ -629,20 +700,35 @@ def render_header(principal_name, staff_number):
     <div class="main-header">
         <div class="header-content">
             <div class="header-left">
-                <div class="company-logo">🏢</div>
+                <div class="company-logo">🏥</div>
                 <div class="header-title">
                     <h1>Medical Insurance Verification</h1>
                     <div class="subtitle">Employee Self-Service Portal</div>
                 </div>
             </div>
-            <div style="display: flex; align-items: center; gap: 30px;">
+            <div class="header-right">
                 <div class="policy-badge">Policy Year {POLICY_YEAR}</div>
-                <div style="text-align: right;">
-                    <div style="font-size: 12px; opacity: 0.75;">Signed in as</div>
-                    <div style="font-weight: 600; font-size: 14px;">{principal_name}</div>
-                    <div style="font-size: 11px; opacity: 0.75;">{staff_number}</div>
+                <div class="user-block">
+                    <div class="user-name">{principal_name}</div>
+                    <div class="user-id">{staff_number}</div>
                 </div>
             </div>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+
+def render_status_strip():
+    days_left = (RENEWAL_DEADLINE - datetime.now()).days
+    deadline_str = RENEWAL_DEADLINE.strftime('%d %B %Y')
+    st.markdown(f"""
+    <div class="status-strip">
+        <div class="status-item">
+            <span>⏱</span>
+            <span>Session timeout: {SESSION_TIMEOUT_MINUTES} min</span>
+        </div>
+        <div class="status-item">
+            <span>📅</span>
+            <span>Deadline: {deadline_str} ({days_left} days left)</span>
         </div>
     </div>
     """, unsafe_allow_html=True)
@@ -650,34 +736,39 @@ def render_header(principal_name, staff_number):
 def render_employee_snapshot(principal, staff_number):
     job_title = format_field(principal.get('JOB TITLE')) or format_field(principal.get('Job Title')) or "—"
     department = format_field(principal.get('DEPARTMENT')) or format_field(principal.get('Department')) or "—"
+    emp_name = format_field(principal['Principal Name']) or '—'
     
     st.markdown(f"""
     <div class="glass-card">
         <div class="card-title">👤 Employee Snapshot</div>
-        <div class="info-grid">
-            <div>
-                <div class="info-row">
-                    <span class="info-label">Employee Number</span>
-                    <span class="info-value">{staff_number}</span>
-                </div>
-                <div class="info-row">
-                    <span class="info-label">Employee Name</span>
-                    <span class="info-value">{format_field(principal['Principal Name']) or '—'}</span>
-                </div>
+        <div class="snapshot-grid">
+            <div class="snapshot-item">
+                <span class="snapshot-label">Employee Number</span>
+                <span class="snapshot-value">{staff_number}</span>
             </div>
-            <div>
-                <div class="info-row">
-                    <span class="info-label">Job Title</span>
-                    <span class="info-value">{job_title}</span>
-                </div>
-                <div class="info-row">
-                    <span class="info-label">Department</span>
-                    <span class="info-value">{department}</span>
-                </div>
+            <div class="snapshot-item">
+                <span class="snapshot-label">Job Title</span>
+                <span class="snapshot-value">{job_title}</span>
+            </div>
+            <div class="snapshot-item">
+                <span class="snapshot-label">Employee Name</span>
+                <span class="snapshot-value">{emp_name}</span>
+            </div>
+            <div class="snapshot-item">
+                <span class="snapshot-label">Department</span>
+                <span class="snapshot-value">{department}</span>
             </div>
         </div>
     </div>
     """, unsafe_allow_html=True)
+
+def format_emirates_id(eid):
+    if not eid:
+        return None
+    eid_str = str(eid).replace(' ', '').replace('-', '')
+    if len(eid_str) == 15:
+        return f"{eid_str[:3]}-{eid_str[3:7]}-{eid_str[7:14]}-{eid_str[14]}"
+    return eid_str
 
 def render_covered_members(employee_data):
     st.markdown("""
@@ -705,7 +796,12 @@ def render_covered_members(employee_data):
         relation = member['Relation']
         badge_class = "badge-principal" if relation == "PRINCIPAL" else ("badge-spouse" if relation == "SPOUSE" else "badge-child")
         
-        full_name = format_field(member.get('Member Full Name')) or f"{format_field(member.get('Member First Name')) or ''} {format_field(member.get('Member Last Name')) or ''}".strip()
+        first_name = format_field(member.get('Member First Name')) or ''
+        middle_name = format_field(member.get('Member Middle Name')) or ''
+        last_name = format_field(member.get('Member Last Name')) or ''
+        full_name = format_field(member.get('Member Full Name')) or f"{first_name} {middle_name} {last_name}".strip()
+        full_name = ' '.join(full_name.split())
+        
         dob = format_field(member.get('Date Of Birth'))
         if dob and ' ' in dob:
             dob = dob.split(' ')[0]
@@ -716,8 +812,9 @@ def render_covered_members(employee_data):
         emirates_id = format_field(member.get('National Identity'))
         passport = format_field(member.get('Passport number'))
         
-        eid_display = emirates_id if emirates_id else f'<span class="missing-value">Not provided</span>'
-        passport_display = passport if passport else f'<span class="missing-value">Not provided</span>'
+        eid_formatted = format_emirates_id(emirates_id) if emirates_id else None
+        eid_display = eid_formatted if eid_formatted else '<span class="missing-value">Not provided</span>'
+        passport_display = passport if passport else '<span class="missing-value">Not provided</span>'
         
         st.markdown(f"""
         <div class="member-card">
@@ -971,8 +1068,9 @@ def render_dashboard():
     principal_name = principal['Principal Name']
     
     render_header(principal_name, staff_number)
+    render_status_strip()
     
-    col1, col2 = st.columns([6, 1])
+    col1, col2 = st.columns([8, 1])
     with col2:
         st.markdown('<div class="signout-btn">', unsafe_allow_html=True)
         if st.button("Sign Out", use_container_width=True):
@@ -980,22 +1078,13 @@ def render_dashboard():
             st.rerun()
         st.markdown('</div>', unsafe_allow_html=True)
     
-    days_left = (RENEWAL_DEADLINE - datetime.now()).days
-    if days_left > 0:
-        st.markdown(f"""
-        <div class="timeout-info">
-            ⏱️ Session timeout: {SESSION_TIMEOUT_MINUTES} min  |  
-            📅 Deadline: {RENEWAL_DEADLINE.strftime('%d %B %Y')} ({days_left} days left)
-        </div>
-        """, unsafe_allow_html=True)
-    
     render_employee_snapshot(principal, staff_number)
     render_covered_members(employee_data)
     render_confirmation_section(employee_data, staff_number)
     
     st.markdown("""
-    <div style="text-align: center; margin-top: 40px; padding: 20px; color: #aaa; font-size: 0.75em;">
-        Need help? <a href="https://wa.me/971564966546" target="_blank" style="color: #25D366;">WhatsApp HR Support</a>
+    <div style="text-align: center; margin-top: 30px; padding: 16px; color: #999; font-size: 11px;">
+        Need help? <a href="https://wa.me/971564966546" target="_blank" style="color: #25D366; text-decoration: none;">WhatsApp HR Support</a>
     </div>
     """, unsafe_allow_html=True)
 
