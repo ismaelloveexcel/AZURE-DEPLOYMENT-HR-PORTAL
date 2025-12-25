@@ -46,6 +46,7 @@ CUSTOM_CSS = """
     
     .stApp {
         font-family: 'Poppins', sans-serif;
+        background: #0f1419;
     }
     
     .login-page [data-testid="stAppViewBlockContainer"] {
@@ -64,14 +65,14 @@ CUSTOM_CSS = """
     }
     
     .login-card {
-        background: #1a1a2e;
-        padding: 22px 20px;
+        background: #1a1f2e;
+        padding: 28px 24px;
         border-radius: 12px;
-        box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+        box-shadow: 0 8px 32px rgba(0,0,0,0.4);
         width: 100%;
-        max-width: 280px;
+        max-width: 320px;
         text-align: center;
-        border: 1px solid rgba(255,255,255,0.1);
+        border: 1px solid rgba(255,255,255,0.06);
     }
     
     .login-card-header {
@@ -85,34 +86,34 @@ CUSTOM_CSS = """
     }
     
     .login-card h1 {
-        color: #e6ebff;
-        font-size: 16px;
+        color: #ffffff;
+        font-size: 18px;
         font-weight: 600;
-        margin: 0 0 3px 0;
+        margin: 0 0 4px 0;
         line-height: 1.3;
     }
     
     .login-card .subtitle {
-        color: #b5bcd9;
-        font-size: 11px;
+        color: #8899a6;
+        font-size: 13px;
         margin: 0;
     }
     
     .login-card .policy-tag {
         display: inline-block;
-        background: rgba(56, 182, 255, 0.15);
-        color: #38b6ff;
-        padding: 4px 12px;
-        border-radius: 10px;
-        font-size: 10px;
+        background: rgba(29, 155, 240, 0.12);
+        color: #1d9bf0;
+        padding: 6px 14px;
+        border-radius: 16px;
+        font-size: 12px;
         font-weight: 600;
-        margin-top: 8px;
+        margin-top: 12px;
     }
     
     .login-help {
-        margin-top: 12px;
-        font-size: 11px;
-        color: #888;
+        margin-top: 16px;
+        font-size: 12px;
+        color: #6e7681;
     }
     
     .login-help a {
@@ -122,11 +123,11 @@ CUSTOM_CSS = """
     }
     
     .main-header {
-        background: #1E1B5C;
-        padding: 14px 20px;
-        margin-bottom: 16px;
+        background: linear-gradient(135deg, #1d4ed8 0%, #1e40af 100%);
+        padding: 16px 24px;
+        margin-bottom: 20px;
         color: white;
-        border-radius: 10px;
+        border-radius: 12px;
     }
     
     .header-content {
@@ -223,15 +224,15 @@ CUSTOM_CSS = """
     }
     
     .status-strip {
-        background: #1a1a2e;
-        border-bottom: 1px solid rgba(255,255,255,0.1);
-        padding: 10px 24px;
-        margin: 0 -60px 16px -60px;
+        background: #1a1f2e;
+        border-bottom: 1px solid rgba(255,255,255,0.06);
+        padding: 12px 28px;
+        margin: 0 -60px 20px -60px;
         display: flex;
         justify-content: center;
-        gap: 32px;
-        font-size: 12px;
-        color: #b5bcd9;
+        gap: 36px;
+        font-size: 13px;
+        color: #8899a6;
     }
     
     .status-item {
@@ -241,23 +242,22 @@ CUSTOM_CSS = """
     }
     
     .glass-card {
-        background: #1a1a2e;
-        border-radius: 10px;
-        padding: 18px;
-        margin-bottom: 12px;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
-        border: 1px solid rgba(255,255,255,0.08);
+        background: #1a1f2e;
+        border-radius: 12px;
+        padding: 20px;
+        margin-bottom: 16px;
+        border: 1px solid rgba(255,255,255,0.06);
     }
     
     .card-title {
-        color: #e6ebff;
-        font-size: 12px;
+        color: #ffffff;
+        font-size: 13px;
         font-weight: 600;
         text-transform: uppercase;
-        letter-spacing: 1.2px;
-        margin-bottom: 14px;
-        padding-bottom: 10px;
-        border-bottom: 1px solid rgba(255,255,255,0.1);
+        letter-spacing: 1px;
+        margin-bottom: 16px;
+        padding-bottom: 12px;
+        border-bottom: 1px solid rgba(255,255,255,0.08);
     }
     
     .snapshot-grid {
@@ -273,38 +273,39 @@ CUSTOM_CSS = """
     }
     
     .snapshot-label {
-        color: #888;
-        font-size: 10px;
+        color: #6e7681;
+        font-size: 11px;
         text-transform: uppercase;
         letter-spacing: 0.5px;
+        font-weight: 500;
     }
     
     .snapshot-value {
-        color: #e6ebff;
-        font-size: 13px;
+        color: #ffffff;
+        font-size: 14px;
         font-weight: 500;
     }
     
     .member-card {
-        background: #16213e;
-        border-radius: 8px;
-        padding: 14px;
-        margin-bottom: 16px;
-        border: 1px solid rgba(255,255,255,0.08);
+        background: #1a1f2e;
+        border-radius: 12px;
+        padding: 18px;
+        margin-bottom: 20px;
+        border: 1px solid rgba(255,255,255,0.06);
     }
     
     .member-header {
         display: flex;
         justify-content: space-between;
         align-items: center;
-        margin-bottom: 12px;
-        padding-bottom: 8px;
-        border-bottom: 1px solid rgba(255,255,255,0.1);
+        margin-bottom: 16px;
+        padding-bottom: 12px;
+        border-bottom: 1px solid rgba(255,255,255,0.08);
     }
     
     .member-name {
-        color: #e6ebff;
-        font-size: 13px;
+        color: #ffffff;
+        font-size: 16px;
         font-weight: 600;
     }
     
@@ -318,18 +319,18 @@ CUSTOM_CSS = """
     }
     
     .badge-principal {
-        background: rgba(56, 182, 255, 0.15);
-        color: #38b6ff;
+        background: rgba(29, 155, 240, 0.15);
+        color: #1d9bf0;
     }
     
     .badge-spouse {
-        background: rgba(236, 72, 153, 0.15);
-        color: #ec4899;
+        background: rgba(139, 92, 246, 0.15);
+        color: #8b5cf6;
     }
     
     .badge-child {
-        background: rgba(245, 158, 11, 0.15);
-        color: #f59e0b;
+        background: rgba(34, 197, 94, 0.15);
+        color: #22c55e;
     }
     
     .member-details {
@@ -342,32 +343,34 @@ CUSTOM_CSS = """
         display: flex;
         justify-content: space-between;
         align-items: center;
-        font-size: 12px;
-        padding: 2px 0;
+        font-size: 13px;
+        padding: 4px 0;
     }
     
     .member-detail-label {
-        color: #888;
+        color: #6e7681;
     }
     
     .member-detail-value {
-        color: #e6ebff;
+        color: #ffffff;
         font-weight: 500;
     }
     
     .missing-value {
-        color: #ff9800;
-        font-size: 11px;
+        color: #f97316;
+        font-size: 12px;
+        font-weight: 500;
     }
     
     .member-divider {
         border: none;
-        border-top: 1px solid rgba(255,255,255,0.1);
-        margin: 16px 0;
+        border-top: 1px solid rgba(255,255,255,0.08);
+        margin: 20px 0;
     }
     
     .missing-text {
-        color: #ff9800 !important;
+        color: #f97316 !important;
+        font-weight: 500;
     }
     
     .edit-section-header {
@@ -398,48 +401,50 @@ CUSTOM_CSS = """
     }
     
     .field-label {
-        color: #888;
-        font-size: 10px;
+        color: #6e7681;
+        font-size: 11px;
         text-transform: uppercase;
-        margin-bottom: 3px;
+        margin-bottom: 4px;
+        font-weight: 500;
+        letter-spacing: 0.3px;
     }
     
     .field-value {
-        color: #e6ebff;
+        color: #ffffff;
         font-weight: 500;
-        font-size: 13px;
-    }
-    
-    .missing-field-text {
-        color: #ff9800;
-        font-weight: 500;
-    }
-    
-    .missing-info-banner {
-        background: rgba(255, 152, 0, 0.1);
-        border-left: 2px solid #ff9800;
-        border-radius: 0 3px 3px 0;
-        padding: 10px 12px;
-        margin-top: 14px;
-        display: flex;
-        align-items: flex-start;
-        gap: 8px;
-    }
-    
-    .missing-icon {
-        color: #ff9800;
         font-size: 14px;
     }
     
-    .missing-title {
-        color: #ff9800;
+    .missing-field-text {
+        color: #f97316;
         font-weight: 600;
-        font-size: 11px;
+    }
+    
+    .missing-info-banner {
+        background: rgba(249, 115, 22, 0.1);
+        border-left: 3px solid #f97316;
+        border-radius: 0 8px 8px 0;
+        padding: 14px 16px;
+        margin-top: 16px;
+        display: flex;
+        align-items: flex-start;
+        gap: 12px;
+    }
+    
+    .missing-icon {
+        color: #f97316;
+        font-size: 18px;
+    }
+    
+    .missing-title {
+        color: #f97316;
+        font-weight: 600;
+        font-size: 14px;
     }
     
     .missing-desc {
-        color: #b5bcd9;
-        font-size: 10px;
+        color: #8899a6;
+        font-size: 13px;
     }
     
     .inline-edit-section {
@@ -471,12 +476,11 @@ CUSTOM_CSS = """
     }
     
     .confirmation-card {
-        background: #1a1a2e;
-        border-radius: 10px;
-        padding: 18px;
-        margin-bottom: 12px;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
-        border: 1px solid rgba(255,255,255,0.08);
+        background: #1a1f2e;
+        border-radius: 12px;
+        padding: 20px;
+        margin-bottom: 16px;
+        border: 1px solid rgba(255,255,255,0.06);
     }
     
     .radio-option {
@@ -501,38 +505,38 @@ CUSTOM_CSS = """
     }
     
     .success-message {
-        background: rgba(22, 163, 74, 0.15);
-        border-radius: 10px;
-        padding: 24px;
+        background: rgba(34, 197, 94, 0.1);
+        border-radius: 12px;
+        padding: 28px;
         text-align: center;
-        margin: 12px 0;
-        border: 1px solid rgba(22, 163, 74, 0.3);
+        margin: 16px 0;
+        border: 1px solid rgba(34, 197, 94, 0.2);
     }
     
     .success-icon {
-        width: 48px;
-        height: 48px;
-        background: rgba(22, 163, 74, 0.2);
+        width: 56px;
+        height: 56px;
+        background: rgba(34, 197, 94, 0.15);
         border-radius: 50%;
         display: flex;
         align-items: center;
         justify-content: center;
-        margin: 0 auto 12px;
-        font-size: 22px;
+        margin: 0 auto 16px;
+        font-size: 26px;
         color: #22c55e;
     }
     
     .success-title {
-        color: #e6ebff;
-        font-size: 15px;
+        color: #ffffff;
+        font-size: 18px;
         font-weight: 600;
-        margin-bottom: 5px;
+        margin-bottom: 8px;
     }
     
     .success-desc {
-        color: #b5bcd9;
-        font-size: 12px;
-        line-height: 1.5;
+        color: #8899a6;
+        font-size: 14px;
+        line-height: 1.6;
     }
     
     .change-log {
