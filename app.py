@@ -106,14 +106,16 @@ CUSTOM_CSS = """
     .info-grid {
         display: grid;
         grid-template-columns: repeat(2, 1fr);
-        gap: 0;
+        gap: 0 40px;
     }
     
     .info-row {
         display: flex;
         justify-content: space-between;
+        align-items: center;
         padding: 12px 0;
         border-bottom: 1px solid #f0f0f0;
+        gap: 20px;
     }
     
     .info-row:last-child {
@@ -124,6 +126,8 @@ CUSTOM_CSS = """
         color: #888;
         font-size: 0.85em;
         font-weight: 400;
+        white-space: nowrap;
+        flex-shrink: 0;
     }
     
     .info-value {
@@ -131,6 +135,7 @@ CUSTOM_CSS = """
         font-size: 0.85em;
         font-weight: 500;
         text-align: right;
+        flex-grow: 1;
     }
     
     .member-card {
@@ -460,11 +465,21 @@ SESSION_TIMEOUT_JS = f"""
 """
 
 DATA_FILE = "attached_assets/Medical_Insurance_Data.csv"
+JOB_DATA_FILE = "attached_assets/job_data.csv"
 CHANGES_FILE = "attached_assets/correction_requests.json"
+
+@st.cache_data
+def load_job_data():
+    if os.path.exists(JOB_DATA_FILE):
+        return pd.read_csv(JOB_DATA_FILE, encoding='utf-8-sig')
+    return pd.DataFrame()
 
 @st.cache_data
 def load_data():
     df = pd.read_csv(DATA_FILE, encoding='utf-8-sig')
+    job_df = load_job_data()
+    if not job_df.empty:
+        df = df.merge(job_df[['Staff Number', 'JOB TITLE', 'DEPARTMENT']], on='Staff Number', how='left')
     return df
 
 def save_data(df):
@@ -812,25 +827,32 @@ def render_confirmation_section(employee_data, staff_number):
         render_correction_form(employee_data, staff_number)
 
 def render_correction_form(employee_data, staff_number):
+    dependents = employee_data[employee_data['Relation'] != 'PRINCIPAL']
+    
+    if dependents.empty:
+        st.info("No dependents found. Only dependents can be edited through this form.")
+        return
+    
     st.markdown("""
     <div class="glass-card">
         <div class="card-title">📝 Correction Request</div>
         <p style="color: #666; font-size: 0.85em; margin-bottom: 15px;">
-            Specify the corrections needed below. Only fill in fields that require changes.
+            Select a dependent and specify the corrections needed below.
         </p>
     </div>
     """, unsafe_allow_html=True)
     
     member_options = []
-    for _, member in employee_data.iterrows():
+    for _, member in dependents.iterrows():
         relation = member['Relation']
-        name = format_field(member.get('Member Full Name')) or f"{format_field(member.get('Member First Name')) or ''} {format_field(member.get('Member Last Name')) or ''}".strip()
+        name = format_field(member.get('Member Full Name')) or f"{format_field(member.get('Member First Name')) or ''} {format_field(member.get('Member Middle Name')) or ''} {format_field(member.get('Member Last Name')) or ''}".strip()
+        name = ' '.join(name.split())
         member_options.append(f"{relation}: {name}")
     
-    selected_member = st.selectbox("Select Member to Correct", member_options, key="selected_member")
+    selected_member = st.selectbox("Select Dependent to Correct", member_options, key="selected_member")
     
     selected_idx = member_options.index(selected_member)
-    member_row = employee_data.iloc[selected_idx]
+    member_row = dependents.iloc[selected_idx]
     member_number = member_row['Member Number']
     
     st.markdown('<p class="section-label" style="margin-top: 20px;">Fields to Correct</p>', unsafe_allow_html=True)
@@ -838,44 +860,48 @@ def render_correction_form(employee_data, staff_number):
     
     changes = []
     
+    current_name = format_field(member_row.get('Member Full Name')) or f"{format_field(member_row.get('Member First Name')) or ''} {format_field(member_row.get('Member Middle Name')) or ''} {format_field(member_row.get('Member Last Name')) or ''}".strip()
+    current_name = ' '.join(current_name.split())
+    
     col1, col2 = st.columns(2)
     
     with col1:
-        current_name = format_field(member_row.get('Member Full Name')) or ""
-        new_name = st.text_input("Full Name", value="", placeholder=f"Current: {current_name}", key="corr_name")
+        new_name = st.text_input("Dependent Name", value="", placeholder=f"Current: {current_name}", key="corr_name")
         if new_name and new_name != current_name:
-            changes.append({"field": "Full Name", "old": current_name, "new": new_name})
+            changes.append({"field": "Dependent Name", "old": current_name, "new": new_name})
         
-        current_dob = format_field(member_row.get('Date Of Birth')) or ""
-        if member_row['Relation'] != 'PRINCIPAL':
-            new_dob = st.text_input("Date of Birth (DD/MM/YYYY)", value="", placeholder=f"Current: {current_dob}", key="corr_dob")
-            if new_dob and new_dob != current_dob:
-                changes.append({"field": "Date of Birth", "old": current_dob, "new": new_dob})
-        else:
-            st.text_input("Date of Birth", value=current_dob, disabled=True, key="corr_dob_locked")
-            st.caption("Principal's DOB cannot be changed (used for login)")
+        current_relation = format_field(member_row.get('Relation')) or ""
+        new_relation = st.selectbox(
+            "Relationship",
+            ["", "SPOUSE", "CHILD"],
+            index=0,
+            key="corr_relation"
+        )
+        if new_relation and new_relation != current_relation:
+            changes.append({"field": "Relationship", "old": current_relation, "new": new_relation})
     
     with col2:
-        current_relation = format_field(member_row.get('Relation')) or ""
-        if member_row['Relation'] != 'PRINCIPAL':
-            new_relation = st.selectbox(
-                "Relationship",
-                ["", "SPOUSE", "CHILD"],
-                index=0,
-                key="corr_relation"
-            )
-            if new_relation and new_relation != current_relation:
-                changes.append({"field": "Relationship", "old": current_relation, "new": new_relation})
+        current_dob = format_field(member_row.get('Date Of Birth')) or ""
+        new_dob = st.text_input("Date of Birth (DD/MM/YYYY)", value="", placeholder=f"Current: {current_dob}", key="corr_dob")
+        if new_dob and new_dob != current_dob:
+            changes.append({"field": "Date of Birth", "old": current_dob, "new": new_dob})
         
         current_eid = format_field(member_row.get('National Identity')) or ""
-        new_eid = st.text_input("Emirates ID", value="", placeholder=f"Current: {current_eid or 'Not provided'}", key="corr_eid")
-        if new_eid and new_eid != current_eid:
-            changes.append({"field": "Emirates ID", "old": current_eid or "Not provided", "new": new_eid})
-    
-    current_passport = format_field(member_row.get('Passport number')) or ""
-    new_passport = st.text_input("Passport Number", value="", placeholder=f"Current: {current_passport or 'Not provided'}", key="corr_passport")
-    if new_passport and new_passport != current_passport:
-        changes.append({"field": "Passport Number", "old": current_passport or "Not provided", "new": new_passport})
+        current_passport = format_field(member_row.get('Passport number')) or ""
+        
+        if not current_eid:
+            new_eid = st.text_input("Emirates ID", value="", placeholder="Not provided - add if available", key="corr_eid")
+            if new_eid:
+                changes.append({"field": "Emirates ID", "old": "Not provided", "new": new_eid})
+        else:
+            st.text_input("Emirates ID", value=current_eid, disabled=True, key="corr_eid_locked")
+        
+        if not current_passport:
+            new_passport = st.text_input("Passport Number", value="", placeholder="Not provided - add if available", key="corr_passport")
+            if new_passport:
+                changes.append({"field": "Passport Number", "old": "Not provided", "new": new_passport})
+        else:
+            st.text_input("Passport Number", value=current_passport, disabled=True, key="corr_passport_locked")
     
     if changes:
         st.markdown('<p class="section-label" style="margin-top: 20px;">Changes Summary</p>', unsafe_allow_html=True)
