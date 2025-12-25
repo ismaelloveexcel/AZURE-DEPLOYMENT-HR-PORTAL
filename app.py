@@ -349,9 +349,14 @@ CUSTOM_CSS = """
     }
     
     .login-container {
-        max-width: 420px;
+        max-width: 360px;
         margin: 60px auto;
         text-align: center;
+    }
+    
+    .login-form-wrapper {
+        max-width: 360px;
+        margin: 0 auto;
     }
     
     .login-header {
@@ -641,19 +646,19 @@ def render_expired_page():
 def render_login():
     st.markdown(CUSTOM_CSS, unsafe_allow_html=True)
     
-    col1, col2, col3 = st.columns([1, 1.3, 1])
-    with col2:
-        st.markdown(f"""
-        <div class="login-container">
-            <div class="login-header">
-                <div class="login-logo">🏢</div>
-                <h1 class="login-title">Medical Insurance Verification</h1>
-                <p class="login-subtitle">Employee Self-Service Portal</p>
-                <div class="login-badge">Policy Year {POLICY_YEAR}</div>
-            </div>
+    st.markdown(f"""
+    <div class="login-container">
+        <div class="login-header">
+            <div class="login-logo">🏥</div>
+            <h1 class="login-title">Medical Insurance Verification</h1>
+            <p class="login-subtitle">Employee Self-Service Portal</p>
+            <div class="login-badge">Policy Year {POLICY_YEAR}</div>
         </div>
-        """, unsafe_allow_html=True)
-        
+    </div>
+    """, unsafe_allow_html=True)
+    
+    col1, col2, col3 = st.columns([1.2, 1, 1.2])
+    with col2:
         with st.form("login_form"):
             staff_number = st.text_input(
                 "Staff Number",
@@ -687,10 +692,10 @@ def render_login():
                         st.error(error_msg)
         
         st.markdown("""
-        <div style="text-align: center; margin-top: 25px;">
-            <p style="color: #aaa; font-size: 0.75em;">Need assistance?</p>
-            <a href="https://wa.me/971564966546" target="_blank" style="color: #25D366; text-decoration: none; font-weight: 600; font-size: 0.85em;">
-                📱 WhatsApp HR Support
+        <div style="text-align: center; margin-top: 20px;">
+            <p style="color: #aaa; font-size: 11px;">Need assistance?</p>
+            <a href="https://wa.me/971564966546" target="_blank" style="color: #25D366; text-decoration: none; font-weight: 600; font-size: 12px;">
+                WhatsApp HR Support
             </a>
         </div>
         """, unsafe_allow_html=True)
