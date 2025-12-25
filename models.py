@@ -6,9 +6,18 @@ from sqlalchemy.orm import sessionmaker
 
 DATABASE_URL = os.environ.get('DATABASE_URL')
 
-engine = create_engine(DATABASE_URL) if DATABASE_URL else None
-SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine) if engine else None
+engine = None
+SessionLocal = None
 Base = declarative_base()
+
+if DATABASE_URL:
+    try:
+        engine = create_engine(DATABASE_URL, pool_pre_ping=True)
+        SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+    except Exception as e:
+        print(f"Database connection error: {e}")
+        engine = None
+        SessionLocal = None
 
 class AuditTrail(Base):
     __tablename__ = 'audit_trail'
@@ -53,14 +62,17 @@ class ReminderQueue(Base):
 
 def init_db():
     if engine:
-        Base.metadata.create_all(bind=engine)
+        try:
+            Base.metadata.create_all(bind=engine)
+        except Exception as e:
+            print(f"Error creating tables: {e}")
 
 def get_db():
     if SessionLocal:
         db = SessionLocal()
         try:
             return db
-        except:
+        except Exception as e:
             db.close()
             raise
     return None
