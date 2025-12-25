@@ -1454,79 +1454,64 @@ def render_confirmation_section(employee_data, staff_number):
     <div class="glass-card">
         <div class="card-title">✔️ Confirmation</div>
         <p style="color: #666; font-size: 0.9em; margin-bottom: 20px;">
-            Please review the information above. If everything is correct, confirm below. 
-            If you need to request changes, select the correction option.
+            Please review the information above. Once you've completed any missing fields, confirm below.
         </p>
     </div>
     """, unsafe_allow_html=True)
     
-    action = st.radio(
-        "Select your action:",
-        ["✅ I confirm that all information above is accurate",
-         "📝 I need to update information"],
-        key="action_choice",
-        label_visibility="collapsed"
+    confirm_checkbox = st.checkbox(
+        "I hereby confirm that all the information displayed for myself and my dependents is accurate and complete.",
+        key="confirm_checkbox"
     )
     
-    if "I confirm" in action:
-        st.markdown("---")
-        confirm_checkbox = st.checkbox(
-            "I hereby confirm that all the information displayed for myself and my dependents is accurate and complete.",
-            key="confirm_checkbox"
-        )
-        
-        if st.button("Submit Confirmation", type="primary", disabled=not confirm_checkbox):
-            df = load_data()
-            confirmation_time = datetime.now().strftime("%d/%m/%Y %I:%M %p")
-            df.loc[df['Staff Number'] == staff_number, 'EmployeeConfirmed'] = confirmation_time
-            save_data(df)
-            st.cache_data.clear()
-            st.session_state['submission_success'] = True
-            st.session_state['submission_type'] = 'confirmation'
-            st.balloons()
-            st.rerun()
+    if st.button("Submit Confirmation", type="primary", disabled=not confirm_checkbox):
+        df = load_data()
+        confirmation_time = datetime.now().strftime("%d/%m/%Y %I:%M %p")
+        df.loc[df['Staff Number'] == staff_number, 'EmployeeConfirmed'] = confirmation_time
+        save_data(df)
+        st.cache_data.clear()
+        st.session_state['submission_success'] = True
+        st.session_state['submission_type'] = 'confirmation'
+        st.balloons()
+        st.rerun()
     
-    else:
-        render_correction_form(employee_data, staff_number)
-
-def render_correction_form(employee_data, staff_number):
+    st.markdown("---")
+    
     st.markdown("""
-    <div class="glass-card">
-        <div class="card-title">📝 Request Additional Changes</div>
-        <p style="color: #666; font-size: 0.85em; margin-bottom: 15px;">
-            If you have any other changes or corrections needed, please describe them below. HR will review your request.
+    <div style="margin-top: 20px;">
+        <p style="color: #666; font-size: 0.85em;">
+            <strong>Need other changes?</strong> Describe any additional corrections below. HR will review your request.
         </p>
     </div>
     """, unsafe_allow_html=True)
     
     change_description = st.text_area(
-        "Describe the changes you need",
-        placeholder="Please describe any corrections or updates needed for your information or your dependents' information. Include member name, what needs to be changed, and the correct value.\n\nExample: 'My spouse's name is spelled incorrectly. Current: John Smith, Correct: Jon Smith'",
+        "Additional changes (optional)",
+        placeholder="Describe any other corrections needed. Include member name, what needs to be changed, and the correct value.\n\nExample: 'My spouse's name is spelled incorrectly. Current: John Smith, Correct: Jon Smith'",
         key="change_description",
-        height=150
+        height=100,
+        label_visibility="collapsed"
     )
     
-    if st.button("📤 Submit Change Request", type="secondary", disabled=not change_description.strip()):
-        principal = employee_data[employee_data['Relation'] == 'PRINCIPAL'].iloc[0]
-        member_number = principal['Member Number']
-        
-        changes_list = [{"field": "General Change Request", "old": "", "new": change_description.strip()}]
-        save_change_request_db(staff_number, member_number, "General Request", changes_list, change_description.strip())
-        
-        log_audit_trail("change_requested", staff_number, member_number, "General Change Request", "", change_description.strip(), "employee")
-        
-        df = load_data()
-        df.loc[df['Staff Number'] == staff_number, 'LastEditedByStaffNo'] = staff_number
-        df.loc[df['Staff Number'] == staff_number, 'LastEditedOn'] = datetime.now().strftime("%d/%m/%Y %I:%M %p")
-        save_data(df)
-        st.cache_data.clear()
-        
-        st.session_state['submission_success'] = True
-        st.session_state['submission_type'] = 'change_request'
-        st.rerun()
-    
-    if not change_description.strip():
-        st.caption("⚠️ Please describe the changes you need")
+    if change_description.strip():
+        if st.button("📤 Submit Change Request", type="secondary"):
+            principal = employee_data[employee_data['Relation'] == 'PRINCIPAL'].iloc[0]
+            member_number = principal['Member Number']
+            
+            changes_list = [{"field": "General Change Request", "old": "", "new": change_description.strip()}]
+            save_change_request_db(staff_number, member_number, "General Request", changes_list, change_description.strip())
+            
+            log_audit_trail("change_requested", staff_number, member_number, "General Change Request", "", change_description.strip(), "employee")
+            
+            df = load_data()
+            df.loc[df['Staff Number'] == staff_number, 'LastEditedByStaffNo'] = staff_number
+            df.loc[df['Staff Number'] == staff_number, 'LastEditedOn'] = datetime.now().strftime("%d/%m/%Y %I:%M %p")
+            save_data(df)
+            st.cache_data.clear()
+            
+            st.session_state['submission_success'] = True
+            st.session_state['submission_type'] = 'change_request'
+            st.rerun()
 
 def render_dashboard():
     st.markdown(CUSTOM_CSS, unsafe_allow_html=True)
