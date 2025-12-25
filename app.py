@@ -40,7 +40,6 @@ CUSTOM_CSS = """
     
     .stApp {
         font-family: 'Poppins', sans-serif;
-        background-color: #f5f5f5;
     }
     
     .login-page [data-testid="stAppViewBlockContainer"] {
@@ -54,59 +53,60 @@ CUSTOM_CSS = """
         flex-direction: column;
         justify-content: center;
         align-items: center;
-        padding: 20px;
+        padding: 16px;
         box-sizing: border-box;
     }
     
     .login-card {
-        background: white;
-        padding: 28px 24px;
-        border-radius: 16px;
-        box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        background: #1a1a2e;
+        padding: 22px 20px;
+        border-radius: 12px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.3);
         width: 100%;
-        max-width: 320px;
+        max-width: 280px;
         text-align: center;
+        border: 1px solid rgba(255,255,255,0.1);
     }
     
     .login-card-header {
-        margin-bottom: 20px;
+        margin-bottom: 16px;
     }
     
     .login-card .login-logo-img {
-        width: 56px;
-        height: 56px;
-        margin-bottom: 14px;
+        width: 45px;
+        height: 45px;
+        margin-bottom: 12px;
     }
     
     .login-card h1 {
-        color: #1E1B5C;
-        font-size: 20px;
+        color: #e6ebff;
+        font-size: 16px;
         font-weight: 600;
-        margin: 0 0 4px 0;
+        margin: 0 0 3px 0;
         line-height: 1.3;
     }
     
     .login-card .subtitle {
-        color: #888;
-        font-size: 11px;
+        color: #b5bcd9;
+        font-size: 9px;
         margin: 0;
     }
     
     .login-card .policy-tag {
         display: inline-block;
-        background: rgba(30, 27, 92, 0.08);
-        color: #1E1B5C;
-        padding: 4px 12px;
-        border-radius: 12px;
-        font-size: 10px;
+        background: rgba(56, 182, 255, 0.15);
+        color: #38b6ff;
+        padding: 3px 10px;
+        border-radius: 10px;
+        font-size: 8px;
         font-weight: 600;
-        margin-top: 10px;
+        margin-top: 8px;
     }
     
     .login-help {
-        margin-top: 16px;
-        font-size: 11px;
-        color: #aaa;
+        margin-top: 12px;
+        font-size: 9px;
+        color: #888;
     }
     
     .login-help a {
@@ -117,10 +117,10 @@ CUSTOM_CSS = """
     
     .main-header {
         background: #1E1B5C;
-        padding: 18px 24px;
-        margin-bottom: 20px;
+        padding: 14px 20px;
+        margin-bottom: 16px;
         color: white;
-        border-radius: 12px;
+        border-radius: 10px;
     }
     
     .header-content {
@@ -132,35 +132,35 @@ CUSTOM_CSS = """
     .header-left {
         display: flex;
         align-items: center;
-        gap: 15px;
+        gap: 12px;
     }
     
     .company-logo {
-        width: 42px;
-        height: 42px;
+        width: 34px;
+        height: 34px;
         background: white;
-        border-radius: 10px;
+        border-radius: 8px;
         display: flex;
         align-items: center;
         justify-content: center;
-        font-size: 20px;
+        font-size: 16px;
     }
     
     .company-logo-img {
-        width: 50px;
-        height: 50px;
-        border-radius: 10px;
+        width: 40px;
+        height: 40px;
+        border-radius: 8px;
         object-fit: contain;
     }
     
     .header-title h1 {
         margin: 0;
-        font-size: 16px;
+        font-size: 13px;
         font-weight: 600;
     }
     
     .header-title .subtitle {
-        font-size: 11px;
+        font-size: 9px;
         opacity: 0.8;
         margin-top: 2px;
         font-weight: 400;
@@ -169,14 +169,14 @@ CUSTOM_CSS = """
     .header-right {
         display: flex;
         align-items: center;
-        gap: 25px;
+        gap: 20px;
     }
     
     .policy-badge {
         background: rgba(255,255,255,0.15);
-        padding: 6px 14px;
-        border-radius: 20px;
-        font-size: 11px;
+        padding: 5px 11px;
+        border-radius: 16px;
+        font-size: 9px;
         font-weight: 500;
     }
     
@@ -185,14 +185,14 @@ CUSTOM_CSS = """
     }
     
     .user-name {
-        font-size: 13px;
+        font-size: 11px;
         font-weight: 500;
     }
     
     .user-id {
-        font-size: 10px;
+        font-size: 8px;
         opacity: 0.7;
-        margin-bottom: 4px;
+        margin-bottom: 3px;
     }
     
     .header-signout-link {
@@ -200,16 +200,16 @@ CUSTOM_CSS = """
         background: rgba(255,255,255,0.15);
         border: 1px solid rgba(255,255,255,0.3);
         color: white;
-        padding: 3px 10px;
-        border-radius: 4px;
-        font-size: 9px;
+        padding: 2px 8px;
+        border-radius: 3px;
+        font-size: 8px;
         font-weight: 500;
         cursor: pointer;
         transition: all 0.2s;
         text-transform: uppercase;
         letter-spacing: 0.5px;
         text-decoration: none;
-        margin-top: 4px;
+        margin-top: 3px;
     }
     
     .header-signout-link:hover {
@@ -217,125 +217,126 @@ CUSTOM_CSS = """
     }
     
     .status-strip {
-        background: #fff;
-        border-bottom: 1px solid #e5e5e5;
-        padding: 10px 30px;
-        margin: 0 -80px 20px -80px;
+        background: #1a1a2e;
+        border-bottom: 1px solid rgba(255,255,255,0.1);
+        padding: 8px 24px;
+        margin: 0 -60px 16px -60px;
         display: flex;
         justify-content: center;
-        gap: 40px;
-        font-size: 12px;
-        color: #666;
+        gap: 32px;
+        font-size: 10px;
+        color: #b5bcd9;
     }
     
     .status-item {
         display: flex;
         align-items: center;
-        gap: 6px;
+        gap: 5px;
     }
     
     .glass-card {
-        background: #fff;
-        border-radius: 12px;
-        padding: 24px;
-        margin-bottom: 16px;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+        background: #1a1a2e;
+        border-radius: 10px;
+        padding: 18px;
+        margin-bottom: 12px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+        border: 1px solid rgba(255,255,255,0.08);
     }
     
     .card-title {
-        color: #1E1B5C;
-        font-size: 12px;
+        color: #e6ebff;
+        font-size: 10px;
         font-weight: 600;
         text-transform: uppercase;
-        letter-spacing: 1.5px;
-        margin-bottom: 20px;
-        padding-bottom: 12px;
-        border-bottom: 1px solid #eee;
+        letter-spacing: 1.2px;
+        margin-bottom: 14px;
+        padding-bottom: 10px;
+        border-bottom: 1px solid rgba(255,255,255,0.1);
     }
     
     .snapshot-grid {
         display: grid;
         grid-template-columns: 1fr 1fr;
-        gap: 16px 40px;
+        gap: 12px 32px;
     }
     
     .snapshot-item {
         display: flex;
         flex-direction: column;
-        gap: 4px;
+        gap: 3px;
     }
     
     .snapshot-label {
         color: #888;
-        font-size: 11px;
+        font-size: 9px;
         text-transform: uppercase;
         letter-spacing: 0.5px;
     }
     
     .snapshot-value {
-        color: #1E1B5C;
-        font-size: 14px;
+        color: #e6ebff;
+        font-size: 11px;
         font-weight: 500;
     }
     
     .member-card {
-        background: #fafafa;
-        border-radius: 10px;
-        padding: 18px;
-        margin-bottom: 12px;
-        border: 1px solid #eee;
+        background: #16213e;
+        border-radius: 8px;
+        padding: 14px;
+        margin-bottom: 16px;
+        border: 1px solid rgba(255,255,255,0.08);
     }
     
     .member-header {
         display: flex;
         justify-content: space-between;
         align-items: center;
-        margin-bottom: 14px;
-        padding-bottom: 10px;
-        border-bottom: 1px solid #eee;
+        margin-bottom: 12px;
+        padding-bottom: 8px;
+        border-bottom: 1px solid rgba(255,255,255,0.1);
     }
     
     .member-name {
-        color: #1E1B5C;
-        font-size: 14px;
+        color: #e6ebff;
+        font-size: 13px;
         font-weight: 600;
     }
     
     .member-badge {
-        padding: 4px 12px;
-        border-radius: 15px;
-        font-size: 10px;
+        padding: 3px 10px;
+        border-radius: 12px;
+        font-size: 8px;
         font-weight: 600;
         text-transform: uppercase;
         letter-spacing: 0.5px;
     }
     
     .badge-principal {
-        background: rgba(30, 27, 92, 0.1);
-        color: #1E1B5C;
+        background: rgba(56, 182, 255, 0.15);
+        color: #38b6ff;
     }
     
     .badge-spouse {
-        background: rgba(236, 72, 153, 0.1);
-        color: #be185d;
+        background: rgba(236, 72, 153, 0.15);
+        color: #ec4899;
     }
     
     .badge-child {
-        background: rgba(245, 158, 11, 0.1);
-        color: #b45309;
+        background: rgba(245, 158, 11, 0.15);
+        color: #f59e0b;
     }
     
     .member-details {
         display: grid;
         grid-template-columns: repeat(2, 1fr);
-        gap: 10px 24px;
+        gap: 8px 20px;
     }
     
     .member-detail-item {
         display: flex;
         justify-content: space-between;
         align-items: center;
-        font-size: 12px;
+        font-size: 10px;
         padding: 2px 0;
     }
     
@@ -344,56 +345,19 @@ CUSTOM_CSS = """
     }
     
     .member-detail-value {
-        color: #333;
+        color: #e6ebff;
         font-weight: 500;
     }
     
     .missing-value {
-        color: #dc2626;
-        font-size: 11px;
-    }
-    
-    .member-card {
-        margin-bottom: 24px;
-    }
-    
-    .member-card-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 20px;
-        padding-bottom: 16px;
-        border-bottom: 1px solid rgba(255,255,255,0.1);
-    }
-    
-    .member-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 20px;
-        padding-bottom: 12px;
-        border-bottom: 1px solid rgba(255,255,255,0.1);
-    }
-    
-    .member-name {
-        font-size: 18px;
-        font-weight: 600;
-        color: #fff;
-    }
-    
-    .member-badge {
-        padding: 4px 12px;
-        border-radius: 20px;
-        font-size: 11px;
-        font-weight: 600;
-        text-transform: uppercase;
-        letter-spacing: 1px;
+        color: #ff9800;
+        font-size: 9px;
     }
     
     .member-divider {
         border: none;
         border-top: 1px solid rgba(255,255,255,0.1);
-        margin: 24px 0;
+        margin: 16px 0;
     }
     
     .missing-text {
@@ -402,42 +366,42 @@ CUSTOM_CSS = """
     
     .edit-section-header {
         color: #ff9800;
-        font-size: 12px;
+        font-size: 9px;
         font-weight: 600;
         text-transform: uppercase;
-        letter-spacing: 1px;
-        margin: 16px 0 12px 0;
-        padding-top: 12px;
+        letter-spacing: 0.8px;
+        margin: 12px 0 8px 0;
+        padding-top: 10px;
         border-top: 1px solid rgba(255,255,255,0.1);
     }
     
     .member-grid {
         display: flex;
         flex-direction: column;
-        gap: 16px;
+        gap: 12px;
     }
     
     .grid-row {
         display: grid;
         grid-template-columns: repeat(3, 1fr);
-        gap: 24px;
+        gap: 16px;
     }
     
     .grid-cell {
-        min-height: 40px;
+        min-height: 32px;
     }
     
     .field-label {
         color: #888;
-        font-size: 11px;
+        font-size: 9px;
         text-transform: uppercase;
-        margin-bottom: 4px;
+        margin-bottom: 3px;
     }
     
     .field-value {
-        color: #fff;
+        color: #e6ebff;
         font-weight: 500;
-        font-size: 14px;
+        font-size: 11px;
     }
     
     .missing-field-text {
@@ -446,137 +410,140 @@ CUSTOM_CSS = """
     }
     
     .missing-info-banner {
-        background: rgba(255, 152, 0, 0.15);
-        border-left: 3px solid #ff9800;
-        border-radius: 0 4px 4px 0;
-        padding: 12px 16px;
-        margin-top: 20px;
+        background: rgba(255, 152, 0, 0.1);
+        border-left: 2px solid #ff9800;
+        border-radius: 0 3px 3px 0;
+        padding: 10px 12px;
+        margin-top: 14px;
         display: flex;
         align-items: flex-start;
-        gap: 10px;
+        gap: 8px;
     }
     
     .missing-icon {
         color: #ff9800;
-        font-size: 18px;
+        font-size: 14px;
     }
     
     .missing-title {
         color: #ff9800;
         font-weight: 600;
-        font-size: 14px;
+        font-size: 11px;
     }
     
     .missing-desc {
-        color: #ccc;
-        font-size: 13px;
+        color: #b5bcd9;
+        font-size: 10px;
     }
     
     .inline-edit-section {
         border-top: 1px solid rgba(255, 255, 255, 0.1);
-        margin-top: 20px;
-        padding-top: 16px;
+        margin-top: 14px;
+        padding-top: 12px;
     }
     
     .inline-edit-title {
         color: #ff9800;
-        font-size: 12px;
+        font-size: 9px;
         font-weight: 600;
         text-transform: uppercase;
-        letter-spacing: 1px;
-        margin-bottom: 12px;
+        letter-spacing: 0.8px;
+        margin-bottom: 10px;
     }
     
     .missing-banner {
         background: rgba(255, 152, 0, 0.1);
-        border-left: 3px solid #ff9800;
-        border-radius: 0 8px 8px 0;
-        padding: 12px 16px;
-        margin: 16px 0;
+        border-left: 2px solid #ff9800;
+        border-radius: 0 6px 6px 0;
+        padding: 10px 12px;
+        margin: 12px 0;
         display: flex;
         align-items: center;
-        gap: 10px;
+        gap: 8px;
         color: #ff9800;
-        font-size: 13px;
+        font-size: 10px;
     }
     
     .confirmation-card {
-        background: #fff;
-        border-radius: 12px;
-        padding: 24px;
-        margin-bottom: 16px;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+        background: #1a1a2e;
+        border-radius: 10px;
+        padding: 18px;
+        margin-bottom: 12px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+        border: 1px solid rgba(255,255,255,0.08);
     }
     
     .radio-option {
         display: flex;
         align-items: center;
-        gap: 10px;
-        padding: 14px 16px;
-        border: 2px solid #e5e5e5;
-        border-radius: 10px;
-        margin-bottom: 10px;
+        gap: 8px;
+        padding: 10px 12px;
+        border: 1px solid rgba(255,255,255,0.15);
+        border-radius: 8px;
+        margin-bottom: 8px;
         cursor: pointer;
         transition: all 0.2s;
     }
     
     .radio-option:hover {
-        border-color: #1E1B5C;
+        border-color: #38b6ff;
     }
     
     .radio-option.selected {
-        border-color: #1E1B5C;
-        background: rgba(30, 27, 92, 0.03);
+        border-color: #38b6ff;
+        background: rgba(56, 182, 255, 0.1);
     }
     
     .success-message {
-        background: rgba(22, 163, 74, 0.08);
-        border-radius: 12px;
-        padding: 30px;
+        background: rgba(22, 163, 74, 0.15);
+        border-radius: 10px;
+        padding: 24px;
         text-align: center;
-        margin: 16px 0;
+        margin: 12px 0;
+        border: 1px solid rgba(22, 163, 74, 0.3);
     }
     
     .success-icon {
-        width: 60px;
-        height: 60px;
-        background: rgba(22, 163, 74, 0.15);
+        width: 48px;
+        height: 48px;
+        background: rgba(22, 163, 74, 0.2);
         border-radius: 50%;
         display: flex;
         align-items: center;
         justify-content: center;
-        margin: 0 auto 16px;
-        font-size: 28px;
-        color: #16a34a;
+        margin: 0 auto 12px;
+        font-size: 22px;
+        color: #22c55e;
     }
     
     .success-title {
-        color: #1E1B5C;
-        font-size: 16px;
+        color: #e6ebff;
+        font-size: 13px;
         font-weight: 600;
-        margin-bottom: 6px;
+        margin-bottom: 5px;
     }
     
     .success-desc {
-        color: #666;
-        font-size: 13px;
+        color: #b5bcd9;
+        font-size: 10px;
         line-height: 1.5;
     }
     
     .change-log {
-        background: #fffbeb;
-        border: 1px solid #fcd34d;
-        border-radius: 8px;
-        padding: 14px;
-        margin-top: 14px;
+        background: rgba(255, 152, 0, 0.1);
+        border: 1px solid rgba(255, 152, 0, 0.3);
+        border-radius: 6px;
+        padding: 10px;
+        margin-top: 10px;
     }
     
     .change-item {
         display: flex;
-        gap: 8px;
-        padding: 6px 0;
-        border-bottom: 1px solid #fef3c7;
-        font-size: 12px;
+        gap: 6px;
+        padding: 5px 0;
+        border-bottom: 1px solid rgba(255,255,255,0.1);
+        font-size: 10px;
+        color: #e6ebff;
     }
     
     .change-item:last-child {
@@ -584,17 +551,17 @@ CUSTOM_CSS = """
     }
     
     .old-value {
-        color: #dc2626;
+        color: #f87171;
         text-decoration: line-through;
     }
     
     .new-value {
-        color: #16a34a;
+        color: #22c55e;
         font-weight: 500;
     }
     
     .login-container {
-        max-width: 340px;
+        max-width: 280px;
         margin: 0 auto;
         text-align: center;
         padding-top: 8vh;
@@ -607,44 +574,44 @@ CUSTOM_CSS = """
     }
     
     .login-form-wrapper {
-        max-width: 360px;
+        max-width: 300px;
         margin: 0 auto;
     }
     
     .content-wrapper {
-        max-width: 800px;
+        max-width: 700px;
         margin: 0 auto;
-        padding: 0 20px;
+        padding: 0 16px;
     }
     
     .login-header {
-        margin-bottom: 16px;
+        margin-bottom: 12px;
     }
     
     .login-logo {
-        width: 44px;
-        height: 44px;
+        width: 36px;
+        height: 36px;
         background: #1E1B5C;
-        border-radius: 12px;
-        margin: 0 auto 16px;
+        border-radius: 10px;
+        margin: 0 auto 12px;
         display: flex;
         align-items: center;
         justify-content: center;
-        font-size: 22px;
+        font-size: 18px;
     }
     
     .login-logo-img {
-        width: 64px;
-        height: 64px;
-        border-radius: 10px;
-        margin: 0 auto 12px;
+        width: 52px;
+        height: 52px;
+        border-radius: 8px;
+        margin: 0 auto 10px;
         display: block;
         object-fit: contain;
     }
     
     .login-title {
-        color: #1E1B5C;
-        font-size: 22px;
+        color: #e6ebff;
+        font-size: 18px;
         font-weight: 600;
         margin-bottom: 2px;
         line-height: 1.2;
@@ -661,33 +628,33 @@ CUSTOM_CSS = """
     }
     
     .login-subtitle {
-        color: #888;
-        font-size: 11px;
+        color: #b5bcd9;
+        font-size: 9px;
         font-weight: 400;
         margin-top: 2px;
     }
     
     .login-badge {
         display: inline-block;
-        background: rgba(30, 27, 92, 0.08);
-        color: #1E1B5C;
-        padding: 4px 12px;
-        border-radius: 15px;
-        font-size: 10px;
+        background: rgba(56, 182, 255, 0.15);
+        color: #38b6ff;
+        padding: 3px 10px;
+        border-radius: 12px;
+        font-size: 8px;
         font-weight: 600;
-        margin-top: 8px;
+        margin-top: 6px;
     }
     
     .stButton > button {
         background: #1E1B5C;
         color: white;
         border: none;
-        padding: 12px 28px;
+        padding: 8px 20px;
         font-weight: 600;
-        font-size: 13px;
-        letter-spacing: 1px;
+        font-size: 10px;
+        letter-spacing: 0.8px;
         text-transform: uppercase;
-        border-radius: 8px;
+        border-radius: 6px;
         width: 100%;
         transition: all 0.2s ease;
         font-family: 'Poppins', sans-serif;
@@ -699,102 +666,135 @@ CUSTOM_CSS = """
     
     .signout-btn button {
         background: transparent !important;
-        border: 1px solid #ddd !important;
-        color: #666 !important;
-        padding: 6px 16px !important;
-        font-size: 11px !important;
+        border: 1px solid rgba(255,255,255,0.2) !important;
+        color: #b5bcd9 !important;
+        padding: 5px 12px !important;
+        font-size: 9px !important;
         letter-spacing: 0.5px !important;
     }
     
     .signout-btn button:hover {
-        background: #f5f5f5 !important;
+        background: rgba(255,255,255,0.1) !important;
     }
     
     .section-label {
-        color: #666;
-        font-size: 11px;
+        color: #b5bcd9;
+        font-size: 9px;
         text-transform: uppercase;
-        letter-spacing: 1px;
-        margin-bottom: 8px;
+        letter-spacing: 0.8px;
+        margin-bottom: 6px;
         font-weight: 600;
     }
     
     div[data-testid="stForm"] {
-        background: white;
-        padding: 18px;
-        border-radius: 12px;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+        background: #1a1a2e;
+        padding: 14px;
+        border-radius: 10px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+        border: 1px solid rgba(255,255,255,0.08);
     }
     
     div[data-testid="stForm"] [data-testid="stVerticalBlock"] {
-        gap: 0.6rem !important;
+        gap: 0.5rem !important;
     }
     
     .stTextInput > div > div > input {
-        border-radius: 8px;
-        border: 1px solid #ddd;
-        padding: 10px 12px;
+        border-radius: 6px;
+        border: 1px solid rgba(255,255,255,0.15);
+        padding: 8px 10px;
         font-family: 'Poppins', sans-serif;
-        font-size: 13px;
+        font-size: 11px;
+        background: #16213e;
+        color: #e6ebff;
     }
     
     .stTextInput label {
-        font-size: 12px !important;
+        font-size: 10px !important;
         margin-bottom: 2px !important;
+        color: #b5bcd9 !important;
     }
     
     .stTextInput > div > div > input:focus {
-        border-color: #1E1B5C;
-        box-shadow: 0 0 0 2px rgba(30, 27, 92, 0.1);
+        border-color: #38b6ff;
+        box-shadow: 0 0 0 2px rgba(56, 182, 255, 0.15);
     }
     
     .stSelectbox > div > div {
-        border-radius: 8px;
+        border-radius: 6px;
+        font-size: 11px;
+    }
+    
+    .stSelectbox label {
+        font-size: 10px !important;
+        color: #b5bcd9 !important;
     }
     
     .stTextArea > div > div > textarea {
-        border-radius: 8px;
-        border: 1px solid #ddd;
+        border-radius: 6px;
+        border: 1px solid rgba(255,255,255,0.15);
         font-family: 'Poppins', sans-serif;
-        font-size: 13px;
+        font-size: 10px;
+        background: #16213e;
+        color: #e6ebff;
+    }
+    
+    .stTextArea label {
+        font-size: 10px !important;
+        color: #b5bcd9 !important;
     }
     
     .stTextArea > div > div > textarea:focus {
-        border-color: #1E1B5C;
-        box-shadow: 0 0 0 2px rgba(30, 27, 92, 0.1);
+        border-color: #38b6ff;
+        box-shadow: 0 0 0 2px rgba(56, 182, 255, 0.15);
     }
     
     .stRadio > div {
-        gap: 8px;
+        gap: 6px;
     }
     
     .stRadio label {
-        padding: 12px 16px !important;
-        border: 2px solid #e5e5e5 !important;
-        border-radius: 8px !important;
-        margin-bottom: 8px !important;
+        padding: 8px 12px !important;
+        font-size: 11px !important;
+        border: 1px solid rgba(255,255,255,0.15) !important;
+        border-radius: 6px !important;
+        margin-bottom: 6px !important;
+        color: #e6ebff !important;
+    }
+    
+    .stCheckbox label {
+        font-size: 11px !important;
+        color: #e6ebff !important;
+    }
+    
+    .stCheckbox label span {
+        color: #e6ebff !important;
     }
     
     .expired-notice {
-        background: white;
-        border-radius: 12px;
-        padding: 40px 30px;
+        background: #1a1a2e;
+        border-radius: 10px;
+        padding: 32px 24px;
         text-align: center;
-        max-width: 420px;
-        margin: 80px auto;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+        max-width: 360px;
+        margin: 60px auto;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        border: 1px solid rgba(255,255,255,0.08);
     }
     
     .inline-error {
-        color: #dc2626;
-        font-size: 11px;
-        margin-top: 4px;
+        color: #f87171;
+        font-size: 9px;
+        margin-top: 3px;
     }
     
     .field-hint {
         color: #888;
-        font-size: 11px;
-        margin-top: 4px;
+        font-size: 9px;
+        margin-top: 3px;
+    }
+    
+    p {
+        color: #b5bcd9 !important;
     }
 </style>
 """
