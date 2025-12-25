@@ -820,11 +820,14 @@ def render_covered_members(employee_data):
         
         gender = format_field(member.get('Gender')) or "—"
         nationality = format_field(member.get('Nationality')) or "—"
+        marital_status = format_field(member.get('Marital Status')) or "—"
         emirates_id = format_field(member.get('National Identity'))
+        visa_unified = format_field(member.get('Visa Unified Number'))
         passport = format_field(member.get('Passport number'))
         
         eid_formatted = format_emirates_id(emirates_id) if emirates_id else None
         eid_display = eid_formatted if eid_formatted else '<span class="missing-value">Not provided</span>'
+        visa_display = visa_unified if visa_unified else '<span class="missing-value">Not provided</span>'
         passport_display = passport if passport else '<span class="missing-value">Not provided</span>'
         
         st.markdown(f"""
@@ -835,20 +838,28 @@ def render_covered_members(employee_data):
             </div>
             <div class="member-details">
                 <div class="member-detail-item">
-                    <span class="member-detail-label">Date of Birth</span>
-                    <span class="member-detail-value">{dob}</span>
-                </div>
-                <div class="member-detail-item">
                     <span class="member-detail-label">Gender</span>
                     <span class="member-detail-value">{gender}</span>
+                </div>
+                <div class="member-detail-item">
+                    <span class="member-detail-label">Date of Birth</span>
+                    <span class="member-detail-value">{dob}</span>
                 </div>
                 <div class="member-detail-item">
                     <span class="member-detail-label">Nationality</span>
                     <span class="member-detail-value">{nationality}</span>
                 </div>
                 <div class="member-detail-item">
+                    <span class="member-detail-label">Marital Status</span>
+                    <span class="member-detail-value">{marital_status}</span>
+                </div>
+                <div class="member-detail-item">
                     <span class="member-detail-label">Emirates ID</span>
                     <span class="member-detail-value">{eid_display}</span>
+                </div>
+                <div class="member-detail-item">
+                    <span class="member-detail-label">Visa Unified No.</span>
+                    <span class="member-detail-value">{visa_display}</span>
                 </div>
                 <div class="member-detail-item">
                     <span class="member-detail-label">Passport</span>
@@ -888,9 +899,9 @@ def render_confirmation_section(employee_data, staff_number):
         else:
             st.markdown("""
             <div class="success-message">
-                <div class="success-icon">📝</div>
-                <div class="success-title">Correction Request Submitted</div>
-                <div class="success-desc">Your request has been recorded.<br>HR will review and contact you if needed.</div>
+                <div class="success-icon">📤</div>
+                <div class="success-title">Change Request Submitted</div>
+                <div class="success-desc">Your request requires HR approval.<br>You will be notified once reviewed.</div>
             </div>
             """, unsafe_allow_html=True)
         return
@@ -908,7 +919,7 @@ def render_confirmation_section(employee_data, staff_number):
     action = st.radio(
         "Select your action:",
         ["✅ I confirm that all information above is accurate",
-         "📝 I need to request corrections"],
+         "📝 I need to update information"],
         key="action_choice",
         label_visibility="collapsed"
     )
@@ -935,49 +946,29 @@ def render_confirmation_section(employee_data, staff_number):
         render_correction_form(employee_data, staff_number)
 
 def render_correction_form(employee_data, staff_number):
-    dependents = employee_data[employee_data['Relation'] != 'PRINCIPAL']
-    principal = employee_data[employee_data['Relation'] == 'PRINCIPAL'].iloc[0]
-    
-    principal_eid = format_field(principal.get('National Identity')) or ""
-    principal_passport = format_field(principal.get('Passport number')) or ""
-    principal_has_missing = not principal_eid or not principal_passport
-    
-    editable_members = []
-    
-    if principal_has_missing:
-        principal_name = format_field(principal.get('Member Full Name')) or f"{format_field(principal.get('Member First Name')) or ''} {format_field(principal.get('Member Middle Name')) or ''} {format_field(principal.get('Member Last Name')) or ''}".strip()
-        principal_name = ' '.join(principal_name.split())
-        editable_members.append({
-            "label": f"PRINCIPAL (Self): {principal_name}",
-            "row": principal,
-            "is_principal": True
-        })
-    
-    for _, member in dependents.iterrows():
-        relation = member['Relation']
-        name = format_field(member.get('Member Full Name')) or f"{format_field(member.get('Member First Name')) or ''} {format_field(member.get('Member Middle Name')) or ''} {format_field(member.get('Member Last Name')) or ''}".strip()
-        name = ' '.join(name.split())
-        editable_members.append({
-            "label": f"{relation}: {name}",
-            "row": member,
-            "is_principal": False
-        })
-    
-    if not editable_members:
-        st.info("No corrections available. All information is complete.")
-        return
-    
     st.markdown("""
     <div class="glass-card">
-        <div class="card-title">📝 Correction Request</div>
+        <div class="card-title">📝 Update Information</div>
         <p style="color: #666; font-size: 0.85em; margin-bottom: 15px;">
-            Select a member and specify the corrections needed below.
+            Select a member to add missing information or request changes.
         </p>
     </div>
     """, unsafe_allow_html=True)
     
+    editable_members = []
+    for _, member in employee_data.iterrows():
+        relation = member['Relation']
+        name = format_field(member.get('Member Full Name')) or f"{format_field(member.get('Member First Name')) or ''} {format_field(member.get('Member Middle Name')) or ''} {format_field(member.get('Member Last Name')) or ''}".strip()
+        name = ' '.join(name.split())
+        label = f"PRINCIPAL (Self): {name}" if relation == "PRINCIPAL" else f"{relation}: {name}"
+        editable_members.append({
+            "label": label,
+            "row": member,
+            "is_principal": relation == "PRINCIPAL"
+        })
+    
     member_options = [m["label"] for m in editable_members]
-    selected_member = st.selectbox("Select Member to Correct", member_options, key="selected_member")
+    selected_member = st.selectbox("Select Member", member_options, key="selected_member")
     
     selected_idx = member_options.index(selected_member)
     member_info = editable_members[selected_idx]
@@ -985,66 +976,148 @@ def render_correction_form(employee_data, staff_number):
     is_principal = member_info["is_principal"]
     member_number = member_row['Member Number']
     
-    st.markdown('<p class="section-label" style="margin-top: 20px;">Fields to Correct</p>', unsafe_allow_html=True)
+    current_gender = format_field(member_row.get('Gender')) or ""
+    current_dob = format_field(member_row.get('Date Of Birth')) or ""
+    current_nationality = format_field(member_row.get('Nationality')) or ""
+    current_marital = format_field(member_row.get('Marital Status')) or ""
+    current_eid = format_field(member_row.get('National Identity')) or ""
+    current_visa = format_field(member_row.get('Visa Unified Number')) or ""
+    current_passport = format_field(member_row.get('Passport number')) or ""
     
-    if is_principal:
-        st.caption("As the principal, you can only add missing Emirates ID or Passport information.")
-    else:
-        st.caption("Only fill in fields that need correction. Leave others empty.")
+    missing_fields = []
+    if not current_gender: missing_fields.append("Gender")
+    if not current_dob and not is_principal: missing_fields.append("Date of Birth")
+    if not current_nationality: missing_fields.append("Nationality")
+    if not current_marital: missing_fields.append("Marital Status")
+    if not current_eid: missing_fields.append("Emirates ID")
+    if not current_visa: missing_fields.append("Visa Unified Number")
+    if not current_passport: missing_fields.append("Passport")
     
-    changes = []
+    has_missing_fields = len(missing_fields) > 0
     
-    current_name = format_field(member_row.get('Member Full Name')) or f"{format_field(member_row.get('Member First Name')) or ''} {format_field(member_row.get('Member Middle Name')) or ''} {format_field(member_row.get('Member Last Name')) or ''}".strip()
-    current_name = ' '.join(current_name.split())
+    direct_inputs = {}
+    change_requests = []
     
-    col1, col2 = st.columns(2)
-    
-    with col1:
-        if not is_principal:
-            new_name = st.text_input("Dependent Name", value="", placeholder=f"Current: {current_name}", key="corr_name")
-            if new_name and new_name != current_name:
-                changes.append({"field": "Dependent Name", "old": current_name, "new": new_name})
+    if has_missing_fields:
+        st.markdown('<p class="section-label" style="margin-top: 20px;">➕ Add Missing Information</p>', unsafe_allow_html=True)
+        st.caption("Fill in missing data below. This will be saved directly.")
+        
+        col1, col2, col3, col4 = st.columns(4)
+        
+        with col1:
+            if not current_gender:
+                new_gender = st.selectbox("Gender", ["", "MALE", "FEMALE"], index=0, key="direct_gender")
+                if new_gender:
+                    direct_inputs["Gender"] = new_gender
             
-            current_relation = format_field(member_row.get('Relation')) or ""
-            new_relation = st.selectbox(
-                "Relationship",
-                ["", "SPOUSE", "CHILD"],
-                index=0,
-                key="corr_relation"
-            )
-            if new_relation and new_relation != current_relation:
-                changes.append({"field": "Relationship", "old": current_relation, "new": new_relation})
-        else:
-            st.text_input("Name", value=current_name, disabled=True, key="corr_name_locked")
+            if not current_nationality:
+                new_nationality = st.text_input("Nationality", value="", placeholder="Enter nationality", key="direct_nationality")
+                if new_nationality:
+                    direct_inputs["Nationality"] = new_nationality
+        
+        with col2:
+            if not current_dob and not is_principal:
+                new_dob = st.text_input("Date of Birth", value="", placeholder="DD/MM/YYYY", key="direct_dob")
+                if new_dob:
+                    direct_inputs["Date Of Birth"] = new_dob
+            
+            if not current_marital:
+                new_marital = st.selectbox("Marital Status", ["", "SINGLE", "MARRIED", "DIVORCED", "WIDOWED"], index=0, key="direct_marital")
+                if new_marital:
+                    direct_inputs["Marital Status"] = new_marital
+        
+        with col3:
+            if not current_eid:
+                new_eid = st.text_input("Emirates ID", value="", placeholder="Enter Emirates ID", key="direct_eid")
+                if new_eid:
+                    direct_inputs["National Identity"] = new_eid
+            
+            if not current_visa:
+                new_visa = st.text_input("Visa Unified No.", value="", placeholder="Enter Visa Number", key="direct_visa")
+                if new_visa:
+                    direct_inputs["Visa Unified Number"] = new_visa
+        
+        with col4:
+            if not current_passport:
+                new_passport = st.text_input("Passport Number", value="", placeholder="Enter Passport", key="direct_passport")
+                if new_passport:
+                    direct_inputs["Passport number"] = new_passport
+        
+        if direct_inputs:
+            if st.button("💾 Save Missing Information", type="primary", key="save_direct"):
+                df = load_data()
+                for field, value in direct_inputs.items():
+                    df.loc[df['Member Number'] == member_number, field] = value
+                df.loc[df['Staff Number'] == staff_number, 'LastEditedByStaffNo'] = staff_number
+                df.loc[df['Staff Number'] == staff_number, 'LastEditedOn'] = datetime.now().strftime("%d/%m/%Y %I:%M %p")
+                save_data(df)
+                st.cache_data.clear()
+                st.success("✅ Information saved successfully!")
+                st.rerun()
     
-    with col2:
+    has_existing_data = current_gender or current_dob or current_nationality or current_marital or current_eid or current_visa or current_passport
+    
+    if has_existing_data or not is_principal:
+        st.markdown('<p class="section-label" style="margin-top: 25px;">📝 Request Changes to Existing Data</p>', unsafe_allow_html=True)
+        st.caption("Changes to existing information require HR approval.")
+        
         if not is_principal:
-            current_dob = format_field(member_row.get('Date Of Birth')) or ""
-            new_dob = st.text_input("Date of Birth (DD/MM/YYYY)", value="", placeholder=f"Current: {current_dob}", key="corr_dob")
-            if new_dob and new_dob != current_dob:
-                changes.append({"field": "Date of Birth", "old": current_dob, "new": new_dob})
+            current_name = format_field(member_row.get('Member Full Name')) or f"{format_field(member_row.get('Member First Name')) or ''} {format_field(member_row.get('Member Middle Name')) or ''} {format_field(member_row.get('Member Last Name')) or ''}".strip()
+            current_name = ' '.join(current_name.split())
+            current_relation = format_field(member_row.get('Relation')) or ""
+            
+            col1, col2 = st.columns(2)
+            with col1:
+                new_name = st.text_input("Name Change", value="", placeholder=f"Current: {current_name}", key="req_name")
+                if new_name and new_name != current_name:
+                    change_requests.append({"field": "Name", "old": current_name, "new": new_name, "column": "Member Full Name"})
+                
+                new_relation = st.selectbox("Relationship Change", ["", "SPOUSE", "CHILD"], index=0, key="req_relation")
+                if new_relation and new_relation != current_relation:
+                    change_requests.append({"field": "Relationship", "old": current_relation, "new": new_relation, "column": "Relation"})
+            
+            with col2:
+                if current_dob:
+                    new_dob_change = st.text_input("Date of Birth Change", value="", placeholder=f"Current: {current_dob}", key="req_dob")
+                    if new_dob_change and new_dob_change != current_dob:
+                        change_requests.append({"field": "Date of Birth", "old": current_dob, "new": new_dob_change, "column": "Date Of Birth"})
         
-        current_eid = format_field(member_row.get('National Identity')) or ""
-        current_passport = format_field(member_row.get('Passport number')) or ""
-        
-        if not current_eid:
-            new_eid = st.text_input("Emirates ID", value="", placeholder="Not provided - add if available", key="corr_eid")
-            if new_eid:
-                changes.append({"field": "Emirates ID", "old": "Not provided", "new": new_eid})
-        else:
-            st.text_input("Emirates ID", value=current_eid, disabled=True, key="corr_eid_locked")
-        
-        if not current_passport:
-            new_passport = st.text_input("Passport Number", value="", placeholder="Not provided - add if available", key="corr_passport")
-            if new_passport:
-                changes.append({"field": "Passport Number", "old": "Not provided", "new": new_passport})
-        else:
-            st.text_input("Passport Number", value=current_passport, disabled=True, key="corr_passport_locked")
+        col1, col2, col3, col4 = st.columns(4)
+        with col1:
+            if current_gender:
+                gender_options = ["", "MALE", "FEMALE"]
+                new_gender_change = st.selectbox("Change Gender", gender_options, index=0, key="req_gender")
+                if new_gender_change and new_gender_change != current_gender:
+                    change_requests.append({"field": "Gender", "old": current_gender, "new": new_gender_change, "column": "Gender"})
+            if current_nationality:
+                new_nationality_change = st.text_input("Change Nationality", value="", placeholder=f"Current: {current_nationality}", key="req_nationality")
+                if new_nationality_change and new_nationality_change != current_nationality:
+                    change_requests.append({"field": "Nationality", "old": current_nationality, "new": new_nationality_change, "column": "Nationality"})
+        with col2:
+            if current_marital:
+                marital_options = ["", "SINGLE", "MARRIED", "DIVORCED", "WIDOWED"]
+                new_marital_change = st.selectbox("Change Marital Status", marital_options, index=0, key="req_marital")
+                if new_marital_change and new_marital_change != current_marital:
+                    change_requests.append({"field": "Marital Status", "old": current_marital, "new": new_marital_change, "column": "Marital Status"})
+        with col3:
+            if current_eid:
+                new_eid_change = st.text_input("Change Emirates ID", value="", placeholder=f"Current: {format_emirates_id(current_eid)}", key="req_eid")
+                if new_eid_change and new_eid_change != current_eid:
+                    change_requests.append({"field": "Emirates ID", "old": current_eid, "new": new_eid_change, "column": "National Identity"})
+            if current_visa:
+                new_visa_change = st.text_input("Change Visa No.", value="", placeholder=f"Current: {current_visa}", key="req_visa")
+                if new_visa_change and new_visa_change != current_visa:
+                    change_requests.append({"field": "Visa Unified Number", "old": current_visa, "new": new_visa_change, "column": "Visa Unified Number"})
+        with col4:
+            if current_passport:
+                new_passport_change = st.text_input("Change Passport", value="", placeholder=f"Current: {current_passport}", key="req_passport")
+                if new_passport_change and new_passport_change != current_passport:
+                    change_requests.append({"field": "Passport Number", "old": current_passport, "new": new_passport_change, "column": "Passport number"})
     
-    if changes:
-        st.markdown('<p class="section-label" style="margin-top: 20px;">Changes Summary</p>', unsafe_allow_html=True)
+    if change_requests:
+        st.markdown('<p class="section-label" style="margin-top: 20px;">Pending Changes (Require Approval)</p>', unsafe_allow_html=True)
         st.markdown('<div class="change-log">', unsafe_allow_html=True)
-        for change in changes:
+        for change in change_requests:
             st.markdown(f"""
             <div class="change-item">
                 <strong>{change['field']}:</strong>
@@ -1053,45 +1126,41 @@ def render_correction_form(employee_data, staff_number):
             </div>
             """, unsafe_allow_html=True)
         st.markdown('</div>', unsafe_allow_html=True)
-    
-    st.markdown('<p class="section-label" style="margin-top: 20px;">Remarks</p>', unsafe_allow_html=True)
-    remarks = st.text_area(
-        "Please provide details for the correction (Required)",
-        placeholder="e.g., 'Emirates ID was renewed' or 'Spelling correction'",
-        key="corr_remarks",
-        label_visibility="collapsed"
-    )
-    
-    submit_disabled = len(changes) == 0 or not remarks.strip()
-    
-    if st.button("Submit Correction Request", type="primary", disabled=submit_disabled):
-        change_request = {
-            "staff_number": staff_number,
-            "member_number": member_number,
-            "member_name": selected_member,
-            "changes": changes,
-            "remarks": remarks,
-            "submitted_at": datetime.now().isoformat(),
-            "status": "pending"
-        }
         
-        save_change_request(change_request)
+        remarks = st.text_area(
+            "Reason for changes (Required)",
+            placeholder="e.g., 'Emirates ID was renewed' or 'Spelling correction'",
+            key="change_remarks",
+            label_visibility="collapsed"
+        )
         
-        df = load_data()
-        df.loc[df['Staff Number'] == staff_number, 'LastEditedByStaffNo'] = staff_number
-        df.loc[df['Staff Number'] == staff_number, 'LastEditedOn'] = datetime.now().strftime("%d/%m/%Y %I:%M %p")
-        save_data(df)
-        st.cache_data.clear()
+        submit_disabled = not remarks.strip()
         
-        st.session_state['submission_success'] = True
-        st.session_state['submission_type'] = 'correction'
-        st.rerun()
-    
-    if submit_disabled:
-        if len(changes) == 0:
-            st.caption("⚠️ Please fill in at least one field to correct")
-        elif not remarks.strip():
-            st.caption("⚠️ Remarks are mandatory for correction requests")
+        if st.button("📤 Submit Change Request", type="secondary", disabled=submit_disabled):
+            change_request = {
+                "staff_number": staff_number,
+                "member_number": member_number,
+                "member_name": selected_member,
+                "changes": [{"field": c["field"], "old": c["old"], "new": c["new"]} for c in change_requests],
+                "remarks": remarks,
+                "submitted_at": datetime.now().isoformat(),
+                "status": "pending_approval"
+            }
+            
+            save_change_request(change_request)
+            
+            df = load_data()
+            df.loc[df['Staff Number'] == staff_number, 'LastEditedByStaffNo'] = staff_number
+            df.loc[df['Staff Number'] == staff_number, 'LastEditedOn'] = datetime.now().strftime("%d/%m/%Y %I:%M %p")
+            save_data(df)
+            st.cache_data.clear()
+            
+            st.session_state['submission_success'] = True
+            st.session_state['submission_type'] = 'change_request'
+            st.rerun()
+        
+        if submit_disabled:
+            st.caption("⚠️ Please provide a reason for the changes")
 
 def render_dashboard():
     st.markdown(CUSTOM_CSS, unsafe_allow_html=True)
