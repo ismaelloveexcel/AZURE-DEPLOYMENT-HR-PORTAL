@@ -1346,24 +1346,23 @@ def render_covered_members(employee_data, staff_number):
         </div>
         """, unsafe_allow_html=True)
         
-        show_edit_section = missing_fields or True
+        direct_inputs = {}
+        validation_errors = []
+        field_labels = {
+            "National Identity": "Emirates ID",
+            "Visa Unified Number": "Visa Unified No.",
+            "Passport number": "Passport",
+            "Marital Status": "Marital Status"
+        }
         
-        if show_edit_section:
+        if missing_fields:
             st.markdown('<div class="edit-section-header">Complete Missing Information</div>', unsafe_allow_html=True)
             
-            direct_inputs = {}
-            validation_errors = []
-            field_labels = {
-                "National Identity": "Emirates ID",
-                "Visa Unified Number": "Visa Unified No.",
-                "Passport number": "Passport",
-                "Marital Status": "Marital Status"
-            }
+            missing_cols = st.columns(3)
+            col_idx = 0
             
-            input_cols = st.columns(4)
-            
-            with input_cols[0]:
-                if not current_eid:
+            if not current_eid:
+                with missing_cols[col_idx % 3]:
                     new_eid = st.text_input("Emirates ID", value="", placeholder="784-XXXX-XXXXXXX-X", key=f"eid_{idx}_{member_number}")
                     if new_eid and new_eid.strip():
                         valid, msg = validate_emirates_id(new_eid.strip())
@@ -1371,47 +1370,51 @@ def render_covered_members(employee_data, staff_number):
                             validation_errors.append(msg)
                         else:
                             direct_inputs["National Identity"] = new_eid.strip()
+                col_idx += 1
             
-            with input_cols[1]:
-                if not current_visa:
+            if not current_visa:
+                with missing_cols[col_idx % 3]:
                     new_visa = st.text_input("Visa Unified No.", value="", placeholder="Enter visa number", key=f"visa_{idx}_{member_number}")
                     if new_visa and new_visa.strip():
                         direct_inputs["Visa Unified Number"] = new_visa.strip()
+                col_idx += 1
             
-            with input_cols[2]:
-                if not current_passport:
+            if not current_passport:
+                with missing_cols[col_idx % 3]:
                     new_passport = st.text_input("Passport Number", value="", placeholder="Enter passport", key=f"passport_{idx}_{member_number}")
                     if new_passport and new_passport.strip():
                         direct_inputs["Passport number"] = new_passport.strip()
-            
-            with input_cols[3]:
-                marital_options = ["", "SINGLE", "MARRIED", "DIVORCED", "WIDOWED"]
-                current_idx = marital_options.index(marital_status) if marital_status in marital_options else 0
-                new_marital = st.selectbox("Update Marital Status", marital_options, index=0, key=f"marital_{idx}_{member_number}")
-                if new_marital and new_marital != marital_status:
-                    direct_inputs["Marital Status"] = new_marital
-            
-            if validation_errors:
-                for err in validation_errors:
-                    st.error(err)
-            
-            if len(direct_inputs) > 0 and len(validation_errors) == 0:
-                if st.button("Save", key=f"save_member_{idx}_{member_number}", type="primary"):
-                    df = load_data()
-                    for field, value in direct_inputs.items():
-                        old_val = ""
-                        if field in df.columns:
-                            old_val_series = df.loc[df['Member Number'] == member_number, field]
-                            if not old_val_series.empty:
-                                old_val = old_val_series.iloc[0] if pd.notna(old_val_series.iloc[0]) else ""
-                        df.loc[df['Member Number'] == member_number, field] = value
-                        log_audit_trail("data_added", staff_number, member_number, field_labels.get(field, field), str(old_val), value, "employee")
-                    df.loc[df['Staff Number'] == staff_number, 'LastEditedByStaffNo'] = staff_number
-                    df.loc[df['Staff Number'] == staff_number, 'LastEditedOn'] = datetime.now().strftime("%d/%m/%Y %I:%M %p")
-                    save_data(df)
-                    st.cache_data.clear()
-                    st.session_state[saved_key] = True
-                    st.rerun()
+        
+        st.markdown('<div class="edit-section-header" style="color: #38b6ff;">Update Information</div>', unsafe_allow_html=True)
+        
+        update_cols = st.columns(3)
+        with update_cols[0]:
+            marital_options = ["", "SINGLE", "MARRIED", "DIVORCED", "WIDOWED"]
+            new_marital = st.selectbox("Update Marital Status", marital_options, index=0, key=f"marital_{idx}_{member_number}")
+            if new_marital and new_marital != marital_status:
+                direct_inputs["Marital Status"] = new_marital
+        
+        if validation_errors:
+            for err in validation_errors:
+                st.error(err)
+        
+        if len(direct_inputs) > 0 and len(validation_errors) == 0:
+            if st.button("Save", key=f"save_member_{idx}_{member_number}", type="primary"):
+                df = load_data()
+                for field, value in direct_inputs.items():
+                    old_val = ""
+                    if field in df.columns:
+                        old_val_series = df.loc[df['Member Number'] == member_number, field]
+                        if not old_val_series.empty:
+                            old_val = old_val_series.iloc[0] if pd.notna(old_val_series.iloc[0]) else ""
+                    df.loc[df['Member Number'] == member_number, field] = value
+                    log_audit_trail("data_added", staff_number, member_number, field_labels.get(field, field), str(old_val), value, "employee")
+                df.loc[df['Staff Number'] == staff_number, 'LastEditedByStaffNo'] = staff_number
+                df.loc[df['Staff Number'] == staff_number, 'LastEditedOn'] = datetime.now().strftime("%d/%m/%Y %I:%M %p")
+                save_data(df)
+                st.cache_data.clear()
+                st.session_state[saved_key] = True
+                st.rerun()
         
         st.markdown("<hr class='member-divider'>", unsafe_allow_html=True)
 
