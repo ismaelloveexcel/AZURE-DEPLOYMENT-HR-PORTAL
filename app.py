@@ -7,8 +7,14 @@ import json
 from io import BytesIO
 from models import init_db, get_db, AuditTrail, ChangeRequest
 
-init_db()
+@st.cache_resource
+def initialize_database():
+    init_db()
+    return True
 
+initialize_database()
+
+@st.cache_resource
 def get_logo_base64():
     logo_path = "attached_assets/Untitled_design_(7)_1766689233925.gif"
     if os.path.exists(logo_path):
