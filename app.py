@@ -196,6 +196,25 @@ CUSTOM_CSS = """
     .user-id {
         font-size: 10px;
         opacity: 0.7;
+        margin-bottom: 6px;
+    }
+    
+    .header-signout-btn {
+        background: rgba(255,255,255,0.15);
+        border: 1px solid rgba(255,255,255,0.3);
+        color: white;
+        padding: 4px 12px;
+        border-radius: 6px;
+        font-size: 10px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.2s;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    
+    .header-signout-btn:hover {
+        background: rgba(255,255,255,0.25);
     }
     
     .status-strip {
@@ -865,6 +884,12 @@ def render_header(principal_name, staff_number):
         </div>
     </div>
     """, unsafe_allow_html=True)
+    
+    signout_col1, signout_col2 = st.columns([6, 1])
+    with signout_col2:
+        if st.button("SIGN OUT", key="header_signout", use_container_width=True):
+            st.session_state.clear()
+            st.rerun()
 
 def render_status_strip():
     days_left = (RENEWAL_DEADLINE - datetime.now()).days
@@ -1501,18 +1526,9 @@ def render_dashboard():
     principal_name = principal['Principal Name']
     
     render_header(principal_name, staff_number)
-    render_status_strip()
     
     col1, col2, col3 = st.columns([1, 2.5, 1])
     with col2:
-        signout_col1, signout_col2 = st.columns([5, 1])
-        with signout_col2:
-            st.markdown('<div class="signout-btn">', unsafe_allow_html=True)
-            if st.button("Sign Out", use_container_width=True):
-                st.session_state.clear()
-                st.rerun()
-            st.markdown('</div>', unsafe_allow_html=True)
-        
         render_employee_snapshot(principal, staff_number)
         render_covered_members(employee_data)
         render_confirmation_section(employee_data, staff_number)
