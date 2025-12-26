@@ -57,6 +57,26 @@ CUSTOM_CSS = """
         font-family: 'Inter', sans-serif;
         background: #f5f7fb;
     }
+
+    .page-shell {
+        max-width: 1100px;
+        margin: 0 auto;
+        padding: 8px 14px 36px;
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+    }
+
+    .section-grid {
+        display: grid;
+        grid-template-columns: 1.15fr 0.85fr;
+        gap: 14px;
+        align-items: start;
+    }
+
+    .section-divider {
+        margin: 6px 0 4px;
+    }
     
     .login-page [data-testid="stAppViewBlockContainer"] {
         padding: 0 !important;
@@ -261,11 +281,12 @@ CUSTOM_CSS = """
     .status-strip {
         background: rgba(255, 255, 255, 0.7);
         border-bottom: 1px solid #e2e8f0;
-        padding: 10px 20px;
-        margin: 0 -60px 14px -60px;
+        padding: 12px 16px;
+        margin: 0 0 6px 0;
+        border-radius: 10px;
         display: flex;
-        justify-content: center;
-        gap: 28px;
+        justify-content: space-between;
+        gap: 18px;
         font-size: 12px;
         color: #475569;
     }
@@ -274,6 +295,72 @@ CUSTOM_CSS = """
         display: flex;
         align-items: center;
         gap: 6px;
+    }
+
+    .summary-card {
+        background: rgba(255, 255, 255, 0.9);
+        border-radius: 12px;
+        padding: 14px 16px;
+        border: 1px solid #e2e8f0;
+        box-shadow: 0 2px 10px rgba(15, 23, 42, 0.05);
+    }
+
+    .summary-card .card-title {
+        margin-bottom: 10px;
+    }
+
+    .key-metrics {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 10px;
+    }
+
+    .metric-tile {
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 10px;
+        padding: 10px 12px;
+    }
+
+    .metric-label {
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        color: #94a3b8;
+        margin-bottom: 4px;
+    }
+
+    .metric-value {
+        color: #0f172a;
+        font-weight: 600;
+        font-size: 14px;
+    }
+
+    .list-row {
+        display: flex;
+        justify-content: space-between;
+        gap: 6px;
+        padding: 8px 0;
+        border-bottom: 1px solid #e2e8f0;
+        font-size: 12px;
+        color: #475569;
+    }
+
+    .list-row:last-child {
+        border-bottom: none;
+    }
+
+    .list-label {
+        text-transform: uppercase;
+        letter-spacing: 0.4px;
+        color: #94a3b8;
+        font-weight: 600;
+        font-size: 11px;
+    }
+
+    .list-value {
+        font-weight: 600;
+        color: #64748b;
     }
     
     .centered-header {
@@ -869,6 +956,14 @@ CUSTOM_CSS = """
         letter-spacing: 0.8px;
         margin-bottom: 8px;
         font-weight: 600;
+    }
+
+    .section-heading {
+        color: #0f172a;
+        font-size: 15px;
+        font-weight: 600;
+        margin: 6px 0 10px 0;
+        letter-spacing: 0.2px;
     }
     
     div[data-testid="stForm"] {
@@ -2151,36 +2246,95 @@ def render_dashboard():
     
     principal = employee_data[employee_data['Relation'] == 'PRINCIPAL'].iloc[0]
     principal_name = principal['Principal Name']
-    
-    col1, col2, col3 = st.columns([1, 2.5, 1])
-    with col2:
-        # Centered header
-        logo_html = f'<img src="data:image/png;base64,{LOGO_BASE64}" alt="Baynunah" class="centered-header-logo">' if LOGO_BASE64 else '<span class="header-logo-placeholder">🏥</span>'
-        st.markdown(f"""
-        <div class="centered-header">
-            {logo_html}
-            <div class="centered-header-title">Medical Insurance Renewal</div>
-            <div class="centered-header-subtitle">Insured by DAMAN</div>
-            <div class="centered-header-year">Year {POLICY_YEAR}</div>
-        </div>
-        """, unsafe_allow_html=True)
-        
+    missing_fields_total = 0
+    for _, member in employee_data.iterrows():
+        if not format_field(member.get('National Identity')):
+            missing_fields_total += 1
+        if not format_field(member.get('Visa Unified Number')):
+            missing_fields_total += 1
+        if not format_field(member.get('Passport number')):
+            missing_fields_total += 1
+
+    confirmed_value = principal.get('EmployeeConfirmed') or principal.get('Confirmed')
+    confirmation_text = format_field(confirmed_value) or 'Pending submission'
+    last_updated = format_field(principal.get('LastEditedOn')) or '—'
+    members_count = len(employee_data)
+    deadline_str = RENEWAL_DEADLINE.strftime('%d %B %Y')
+
+    st.markdown('<div class="page-shell">', unsafe_allow_html=True)
+
+    render_header(principal_name, staff_number)
+    render_status_strip()
+
+    st.markdown(f"""
+    <div class="centered-header">
+        {'<img src="data:image/png;base64,' + LOGO_BASE64 + '" alt="Baynunah" class="centered-header-logo">' if LOGO_BASE64 else '<span class="header-logo-placeholder">🏥</span>'}
+        <div class="centered-header-title">Medical Insurance Renewal</div>
+        <div class="centered-header-subtitle">Insured by DAMAN</div>
+        <div class="centered-header-year">Year {POLICY_YEAR}</div>
+    </div>
+    """, unsafe_allow_html=True)
+
+    top_cols = st.columns([1.15, 0.85])
+    with top_cols[0]:
         render_employee_snapshot(principal, staff_number)
-        render_covered_members(employee_data, staff_number)
-        render_confirmation_section(employee_data, staff_number)
-        
-        st.markdown("""
-        <div style="text-align: center; margin-top: 30px; padding: 16px; color: #94a3b8; font-size: 13px;">
-            Need help? <a href="https://wa.me/971564966546" target="_blank" style="color: #23c483; text-decoration: none; font-weight: 500;">WhatsApp HR Support</a>
+    with top_cols[1]:
+        st.markdown(f"""
+        <div class="summary-card">
+            <div class="card-title">🔎 Renewal Overview</div>
+            <div class="key-metrics">
+                <div class="metric-tile">
+                    <div class="metric-label">Covered Members</div>
+                    <div class="metric-value">{members_count}</div>
+                </div>
+                <div class="metric-tile">
+                    <div class="metric-label">Items To Update</div>
+                    <div class="metric-value">{missing_fields_total}</div>
+                </div>
+                <div class="metric-tile">
+                    <div class="metric-label">Confirmation</div>
+                    <div class="metric-value">{confirmation_text}</div>
+                </div>
+                <div class="metric-tile">
+                    <div class="metric-label">Last Updated</div>
+                    <div class="metric-value">{last_updated}</div>
+                </div>
+            </div>
+            <div class="section-divider"></div>
+            <div class="list-row">
+                <span class="list-label">Deadline</span>
+                <span class="list-value">{deadline_str}</span>
+            </div>
+            <div class="list-row">
+                <span class="list-label">Session Timeout</span>
+                <span class="list-value">{SESSION_TIMEOUT_MINUTES} minutes</span>
+            </div>
+            <div class="list-row">
+                <span class="list-label">Support</span>
+                <span class="list-value">WhatsApp HR • +971 56 496 6546</span>
+            </div>
         </div>
         """, unsafe_allow_html=True)
-        
-        # Sign out button at bottom with login page styling
-        st.markdown('<div class="signout-container">', unsafe_allow_html=True)
-        if st.button("Sign Out", key="footer_signout", type="secondary"):
-            st.session_state.clear()
-            st.rerun()
-        st.markdown('</div>', unsafe_allow_html=True)
+
+    st.markdown('<div class="section-heading">Covered Members</div>', unsafe_allow_html=True)
+    render_covered_members(employee_data, staff_number)
+
+    st.markdown('<div class="section-heading">Confirmation & Requests</div>', unsafe_allow_html=True)
+    render_confirmation_section(employee_data, staff_number)
+
+    st.markdown("""
+    <div style="text-align: center; margin-top: 18px; padding: 12px; color: #94a3b8; font-size: 13px;">
+        Need help? <a href="https://wa.me/971564966546" target="_blank" style="color: #23c483; text-decoration: none; font-weight: 500;">WhatsApp HR Support</a>
+    </div>
+    """, unsafe_allow_html=True)
+
+    st.markdown('<div class="signout-container">', unsafe_allow_html=True)
+    if st.button("Sign Out", key="footer_signout", type="secondary"):
+        st.session_state.clear()
+        st.rerun()
+    st.markdown('</div>', unsafe_allow_html=True)
+
+    st.markdown('</div>', unsafe_allow_html=True)
 
 def generate_excel_report():
     df = load_data()
