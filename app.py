@@ -483,15 +483,36 @@ CUSTOM_CSS = """
         font-weight: 600;
     }
     
+    .edit-form-card {
+        background: rgba(255, 255, 255, 0.85);
+        backdrop-filter: blur(10px);
+        border-radius: 12px;
+        padding: 16px;
+        margin: 14px 0;
+        border: 1px solid #e2e8f0;
+        box-shadow: 0 2px 10px rgba(15, 23, 42, 0.05);
+    }
+    
     .edit-section-header {
         color: #ea580c;
         font-size: 11px;
         font-weight: 600;
         text-transform: uppercase;
         letter-spacing: 0.6px;
-        margin: 10px 0 8px 0;
-        padding-top: 10px;
+        margin: 0 0 12px 0;
+        font-family: 'Inter', sans-serif;
+    }
+    
+    .edit-section-header-green {
+        color: #23c483;
+        font-size: 11px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.6px;
+        margin: 16px 0 12px 0;
+        padding-top: 12px;
         border-top: 1px solid #e2e8f0;
+        font-family: 'Inter', sans-serif;
     }
     
     .member-grid {
@@ -810,44 +831,32 @@ CUSTOM_CSS = """
         margin-bottom: 20px;
     }
     
-    .signout-container .stButton > button,
-    .signout-container .stButton > button > div,
-    .signout-container .stButton > button > div > p,
-    .signout-container .stButton > button span {
-        background: transparent !important;
+    .signout-container {
+        display: flex;
+        justify-content: center;
+        margin-top: 30px;
+        margin-bottom: 20px;
+    }
+    
+    .signout-container .stButton > button {
+        background: #23c483 !important;
+        color: white !important;
         border: none !important;
-        box-shadow: none !important;
-        color: #64748b !important;
-        font-size: 13px !important;
-        font-weight: 500 !important;
+        padding: 10px 40px !important;
+        font-weight: 600 !important;
+        font-size: 12px !important;
+        letter-spacing: 0.4px !important;
+        text-transform: uppercase !important;
+        border-radius: 8px !important;
         font-family: 'Inter', sans-serif !important;
-        text-transform: none !important;
-        letter-spacing: 0 !important;
-        padding: 8px 16px !important;
-        position: relative;
-        transition: all 0.3s ease !important;
+        box-shadow: 0 2px 6px rgba(35, 196, 131, 0.2) !important;
+        transition: all 0.2s ease !important;
         width: auto !important;
     }
     
-    .signout-container .stButton > button::after {
-        content: '';
-        position: absolute;
-        bottom: 6px;
-        left: 50%;
-        transform: translateX(-50%);
-        width: 0;
-        height: 2px;
-        background: #23c483;
-        transition: width 0.3s ease;
-    }
-    
     .signout-container .stButton > button:hover {
-        color: #23c483 !important;
-        background: transparent !important;
-    }
-    
-    .signout-container .stButton > button:hover::after {
-        width: 60%;
+        background: #1ea76f !important;
+        box-shadow: 0 3px 10px rgba(35, 196, 131, 0.3) !important;
     }
     
     .section-label {
@@ -1961,6 +1970,9 @@ def render_covered_members(employee_data, staff_number):
             "Marital Status": "Marital Status"
         }
         
+        # Edit form card
+        st.markdown('<div class="edit-form-card">', unsafe_allow_html=True)
+        
         if missing_fields:
             st.markdown('<div class="edit-section-header">Complete Missing Information</div>', unsafe_allow_html=True)
             
@@ -1991,7 +2003,9 @@ def render_covered_members(employee_data, staff_number):
                     if new_passport and new_passport.strip():
                         direct_inputs["Passport number"] = new_passport.strip()
         
-        st.markdown('<div class="edit-section-header" style="color: #23c483;">Update Information</div>', unsafe_allow_html=True)
+            st.markdown('<div class="edit-section-header-green">Update Information</div>', unsafe_allow_html=True)
+        else:
+            st.markdown('<div class="edit-section-header" style="color: #23c483;">Update Information</div>', unsafe_allow_html=True)
         
         update_cols = st.columns(3)
         with update_cols[0]:
@@ -2024,6 +2038,8 @@ def render_covered_members(employee_data, staff_number):
                     st.cache_data.clear()
                     st.session_state[saved_key] = True
                 st.rerun()
+        
+        st.markdown('</div>', unsafe_allow_html=True)
         
         st.markdown("<hr class='member-divider'>", unsafe_allow_html=True)
 
