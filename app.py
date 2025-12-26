@@ -1036,7 +1036,7 @@ def render_login():
             margin-bottom: 20px;
         }
         .login-card-title h1 {
-            color: #0f172a;
+            color: #000000;
             font-size: 22px;
             font-weight: 700;
             font-family: 'Aptos', 'Calibri', sans-serif;
@@ -1045,7 +1045,7 @@ def render_login():
             text-shadow: 0 1px 2px rgba(255,255,255,0.2);
         }
         .login-card-title .subtitle {
-            color: #0f172a;
+            color: #000000;
             font-size: 13px;
             font-family: 'Aptos', 'Calibri', sans-serif;
             margin: 0;
@@ -1053,7 +1053,7 @@ def render_login():
         .login-card-title .badge {
             display: inline-block;
             background: rgba(255, 255, 255, 0.4);
-            color: #0f172a;
+            color: #000000;
             padding: 5px 14px;
             border-radius: 12px;
             font-size: 11px;
@@ -1063,7 +1063,7 @@ def render_login():
             backdrop-filter: blur(10px);
         }
         .login-page-wrapper .stTextInput label {
-            color: #0f172a !important;
+            color: #000000 !important;
             font-family: 'Aptos', 'Calibri', sans-serif !important;
             font-weight: 500 !important;
             font-size: 13px !important;
@@ -1073,7 +1073,7 @@ def render_login():
             background: #f0f4f8 !important;
             border: 1px solid #e2e8f0 !important;
             border-radius: 10px !important;
-            color: #0f172a !important;
+            color: #000000 !important;
             font-family: 'Aptos', 'Calibri', sans-serif !important;
             padding: 12px 14px !important;
             font-size: 14px !important;
@@ -1089,7 +1089,7 @@ def render_login():
         }
         .login-page-wrapper .stFormSubmitButton > button {
             background: #f0f4f8 !important;
-            color: #0f172a !important;
+            color: #000000 !important;
             border: 1px solid #e2e8f0 !important;
             border-radius: 10px !important;
             font-weight: 600 !important;
@@ -1106,7 +1106,7 @@ def render_login():
         }
         .login-help {
             font-family: 'Aptos', 'Calibri', sans-serif !important;
-            color: #0f172a !important;
+            color: #000000 !important;
         }
         .login-help a {
             color: #25D366 !important;
