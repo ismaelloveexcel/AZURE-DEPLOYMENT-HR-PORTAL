@@ -1065,24 +1065,44 @@ def render_login():
         .login-page-wrapper .stTextInput label {
             color: #0f172a !important;
             font-family: 'Aptos', 'Calibri', sans-serif !important;
-            font-weight: 400 !important;
+            font-weight: 500 !important;
+            font-size: 13px !important;
+            margin-bottom: 6px !important;
         }
         .login-page-wrapper .stTextInput > div > div > input {
-            background: #e8eef5 !important;
-            border: 1px solid #d1d9e6 !important;
+            background: #f0f4f8 !important;
+            border: 1px solid #e2e8f0 !important;
+            border-radius: 10px !important;
             color: #0f172a !important;
             font-family: 'Aptos', 'Calibri', sans-serif !important;
+            padding: 12px 14px !important;
+            font-size: 14px !important;
+            transition: all 0.2s ease !important;
+        }
+        .login-page-wrapper .stTextInput > div > div > input:focus {
+            border-color: #3b82f6 !important;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1) !important;
+            background: #ffffff !important;
+        }
+        .login-page-wrapper .stTextInput > div > div > input::placeholder {
+            color: #94a3b8 !important;
         }
         .login-page-wrapper .stFormSubmitButton > button {
-            background: rgba(255,255,255,0.95) !important;
-            color: #1e40af !important;
-            border: none !important;
-            font-weight: 700 !important;
+            background: #f0f4f8 !important;
+            color: #0f172a !important;
+            border: 1px solid #e2e8f0 !important;
+            border-radius: 10px !important;
+            font-weight: 600 !important;
             font-family: 'Aptos', 'Calibri', sans-serif !important;
+            padding: 12px 24px !important;
+            font-size: 14px !important;
+            transition: all 0.2s ease !important;
+            margin-top: 8px !important;
         }
         .login-page-wrapper .stFormSubmitButton > button:hover {
-            background: #ffffff !important;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15) !important;
+            background: #e2e8f0 !important;
+            border-color: #cbd5e1 !important;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08) !important;
         }
         .login-help {
             font-family: 'Aptos', 'Calibri', sans-serif !important;
@@ -1100,18 +1120,19 @@ def render_login():
             padding: 20px;
         }
         .login-page-wrapper [data-testid="stForm"] {
-            background: linear-gradient(135deg, rgba(56, 189, 248, 0.25) 0%, rgba(59, 130, 246, 0.35) 50%, rgba(99, 102, 241, 0.25) 100%);
+            background: rgba(255, 255, 255, 0.95);
             backdrop-filter: blur(20px);
             -webkit-backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.4);
-            border-radius: 20px;
-            padding: 28px;
+            border: 1px solid rgba(255, 255, 255, 0.8);
+            border-radius: 16px;
+            padding: 32px 28px;
             box-shadow: 
-                0 8px 32px rgba(56, 189, 248, 0.15),
-                inset 0 1px 0 rgba(255, 255, 255, 0.5),
-                inset 0 -1px 0 rgba(255, 255, 255, 0.1);
+                0 4px 24px rgba(0, 0, 0, 0.08),
+                0 1px 2px rgba(0, 0, 0, 0.04);
             position: relative;
             overflow: hidden;
+            max-width: 380px;
+            margin: 0 auto;
         }
         .login-page-wrapper [data-testid="stForm"]::before {
             content: "";
@@ -1120,10 +1141,10 @@ def render_login():
             left: 0;
             right: 0;
             bottom: 0;
-            background: linear-gradient(180deg, rgba(255,255,255,0.3) 0%, rgba(255,255,255,0) 50%);
+            background: linear-gradient(180deg, rgba(255,255,255,0.5) 0%, rgba(255,255,255,0) 40%);
             pointer-events: none;
             z-index: 0;
-            border-radius: 20px;
+            border-radius: 16px;
         }
         .login-page-wrapper [data-testid="stForm"] > * {
             position: relative;
