@@ -1053,7 +1053,7 @@ def render_login():
         .login-card-title .badge {
             display: inline-block;
             background: rgba(255, 255, 255, 0.4);
-            color: #4df759;
+            color: #0f172a;
             padding: 5px 14px;
             border-radius: 12px;
             font-size: 11px;
