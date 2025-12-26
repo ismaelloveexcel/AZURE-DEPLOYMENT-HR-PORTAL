@@ -1204,53 +1204,57 @@ def render_login():
         }
         [data-testid="stForm"] .stFormSubmitButton {
             display: block;
-            margin-top: 12px !important;
+            margin-top: 16px !important;
+            text-align: center;
         }
         [data-testid="stForm"] .stFormSubmitButton > button,
         [data-testid="stForm"] .stFormSubmitButton button,
-        [data-testid="stForm"] button[kind="secondaryFormSubmit"],
-        .stFormSubmitButton > button,
         button[data-testid="stBaseButton-secondaryFormSubmit"] {
-            padding: 1.1em 2.5em !important;
-            font-size: 12px !important;
-            text-transform: uppercase !important;
-            letter-spacing: 2.5px !important;
-            font-weight: 600 !important;
+            font-size: 14px !important;
+            color: #0f172a !important;
             font-family: 'Aptos', 'Calibri', sans-serif !important;
-            color: #333 !important;
-            background: linear-gradient(145deg, #e6e6e6, #cccccc) !important;
-            border: none !important;
-            border-radius: 8px !important;
-            -webkit-border-radius: 8px !important;
-            -moz-border-radius: 8px !important;
-            box-shadow: 
-                6px 6px 12px rgba(0, 0, 0, 0.15),
-                -4px -4px 10px rgba(255, 255, 255, 0.8),
-                inset 1px 1px 2px rgba(255, 255, 255, 0.5) !important;
-            transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1) !important;
+            font-weight: 800 !important;
             cursor: pointer;
-            outline: none !important;
+            position: relative;
+            border: none !important;
+            background: none !important;
+            background-color: transparent !important;
+            text-transform: uppercase !important;
+            letter-spacing: 2px !important;
+            padding: 12px 24px !important;
+            transition-timing-function: cubic-bezier(0.25, 0.8, 0.25, 1) !important;
+            transition-duration: 400ms !important;
+            transition-property: color !important;
+            box-shadow: none !important;
         }
+        [data-testid="stForm"] .stFormSubmitButton > button:focus,
         [data-testid="stForm"] .stFormSubmitButton > button:hover,
-        [data-testid="stForm"] .stFormSubmitButton button:hover,
         button[data-testid="stBaseButton-secondaryFormSubmit"]:hover {
-            background: linear-gradient(145deg, #27d98a, #1fb370) !important;
-            border-radius: 8px !important;
-            box-shadow: 
-                8px 8px 16px rgba(35, 196, 131, 0.3),
-                -4px -4px 12px rgba(255, 255, 255, 0.6),
-                inset 1px 1px 2px rgba(255, 255, 255, 0.3) !important;
-            color: #fff !important;
-            transform: translateY(-4px) scale(1.02) !important;
+            color: #23c483 !important;
+            background: none !important;
+            background-color: transparent !important;
+            box-shadow: none !important;
+            transform: none !important;
         }
-        [data-testid="stForm"] .stFormSubmitButton > button:active,
-        [data-testid="stForm"] .stFormSubmitButton button:active,
-        button[data-testid="stBaseButton-secondaryFormSubmit"]:active {
-            transform: translateY(1px) scale(0.98) !important;
-            border-radius: 8px !important;
-            box-shadow: 
-                2px 2px 6px rgba(0, 0, 0, 0.2),
-                inset 2px 2px 4px rgba(0, 0, 0, 0.1) !important;
+        [data-testid="stForm"] .stFormSubmitButton > button::after,
+        button[data-testid="stBaseButton-secondaryFormSubmit"]::after {
+            content: "" !important;
+            pointer-events: none;
+            bottom: 8px;
+            left: 50%;
+            position: absolute;
+            width: 0%;
+            height: 2px;
+            background-color: #23c483 !important;
+            transition-timing-function: cubic-bezier(0.25, 0.8, 0.25, 1);
+            transition-duration: 400ms;
+            transition-property: width, left;
+        }
+        [data-testid="stForm"] .stFormSubmitButton > button:focus::after,
+        [data-testid="stForm"] .stFormSubmitButton > button:hover::after,
+        button[data-testid="stBaseButton-secondaryFormSubmit"]:hover::after {
+            width: 60% !important;
+            left: 20% !important;
         }
         .login-help {
             font-family: 'Aptos', 'Calibri', sans-serif !important;
