@@ -1032,26 +1032,45 @@ def render_login():
             margin-bottom: 20px;
         }
         .login-card-title h1 {
-            color: #0f172a;
+            color: #ffffff;
             font-size: 22px;
             font-weight: 600;
             margin: 0 0 4px 0;
             line-height: 1.3;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.1);
         }
         .login-card-title .subtitle {
-            color: #475569;
+            color: rgba(255,255,255,0.85);
             font-size: 13px;
             margin: 0;
         }
         .login-card-title .badge {
             display: inline-block;
-            background: rgba(37, 99, 235, 0.1);
-            color: #2563eb;
+            background: rgba(255, 255, 255, 0.25);
+            color: #ffffff;
             padding: 5px 14px;
             border-radius: 12px;
             font-size: 11px;
             font-weight: 600;
             margin-top: 10px;
+            backdrop-filter: blur(10px);
+        }
+        .login-page-wrapper .stTextInput label {
+            color: rgba(255,255,255,0.9) !important;
+        }
+        .login-page-wrapper .stTextInput > div > div > input {
+            background: rgba(255,255,255,0.85) !important;
+            border: 1px solid rgba(255,255,255,0.5) !important;
+        }
+        .login-page-wrapper .stFormSubmitButton > button {
+            background: rgba(255,255,255,0.95) !important;
+            color: #1e40af !important;
+            border: none !important;
+            font-weight: 600 !important;
+        }
+        .login-page-wrapper .stFormSubmitButton > button:hover {
+            background: #ffffff !important;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15) !important;
         }
         .login-page-wrapper {
             display: flex;
@@ -1062,11 +1081,16 @@ def render_login():
             padding: 20px;
         }
         .login-page-wrapper [data-testid="stForm"] {
-            background: rgba(255,255,255,0.92);
-            border: 1px solid #e2e8f0;
-            border-radius: 12px;
-            padding: 24px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+            background: linear-gradient(135deg, rgba(56, 189, 248, 0.25) 0%, rgba(59, 130, 246, 0.35) 50%, rgba(99, 102, 241, 0.25) 100%);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            border-radius: 20px;
+            padding: 28px;
+            box-shadow: 
+                0 8px 32px rgba(56, 189, 248, 0.15),
+                inset 0 1px 0 rgba(255, 255, 255, 0.5),
+                inset 0 -1px 0 rgba(255, 255, 255, 0.1);
             position: relative;
             overflow: hidden;
         }
@@ -1077,11 +1101,10 @@ def render_login():
             left: 0;
             right: 0;
             bottom: 0;
-            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)' opacity='.35'/%3E%3C/svg%3E");
-            opacity: 0.045;
-            mix-blend-mode: overlay;
+            background: linear-gradient(180deg, rgba(255,255,255,0.3) 0%, rgba(255,255,255,0) 50%);
             pointer-events: none;
             z-index: 0;
+            border-radius: 20px;
         }
         .login-page-wrapper [data-testid="stForm"] > * {
             position: relative;
