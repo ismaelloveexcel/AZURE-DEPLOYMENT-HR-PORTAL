@@ -1945,15 +1945,6 @@ def render_confirmation_section(employee_data, staff_number):
             """, unsafe_allow_html=True)
         return
     
-    st.markdown("""
-    <div class="glass-card">
-        <div class="card-title">✔️ Confirmation</div>
-        <p style="color: #b5bcd9; font-size: 1em; margin-bottom: 20px; line-height: 1.5;">
-            Please review the information above. Once you've completed any missing fields, confirm below.
-        </p>
-    </div>
-    """, unsafe_allow_html=True)
-    
     confirm_checkbox = st.checkbox(
         "I hereby confirm that all the information displayed for myself and my dependents is accurate and complete.",
         key="confirm_checkbox"
