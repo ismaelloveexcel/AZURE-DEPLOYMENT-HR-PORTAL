@@ -112,8 +112,8 @@ CUSTOM_CSS = """
     
     .login-card .policy-tag {
         display: inline-block;
-        background: rgba(37, 99, 235, 0.1);
-        color: #2563eb;
+        background: rgba(35, 196, 131, 0.1);
+        color: #23c483;
         padding: 6px 14px;
         border-radius: 16px;
         font-size: 12px;
@@ -128,7 +128,7 @@ CUSTOM_CSS = """
     }
     
     .login-help a {
-        color: #22c55e;
+        color: #23c483;
         text-decoration: none;
         font-weight: 600;
     }
@@ -276,6 +276,87 @@ CUSTOM_CSS = """
         gap: 6px;
     }
     
+    .minimal-header {
+        background: rgba(255, 255, 255, 0.85);
+        backdrop-filter: blur(10px);
+        border-radius: 12px;
+        padding: 16px 20px;
+        margin-bottom: 14px;
+        border: 1px solid #e2e8f0;
+        box-shadow: 0 2px 10px rgba(15, 23, 42, 0.05);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    
+    .header-left-section {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+    }
+    
+    .header-logo-img {
+        width: 40px;
+        height: 40px;
+        border-radius: 8px;
+        object-fit: contain;
+    }
+    
+    .header-logo-placeholder {
+        font-size: 28px;
+    }
+    
+    .header-info {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+    }
+    
+    .header-title-text {
+        color: #64748b;
+        font-size: 14px;
+        font-weight: 500;
+    }
+    
+    .header-subtitle-text {
+        color: #94a3b8;
+        font-size: 11px;
+        font-weight: 400;
+    }
+    
+    .header-right-section {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+    }
+    
+    .header-policy-badge {
+        background: rgba(35, 196, 131, 0.1);
+        border: 1px solid rgba(35, 196, 131, 0.3);
+        color: #23c483;
+        padding: 6px 14px;
+        border-radius: 16px;
+        font-size: 11px;
+        font-weight: 500;
+        text-transform: uppercase;
+        letter-spacing: 0.3px;
+    }
+    
+    .header-user-info {
+        text-align: right;
+    }
+    
+    .header-user-name {
+        color: #64748b;
+        font-size: 13px;
+        font-weight: 500;
+    }
+    
+    .header-user-id {
+        color: #94a3b8;
+        font-size: 11px;
+    }
+    
     .glass-card {
         background: rgba(255, 255, 255, 0.85);
         backdrop-filter: blur(10px);
@@ -358,8 +439,8 @@ CUSTOM_CSS = """
     }
     
     .badge-principal {
-        background: rgba(37, 99, 235, 0.1);
-        color: #2563eb;
+        background: rgba(35, 196, 131, 0.1);
+        color: #23c483;
     }
     
     .badge-spouse {
@@ -538,13 +619,13 @@ CUSTOM_CSS = """
     }
     
     .radio-option:hover {
-        border-color: #2563eb;
-        background: rgba(37, 99, 235, 0.04);
+        border-color: #23c483;
+        background: rgba(35, 196, 131, 0.04);
     }
     
     .radio-option.selected {
-        border-color: #2563eb;
-        background: rgba(37, 99, 235, 0.08);
+        border-color: #23c483;
+        background: rgba(35, 196, 131, 0.08);
     }
     
     .success-message {
@@ -644,7 +725,7 @@ CUSTOM_CSS = """
     .login-logo {
         width: 40px;
         height: 40px;
-        background: #2563eb;
+        background: #23c483;
         border-radius: 12px;
         margin: 0 auto 14px;
         display: flex;
@@ -689,8 +770,8 @@ CUSTOM_CSS = """
     
     .login-badge {
         display: inline-block;
-        background: rgba(37, 99, 235, 0.1);
-        color: #2563eb;
+        background: rgba(35, 196, 131, 0.1);
+        color: #23c483;
         padding: 5px 14px;
         border-radius: 14px;
         font-size: 11px;
@@ -699,7 +780,7 @@ CUSTOM_CSS = """
     }
     
     .stButton > button {
-        background: #2563eb;
+        background: #23c483;
         color: white;
         border: none;
         padding: 10px 20px;
@@ -711,12 +792,12 @@ CUSTOM_CSS = """
         width: 100%;
         transition: all 0.2s ease;
         font-family: 'Inter', sans-serif;
-        box-shadow: 0 2px 6px rgba(37, 99, 235, 0.2);
+        box-shadow: 0 2px 6px rgba(35, 196, 131, 0.2);
     }
     
     .stButton > button:hover {
-        background: #1d4ed8;
-        box-shadow: 0 3px 10px rgba(37, 99, 235, 0.3);
+        background: #1ea76f;
+        box-shadow: 0 3px 10px rgba(35, 196, 131, 0.3);
     }
     
     .signout-btn button {
@@ -813,12 +894,12 @@ CUSTOM_CSS = """
     .stTextInput label {
         font-size: 12px !important;
         margin-bottom: 4px !important;
-        color: #334155 !important;
+        color: #64748b !important;
     }
     
     .stTextInput > div > div > input:focus {
-        border-color: #2563eb;
-        box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.15);
+        border-color: #23c483;
+        box-shadow: 0 0 0 2px rgba(35, 196, 131, 0.15);
         background: #ffffff !important;
     }
     
@@ -831,7 +912,7 @@ CUSTOM_CSS = """
     
     .stSelectbox label {
         font-size: 12px !important;
-        color: #334155 !important;
+        color: #64748b !important;
     }
     
     .stTextArea > div > div > textarea {
@@ -845,12 +926,12 @@ CUSTOM_CSS = """
     
     .stTextArea label {
         font-size: 12px !important;
-        color: #334155 !important;
+        color: #64748b !important;
     }
     
     .stTextArea > div > div > textarea:focus {
-        border-color: #2563eb;
-        box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.15);
+        border-color: #23c483;
+        box-shadow: 0 0 0 2px rgba(35, 196, 131, 0.15);
         background: #ffffff !important;
     }
     
@@ -1434,8 +1515,8 @@ def render_login():
         }
         .login-page-header .badge {
             display: inline-block;
-            background: rgba(37, 99, 235, 0.1);
-            color: #2563eb;
+            background: rgba(35, 196, 131, 0.1);
+            color: #23c483;
             padding: 6px 16px;
             border-radius: 14px;
             font-size: 12px;
@@ -1449,7 +1530,7 @@ def render_login():
             color: #64748b;
         }
         .login-help a {
-            color: #25D366;
+            color: #23c483;
             text-decoration: none;
             font-weight: 600;
         }
@@ -1920,7 +2001,7 @@ def render_covered_members(employee_data, staff_number):
                     if new_passport and new_passport.strip():
                         direct_inputs["Passport number"] = new_passport.strip()
         
-        st.markdown('<div class="edit-section-header" style="color: #2563eb;">Update Information</div>', unsafe_allow_html=True)
+        st.markdown('<div class="edit-section-header" style="color: #23c483;">Update Information</div>', unsafe_allow_html=True)
         
         update_cols = st.columns(3)
         with update_cols[0]:
@@ -2064,13 +2145,34 @@ def render_dashboard():
     
     col1, col2, col3 = st.columns([1, 2.5, 1])
     with col2:
+        # Minimal header inside the content column (aligned with cards)
+        logo_html = f'<img src="data:image/png;base64,{LOGO_BASE64}" alt="Baynunah" class="header-logo-img">' if LOGO_BASE64 else '<span class="header-logo-placeholder">🏥</span>'
+        st.markdown(f"""
+        <div class="minimal-header">
+            <div class="header-left-section">
+                {logo_html}
+                <div class="header-info">
+                    <div class="header-title-text">Medical Insurance Verification</div>
+                    <div class="header-subtitle-text">Insured by DAMAN</div>
+                </div>
+            </div>
+            <div class="header-right-section">
+                <div class="header-policy-badge">Policy {POLICY_YEAR}</div>
+                <div class="header-user-info">
+                    <div class="header-user-name">{principal_name}</div>
+                    <div class="header-user-id">{staff_number}</div>
+                </div>
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
+        
         render_employee_snapshot(principal, staff_number)
         render_covered_members(employee_data, staff_number)
         render_confirmation_section(employee_data, staff_number)
         
         st.markdown("""
-        <div style="text-align: center; margin-top: 30px; padding: 16px; color: #999; font-size: 13px;">
-            Need help? <a href="https://wa.me/971564966546" target="_blank" style="color: #25D366; text-decoration: none; font-weight: 600;">WhatsApp HR Support</a>
+        <div style="text-align: center; margin-top: 30px; padding: 16px; color: #94a3b8; font-size: 13px;">
+            Need help? <a href="https://wa.me/971564966546" target="_blank" style="color: #23c483; text-decoration: none; font-weight: 500;">WhatsApp HR Support</a>
         </div>
         """, unsafe_allow_html=True)
         
