@@ -1014,15 +1014,21 @@ def render_login():
             0%, 100% { transform: translateY(0px); }
             50% { transform: translateY(-8px); }
         }
+        @keyframes icon-float {
+            0%, 100% { transform: translateY(0px) scale(1); }
+            50% { transform: translateY(-6px) scale(1.02); }
+        }
         @keyframes gentle-pulse {
             0%, 100% { transform: scale(1); filter: drop-shadow(0 0 0 rgba(35, 196, 131, 0)); }
             50% { transform: scale(1.05); filter: drop-shadow(0 0 8px rgba(35, 196, 131, 0.3)); }
         }
         .app-icon {
+            animation: icon-float 3s ease-in-out infinite;
             transition: all 0.3s ease;
         }
         .app-icon:hover {
             animation: gentle-pulse 1.5s ease-in-out infinite;
+            filter: drop-shadow(0 6px 12px rgba(35, 196, 131, 0.35));
         }
         @keyframes spin {
             0% { transform: translate(-50%, -50%) rotate(90deg) translate(3em) rotate(-90deg); }
@@ -1369,7 +1375,7 @@ def render_login():
     """, unsafe_allow_html=True)
     
     logo_html = f'<img src="data:image/png;base64,{LOGO_BASE64}" alt="Baynunah" style="width:130px;height:auto;display:block;margin:0 auto 10px;">' if LOGO_BASE64 else ''
-    app_icon_html = f'<img src="data:image/gif;base64,{APP_ICON_BASE64}" alt="Insurance" class="app-icon" style="width:50px;height:50px;display:block;margin:0 auto 8px;border-radius:8px;cursor:pointer;">' if APP_ICON_BASE64 else ''
+    app_icon_html = f'<img src="data:image/gif;base64,{APP_ICON_BASE64}" alt="Insurance" class="app-icon" style="width:70px;height:70px;display:block;margin:0 auto 12px;border-radius:10px;cursor:pointer;">' if APP_ICON_BASE64 else ''
     
     st.markdown('<div class="login-page-wrapper">', unsafe_allow_html=True)
     
