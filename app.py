@@ -1215,18 +1215,19 @@ def render_login():
         }
         [data-testid="stForm"] .stFormSubmitButton > button,
         [data-testid="stForm"] .stFormSubmitButton button,
+        [data-testid="stForm"] button,
         button[data-testid="stBaseButton-secondaryFormSubmit"] {
-            font-size: 13px !important;
+            font-size: 14px !important;
             color: #0f172a !important;
             font-family: 'Aptos', 'Calibri', sans-serif !important;
-            font-weight: 600 !important;
+            font-weight: 700 !important;
             cursor: pointer;
             position: relative;
             border: none !important;
             background: none !important;
             background-color: transparent !important;
             text-transform: uppercase !important;
-            letter-spacing: 1.5px !important;
+            letter-spacing: 1px !important;
             padding: 12px 24px !important;
             transition-timing-function: cubic-bezier(0.25, 0.8, 0.25, 1) !important;
             transition-duration: 400ms !important;
