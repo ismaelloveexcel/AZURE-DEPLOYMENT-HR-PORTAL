@@ -22,7 +22,16 @@ def get_logo_base64():
             return base64.b64encode(f.read()).decode()
     return None
 
+@st.cache_resource
+def get_app_icon_base64():
+    icon_path = "attached_assets/Untitled_design_(7)_1766743946677.gif"
+    if os.path.exists(icon_path):
+        with open(icon_path, "rb") as f:
+            return base64.b64encode(f.read()).decode()
+    return None
+
 LOGO_BASE64 = get_logo_base64()
+APP_ICON_BASE64 = get_app_icon_base64()
 
 st.set_page_config(
     page_title="Medical Insurance Verification | Baynunah",
@@ -1283,7 +1292,8 @@ def render_login():
     </style>
     """, unsafe_allow_html=True)
     
-    logo_html = f'<img src="data:image/png;base64,{LOGO_BASE64}" alt="Baynunah" style="width:180px;height:auto;display:block;margin:0 auto 20px;">' if LOGO_BASE64 else ''
+    logo_html = f'<img src="data:image/png;base64,{LOGO_BASE64}" alt="Baynunah" style="width:180px;height:auto;display:block;margin:0 auto 16px;">' if LOGO_BASE64 else ''
+    app_icon_html = f'<img src="data:image/gif;base64,{APP_ICON_BASE64}" alt="Insurance" style="width:70px;height:70px;display:block;margin:0 auto 12px;border-radius:12px;">' if APP_ICON_BASE64 else ''
     
     st.markdown('<div class="login-page-wrapper">', unsafe_allow_html=True)
     
@@ -1293,6 +1303,7 @@ def render_login():
             st.markdown(f"""
             <div class="login-card-title">
                 {logo_html}
+                {app_icon_html}
                 <h1>Medical Insurance<br>Verification</h1>
                 <span class="badge">Policy Year {POLICY_YEAR}</span>
             </div>
