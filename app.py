@@ -1159,15 +1159,15 @@ def render_login():
             text-transform: uppercase;
         }
         [data-testid="stForm"] .stTextInput label {
-            color: #0f172a !important;
+            color: #64748b !important;
             font-family: 'Inter', sans-serif !important;
-            font-weight: 700 !important;
+            font-weight: 500 !important;
             font-size: 14px !important;
             margin-bottom: 6px !important;
         }
         [data-testid="stForm"] .stTextInput label p {
-            color: #0f172a !important;
-            font-weight: 700 !important;
+            color: #64748b !important;
+            font-weight: 500 !important;
         }
         [data-testid="stForm"] .stTextInput > div > div > input {
             border: none !important;
