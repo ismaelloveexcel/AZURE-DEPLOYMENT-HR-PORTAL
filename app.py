@@ -1166,14 +1166,14 @@ def render_login():
         [data-testid="stForm"] .stTextInput > div > div > input {
             border: none !important;
             outline: none !important;
-            border-radius: 45px !important;
-            padding: 14px 20px !important;
+            border-radius: 8px !important;
+            padding: 1.1em 1.2em !important;
             background-color: #e8edf3 !important;
             box-shadow: inset 1px 2px 4px rgba(0,0,0,0.06) !important;
             transition: all 0.3s ease !important;
             color: #0f172a !important;
             font-family: 'Aptos', 'Calibri', sans-serif !important;
-            font-size: 13px !important;
+            font-size: 12px !important;
             line-height: 1.4 !important;
         }
         [data-testid="stForm"] .stTextInput > div > div > input:focus {
