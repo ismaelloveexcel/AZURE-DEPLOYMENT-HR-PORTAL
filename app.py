@@ -16,7 +16,7 @@ initialize_database()
 
 @st.cache_resource
 def get_logo_base64():
-    logo_path = "attached_assets/Untitled_design_(7)_1766689233925.gif"
+    logo_path = "attached_assets/logo_1765648544636_1766742634201.png"
     if os.path.exists(logo_path):
         with open(logo_path, "rb") as f:
             return base64.b64encode(f.read()).decode()
@@ -1008,17 +1008,17 @@ def render_login():
         [data-testid="stAppViewBlockContainer"] {
             padding-top: 0 !important;
             padding-bottom: 0 !important;
-            background: #b4b4b4 !important;
+            background: linear-gradient(145deg, #a8b5c4 0%, #9ca8b8 50%, #8e9bab 100%) !important;
             min-height: 100vh;
         }
         [data-testid="stMainBlockContainer"] {
-            background: #b4b4b4 !important;
+            background: transparent !important;
         }
         .stApp {
-            background: #b4b4b4 !important;
+            background: linear-gradient(145deg, #a8b5c4 0%, #9ca8b8 50%, #8e9bab 100%) !important;
         }
         [data-testid="stVerticalBlock"] {
-            gap: 0.5rem !important;
+            gap: 0.3rem !important;
         }
         .login-glass-card {
             background: rgba(255,255,255,0.92);
@@ -1076,24 +1076,24 @@ def render_login():
         [data-testid="stForm"] .stTextInput > div > div > input {
             border: none !important;
             outline: none !important;
-            border-radius: 15px !important;
-            padding: 1.2em 1em !important;
-            height: 50px !important;
-            background-color: #ccc !important;
-            box-shadow: inset 2px 5px 10px rgba(0,0,0,0.3) !important;
+            border-radius: 12px !important;
+            padding: 14px 16px !important;
+            height: 48px !important;
+            background-color: #e8edf3 !important;
+            box-shadow: inset 1px 2px 4px rgba(0,0,0,0.08) !important;
             transition: 300ms ease-in-out !important;
             color: #0f172a !important;
             font-family: 'Aptos', 'Calibri', sans-serif !important;
             font-size: 14px !important;
         }
         [data-testid="stForm"] .stTextInput > div > div > input:focus {
-            background-color: white !important;
-            transform: scale(1.05) !important;
-            box-shadow: 13px 13px 100px #969696,
-                       -13px -13px 100px #ffffff !important;
+            background-color: #ffffff !important;
+            transform: scale(1.02) !important;
+            box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.15),
+                       inset 0 1px 2px rgba(0,0,0,0.05) !important;
         }
         [data-testid="stForm"] .stTextInput > div > div > input::placeholder {
-            color: #666 !important;
+            color: #94a3b8 !important;
         }
         [data-testid="stForm"] .stFormSubmitButton {
             position: relative;
@@ -1168,22 +1168,22 @@ def render_login():
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            min-height: 70vh;
-            padding: 20px;
+            min-height: calc(100vh - 60px);
+            padding: 10px 20px;
         }
         [data-testid="stForm"] {
             background: white !important;
             border: none !important;
             border-radius: 20px !important;
-            padding: 35px 30px !important;
+            padding: 28px 26px !important;
             box-shadow: 
-                30px 30px 50px rgba(0, 0, 0, 0.15),
-                15px 15px 30px rgba(0, 0, 0, 0.1),
-                inset -2px -2px 4px rgba(0, 0, 0, 0.02),
-                inset 2px 2px 4px rgba(255, 255, 255, 0.9) !important;
+                20px 20px 40px rgba(0, 0, 0, 0.12),
+                10px 10px 20px rgba(0, 0, 0, 0.08),
+                inset -1px -1px 3px rgba(0, 0, 0, 0.02),
+                inset 1px 1px 3px rgba(255, 255, 255, 0.9) !important;
             position: relative;
             overflow: hidden;
-            max-width: 380px;
+            max-width: 360px;
             margin: 0 auto;
         }
         [data-testid="stForm"] > * {
@@ -1268,7 +1268,7 @@ def render_login():
     </style>
     """, unsafe_allow_html=True)
     
-    logo_html = f'<img src="data:image/gif;base64,{LOGO_BASE64}" alt="Logo" style="width:100px;height:100px;display:block;margin:0 auto 16px;border-radius:12px;animation:gentle-float 3s ease-in-out infinite;filter:drop-shadow(0 2px 8px rgba(56, 189, 248, 0.2));">' if LOGO_BASE64 else ''
+    logo_html = f'<img src="data:image/png;base64,{LOGO_BASE64}" alt="Baynunah" style="width:180px;height:auto;display:block;margin:0 auto 20px;">' if LOGO_BASE64 else ''
     
     st.markdown('<div class="login-page-wrapper">', unsafe_allow_html=True)
     
@@ -1322,7 +1322,7 @@ def render_login():
     st.markdown('</div>', unsafe_allow_html=True)
 
 def render_header(principal_name, staff_number):
-    logo_html = f'<img src="data:image/gif;base64,{LOGO_BASE64}" alt="Logo" class="company-logo-img">' if LOGO_BASE64 else '<div class="company-logo">🏥</div>'
+    logo_html = f'<img src="data:image/png;base64,{LOGO_BASE64}" alt="Baynunah" class="company-logo-img">' if LOGO_BASE64 else '<div class="company-logo">🏥</div>'
     st.markdown(f"""
     <div class="main-header">
         <div class="header-content">
