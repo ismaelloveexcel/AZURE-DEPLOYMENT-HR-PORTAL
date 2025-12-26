@@ -68,11 +68,11 @@ CUSTOM_CSS = """
     .login-card {
         background: rgba(255, 255, 255, 0.9);
         backdrop-filter: blur(20px);
-        padding: 32px 28px;
-        border-radius: 20px;
-        box-shadow: 0 10px 40px rgba(15, 23, 42, 0.1);
+        padding: 24px 22px;
+        border-radius: 16px;
+        box-shadow: 0 8px 32px rgba(15, 23, 42, 0.1);
         width: 100%;
-        max-width: 340px;
+        max-width: 320px;
         text-align: center;
         border: 1px solid rgba(255, 255, 255, 0.8);
     }
@@ -126,11 +126,11 @@ CUSTOM_CSS = """
     
     .main-header {
         background: linear-gradient(135deg, #2563eb 0%, #3b82f6 100%);
-        padding: 18px 24px;
-        margin-bottom: 24px;
+        padding: 14px 18px;
+        margin-bottom: 16px;
         color: white;
-        border-radius: 16px;
-        box-shadow: 0 4px 20px rgba(37, 99, 235, 0.25);
+        border-radius: 12px;
+        box-shadow: 0 4px 16px rgba(37, 99, 235, 0.2);
     }
     
     .header-content {
@@ -229,12 +229,12 @@ CUSTOM_CSS = """
     .status-strip {
         background: rgba(255, 255, 255, 0.7);
         border-bottom: 1px solid #e2e8f0;
-        padding: 14px 28px;
-        margin: 0 -60px 24px -60px;
+        padding: 10px 20px;
+        margin: 0 -60px 14px -60px;
         display: flex;
         justify-content: center;
-        gap: 40px;
-        font-size: 13px;
+        gap: 28px;
+        font-size: 12px;
         color: #475569;
     }
     
@@ -247,82 +247,82 @@ CUSTOM_CSS = """
     .glass-card {
         background: rgba(255, 255, 255, 0.85);
         backdrop-filter: blur(10px);
-        border-radius: 16px;
-        padding: 22px;
-        margin-bottom: 20px;
+        border-radius: 12px;
+        padding: 16px;
+        margin-bottom: 14px;
         border: 1px solid #e2e8f0;
-        box-shadow: 0 4px 16px rgba(15, 23, 42, 0.06);
+        box-shadow: 0 2px 10px rgba(15, 23, 42, 0.05);
     }
     
     .card-title {
         color: #0f172a;
-        font-size: 13px;
+        font-size: 12px;
         font-weight: 600;
         text-transform: uppercase;
-        letter-spacing: 1px;
-        margin-bottom: 18px;
-        padding-bottom: 14px;
+        letter-spacing: 0.8px;
+        margin-bottom: 12px;
+        padding-bottom: 10px;
         border-bottom: 1px solid #e2e8f0;
     }
     
     .snapshot-grid {
         display: grid;
         grid-template-columns: 1fr 1fr;
-        gap: 12px 32px;
+        gap: 8px 24px;
     }
     
     .snapshot-item {
         display: flex;
         flex-direction: column;
-        gap: 3px;
+        gap: 2px;
     }
     
     .snapshot-label {
         color: #64748b;
         font-size: 11px;
         text-transform: uppercase;
-        letter-spacing: 0.5px;
+        letter-spacing: 0.4px;
         font-weight: 500;
     }
     
     .snapshot-value {
         color: #0f172a;
-        font-size: 14px;
+        font-size: 13px;
         font-weight: 500;
     }
     
     .member-card {
         background: rgba(255, 255, 255, 0.9);
         backdrop-filter: blur(10px);
-        border-radius: 16px;
-        padding: 20px;
-        margin-bottom: 20px;
+        border-radius: 12px;
+        padding: 14px;
+        margin-bottom: 14px;
         border: 1px solid #e2e8f0;
-        box-shadow: 0 4px 16px rgba(15, 23, 42, 0.06);
+        box-shadow: 0 2px 10px rgba(15, 23, 42, 0.05);
     }
     
     .member-header {
         display: flex;
         justify-content: space-between;
         align-items: center;
-        margin-bottom: 18px;
-        padding-bottom: 14px;
+        margin-bottom: 12px;
+        padding-bottom: 10px;
         border-bottom: 1px solid #e2e8f0;
     }
     
     .member-name {
         color: #0f172a;
-        font-size: 17px;
+        font-size: 15px;
         font-weight: 600;
     }
     
     .member-badge {
-        padding: 4px 12px;
-        border-radius: 12px;
+        padding: 3px 10px;
+        border-radius: 10px;
         font-size: 10px;
         font-weight: 600;
         text-transform: uppercase;
-        letter-spacing: 0.5px;
+        letter-spacing: 0.4px;
     }
     
     .badge-principal {
@@ -343,15 +343,15 @@ CUSTOM_CSS = """
     .member-details {
         display: grid;
         grid-template-columns: repeat(2, 1fr);
-        gap: 8px 20px;
+        gap: 6px 16px;
     }
     
     .member-detail-item {
         display: flex;
         justify-content: space-between;
         align-items: center;
-        font-size: 13px;
-        padding: 5px 0;
+        font-size: 12px;
+        padding: 3px 0;
     }
     
     .member-detail-label {
@@ -365,14 +365,14 @@ CUSTOM_CSS = """
     
     .missing-value {
         color: #f97316;
-        font-size: 12px;
+        font-size: 11px;
         font-weight: 600;
     }
     
     .member-divider {
         border: none;
         border-top: 1px solid #e2e8f0;
-        margin: 20px 0;
+        margin: 12px 0;
     }
     
     .missing-text {
@@ -382,36 +382,36 @@ CUSTOM_CSS = """
     
     .edit-section-header {
         color: #ea580c;
-        font-size: 12px;
+        font-size: 11px;
         font-weight: 600;
         text-transform: uppercase;
-        letter-spacing: 0.8px;
-        margin: 14px 0 10px 0;
-        padding-top: 12px;
+        letter-spacing: 0.6px;
+        margin: 10px 0 8px 0;
+        padding-top: 10px;
         border-top: 1px solid #e2e8f0;
     }
     
     .member-grid {
         display: flex;
         flex-direction: column;
-        gap: 12px;
+        gap: 8px;
     }
     
     .grid-row {
         display: grid;
         grid-template-columns: repeat(3, 1fr);
-        gap: 16px;
+        gap: 12px;
     }
     
     .grid-cell {
-        min-height: 32px;
+        min-height: 28px;
     }
     
     .field-label {
         color: #64748b;
-        font-size: 11px;
+        font-size: 10px;
         text-transform: uppercase;
-        margin-bottom: 5px;
+        margin-bottom: 3px;
         font-weight: 500;
         letter-spacing: 0.3px;
     }
@@ -419,7 +419,7 @@ CUSTOM_CSS = """
     .field-value {
         color: #0f172a;
         font-weight: 500;
-        font-size: 14px;
+        font-size: 13px;
     }
     
     .missing-field-text {
@@ -430,76 +430,76 @@ CUSTOM_CSS = """
     .missing-info-banner {
         background: rgba(249, 115, 22, 0.08);
         border-left: 3px solid #f97316;
-        border-radius: 0 10px 10px 0;
-        padding: 14px 18px;
-        margin-top: 18px;
+        border-radius: 0 8px 8px 0;
+        padding: 10px 14px;
+        margin-top: 12px;
         display: flex;
         align-items: flex-start;
-        gap: 12px;
+        gap: 10px;
     }
     
     .missing-icon {
         color: #f97316;
-        font-size: 18px;
+        font-size: 16px;
     }
     
     .missing-title {
         color: #ea580c;
         font-weight: 600;
-        font-size: 14px;
+        font-size: 13px;
     }
     
     .missing-desc {
         color: #64748b;
-        font-size: 13px;
+        font-size: 12px;
     }
     
     .inline-edit-section {
         border-top: 1px solid #e2e8f0;
-        margin-top: 16px;
-        padding-top: 14px;
+        margin-top: 12px;
+        padding-top: 10px;
     }
     
     .inline-edit-title {
         color: #ea580c;
-        font-size: 12px;
+        font-size: 11px;
         font-weight: 600;
         text-transform: uppercase;
-        letter-spacing: 0.8px;
-        margin-bottom: 12px;
+        letter-spacing: 0.6px;
+        margin-bottom: 8px;
     }
     
     .missing-banner {
         background: rgba(249, 115, 22, 0.06);
         border-left: 3px solid #f97316;
-        border-radius: 0 10px 10px 0;
-        padding: 14px 16px;
-        margin: 14px 0;
+        border-radius: 0 8px 8px 0;
+        padding: 10px 12px;
+        margin: 10px 0;
         display: flex;
         align-items: center;
-        gap: 12px;
+        gap: 10px;
         color: #ea580c;
-        font-size: 13px;
+        font-size: 12px;
     }
     
     .confirmation-card {
         background: rgba(255, 255, 255, 0.9);
         backdrop-filter: blur(10px);
-        border-radius: 16px;
-        padding: 22px;
-        margin-bottom: 20px;
+        border-radius: 12px;
+        padding: 16px;
+        margin-bottom: 14px;
         border: 1px solid #e2e8f0;
-        box-shadow: 0 4px 16px rgba(15, 23, 42, 0.06);
+        box-shadow: 0 2px 10px rgba(15, 23, 42, 0.05);
     }
     
     .radio-option {
         display: flex;
         align-items: center;
-        gap: 10px;
-        padding: 12px 14px;
+        gap: 8px;
+        padding: 10px 12px;
         border: 1px solid #e2e8f0;
-        border-radius: 10px;
-        margin-bottom: 10px;
+        border-radius: 8px;
+        margin-bottom: 8px;
         cursor: pointer;
         transition: all 0.2s;
         background: rgba(255, 255, 255, 0.6);
@@ -517,37 +517,37 @@ CUSTOM_CSS = """
     
     .success-message {
         background: rgba(16, 185, 129, 0.08);
-        border-radius: 16px;
-        padding: 32px;
+        border-radius: 12px;
+        padding: 24px;
         text-align: center;
-        margin: 20px 0;
+        margin: 14px 0;
         border: 1px solid rgba(16, 185, 129, 0.2);
     }
     
     .success-icon {
-        width: 60px;
-        height: 60px;
+        width: 48px;
+        height: 48px;
         background: rgba(16, 185, 129, 0.12);
         border-radius: 50%;
         display: flex;
         align-items: center;
         justify-content: center;
-        margin: 0 auto 18px;
-        font-size: 28px;
+        margin: 0 auto 12px;
+        font-size: 22px;
         color: #10b981;
     }
     
     .success-title {
         color: #0f172a;
-        font-size: 19px;
+        font-size: 16px;
         font-weight: 600;
-        margin-bottom: 10px;
+        margin-bottom: 6px;
     }
     
     .success-desc {
         color: #475569;
-        font-size: 14px;
-        line-height: 1.6;
+        font-size: 13px;
+        line-height: 1.5;
     }
     
     .change-log {
@@ -670,21 +670,21 @@ CUSTOM_CSS = """
         background: #2563eb;
         color: white;
         border: none;
-        padding: 12px 24px;
+        padding: 10px 20px;
         font-weight: 600;
-        font-size: 13px;
-        letter-spacing: 0.5px;
+        font-size: 12px;
+        letter-spacing: 0.4px;
         text-transform: uppercase;
-        border-radius: 10px;
+        border-radius: 8px;
         width: 100%;
         transition: all 0.2s ease;
         font-family: 'Poppins', sans-serif;
-        box-shadow: 0 2px 8px rgba(37, 99, 235, 0.25);
+        box-shadow: 0 2px 6px rgba(37, 99, 235, 0.2);
     }
     
     .stButton > button:hover {
         background: #1d4ed8;
-        box-shadow: 0 4px 12px rgba(37, 99, 235, 0.35);
+        box-shadow: 0 3px 10px rgba(37, 99, 235, 0.3);
     }
     
     .signout-btn button {
@@ -712,9 +712,9 @@ CUSTOM_CSS = """
     
     div[data-testid="stForm"] {
         background: rgba(255, 255, 255, 0.85);
-        padding: 16px;
-        border-radius: 12px;
-        box-shadow: 0 4px 16px rgba(15, 23, 42, 0.06);
+        padding: 14px;
+        border-radius: 10px;
+        box-shadow: 0 2px 10px rgba(15, 23, 42, 0.05);
         border: 1px solid #e2e8f0;
     }
     
@@ -723,73 +723,73 @@ CUSTOM_CSS = """
     }
     
     .stTextInput > div > div > input {
-        border-radius: 8px;
+        border-radius: 6px;
         border: 1px solid #e2e8f0;
-        padding: 12px 14px;
+        padding: 10px 12px;
         font-family: 'Poppins', sans-serif;
-        font-size: 14px;
+        font-size: 13px;
         background: #f8fafc !important;
         color: #0f172a !important;
     }
     
     .stTextInput label {
-        font-size: 13px !important;
-        margin-bottom: 6px !important;
+        font-size: 12px !important;
+        margin-bottom: 4px !important;
         color: #475569 !important;
     }
     
     .stTextInput > div > div > input:focus {
         border-color: #2563eb;
-        box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+        box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.1);
     }
     
     .stSelectbox > div > div {
-        border-radius: 8px;
-        font-size: 14px;
+        border-radius: 6px;
+        font-size: 13px;
         background: #f8fafc !important;
         border: 1px solid #e2e8f0 !important;
     }
     
     .stSelectbox label {
-        font-size: 13px !important;
+        font-size: 12px !important;
         color: #475569 !important;
     }
     
     .stTextArea > div > div > textarea {
-        border-radius: 8px;
+        border-radius: 6px;
         border: 1px solid #e2e8f0;
         font-family: 'Poppins', sans-serif;
-        font-size: 14px;
+        font-size: 13px;
         background: #f8fafc !important;
         color: #0f172a !important;
     }
     
     .stTextArea label {
-        font-size: 13px !important;
+        font-size: 12px !important;
         color: #475569 !important;
     }
     
     .stTextArea > div > div > textarea:focus {
         border-color: #2563eb;
-        box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+        box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.1);
     }
     
     .stRadio > div {
-        gap: 8px;
+        gap: 6px;
     }
     
     .stRadio label {
-        padding: 12px 16px !important;
-        font-size: 14px !important;
+        padding: 10px 14px !important;
+        font-size: 13px !important;
         border: 1px solid #e2e8f0 !important;
-        border-radius: 8px !important;
-        margin-bottom: 8px !important;
+        border-radius: 6px !important;
+        margin-bottom: 6px !important;
         color: #0f172a !important;
         background: #f8fafc !important;
     }
     
     .stCheckbox label {
-        font-size: 14px !important;
+        font-size: 13px !important;
         color: #0f172a !important;
     }
     
