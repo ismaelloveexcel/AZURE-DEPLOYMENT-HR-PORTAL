@@ -1020,12 +1020,72 @@ def render_login():
             background: rgba(255,255,255,0.92);
             border: 1px solid #e2e8f0;
             border-radius: 12px;
-            padding: 24px;
-            max-width: 340px;
+            padding: 28px 24px;
+            max-width: 360px;
             margin: 0 auto;
             box-shadow: 0 1px 3px rgba(0,0,0,0.08);
             position: relative;
             overflow: hidden;
+        }
+        .login-card-title {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .login-card-title h1 {
+            color: #0f172a;
+            font-size: 22px;
+            font-weight: 600;
+            margin: 0 0 4px 0;
+            line-height: 1.3;
+        }
+        .login-card-title .subtitle {
+            color: #475569;
+            font-size: 13px;
+            margin: 0;
+        }
+        .login-card-title .badge {
+            display: inline-block;
+            background: rgba(37, 99, 235, 0.1);
+            color: #2563eb;
+            padding: 5px 14px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 600;
+            margin-top: 10px;
+        }
+        .login-page-wrapper {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 70vh;
+            padding: 20px;
+        }
+        .login-page-wrapper [data-testid="stForm"] {
+            background: rgba(255,255,255,0.92);
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+            position: relative;
+            overflow: hidden;
+        }
+        .login-page-wrapper [data-testid="stForm"]::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)' opacity='.35'/%3E%3C/svg%3E");
+            opacity: 0.045;
+            mix-blend-mode: overlay;
+            pointer-events: none;
+            z-index: 0;
+        }
+        .login-page-wrapper [data-testid="stForm"] > * {
+            position: relative;
+            z-index: 1;
         }
         .login-glass-card::before {
             content: "";
@@ -1105,21 +1165,21 @@ def render_login():
     </style>
     """, unsafe_allow_html=True)
     
-    logo_html = f'<img src="data:image/gif;base64,{LOGO_BASE64}" alt="Logo" style="width:56px;height:56px;display:block;margin:0 auto 12px;border-radius:10px;">' if LOGO_BASE64 else ''
+    logo_html = f'<img src="data:image/gif;base64,{LOGO_BASE64}" alt="Logo" style="width:48px;height:48px;display:block;margin:0 auto 10px;border-radius:8px;">' if LOGO_BASE64 else ''
     
-    st.markdown(f"""
-    <div class="login-page-header">
-        {logo_html}
-        <h1>Medical Insurance<br>Verification</h1>
-        <p class="subtitle">Employee Self-Service Portal</p>
-        <span class="badge">Policy Year {POLICY_YEAR}</span>
-    </div>
-    """, unsafe_allow_html=True)
+    st.markdown('<div class="login-page-wrapper">', unsafe_allow_html=True)
     
-    col1, col2, col3 = st.columns([1, 1.8, 1])
+    col1, col2, col3 = st.columns([1, 2, 1])
     with col2:
-        st.markdown('<div class="login-glass-card">', unsafe_allow_html=True)
         with st.form("login_form"):
+            st.markdown(f"""
+            <div class="login-card-title">
+                {logo_html}
+                <h1>Medical Insurance<br>Verification</h1>
+                <p class="subtitle">Employee Self-Service Portal</p>
+                <span class="badge">Policy Year {POLICY_YEAR}</span>
+            </div>
+            """, unsafe_allow_html=True)
             staff_number = st.text_input(
                 "Staff Number",
                 placeholder="e.g., BAYN00001",
@@ -1150,13 +1210,14 @@ def render_login():
                         st.rerun()
                     else:
                         st.error(error_msg)
-        st.markdown('</div>', unsafe_allow_html=True)
         
         st.markdown("""
         <div class="login-help">
             Need help? <a href="https://wa.me/971564966546" target="_blank">WhatsApp HR</a>
         </div>
         """, unsafe_allow_html=True)
+    
+    st.markdown('</div>', unsafe_allow_html=True)
 
 def render_header(principal_name, staff_number):
     logo_html = f'<img src="data:image/gif;base64,{LOGO_BASE64}" alt="Logo" class="company-logo-img">' if LOGO_BASE64 else '<div class="company-logo">🏥</div>'
