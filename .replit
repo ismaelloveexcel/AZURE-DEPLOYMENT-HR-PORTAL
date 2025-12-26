@@ -39,3 +39,5 @@ externalPort = 80
 
 [userenv.shared]
 ADMIN_PASSWORD = "admin2026"
+STREAMLIT_SERVER_ENABLE_XSRF_PROTECTION = "false"
+STREAMLIT_SERVER_ENABLE_CORS = "false"
