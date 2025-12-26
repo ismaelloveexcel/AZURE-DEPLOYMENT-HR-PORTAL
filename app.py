@@ -1062,18 +1062,18 @@ def render_login():
             margin-top: 10px;
             backdrop-filter: blur(10px);
         }
-        .login-page-wrapper .stTextInput label {
+        [data-testid="stForm"] .stTextInput label {
             color: #0f172a !important;
             font-family: 'Aptos', 'Calibri', sans-serif !important;
             font-weight: 700 !important;
             font-size: 14px !important;
             margin-bottom: 6px !important;
         }
-        .login-page-wrapper .stTextInput label p {
+        [data-testid="stForm"] .stTextInput label p {
             color: #0f172a !important;
             font-weight: 700 !important;
         }
-        .login-page-wrapper .stTextInput > div > div > input {
+        [data-testid="stForm"] .stTextInput > div > div > input {
             background: #f0f4f8 !important;
             border: 1px solid #e2e8f0 !important;
             border-radius: 10px !important;
@@ -1083,15 +1083,15 @@ def render_login():
             font-size: 14px !important;
             transition: all 0.2s ease !important;
         }
-        .login-page-wrapper .stTextInput > div > div > input:focus {
+        [data-testid="stForm"] .stTextInput > div > div > input:focus {
             border-color: #3b82f6 !important;
             box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1) !important;
             background: #ffffff !important;
         }
-        .login-page-wrapper .stTextInput > div > div > input::placeholder {
+        [data-testid="stForm"] .stTextInput > div > div > input::placeholder {
             color: #94a3b8 !important;
         }
-        .login-page-wrapper .stFormSubmitButton > button {
+        [data-testid="stForm"] .stFormSubmitButton > button {
             background: #f0f4f8 !important;
             color: #0f172a !important;
             border: 1px solid #e2e8f0 !important;
@@ -1103,7 +1103,7 @@ def render_login():
             transition: all 0.2s ease !important;
             margin-top: 8px !important;
         }
-        .login-page-wrapper .stFormSubmitButton > button:hover {
+        [data-testid="stForm"] .stFormSubmitButton > button:hover {
             background: #e2e8f0 !important;
             border-color: #cbd5e1 !important;
             box-shadow: 0 2px 8px rgba(0,0,0,0.08) !important;
@@ -1123,22 +1123,22 @@ def render_login():
             min-height: 70vh;
             padding: 20px;
         }
-        .login-page-wrapper [data-testid="stForm"] {
-            background: white;
-            border: none;
-            border-radius: 20px;
-            padding: 35px 30px;
+        [data-testid="stForm"] {
+            background: white !important;
+            border: none !important;
+            border-radius: 20px !important;
+            padding: 35px 30px !important;
             box-shadow: 
                 30px 30px 50px rgba(0, 0, 0, 0.15),
                 15px 15px 30px rgba(0, 0, 0, 0.1),
                 inset -2px -2px 4px rgba(0, 0, 0, 0.02),
-                inset 2px 2px 4px rgba(255, 255, 255, 0.9);
+                inset 2px 2px 4px rgba(255, 255, 255, 0.9) !important;
             position: relative;
             overflow: hidden;
             max-width: 380px;
             margin: 0 auto;
         }
-        .login-page-wrapper [data-testid="stForm"] > * {
+        [data-testid="stForm"] > * {
             position: relative;
             z-index: 1;
         }
