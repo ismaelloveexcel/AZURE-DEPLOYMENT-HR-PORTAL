@@ -57,8 +57,8 @@ LOGO_BASE64 = get_logo_base64()
 APP_ICON_BASE64 = get_app_icon_base64()
 
 st.set_page_config(
-    page_title="Medical Insurance Verification | Baynunah",
-    page_icon="🏥",
+    page_title="HR Portal | Baynunah",
+    page_icon="🏢",
     layout="wide",
     initial_sidebar_state="collapsed"
 )
@@ -1491,6 +1491,204 @@ def format_field(value):
 def check_link_expired():
     return datetime.now() > RENEWAL_DEADLINE
 
+LANDING_PAGE_CSS = """
+<style>
+    .landing-container {
+        max-width: 900px;
+        margin: 0 auto;
+        padding: 40px 20px;
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+    }
+    
+    .landing-header {
+        text-align: center;
+        margin-bottom: 40px;
+    }
+    
+    .landing-logo {
+        width: 120px;
+        height: auto;
+        margin-bottom: 20px;
+    }
+    
+    .landing-title {
+        font-size: 32px;
+        font-weight: 800;
+        color: #0B1F3B;
+        margin: 0 0 8px 0;
+        font-family: Inter, sans-serif;
+    }
+    
+    .landing-subtitle {
+        font-size: 16px;
+        color: #64748B;
+        margin: 0;
+        font-family: Inter, sans-serif;
+    }
+    
+    .apps-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 24px;
+        margin-top: 20px;
+    }
+    
+    .app-card {
+        background: rgba(255,255,255,0.95);
+        border: 1px solid rgba(15,23,42,0.08);
+        border-radius: 16px;
+        padding: 28px;
+        text-align: center;
+        transition: all 0.3s ease;
+        cursor: pointer;
+        text-decoration: none;
+        display: block;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+    }
+    
+    .app-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 12px 40px rgba(33,193,122,0.15);
+        border-color: rgba(33,193,122,0.3);
+    }
+    
+    .app-card-icon {
+        font-size: 48px;
+        margin-bottom: 16px;
+        display: block;
+    }
+    
+    .app-card-icon img {
+        width: 64px;
+        height: 64px;
+        object-fit: contain;
+    }
+    
+    .app-card-title {
+        font-size: 20px;
+        font-weight: 700;
+        color: #0B1F3B;
+        margin: 0 0 8px 0;
+        font-family: Inter, sans-serif;
+    }
+    
+    .app-card-description {
+        font-size: 14px;
+        color: #64748B;
+        margin: 0 0 16px 0;
+        line-height: 1.5;
+        font-family: Inter, sans-serif;
+    }
+    
+    .app-card-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 6px 12px;
+        border-radius: 999px;
+        background: rgba(33,193,122,0.12);
+        color: #0E5F3D;
+        font-size: 12px;
+        font-weight: 600;
+        font-family: Inter, sans-serif;
+    }
+    
+    .app-card-coming-soon {
+        background: rgba(148,163,184,0.15);
+        color: #64748B;
+    }
+    
+    .app-card-disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+    }
+    
+    .app-card-disabled:hover {
+        transform: none;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+        border-color: rgba(15,23,42,0.08);
+    }
+    
+    .landing-footer {
+        text-align: center;
+        margin-top: auto;
+        padding-top: 40px;
+        color: #94a3b8;
+        font-size: 13px;
+        font-family: Inter, sans-serif;
+    }
+    
+    .landing-footer a {
+        color: #21C17A;
+        text-decoration: none;
+        font-weight: 500;
+    }
+</style>
+"""
+
+def render_landing_page():
+    st.markdown(CUSTOM_CSS, unsafe_allow_html=True)
+    st.markdown(LANDING_PAGE_CSS, unsafe_allow_html=True)
+    
+    logo_html = ""
+    if LOGO_BASE64:
+        logo_html = '<img src="data:image/png;base64,' + LOGO_BASE64 + '" alt="Baynunah" class="landing-logo">'
+    else:
+        logo_html = '<div style="font-size: 64px; margin-bottom: 20px;">🏢</div>'
+    
+    icon_html = ""
+    if APP_ICON_BASE64:
+        icon_html = '<img src="data:image/gif;base64,' + APP_ICON_BASE64 + '" alt="Insurance">'
+    else:
+        icon_html = "🏥"
+    
+    html_content = """
+    <div class="landing-container">
+        <div class="landing-header">
+            """ + logo_html + """
+            <h1 class="landing-title">HR Self-Service Portal</h1>
+            <p class="landing-subtitle">Access employee services and resources</p>
+        </div>
+        
+        <div class="apps-grid">
+            <a href="?app=insurance" class="app-card">
+                <span class="app-card-icon">""" + icon_html + """</span>
+                <h3 class="app-card-title">Medical Insurance</h3>
+                <p class="app-card-description">Review and verify your DAMAN medical insurance details for Policy Year 2026</p>
+                <span class="app-card-badge">Deadline: Jan 31, 2026</span>
+            </a>
+            
+            <div class="app-card app-card-disabled">
+                <span class="app-card-icon">📋</span>
+                <h3 class="app-card-title">Leave Management</h3>
+                <p class="app-card-description">Submit and track leave requests, view leave balance</p>
+                <span class="app-card-badge app-card-coming-soon">Coming Soon</span>
+            </div>
+            
+            <div class="app-card app-card-disabled">
+                <span class="app-card-icon">📄</span>
+                <h3 class="app-card-title">Documents</h3>
+                <p class="app-card-description">Request salary certificates, NOC letters, and other documents</p>
+                <span class="app-card-badge app-card-coming-soon">Coming Soon</span>
+            </div>
+            
+            <div class="app-card app-card-disabled">
+                <span class="app-card-icon">💰</span>
+                <h3 class="app-card-title">Payslips</h3>
+                <p class="app-card-description">View and download your monthly payslips</p>
+                <span class="app-card-badge app-card-coming-soon">Coming Soon</span>
+            </div>
+        </div>
+        
+        <div class="landing-footer">
+            Need help? <a href="https://wa.me/971564966546" target="_blank">WhatsApp HR Support</a>
+        </div>
+    </div>
+    """
+    st.markdown(html_content, unsafe_allow_html=True)
+
 def render_expired_page():
     st.markdown(CUSTOM_CSS, unsafe_allow_html=True)
     st.markdown("""
@@ -2799,6 +2997,10 @@ def get_query_params():
 def main():
     query_params = get_query_params()
     is_admin = query_params.get('admin') == 'true' or (isinstance(query_params.get('admin'), list) and 'true' in query_params.get('admin', []))
+    app_param = query_params.get('app', '')
+    if isinstance(app_param, list):
+        app_param = app_param[0] if app_param else ''
+    is_insurance = app_param == 'insurance'
     
     if 'authenticated' not in st.session_state:
         st.session_state['authenticated'] = False
@@ -2825,7 +3027,7 @@ def main():
             render_admin_portal()
         else:
             render_admin_login()
-    else:
+    elif is_insurance:
         if check_link_expired():
             render_expired_page()
             return
@@ -2834,6 +3036,8 @@ def main():
             render_dashboard()
         else:
             render_login()
+    else:
+        render_landing_page()
 
 if __name__ == "__main__":
     main()
