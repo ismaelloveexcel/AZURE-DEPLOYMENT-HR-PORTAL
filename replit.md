@@ -39,8 +39,11 @@ A secure HR portal landing page for Baynunah Group with admin-restricted access.
 ### Admin Portal
 - Password protected access
 - Environment variable: `ADMIN_PASSWORD` (default: admin2026)
-- HR contact information displayed after authentication
 - Sign out functionality
+- Subfolder structure:
+  - **Insurance Renewal 2026**
+    - Life Insurance
+    - Medical Insurance
 
 ### Coming Soon Pages
 - Employees, Onboarding, External Users sections show placeholder
