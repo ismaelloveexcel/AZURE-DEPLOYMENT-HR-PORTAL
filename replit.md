@@ -1,96 +1,72 @@
-# Medical Insurance Renewal - Employee Verification Portal
+# Baynunah HR Portal - Landing Page
 
 ## Overview
-A secure employee self-service portal for medical insurance renewal verification. Employees authenticate with Staff Number + Date of Birth to review their insurance details and either confirm accuracy OR submit correction requests.
+A secure HR portal landing page for Baynunah Group with admin-restricted access. Features 4 category sections with neumorphism-styled buttons.
 
 ## Current State
-- **Status**: Complete and functional
-- **Last Updated**: December 25, 2025
-- **Policy Year**: 2026
-- **Verification Deadline**: January 31, 2026
+- **Status**: Production-ready
+- **Last Updated**: December 29, 2025
+- **Custom Domain**: hr.baynunah.ae (configured separately)
 
 ## Features
 
-### Layout Sections
-1. **Header** - Company logo placeholder, title, Policy Year badge
-2. **Employee Snapshot** (Read-only) - Employee Number, Name, Job Title, Department
-3. **Covered Members** - All members with detailed fields (Gender, DOB, Nationality, Marital Status, Emirates ID, Visa Unified Number, Passport)
-4. **Confirmation** - Two-path workflow (Confirm or Update Information)
-5. **Update Form** - Two-path data entry:
-   - Direct input for missing data (saved immediately)
-   - Change requests for existing data (requires admin approval)
-6. **Submission Status** - Success messages
+### Landing Page
+- **Header**: Baynunah logo with portal title
+- **4 Category Buttons**: 
+  - Employees (Staff services & resources)
+  - Onboarding (New hire orientation)
+  - External Users (Partners & contractors)
+  - Admin (HR administration - password protected)
 
-### Two-Path Data Entry Workflow
-- **Direct Input**: Missing fields (Emirates ID, Passport, Visa, etc.) can be added immediately
-- **Change Request**: Modifying existing data requires HR approval
-- Validation: Emirates ID format (784-XXXX-XXXXXXX-X), Date of Birth realistic checks
+### Menu Design
+- 2x2 quadrant grid with rounded corners forming circular shape
+- Each quadrant has unique corner radius (top-left, top-right, bottom-left, bottom-right)
+- SVG outline icons in fluorescent green (#39FF14)
+- Hover animations: letter-spacing expansion, translateY lift, color inversion
 
-### Admin Portal (Access via ?admin=true)
-- **Pending Approvals**: Review and approve/reject change requests
-- **Statistics**: Verification completion rates, missing data summary
-- **Audit Trail**: Complete log of all data changes
-- **Export Reports**: Excel download with completion overview, pending items, missing data
+### Button Styling (Neumorphism)
+- Light gray background (#e8e8e8) with soft shadows
+- Inset shadows: `inset 2px 5px 10px rgba(0,0,0,0.2)`
+- Hover animations:
+  - Letter-spacing expansion (0.2em → 0.5em)
+  - TranslateY lift (-0.8em)
+  - Background change to dark (#171717)
+  - Text color change to white
 
-### Security Features
-- Session timeout (15 minutes of inactivity)
-- Link expiration after deadline date
-- Principal's DOB locked (used for authentication)
-- Admin portal password protected
+### Footer
+- "Conceptualised by Baynunah|HR|IS"
+
+### Admin Portal
+- Password protected access
+- Environment variable: `ADMIN_PASSWORD` (default: admin2026)
+- HR contact information displayed after authentication
+- Sign out functionality
+
+### Coming Soon Pages
+- Employees, Onboarding, External Users sections show placeholder
+- Back to Home navigation
+
+## Technical Details
+- **Framework**: Streamlit
+- **Port**: 5000
+- **Design**: White neumorphism theme (#e8e8e8 background)
+- **Font**: Poppins (Google Fonts)
 
 ## Project Structure
 ```
 /
 ├── app.py                 # Main Streamlit application
-├── models.py              # SQLAlchemy database models
 ├── attached_assets/
-│   ├── Medical_Insurance_Data.csv   # Employee data
-│   └── job_data.csv                 # Job titles/departments
+│   └── logo_*.png         # Baynunah logo
 ├── .streamlit/
 │   └── config.toml        # Streamlit server configuration
 └── replit.md              # This documentation
 ```
-
-## Technical Details
-- **Framework**: Streamlit
-- **Database**: PostgreSQL (for audit trail, change requests)
-- **Port**: 5000
-- **Data Storage**: CSV for employee data, PostgreSQL for audit/requests
-- **Authentication**: Staff Number + Date of Birth validation
-
-## Database Tables
-- `audit_trail`: Logs all data changes with timestamps
-- `change_requests`: Stores pending change requests for admin review
-
-## Configuration
-Located at top of app.py:
-- `POLICY_YEAR` - Current policy year (2026)
-- `RENEWAL_DEADLINE` - Cutoff date for verification
-- `SESSION_TIMEOUT_MINUTES` - Inactivity timeout (15 min)
-
-Environment Variables:
-- `ADMIN_PASSWORD` - Admin portal password (default: admin2026)
-- `DATABASE_URL` - PostgreSQL connection string
-
-## Sample Staff Numbers for Testing
-- BAYN00008 (Mohammad Ismael Sudally) - DOB: 16/05/1988
-- BAYN00047 (Alexander Manual Vaz) - DOB: 06/03/1958
-- BAYN00002 (Syed Irfan Zakiuddin) - DOB: 11/03/1979
-- BAYN00003 (Michael Rutman) - DOB: 21/07/1979
 
 ## Running the Application
 ```bash
 streamlit run app.py --server.port 5000
 ```
 
-## Admin Portal Access
-Navigate to the app URL with `?admin=true` parameter:
-```
-https://your-app-url/?admin=true
-```
-Login with the ADMIN_PASSWORD and your name.
-
-## Future Enhancements (Not Yet Implemented)
-- Email reminder system for incomplete verifications
-- SharePoint List integration (writeback)
-- Power Automate email trigger for HR notifications
+## Environment Variables
+- `ADMIN_PASSWORD` - Admin portal password (default: admin2026)
