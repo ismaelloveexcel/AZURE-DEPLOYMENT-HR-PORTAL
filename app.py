@@ -609,28 +609,22 @@ def render_employees():
         
         st.markdown(f'''
         <style>
-            .pass-container {{
+            .pass-wrapper {{
                 display: flex; justify-content: center; align-items: center;
-                min-height: 75vh; padding: 20px;
+                min-height: 80vh; padding: 20px;
             }}
             .pass-card {{
-                width: 380px; min-height: 480px;
-                background-color: rgba(255, 255, 255, 0.074);
-                border: 1px solid rgba(255, 255, 255, 0.222);
-                -webkit-backdrop-filter: blur(20px);
-                backdrop-filter: blur(20px);
+                width: 380px;
+                background-color: rgba(255, 255, 255, 0.95);
+                border: 1px solid rgba(255, 255, 255, 0.9);
                 border-radius: 12px;
-                overflow: hidden;
-                transition: all ease 0.3s;
-                display: flex; flex-direction: column;
-            }}
-            .pass-card:hover {{
-                box-shadow: 0px 0px 20px 1px #0a23511f;
-                border: 1px solid rgba(255, 255, 255, 0.454);
+                overflow: visible;
+                box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
             }}
             .pass-header {{
-                background: #0a2351; padding: 15px 20px;
+                background: #0a2351; padding: 18px 20px;
                 display: flex; justify-content: flex-end; align-items: center;
+                border-radius: 12px 12px 0 0;
             }}
             .pass-logo {{
                 height: 28px;
@@ -641,35 +635,61 @@ def render_employees():
                 letter-spacing: 0.08em;
             }}
             .pass-body {{
-                flex: 1; padding: 40px 30px; position: relative;
+                padding: 30px 25px; position: relative;
+                min-height: 320px;
                 display: flex; flex-direction: column;
-                justify-content: flex-end;
+                justify-content: center;
             }}
             .pass-watermark {{
-                position: absolute; top: 50%; left: 50%;
+                position: absolute; top: 35%; left: 50%;
                 transform: translate(-50%, -50%);
-                width: 180px; opacity: 0.12; pointer-events: none;
+                width: 160px; opacity: 0.12; pointer-events: none;
+            }}
+            .pass-form {{
+                position: relative; z-index: 10;
+                display: flex; flex-direction: column; gap: 12px;
+                margin-top: auto;
             }}
             .pass-footer {{
                 text-align: center; padding: 12px;
                 font-size: 0.72em; color: #666;
-                border-top: 1px solid rgba(0,0,0,0.05);
+                border-top: 1px solid rgba(0,0,0,0.08);
+                border-radius: 0 0 12px 12px;
+            }}
+            [data-testid="stVerticalBlock"] > div:has(.pass-wrapper) + div {{
+                position: relative;
+                margin-top: -180px;
+                z-index: 100;
+            }}
+            .stTextInput input, .stDateInput input {{
+                border: 1px solid #ddd !important;
+                border-radius: 6px !important;
+                padding: 12px 15px !important;
+                background: white !important;
+            }}
+            .stButton button {{
+                background: #0a2351 !important;
+                color: white !important;
+                border-radius: 6px !important;
+                padding: 12px !important;
+                font-weight: 500 !important;
             }}
         </style>
-        <div class="pass-container">
+        <div class="pass-wrapper">
             <div class="pass-card">
                 <div class="pass-header">
                     {logo_html}
                 </div>
                 <div class="pass-body">
                     {droplet_html}
+                    <div class="pass-form"></div>
                 </div>
                 <div class="pass-footer">Conceptualised by Baynunah HR|IS</div>
             </div>
         </div>
         ''', unsafe_allow_html=True)
         
-        col1, col2, col3 = st.columns([1, 1.5, 1])
+        col1, col2, col3 = st.columns([0.15, 0.7, 0.15])
         with col2:
             emp_id = st.text_input("Employee ID", placeholder="Employee ID", key="emp_id", label_visibility="collapsed")
             dob = st.date_input("Date of Birth", value=pd.to_datetime("1980-01-01"), min_value=pd.to_datetime("1940-01-01"), max_value=pd.to_datetime("2010-01-01"), key="emp_dob", format="DD/MM/YYYY", label_visibility="collapsed")
@@ -685,8 +705,10 @@ def render_employees():
                         st.error("Invalid Employee ID or Date of Birth")
                 else:
                     st.warning("Please enter Employee ID and Date of Birth")
-            
-            st.markdown("<br>", unsafe_allow_html=True)
+        
+        st.markdown("<br>", unsafe_allow_html=True)
+        col1, col2, col3 = st.columns([1, 1, 1])
+        with col2:
             if st.button("Back to Home", use_container_width=True, key="emp_back"):
                 st.query_params.clear()
                 st.rerun()
@@ -734,28 +756,22 @@ def render_admin():
         
         st.markdown(f'''
         <style>
-            .pass-container {{
+            .pass-wrapper {{
                 display: flex; justify-content: center; align-items: center;
-                min-height: 75vh; padding: 20px;
+                min-height: 80vh; padding: 20px;
             }}
             .pass-card {{
-                width: 380px; min-height: 400px;
-                background-color: rgba(255, 255, 255, 0.074);
-                border: 1px solid rgba(255, 255, 255, 0.222);
-                -webkit-backdrop-filter: blur(20px);
-                backdrop-filter: blur(20px);
+                width: 380px;
+                background-color: rgba(255, 255, 255, 0.95);
+                border: 1px solid rgba(255, 255, 255, 0.9);
                 border-radius: 12px;
-                overflow: hidden;
-                transition: all ease 0.3s;
-                display: flex; flex-direction: column;
-            }}
-            .pass-card:hover {{
-                box-shadow: 0px 0px 20px 1px #0a23511f;
-                border: 1px solid rgba(255, 255, 255, 0.454);
+                overflow: visible;
+                box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
             }}
             .pass-header {{
-                background: #0a2351; padding: 15px 20px;
+                background: #0a2351; padding: 18px 20px;
                 display: flex; justify-content: flex-end; align-items: center;
+                border-radius: 12px 12px 0 0;
             }}
             .pass-logo {{
                 height: 28px;
@@ -766,35 +782,61 @@ def render_admin():
                 letter-spacing: 0.08em;
             }}
             .pass-body {{
-                flex: 1; padding: 40px 30px; position: relative;
+                padding: 30px 25px; position: relative;
+                min-height: 280px;
                 display: flex; flex-direction: column;
-                justify-content: flex-end;
+                justify-content: center;
             }}
             .pass-watermark {{
-                position: absolute; top: 50%; left: 50%;
+                position: absolute; top: 35%; left: 50%;
                 transform: translate(-50%, -50%);
-                width: 180px; opacity: 0.12; pointer-events: none;
+                width: 160px; opacity: 0.12; pointer-events: none;
+            }}
+            .pass-form {{
+                position: relative; z-index: 10;
+                display: flex; flex-direction: column; gap: 12px;
+                margin-top: auto;
             }}
             .pass-footer {{
                 text-align: center; padding: 12px;
                 font-size: 0.72em; color: #666;
-                border-top: 1px solid rgba(0,0,0,0.05);
+                border-top: 1px solid rgba(0,0,0,0.08);
+                border-radius: 0 0 12px 12px;
+            }}
+            [data-testid="stVerticalBlock"] > div:has(.pass-wrapper) + div {{
+                position: relative;
+                margin-top: -140px;
+                z-index: 100;
+            }}
+            .stTextInput input {{
+                border: 1px solid #ddd !important;
+                border-radius: 6px !important;
+                padding: 12px 15px !important;
+                background: white !important;
+            }}
+            .stButton button {{
+                background: #0a2351 !important;
+                color: white !important;
+                border-radius: 6px !important;
+                padding: 12px !important;
+                font-weight: 500 !important;
             }}
         </style>
-        <div class="pass-container">
+        <div class="pass-wrapper">
             <div class="pass-card">
                 <div class="pass-header">
                     {logo_html}
                 </div>
                 <div class="pass-body">
                     {droplet_html}
+                    <div class="pass-form"></div>
                 </div>
                 <div class="pass-footer">Conceptualised by Baynunah HR|IS</div>
             </div>
         </div>
         ''', unsafe_allow_html=True)
         
-        col1, col2, col3 = st.columns([1, 1.5, 1])
+        col1, col2, col3 = st.columns([0.15, 0.7, 0.15])
         with col2:
             password = st.text_input("Password", type="password", key="admin_pwd", label_visibility="collapsed", placeholder="Enter Password")
             if st.button("Login", use_container_width=True):
@@ -803,8 +845,10 @@ def render_admin():
                     st.rerun()
                 else:
                     st.error("Invalid password")
-            
-            st.markdown("<br>", unsafe_allow_html=True)
+        
+        st.markdown("<br>", unsafe_allow_html=True)
+        col1, col2, col3 = st.columns([1, 1, 1])
+        with col2:
             if st.button("Back to Home", use_container_width=True, key="back_home"):
                 st.query_params.clear()
                 st.rerun()
