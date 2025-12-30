@@ -353,7 +353,7 @@ def render_home():
             .menu-item {{
                 width: 160px;
                 height: 160px;
-                background: linear-gradient(145deg, #ffffff, #e6e6e6);
+                background: linear-gradient(-75deg, rgba(255,255,255,0.15), rgba(255,255,255,0.4), rgba(255,255,255,0.15));
                 display: flex;
                 flex-direction: column;
                 align-items: center;
@@ -364,49 +364,52 @@ def render_home():
                 font-size: 0.85em;
                 letter-spacing: 0.12em;
                 text-transform: uppercase;
-                transition: all 0.25s ease-in-out;
+                transition: all 0.35s cubic-bezier(0.25, 1, 0.5, 1);
                 border: none;
                 outline: none;
                 cursor: pointer;
                 text-align: center;
                 padding: 20px;
+                backdrop-filter: blur(8px);
+                -webkit-backdrop-filter: blur(8px);
                 box-shadow:
-                    8px 8px 16px rgba(180, 180, 180, 0.5),
-                    -8px -8px 16px rgba(255, 255, 255, 0.9),
-                    inset 1px 1px 2px rgba(255,255,255,0.8),
-                    inset -1px -1px 2px rgba(0,0,0,0.05);
+                    inset 0 2px 3px rgba(255,255,255,0.6),
+                    inset 0 -2px 3px rgba(0,0,0,0.08),
+                    0 8px 20px -4px rgba(0,0,0,0.15),
+                    0 0 0 1px rgba(255,255,255,0.5);
+            }}
+            .menu-item::before {{
+                content: "";
+                position: absolute;
+                inset: 0;
+                border-radius: inherit;
+                padding: 1px;
+                background: linear-gradient(145deg, rgba(255,255,255,0.8), rgba(255,255,255,0.2), rgba(0,0,0,0.1));
+                -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+                -webkit-mask-composite: xor;
+                mask-composite: exclude;
+                pointer-events: none;
+            }}
+            .menu-item:hover {{
+                transform: scale(0.98);
+                box-shadow:
+                    inset 0 2px 4px rgba(255,255,255,0.7),
+                    inset 0 -2px 4px rgba(0,0,0,0.1),
+                    0 4px 12px -2px rgba(0,0,0,0.2),
+                    0 0 0 1px rgba(255,255,255,0.6);
             }}
             .menu-item:active {{
+                transform: scale(0.96);
                 box-shadow:
-                    inset 4px 4px 10px rgba(180, 180, 180, 0.5),
-                    inset -4px -4px 10px rgba(255, 255, 255, 0.9);
+                    inset 0 3px 6px rgba(0,0,0,0.1),
+                    inset 0 -2px 4px rgba(255,255,255,0.5),
+                    0 2px 6px -2px rgba(0,0,0,0.15);
             }}
             .menu-item img {{ width: 36px; height: 36px; margin-bottom: 8px; transition: all 0.25s ease; }}
             .menu-item span {{ 
                 display: block; 
                 line-height: 1.3;
-                position: relative;
-                padding: 0.4em 0.8em;
-                border-radius: 999px;
-                background: linear-gradient(-75deg, rgba(255,255,255,0.05), rgba(255,255,255,0.25), rgba(255,255,255,0.05));
-                box-shadow: 
-                    inset 0 0.08em 0.08em rgba(0,0,0,0.05),
-                    inset 0 -0.08em 0.08em rgba(255,255,255,0.5),
-                    0 0.15em 0.08em -0.08em rgba(0,0,0,0.15),
-                    inset 0 0 0.06em 0.15em rgba(255,255,255,0.2);
-                backdrop-filter: blur(2px);
-                -webkit-backdrop-filter: blur(2px);
-                text-shadow: 0 0.15em 0.04em rgba(0,0,0,0.08);
-                transition: all 0.3s ease;
-            }}
-            .menu-item:hover span {{
-                background: linear-gradient(-75deg, rgba(255,255,255,0.1), rgba(255,255,255,0.35), rgba(255,255,255,0.1));
-                box-shadow: 
-                    inset 0 0.08em 0.08em rgba(0,0,0,0.05),
-                    inset 0 -0.08em 0.08em rgba(255,255,255,0.6),
-                    0 0.1em 0.04em -0.06em rgba(0,0,0,0.2),
-                    inset 0 0 0.04em 0.1em rgba(255,255,255,0.4);
-                text-shadow: 0.02em 0.02em 0.02em rgba(0,0,0,0.1);
+                text-shadow: 0 1px 2px rgba(0,0,0,0.1);
             }}
             .menu-item .content {{ 
                 display: flex; flex-direction: column; 
@@ -417,30 +420,34 @@ def render_home():
             .item-tl {{ 
                 border-radius: 160px 5px 5px 5px; 
                 transform-origin: 100% 100%;
+                position: relative;
             }}
             .item-tl .content {{ transform: translate(-8px, -8px); }}
-            .item-tl:hover {{ transform: translate(-5px, -5px); background: linear-gradient(145deg, #e6e6e6, #ffffff); box-shadow: 4px 4px 8px rgba(180,180,180,0.4), -4px -4px 8px rgba(255,255,255,0.9); }}
+            .item-tl:hover {{ transform: translate(-3px, -3px) scale(0.98); }}
             
             .item-tr {{ 
                 border-radius: 5px 160px 5px 5px;
                 transform-origin: 0% 100%;
+                position: relative;
             }}
             .item-tr .content {{ transform: translate(8px, -8px); }}
-            .item-tr:hover {{ transform: translate(5px, -5px); background: linear-gradient(145deg, #e6e6e6, #ffffff); box-shadow: 4px 4px 8px rgba(180,180,180,0.4), -4px -4px 8px rgba(255,255,255,0.9); }}
+            .item-tr:hover {{ transform: translate(3px, -3px) scale(0.98); }}
             
             .item-bl {{ 
                 border-radius: 5px 5px 5px 160px;
                 transform-origin: 100% 0%;
+                position: relative;
             }}
             .item-bl .content {{ transform: translate(-8px, 8px); }}
-            .item-bl:hover {{ transform: translate(-5px, 5px); background: linear-gradient(145deg, #e6e6e6, #ffffff); box-shadow: 4px 4px 8px rgba(180,180,180,0.4), -4px -4px 8px rgba(255,255,255,0.9); }}
+            .item-bl:hover {{ transform: translate(-3px, 3px) scale(0.98); }}
             
             .item-br {{ 
                 border-radius: 5px 5px 160px 5px;
                 transform-origin: 0% 0%;
+                position: relative;
             }}
             .item-br .content {{ transform: translate(8px, 8px); }}
-            .item-br:hover {{ transform: translate(5px, 5px); background: linear-gradient(145deg, #e6e6e6, #ffffff); box-shadow: 4px 4px 8px rgba(180,180,180,0.4), -4px -4px 8px rgba(255,255,255,0.9); }}
+            .item-br:hover {{ transform: translate(3px, 3px) scale(0.98); }}
             
             .portal-footer {{ margin-top: 10px; text-align: center; font-size: 0.65em; color: #999; letter-spacing: 0.1em; }}
             
