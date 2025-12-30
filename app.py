@@ -426,6 +426,7 @@ def render_home():
                 .menu-item img {{ width: 36px; height: 36px; }}
                 .portal-title {{ font-size: 1.3em; }}
                 .portal-logo {{ width: 80px; }}
+                .login-card {{ width: 260px; padding: 2rem 1.5rem; }}
             }}
         </style>
     </head>
@@ -468,13 +469,23 @@ def render_home():
     </body>
     </html>
     '''
-    components.html(html_content, height=650, scrolling=False)
+    components.html(html_content, height=700, scrolling=False)
 
 def render_coming_soon(title):
     st.markdown(CSS, unsafe_allow_html=True)
     st.markdown(f'''
     <div class="page-container">
         <h1 class="page-title">{title}</h1>
+        <p class="page-message">This section is coming soon.</p>
+        <a href="?" class="back-btn">Back to Home</a>
+    </div>
+    ''', unsafe_allow_html=True)
+
+def render_onboarding():
+    st.markdown(CSS, unsafe_allow_html=True)
+    st.markdown('''
+    <div class="page-container">
+        <h1 class="page-title">Onboarding</h1>
         <p class="page-message">This section is coming soon.</p>
         <a href="?" class="back-btn">Back to Home</a>
     </div>
@@ -684,92 +695,71 @@ def render_employees():
                 st.query_params.clear()
                 st.rerun()
     else:
-        droplet_html = f'<img src="data:image/png;base64,{droplet_b64}" class="pass-watermark">' if droplet_b64 else ''
-        logo_html = f'<img src="data:image/png;base64,{logo_b64}" class="pass-logo">' if logo_b64 else '<span class="pass-logo-text">baynunah</span>'
-        
-        st.markdown(f'''
+        st.markdown('''
         <style>
-            .pass-wrapper {{
+            .login-wrapper {
                 display: flex; justify-content: center; align-items: center;
-                min-height: 80vh; padding: 20px;
-            }}
-            .pass-card {{
-                width: 380px;
-                background-color: rgba(255, 255, 255, 0.95);
-                border: 1px solid rgba(255, 255, 255, 0.9);
-                border-radius: 12px;
-                overflow: visible;
-                box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-            }}
-            .pass-header {{
-                background: #0a2351; padding: 18px 20px;
-                display: flex; justify-content: flex-end; align-items: center;
-                border-radius: 12px 12px 0 0;
-            }}
-            .pass-logo {{
-                height: 28px;
-                filter: brightness(0) invert(1);
-            }}
-            .pass-logo-text {{
-                color: white; font-size: 1.2em; font-weight: 600;
-                letter-spacing: 0.08em;
-            }}
-            .pass-body {{
-                padding: 30px 25px; position: relative;
-                min-height: 320px;
-                display: flex; flex-direction: column;
-                justify-content: center;
-            }}
-            .pass-watermark {{
-                position: absolute; top: 35%; left: 50%;
-                transform: translate(-50%, -50%);
-                width: 160px; opacity: 0.12; pointer-events: none;
-            }}
-            .pass-form {{
-                position: relative; z-index: 10;
-                display: flex; flex-direction: column; gap: 12px;
-                margin-top: auto;
-            }}
-            .pass-footer {{
-                text-align: center; padding: 12px;
-                font-size: 0.72em; color: #666;
-                border-top: 1px solid rgba(0,0,0,0.08);
-                border-radius: 0 0 12px 12px;
-            }}
-            [data-testid="stVerticalBlock"] > div:has(.pass-wrapper) + div {{
+                min-height: 70vh; padding: 20px;
+            }
+            .login-card {
+                width: 320px;
+                padding: 2.5rem 2rem;
+                text-align: center;
+                background: #00065f;
+                border-radius: 16px;
+                border: 1px solid #9c9a9a;
+            }
+            .login-title {
+                margin-bottom: 1.5rem;
+                font-size: 1.6em;
+                font-weight: 500;
+                color: #9c9a9a;
+                text-shadow: 1px 1px 20px #9c9a9a;
+                text-transform: uppercase;
+                letter-spacing: 0.05em;
+            }
+            [data-testid="stVerticalBlock"] > div:has(.login-wrapper) + div {
                 position: relative;
-                margin-top: -180px;
+                margin-top: -280px;
                 z-index: 100;
-            }}
-            .stTextInput input, .stDateInput input {{
-                border: 1px solid #ddd !important;
+                display: flex;
+                justify-content: center;
+            }
+            [data-testid="stVerticalBlock"] > div:has(.login-wrapper) + div > div {
+                max-width: 280px;
+            }
+            .stTextInput input, .stDateInput input {
+                border: none !important;
                 border-radius: 6px !important;
-                padding: 12px 15px !important;
-                background: white !important;
-            }}
-            .stButton button {{
-                background: #0a2351 !important;
-                color: white !important;
+                padding: 14px 16px !important;
+                background: #fbfcff !important;
+                color: #333 !important;
+            }
+            .stTextInput input::placeholder {
+                color: #999 !important;
+            }
+            .stButton button {
+                background: #9c9a9a !important;
+                color: #00065f !important;
                 border-radius: 6px !important;
-                padding: 12px !important;
-                font-weight: 500 !important;
-            }}
+                padding: 14px !important;
+                font-weight: 600 !important;
+                text-transform: uppercase !important;
+                margin-top: 0.5rem !important;
+            }
+            .stButton button:hover {
+                background: #fbfcff !important;
+                color: #9c9a9a !important;
+            }
         </style>
-        <div class="pass-wrapper">
-            <div class="pass-card">
-                <div class="pass-header">
-                    {logo_html}
-                </div>
-                <div class="pass-body">
-                    {droplet_html}
-                    <div class="pass-form"></div>
-                </div>
-                <div class="pass-footer">Conceptualised by Baynunah HR|IS</div>
+        <div class="login-wrapper">
+            <div class="login-card">
+                <h4 class="login-title">Log In</h4>
             </div>
         </div>
         ''', unsafe_allow_html=True)
         
-        col1, col2, col3 = st.columns([0.15, 0.7, 0.15])
+        col1, col2, col3 = st.columns([0.25, 0.5, 0.25])
         with col2:
             emp_id = st.text_input("Employee ID", placeholder="Employee ID", key="emp_id", label_visibility="collapsed")
             dob = st.date_input("Date of Birth", value=pd.to_datetime("1980-01-01"), min_value=pd.to_datetime("1940-01-01"), max_value=pd.to_datetime("2010-01-01"), key="emp_dob", format="DD/MM/YYYY", label_visibility="collapsed")
@@ -785,10 +775,7 @@ def render_employees():
                         st.error("Invalid Employee ID or Date of Birth")
                 else:
                     st.warning("Please enter Employee ID and Date of Birth")
-        
-        st.markdown("<br>", unsafe_allow_html=True)
-        col1, col2, col3 = st.columns([1, 1, 1])
-        with col2:
+            
             if st.button("Back to Home", use_container_width=True, key="emp_back"):
                 st.query_params.clear()
                 st.rerun()
@@ -829,94 +816,71 @@ def render_admin():
                 st.query_params.clear()
                 st.rerun()
     else:
-        droplet_b64 = get_droplet_base64()
-        logo_b64 = get_logo_base64()
-        droplet_html = f'<img src="data:image/png;base64,{droplet_b64}" class="pass-watermark">' if droplet_b64 else ''
-        logo_html = f'<img src="data:image/png;base64,{logo_b64}" class="pass-logo">' if logo_b64 else '<span class="pass-logo-text">baynunah</span>'
-        
-        st.markdown(f'''
+        st.markdown('''
         <style>
-            .pass-wrapper {{
+            .login-wrapper {
                 display: flex; justify-content: center; align-items: center;
-                min-height: 80vh; padding: 20px;
-            }}
-            .pass-card {{
-                width: 380px;
-                background-color: rgba(255, 255, 255, 0.95);
-                border: 1px solid rgba(255, 255, 255, 0.9);
-                border-radius: 12px;
-                overflow: visible;
-                box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-            }}
-            .pass-header {{
-                background: #0a2351; padding: 18px 20px;
-                display: flex; justify-content: flex-end; align-items: center;
-                border-radius: 12px 12px 0 0;
-            }}
-            .pass-logo {{
-                height: 28px;
-                filter: brightness(0) invert(1);
-            }}
-            .pass-logo-text {{
-                color: white; font-size: 1.2em; font-weight: 600;
-                letter-spacing: 0.08em;
-            }}
-            .pass-body {{
-                padding: 30px 25px; position: relative;
-                min-height: 280px;
-                display: flex; flex-direction: column;
-                justify-content: center;
-            }}
-            .pass-watermark {{
-                position: absolute; top: 35%; left: 50%;
-                transform: translate(-50%, -50%);
-                width: 160px; opacity: 0.12; pointer-events: none;
-            }}
-            .pass-form {{
-                position: relative; z-index: 10;
-                display: flex; flex-direction: column; gap: 12px;
-                margin-top: auto;
-            }}
-            .pass-footer {{
-                text-align: center; padding: 12px;
-                font-size: 0.72em; color: #666;
-                border-top: 1px solid rgba(0,0,0,0.08);
-                border-radius: 0 0 12px 12px;
-            }}
-            [data-testid="stVerticalBlock"] > div:has(.pass-wrapper) + div {{
+                min-height: 70vh; padding: 20px;
+            }
+            .login-card {
+                width: 320px;
+                padding: 2.5rem 2rem;
+                text-align: center;
+                background: #00065f;
+                border-radius: 16px;
+                border: 1px solid #9c9a9a;
+            }
+            .login-title {
+                margin-bottom: 1.5rem;
+                font-size: 1.6em;
+                font-weight: 500;
+                color: #9c9a9a;
+                text-shadow: 1px 1px 20px #9c9a9a;
+                text-transform: uppercase;
+                letter-spacing: 0.05em;
+            }
+            [data-testid="stVerticalBlock"] > div:has(.login-wrapper) + div {
                 position: relative;
-                margin-top: -140px;
+                margin-top: -220px;
                 z-index: 100;
-            }}
-            .stTextInput input {{
-                border: 1px solid #ddd !important;
+                display: flex;
+                justify-content: center;
+            }
+            [data-testid="stVerticalBlock"] > div:has(.login-wrapper) + div > div {
+                max-width: 280px;
+            }
+            .stTextInput input {
+                border: none !important;
                 border-radius: 6px !important;
-                padding: 12px 15px !important;
-                background: white !important;
-            }}
-            .stButton button {{
-                background: #0a2351 !important;
-                color: white !important;
+                padding: 14px 16px !important;
+                background: #fbfcff !important;
+                color: #333 !important;
+            }
+            .stTextInput input::placeholder {
+                color: #999 !important;
+            }
+            .stButton button {
+                background: #9c9a9a !important;
+                color: #00065f !important;
                 border-radius: 6px !important;
-                padding: 12px !important;
-                font-weight: 500 !important;
-            }}
+                padding: 14px !important;
+                font-weight: 600 !important;
+                text-transform: uppercase !important;
+                margin-top: 0.5rem !important;
+            }
+            .stButton button:hover {
+                background: #fbfcff !important;
+                color: #9c9a9a !important;
+            }
         </style>
-        <div class="pass-wrapper">
-            <div class="pass-card">
-                <div class="pass-header">
-                    {logo_html}
-                </div>
-                <div class="pass-body">
-                    {droplet_html}
-                    <div class="pass-form"></div>
-                </div>
-                <div class="pass-footer">Conceptualised by Baynunah HR|IS</div>
+        <div class="login-wrapper">
+            <div class="login-card">
+                <h4 class="login-title">Admin</h4>
             </div>
         </div>
         ''', unsafe_allow_html=True)
         
-        col1, col2, col3 = st.columns([0.15, 0.7, 0.15])
+        col1, col2, col3 = st.columns([0.25, 0.5, 0.25])
         with col2:
             password = st.text_input("Password", type="password", key="admin_pwd", label_visibility="collapsed", placeholder="Enter Password")
             if st.button("Login", use_container_width=True):
@@ -925,10 +889,7 @@ def render_admin():
                     st.rerun()
                 else:
                     st.error("Invalid password")
-        
-        st.markdown("<br>", unsafe_allow_html=True)
-        col1, col2, col3 = st.columns([1, 1, 1])
-        with col2:
+            
             if st.button("Back to Home", use_container_width=True, key="back_home"):
                 st.query_params.clear()
                 st.rerun()
@@ -1053,7 +1014,7 @@ def main():
     elif page == "employees":
         render_employees()
     elif page == "onboarding":
-        render_coming_soon("Onboarding")
+        render_onboarding()
     elif page == "external":
         render_coming_soon("External Users")
     elif page == "admin":
