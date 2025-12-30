@@ -360,13 +360,15 @@ def render_home():
                 text-decoration: none;
                 color: #333;
                 font-weight: 500;
-                font-size: 0.9em;
-                letter-spacing: 0.15em;
+                font-size: 0.85em;
+                letter-spacing: 0.12em;
                 text-transform: uppercase;
                 transition: all 0.25s ease-in-out;
                 border: none;
                 outline: none;
                 cursor: pointer;
+                text-align: center;
+                padding: 20px;
                 box-shadow:
                     inset 2px 2px 4px rgba(255,255,255,0.9),
                     inset -2px -2px 4px rgba(0,0,0,0.15),
@@ -377,7 +379,8 @@ def render_home():
                     inset 4px 4px 8px rgba(0,0,0,0.15),
                     inset -2px -2px 4px rgba(255,255,255,0.9);
             }}
-            .menu-item img {{ width: 48px; height: 48px; margin-bottom: 15px; transition: all 0.25s ease; }}
+            .menu-item img {{ width: 44px; height: 44px; margin-bottom: 12px; transition: all 0.25s ease; }}
+            .menu-item span {{ display: block; line-height: 1.3; }}
             
             .item-tl {{ 
                 border-radius: 200px 5px 5px 5px; 
