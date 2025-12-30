@@ -333,31 +333,87 @@ def render_home():
                 flex-direction: column;
                 align-items: center;
                 justify-content: center;
-                padding: 20px;
+                padding: 15px;
             }}
-            .portal-header {{ text-align: center; margin-bottom: 30px; }}
-            .portal-logo {{ width: 120px; margin-bottom: 10px; }}
-            .portal-title {{ font-size: 1.8em; font-weight: 600; color: #333; letter-spacing: 0.05em; }}
-            .menu-grid {{ display: grid; grid-template-columns: repeat(2, 130px); gap: 8px; margin: 20px auto; }}
+            .portal-header {{ text-align: center; margin-bottom: 25px; }}
+            .portal-logo {{ width: 100px; margin-bottom: 8px; }}
+            .portal-title {{ font-size: 1.6em; font-weight: 600; color: #333; letter-spacing: 0.05em; }}
+            
+            .menu-container {{
+                display: flex;
+                flex-direction: column;
+                gap: 0.5em;
+            }}
+            .menu-row {{
+                display: flex;
+                flex-direction: row;
+                gap: 0.5em;
+            }}
             .menu-item {{
-                width: 130px; height: 130px; background: #e8e8e8;
-                display: flex; flex-direction: column; align-items: center; justify-content: center;
-                text-decoration: none; color: #333; font-weight: 500; font-size: 0.85em;
-                letter-spacing: 0.2em; text-transform: uppercase; transition: all 0.3s ease;
-                box-shadow: 6px 6px 12px rgba(0,0,0,0.15), -6px -6px 12px rgba(255,255,255,0.8), inset 2px 5px 10px rgba(0,0,0,0.1);
+                width: 200px;
+                height: 200px;
+                background: transparent;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                text-decoration: none;
+                color: #333;
+                font-weight: 500;
+                font-size: 0.9em;
+                letter-spacing: 0.15em;
+                text-transform: uppercase;
+                transition: all 0.25s ease-in-out;
+                border: none;
+                outline: none;
+                cursor: pointer;
+                box-shadow:
+                    inset 2px 2px 4px rgba(255,255,255,0.9),
+                    inset -2px -2px 4px rgba(0,0,0,0.15),
+                    4px 4px 10px rgba(0,0,0,0.12);
             }}
-            .menu-item:hover {{ letter-spacing: 0.5em; transform: translateY(-8px); background: #171717; color: white; }}
-            .menu-item:hover img {{ filter: brightness(0) invert(1); }}
-            .menu-item img {{ width: 36px; height: 36px; margin-bottom: 10px; }}
-            .item-tl {{ border-radius: 60px 12px 12px 12px; }}
-            .item-tr {{ border-radius: 12px 60px 12px 12px; }}
-            .item-bl {{ border-radius: 12px 12px 12px 60px; }}
-            .item-br {{ border-radius: 12px 12px 60px 12px; }}
-            .portal-footer {{ margin-top: 30px; text-align: center; font-size: 0.75em; color: #666; letter-spacing: 0.1em; }}
-            @media (max-width: 600px) {{
-                .menu-grid {{ grid-template-columns: repeat(2, 110px); }}
-                .menu-item {{ width: 110px; height: 110px; font-size: 0.7em; }}
-                .portal-title {{ font-size: 1.4em; }}
+            .menu-item:active {{
+                box-shadow:
+                    inset 4px 4px 8px rgba(0,0,0,0.15),
+                    inset -2px -2px 4px rgba(255,255,255,0.9);
+            }}
+            .menu-item img {{ width: 48px; height: 48px; margin-bottom: 15px; transition: all 0.25s ease; }}
+            
+            .item-tl {{ 
+                border-radius: 100px 8px 8px 8px; 
+                transform-origin: 100% 100%;
+            }}
+            .item-tl:hover {{ transform: translate(-8px, -8px); background: #171717; color: white; }}
+            .item-tl:hover img {{ filter: brightness(0) invert(1); }}
+            
+            .item-tr {{ 
+                border-radius: 8px 100px 8px 8px;
+                transform-origin: 0% 100%;
+            }}
+            .item-tr:hover {{ transform: translate(8px, -8px); background: #171717; color: white; }}
+            .item-tr:hover img {{ filter: brightness(0) invert(1); }}
+            
+            .item-bl {{ 
+                border-radius: 8px 8px 8px 100px;
+                transform-origin: 100% 0%;
+            }}
+            .item-bl:hover {{ transform: translate(-8px, 8px); background: #171717; color: white; }}
+            .item-bl:hover img {{ filter: brightness(0) invert(1); }}
+            
+            .item-br {{ 
+                border-radius: 8px 8px 100px 8px;
+                transform-origin: 0% 0%;
+            }}
+            .item-br:hover {{ transform: translate(8px, 8px); background: #171717; color: white; }}
+            .item-br:hover img {{ filter: brightness(0) invert(1); }}
+            
+            .portal-footer {{ margin-top: 25px; text-align: center; font-size: 0.72em; color: #666; letter-spacing: 0.1em; }}
+            
+            @media (max-width: 500px) {{
+                .menu-item {{ width: 140px; height: 140px; font-size: 0.75em; }}
+                .menu-item img {{ width: 36px; height: 36px; }}
+                .portal-title {{ font-size: 1.3em; }}
+                .portal-logo {{ width: 80px; }}
             }}
         </style>
     </head>
@@ -366,29 +422,33 @@ def render_home():
             {logo_html}
             <h1 class="portal-title">HR PORTAL</h1>
         </div>
-        <div class="menu-grid">
-            <a href="?page=employees" class="menu-item item-tl">
-                <img src="{SVG_USERS}" alt="Employees">
-                <span>Employees</span>
-            </a>
-            <a href="?page=onboarding" class="menu-item item-tr">
-                <img src="{SVG_CHECK}" alt="Onboarding">
-                <span>Onboarding</span>
-            </a>
-            <a href="?page=external" class="menu-item item-bl">
-                <img src="{SVG_GLOBE}" alt="External">
-                <span>External</span>
-            </a>
-            <a href="?page=admin" class="menu-item item-br">
-                <img src="{SVG_LOCK}" alt="Admin">
-                <span>Admin</span>
-            </a>
+        <div class="menu-container">
+            <div class="menu-row">
+                <a href="?page=employees" class="menu-item item-tl">
+                    <img src="{SVG_USERS}" alt="Employees">
+                    <span>Employees</span>
+                </a>
+                <a href="?page=onboarding" class="menu-item item-tr">
+                    <img src="{SVG_CHECK}" alt="Onboarding">
+                    <span>Onboarding</span>
+                </a>
+            </div>
+            <div class="menu-row">
+                <a href="?page=external" class="menu-item item-bl">
+                    <img src="{SVG_GLOBE}" alt="External">
+                    <span>External</span>
+                </a>
+                <a href="?page=admin" class="menu-item item-br">
+                    <img src="{SVG_LOCK}" alt="Admin">
+                    <span>Admin</span>
+                </a>
+            </div>
         </div>
         <div class="portal-footer">Conceptualised by Baynunah|HR|IS</div>
     </body>
     </html>
     '''
-    components.html(html_content, height=700, scrolling=False)
+    components.html(html_content, height=650, scrolling=False)
 
 def render_coming_soon(title):
     st.markdown(CSS, unsafe_allow_html=True)
