@@ -604,40 +604,58 @@ def render_employees():
                 st.query_params.clear()
                 st.rerun()
     else:
-        droplet_html = f'<img src="data:image/png;base64,{droplet_b64}" class="login-droplet">' if droplet_b64 else ''
+        droplet_html = f'<img src="data:image/png;base64,{droplet_b64}" class="login-watermark">' if droplet_b64 else ''
         
         st.markdown(f'''
         <style>
-            .login-container {{
+            .login-wrapper {{
                 display: flex; justify-content: center; align-items: center;
-                min-height: 60vh; padding: 20px;
+                min-height: 70vh; padding: 20px;
             }}
             .login-card {{
-                background: #e8e8e8; border-radius: 20px; padding: 40px;
+                background: white; border-radius: 4px; 
                 max-width: 380px; width: 100%; position: relative;
-                box-shadow: 8px 8px 16px rgba(0,0,0,0.15), -8px -8px 16px rgba(255,255,255,0.8);
+                box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+                overflow: hidden;
             }}
-            .login-droplet {{
-                display: block; margin: 0 auto 20px auto;
-                width: 80px; opacity: 0.3;
+            .login-header {{
+                background: #0a2351; padding: 15px 20px; text-align: center;
             }}
-            .login-title {{
-                font-size: 1.4em; font-weight: 600; color: #333;
-                text-align: center; margin-bottom: 25px;
+            .login-header-text {{
+                color: white; font-size: 1.3em; font-weight: 600;
+                letter-spacing: 0.05em; margin: 0;
+            }}
+            .login-body {{
+                padding: 40px 30px 20px 30px; position: relative;
+                min-height: 280px;
+            }}
+            .login-watermark {{
+                position: absolute; top: 50%; left: 50%;
+                transform: translate(-50%, -50%);
+                width: 150px; opacity: 0.08; pointer-events: none;
+            }}
+            .login-footer {{
+                text-align: center; padding: 15px;
+                border-top: 1px solid #eee;
+                font-size: 0.75em; color: #666;
             }}
         </style>
-        <div class="login-container">
+        <div class="login-wrapper">
             <div class="login-card">
-                {droplet_html}
-                <h2 class="login-title">Employee Login</h2>
+                <div class="login-header">
+                    <p class="login-header-text">baynunah</p>
+                </div>
+                <div class="login-body">
+                    {droplet_html}
+                </div>
             </div>
         </div>
         ''', unsafe_allow_html=True)
         
         col1, col2, col3 = st.columns([1, 1, 1])
         with col2:
-            emp_id = st.text_input("Employee ID", placeholder="e.g. BAYN00046", key="emp_id")
-            dob = st.date_input("Date of Birth", value=pd.to_datetime("1980-01-01"), min_value=pd.to_datetime("1940-01-01"), max_value=pd.to_datetime("2010-01-01"), key="emp_dob", format="DD/MM/YYYY")
+            emp_id = st.text_input("Employee ID", placeholder="e.g. BAYN00046", key="emp_id", label_visibility="collapsed")
+            dob = st.date_input("Date of Birth", value=pd.to_datetime("1980-01-01"), min_value=pd.to_datetime("1940-01-01"), max_value=pd.to_datetime("2010-01-01"), key="emp_dob", format="DD/MM/YYYY", label_visibility="collapsed")
             
             if st.button("Login", use_container_width=True):
                 if emp_id and dob:
@@ -650,6 +668,8 @@ def render_employees():
                         st.error("Invalid Employee ID or Date of Birth")
                 else:
                     st.warning("Please enter Employee ID and Date of Birth")
+            
+            st.markdown('<p style="text-align:center; font-size:0.75em; color:#666; margin-top:20px;">Conceptualised by Baynunah HR|IS</p>', unsafe_allow_html=True)
             
             st.markdown("<br>", unsafe_allow_html=True)
             if st.button("Back to Home", use_container_width=True, key="emp_back"):
@@ -692,23 +712,61 @@ def render_admin():
                 st.query_params.clear()
                 st.rerun()
     else:
-        st.markdown('''
-        <div class="page-container">
-            <div class="admin-card">
-                <h2 class="admin-title">Admin Access</h2>
+        droplet_b64 = get_droplet_base64()
+        droplet_html = f'<img src="data:image/png;base64,{droplet_b64}" class="login-watermark">' if droplet_b64 else ''
+        
+        st.markdown(f'''
+        <style>
+            .login-wrapper {{
+                display: flex; justify-content: center; align-items: center;
+                min-height: 70vh; padding: 20px;
+            }}
+            .login-card {{
+                background: white; border-radius: 4px; 
+                max-width: 380px; width: 100%; position: relative;
+                box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+                overflow: hidden;
+            }}
+            .login-header {{
+                background: #0a2351; padding: 15px 20px; text-align: center;
+            }}
+            .login-header-text {{
+                color: white; font-size: 1.3em; font-weight: 600;
+                letter-spacing: 0.05em; margin: 0;
+            }}
+            .login-body {{
+                padding: 40px 30px 20px 30px; position: relative;
+                min-height: 200px;
+            }}
+            .login-watermark {{
+                position: absolute; top: 50%; left: 50%;
+                transform: translate(-50%, -50%);
+                width: 150px; opacity: 0.08; pointer-events: none;
+            }}
+        </style>
+        <div class="login-wrapper">
+            <div class="login-card">
+                <div class="login-header">
+                    <p class="login-header-text">baynunah</p>
+                </div>
+                <div class="login-body">
+                    {droplet_html}
+                </div>
             </div>
         </div>
         ''', unsafe_allow_html=True)
         
         col1, col2, col3 = st.columns([1, 1, 1])
         with col2:
-            password = st.text_input("Enter Password", type="password", key="admin_pwd")
+            password = st.text_input("Password", type="password", key="admin_pwd", label_visibility="collapsed", placeholder="Enter Password")
             if st.button("Login", use_container_width=True):
                 if password == ADMIN_PASSWORD and ADMIN_PASSWORD:
                     st.session_state.admin_authenticated = True
                     st.rerun()
                 else:
                     st.error("Invalid password")
+            
+            st.markdown('<p style="text-align:center; font-size:0.75em; color:#666; margin-top:20px;">Conceptualised by Baynunah HR|IS</p>', unsafe_allow_html=True)
             
             st.markdown("<br>", unsafe_allow_html=True)
             if st.button("Back to Home", use_container_width=True, key="back_home"):
