@@ -36,10 +36,13 @@ jobs:
 
   frontend-test:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
-      - run: cd frontend && npm ci && npm run lint
+      - run: npm ci && npm run lint
 ```
 
 #### Security Scanning
