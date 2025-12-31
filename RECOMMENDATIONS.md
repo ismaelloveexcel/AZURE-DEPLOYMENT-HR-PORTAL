@@ -5,6 +5,154 @@
 
 ---
 
+## 📋 Portal Philosophy
+
+### This is an HR Portal, NOT an HRIS
+
+**Important Distinction:**
+
+| HR Portal (This System) | HRIS (Not This System) |
+|------------------------|------------------------|
+| Process efficiency tool | Comprehensive data system |
+| Streamlines workflows | Manages all HR data |
+| UAE Labor Law guidance | Strict compliance enforcement |
+| Alerts and reminders | Blocking and restrictions |
+| Supports HR decisions | Replaces HR decisions |
+| Simple, focused features | Complex, full-featured |
+
+**Core Purpose:**
+- ✅ Make HR processes more efficient
+- ✅ Ensure UAE Labor Law alignment
+- ✅ Provide helpful reminders and alerts
+- ✅ Support a solo HR administrator
+- ❌ NOT a replacement for HR judgment
+- ❌ NOT a strict compliance enforcement system
+
+### Soft Compliance Approach
+
+**Philosophy:** Non-compliance issues should **inform HR, not block users**.
+
+```python
+# Compliance Alert Levels
+COMPLIANCE_ALERT_TYPES = {
+    "info": {
+        "icon": "ℹ️",
+        "color": "blue",
+        "action": "display_only",  # Just show info, no blocking
+        "example": "Leave balance is low"
+    },
+    "warning": {
+        "icon": "⚠️",
+        "color": "yellow",
+        "action": "warn_and_proceed",  # Show warning, allow user to continue
+        "example": "Document expiring in 30 days"
+    },
+    "alert": {
+        "icon": "🔴",
+        "color": "red",
+        "action": "alert_hr_and_proceed",  # Alert HR, but still allow action
+        "example": "Leave request exceeds balance"
+    },
+    "block": {
+        "icon": "🚫",
+        "color": "red",
+        "action": "block_with_override",  # Block but HR can override
+        "example": "Critical security issue only"
+        # Use sparingly - only for truly critical items
+    }
+}
+
+def handle_compliance_issue(issue_type, message, allow_proceed=True):
+    """
+    Display compliance issue but allow user to proceed in most cases.
+    Only truly critical issues should block (with HR override available).
+    """
+    alert = COMPLIANCE_ALERT_TYPES.get(issue_type, COMPLIANCE_ALERT_TYPES["info"])
+    
+    if issue_type == "info":
+        st.info(f"{alert['icon']} {message}")
+        return True  # Always allow
+    
+    elif issue_type == "warning":
+        st.warning(f"{alert['icon']} {message}")
+        return True  # Allow with warning shown
+    
+    elif issue_type == "alert":
+        st.error(f"{alert['icon']} {message}")
+        st.caption("⚠️ HR has been notified of this issue.")
+        notify_hr(message)  # Send alert to HR
+        return True  # Still allow user to proceed
+    
+    elif issue_type == "block":
+        st.error(f"{alert['icon']} {message}")
+        st.caption("This action requires HR approval to proceed.")
+        
+        # Show override option for HR
+        if st.session_state.get('is_hr_admin'):
+            if st.button("🔓 HR Override - Proceed Anyway"):
+                log_hr_override(message)
+                return True
+        return False  # Block non-HR users
+    
+    return allow_proceed
+```
+
+**When to Use Each Level:**
+
+| Level | Use When | Example | Blocks User? |
+|-------|----------|---------|--------------|
+| Info | General guidance | "You have 15 leave days remaining" | ❌ No |
+| Warning | Potential issue | "Visa expires in 45 days" | ❌ No |
+| Alert | Compliance concern | "Leave request exceeds annual balance" | ❌ No (but notifies HR) |
+| Block | Critical only | "Security breach detected" | ✅ Yes (HR can override) |
+
+**Examples of Soft Compliance:**
+
+```python
+# Example: Leave request with insufficient balance
+def submit_leave_request(employee_id, leave_type, days_requested):
+    balance = get_leave_balance(employee_id, leave_type)
+    
+    if days_requested > balance:
+        # DON'T block - just warn and notify HR
+        handle_compliance_issue(
+            "alert",
+            f"Leave request ({days_requested} days) exceeds balance ({balance} days). "
+            f"This may result in unpaid leave or salary deduction."
+        )
+        # Still submit the request - HR will review
+    
+    # Proceed with submission
+    create_leave_request(employee_id, leave_type, days_requested)
+    st.success("✅ Leave request submitted for approval")
+
+# Example: Document expiry warning
+def check_document_expiry(employee_id, doc_type):
+    expiry_date = get_document_expiry(employee_id, doc_type)
+    days_until_expiry = (expiry_date - datetime.now()).days
+    
+    if days_until_expiry < 0:
+        # Expired - alert but don't block operations
+        handle_compliance_issue(
+            "alert",
+            f"{doc_type} has expired. Please initiate renewal process."
+        )
+    elif days_until_expiry < 30:
+        # Expiring soon - just warn
+        handle_compliance_issue(
+            "warning",
+            f"{doc_type} expires in {days_until_expiry} days. Consider starting renewal."
+        )
+    elif days_until_expiry < 60:
+        # Coming up - just info
+        handle_compliance_issue(
+            "info",
+            f"{doc_type} expires in {days_until_expiry} days."
+        )
+```
+
+---
+
 ## Executive Summary
 
 This document provides actionable recommendations to improve the Baynunah HR Portal's visual design and operational efficiency, specifically optimized for a solo HR administrator managing the system.
@@ -743,21 +891,57 @@ def render_document_expiry_dashboard():
         st.progress(0.85, text=f"{doc['icon']} {doc['type']}: {doc['expiring']} expiring soon")
 ```
 
-### 3.2 WPS (Wage Protection System) Integration
+### 3.2 WPS (Wage Protection System) - OPTIONAL MODULE
 
-**Purpose:** UAE mandates salary payments through WPS for all private sector employees.
+**⚠️ Important:** WPS is **optional** and can be disabled. Some companies (e.g., government-linked entities, free zones with exemptions) are not required to use WPS as their visas are issued through government companies.
 
 ```python
-# WPS Compliance Checklist
-WPS_REQUIREMENTS = {
-    "bank_iban": "Valid UAE Bank IBAN (23 characters)",
-    "employee_mol_number": "Ministry of Labor Registration",
-    "salary_amount": "Monthly salary as per contract",
-    "establishment_id": "Company MOL Establishment ID"
+# WPS Configuration - Can be disabled in settings
+PORTAL_SETTINGS = {
+    "wps_enabled": False,  # Set to False if company is exempt from WPS
+    "wps_exemption_reason": "Visa issued by government company",
+    # ... other settings
 }
 
-def render_wps_status():
-    st.markdown("### 💳 WPS Compliance Status")
+def render_wps_settings():
+    """Allow HR to enable/disable WPS module."""
+    st.markdown("### 💳 WPS Settings")
+    
+    wps_enabled = st.toggle(
+        "Enable WPS Module",
+        value=False,
+        help="Disable if your company is exempt from WPS (e.g., government-linked, certain free zones)"
+    )
+    
+    if not wps_enabled:
+        st.info("""
+        ℹ️ **WPS Module Disabled**
+        
+        This is appropriate if:
+        - Your visas are issued by a government company
+        - You're in a free zone with WPS exemption
+        - You have special arrangements with MOHRE
+        
+        Salaries can still be processed through your normal banking channels.
+        """)
+        
+        exemption_reason = st.text_input(
+            "Exemption Reason (for records)",
+            placeholder="e.g., Visa issued by government company"
+        )
+    else:
+        st.markdown("#### WPS Compliance Checklist")
+        # Show WPS requirements only if enabled
+        render_wps_requirements()
+
+def render_wps_requirements():
+    """Only shown if WPS is enabled."""
+    WPS_REQUIREMENTS = {
+        "bank_iban": "Valid UAE Bank IBAN (23 characters)",
+        "employee_mol_number": "Ministry of Labor Registration",
+        "salary_amount": "Monthly salary as per contract",
+        "establishment_id": "Company MOL Establishment ID"
+    }
     
     st.success("✅ All employees registered in WPS")
     st.info("📅 Next payroll date: January 28, 2026")
@@ -1192,17 +1376,564 @@ def render_compliance_alerts():
 
 ## 🏆 UAE HR Portal Best Practices Summary
 
-| Feature | Importance | Implementation Status |
-|---------|------------|----------------------|
-| Document Expiry Tracking | Critical | 🟡 Planned |
-| WPS Compliance | Critical | 🟡 Planned |
-| UAE Leave Types | Critical | ✅ Schema Ready |
-| Gratuity Calculator | High | 🟡 Planned |
-| Visa Pipeline Tracking | High | 🟡 Planned |
-| Arabic RTL Support | Medium | 🟡 Planned |
-| MOHRE Integration | Medium | 🟡 Planned |
-| Mobile ESS App | Medium | 🟡 Planned |
+| Feature | Importance | Implementation Status | Notes |
+|---------|------------|----------------------|-------|
+| Document Expiry Tracking | Critical | ✅ Implemented | Alerts HR, doesn't block |
+| WPS Compliance | Optional | 🔘 Toggleable | Disabled by default for govt-linked companies |
+| UAE Leave Types | Critical | ✅ Schema Ready | Soft compliance warnings |
+| Gratuity Calculator | High | ✅ Implemented | Per Federal Law No. 8/1980 |
+| Visa Pipeline Tracking | High | 🟡 Planned | For applicable companies |
+| Arabic RTL Support | Medium | 🟡 Planned | Future enhancement |
+| MOHRE Integration | Medium | 🟡 Planned | When applicable |
+| Mobile ESS App | Medium | 🟡 Planned | Solo HR priority |
 
 ---
 
 *This UAE-specific section ensures the HR Portal meets local regulatory requirements and follows best practices established by leading UAE companies.*
+
+---
+
+## 👤 Part 4: Solo HR Non-Technical User Enhancements
+
+This section focuses on making the HR Portal easy to use for a **solo HR administrator** who may not have technical expertise. All features are designed with simplicity, guided workflows, and minimal learning curve in mind.
+
+### 4.1 Guided Wizards for Complex Tasks
+
+**Purpose:** Break down complex HR tasks into simple step-by-step processes.
+
+```python
+def render_guided_wizard(title, steps, current_step):
+    """
+    Render a step-by-step wizard with progress indicator.
+    Makes complex tasks simple for non-technical users.
+    """
+    st.markdown(f"### {title}")
+    
+    # Progress bar
+    progress = (current_step) / len(steps)
+    st.progress(progress, text=f"Step {current_step + 1} of {len(steps)}")
+    
+    # Step indicators
+    cols = st.columns(len(steps))
+    for i, step in enumerate(steps):
+        with cols[i]:
+            if i < current_step:
+                st.markdown(f"✅ ~~{step['name']}~~")
+            elif i == current_step:
+                st.markdown(f"👉 **{step['name']}**")
+            else:
+                st.markdown(f"⬜ {step['name']}")
+    
+    return steps[current_step]
+
+# Example: New Employee Onboarding Wizard
+ONBOARDING_WIZARD_STEPS = [
+    {"name": "Basic Info", "fields": ["name", "email", "phone"]},
+    {"name": "Job Details", "fields": ["title", "department", "manager"]},
+    {"name": "Documents", "fields": ["emirates_id", "visa", "passport"]},
+    {"name": "Bank Details", "fields": ["bank_name", "iban"]},
+    {"name": "Review", "fields": []},
+]
+```
+
+### 4.2 One-Click Common Tasks
+
+**Purpose:** Single-button actions for frequent HR tasks.
+
+```python
+def render_one_click_actions():
+    """Quick action buttons for the most common HR tasks."""
+    st.markdown("### ⚡ Quick Actions (One Click)")
+    
+    col1, col2, col3, col4 = st.columns(4)
+    
+    with col1:
+        if st.button("📧 Send Reminder\nEmails", use_container_width=True):
+            send_expiry_reminders()
+            st.success("Reminders sent!")
+    
+    with col2:
+        if st.button("📊 Generate\nMonthly Report", use_container_width=True):
+            generate_monthly_report()
+            st.success("Report generated!")
+    
+    with col3:
+        if st.button("📅 Check Today's\nBirthdays", use_container_width=True):
+            birthdays = get_todays_birthdays()
+            if birthdays:
+                st.info(f"🎂 {len(birthdays)} birthday(s) today!")
+            else:
+                st.info("No birthdays today")
+    
+    with col4:
+        if st.button("🔔 View All\nAlerts", use_container_width=True):
+            st.query_params["page"] = "alerts"
+            st.rerun()
+```
+
+### 4.3 Plain Language Error Messages
+
+**Purpose:** Replace technical jargon with friendly, actionable messages.
+
+```python
+# User-friendly error messages for non-technical HR
+FRIENDLY_ERROR_MESSAGES = {
+    "database_connection_failed": {
+        "title": "Connection Issue",
+        "message": "Cannot connect to the system right now.",
+        "action": "Please wait a few minutes and try again. If it continues, contact IT support.",
+        "icon": "🔌"
+    },
+    "file_upload_failed": {
+        "title": "Upload Problem",
+        "message": "The file couldn't be uploaded.",
+        "action": "Make sure the file is smaller than 5MB and is a PDF, JPG, or PNG.",
+        "icon": "📁"
+    },
+    "invalid_emirates_id": {
+        "title": "Emirates ID Error",
+        "message": "The Emirates ID format looks incorrect.",
+        "action": "Emirates ID should be 15 digits, like: 784-1990-1234567-1",
+        "icon": "🪪"
+    },
+    "session_expired": {
+        "title": "Session Timed Out",
+        "message": "You were logged out for security.",
+        "action": "Just click the 'Login' button to continue.",
+        "icon": "⏰"
+    }
+}
+
+def show_friendly_error(error_type):
+    error = FRIENDLY_ERROR_MESSAGES.get(error_type, {
+        "title": "Something went wrong",
+        "message": "An unexpected error occurred.",
+        "action": "Please try again or contact IT support if the problem persists.",
+        "icon": "⚠️"
+    })
+    
+    st.error(f"""
+    {error['icon']} **{error['title']}**
+    
+    {error['message']}
+    
+    **What to do:** {error['action']}
+    """)
+```
+
+### 4.4 Contextual Help Tooltips
+
+**Purpose:** Inline explanations without leaving the page.
+
+```python
+def render_field_with_help(label, help_text, field_type="text", **kwargs):
+    """Render input field with built-in help tooltip."""
+    st.markdown(f"""
+    <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
+        <span style="font-weight: 500;">{label}</span>
+        <span title="{help_text}" style="cursor: help; color: #3498db;">ℹ️</span>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    if field_type == "text":
+        return st.text_input(label, label_visibility="collapsed", **kwargs)
+    elif field_type == "date":
+        return st.date_input(label, label_visibility="collapsed", **kwargs)
+    elif field_type == "select":
+        return st.selectbox(label, label_visibility="collapsed", **kwargs)
+
+# Example usage
+emirates_id = render_field_with_help(
+    "Emirates ID",
+    "15-digit number on the front of the Emirates ID card (e.g., 784-1990-1234567-1)",
+    placeholder="784-XXXX-XXXXXXX-X"
+)
+```
+
+### 4.5 Smart Defaults & Auto-Fill
+
+**Purpose:** Pre-fill common values to reduce data entry.
+
+```python
+def get_smart_defaults():
+    """Return intelligent defaults based on context and history."""
+    today = datetime.now()
+    
+    return {
+        "contract_type": "Unlimited",  # Most common in UAE
+        "work_schedule": 6,  # 6 days/week standard
+        "overtime_type": "Offset Days",  # Common for salaried
+        "notice_period": "30 days",  # Standard UAE notice
+        "probation_period": "6 months",  # UAE standard
+        "annual_leave": 30,  # UAE labor law minimum after 1 year
+        "location": "Abu Dhabi",  # Company location
+        "currency": "AED",
+        "bank_country": "United Arab Emirates",
+        "visa_type": "Employment Visa",
+        "join_date": today,  # Default to today
+    }
+
+def render_form_with_smart_defaults():
+    defaults = get_smart_defaults()
+    
+    col1, col2 = st.columns(2)
+    with col1:
+        contract = st.selectbox(
+            "Contract Type",
+            ["Unlimited", "Limited (2 years)", "Limited (3 years)"],
+            index=0,  # Pre-select most common
+            help="Unlimited contracts are most common in UAE"
+        )
+    with col2:
+        notice = st.selectbox(
+            "Notice Period",
+            ["30 days", "60 days", "90 days"],
+            index=0,
+            help="Standard notice period is 30 days per UAE Labor Law"
+        )
+```
+
+### 4.6 Visual Status Indicators
+
+**Purpose:** Color-coded status that anyone can understand at a glance.
+
+```python
+def render_status_badge(status, context="general"):
+    """Render color-coded status badge with emoji."""
+    
+    status_config = {
+        # Document statuses
+        "valid": {"color": "#27ae60", "bg": "#d4edda", "icon": "✅", "text": "Valid"},
+        "expiring_soon": {"color": "#f39c12", "bg": "#fff3cd", "icon": "⚠️", "text": "Expiring Soon"},
+        "expired": {"color": "#e74c3c", "bg": "#f8d7da", "icon": "❌", "text": "Expired"},
+        
+        # Request statuses
+        "pending": {"color": "#f39c12", "bg": "#fff3cd", "icon": "⏳", "text": "Pending"},
+        "approved": {"color": "#27ae60", "bg": "#d4edda", "icon": "✅", "text": "Approved"},
+        "rejected": {"color": "#e74c3c", "bg": "#f8d7da", "icon": "❌", "text": "Rejected"},
+        
+        # Employee statuses
+        "active": {"color": "#27ae60", "bg": "#d4edda", "icon": "🟢", "text": "Active"},
+        "on_leave": {"color": "#3498db", "bg": "#cce5ff", "icon": "🏖️", "text": "On Leave"},
+        "terminated": {"color": "#6c757d", "bg": "#e2e3e5", "icon": "⬜", "text": "Terminated"},
+    }
+    
+    config = status_config.get(status.lower(), status_config["pending"])
+    
+    st.markdown(f"""
+    <span style="
+        background: {config['bg']};
+        color: {config['color']};
+        padding: 4px 12px;
+        border-radius: 16px;
+        font-size: 0.875rem;
+        font-weight: 500;
+    ">
+        {config['icon']} {config['text']}
+    </span>
+    """, unsafe_allow_html=True)
+```
+
+### 4.7 Daily Dashboard for Solo HR
+
+**Purpose:** Everything a solo HR needs to see each morning.
+
+```python
+def render_solo_hr_dashboard():
+    """Dashboard designed for solo HR - shows what needs attention today."""
+    
+    st.markdown("## 🌅 Good Morning! Here's Your Day")
+    st.caption(f"📅 {datetime.now().strftime('%A, %B %d, %Y')}")
+    
+    # Priority alerts at the top
+    st.markdown("### 🚨 Needs Your Attention Today")
+    
+    urgent_items = [
+        {"type": "danger", "text": "2 visas expire this week", "action": "Start renewal"},
+        {"type": "warning", "text": "3 leave requests pending approval", "action": "Review now"},
+        {"type": "info", "text": "Monthly report due in 2 days", "action": "Generate"},
+    ]
+    
+    for item in urgent_items:
+        col1, col2 = st.columns([4, 1])
+        with col1:
+            if item["type"] == "danger":
+                st.error(f"🔴 {item['text']}")
+            elif item["type"] == "warning":
+                st.warning(f"🟠 {item['text']}")
+            else:
+                st.info(f"🔵 {item['text']}")
+        with col2:
+            st.button(item["action"], key=f"action_{item['text'][:10]}")
+    
+    st.markdown("---")
+    
+    # Today's Quick Info
+    col1, col2, col3, col4 = st.columns(4)
+    
+    with col1:
+        st.metric("👥 Employees", "47", help="Total active employees")
+    with col2:
+        st.metric("🏖️ On Leave Today", "3", help="Employees on leave")
+    with col3:
+        st.metric("🎂 Birthdays", "1", help="Employee birthdays today")
+    with col4:
+        st.metric("📅 Interviews", "2", help="Scheduled for today")
+    
+    st.markdown("---")
+    
+    # Today's Schedule
+    st.markdown("### 📅 Today's Schedule")
+    
+    events = [
+        {"time": "10:00 AM", "event": "Interview - Ahmed (Electronics Engineer)", "type": "interview"},
+        {"time": "2:00 PM", "event": "New Employee Orientation - Fatima", "type": "onboarding"},
+        {"time": "4:00 PM", "event": "Monthly HR Review Meeting", "type": "meeting"},
+    ]
+    
+    for event in events:
+        st.markdown(f"⏰ **{event['time']}** - {event['event']}")
+```
+
+### 4.8 Checklists for Processes
+
+**Purpose:** Step-by-step checklists ensure nothing is missed.
+
+```python
+# Pre-built checklists for common HR processes
+HR_CHECKLISTS = {
+    "new_employee_onboarding": {
+        "name": "New Employee Onboarding",
+        "icon": "👋",
+        "steps": [
+            {"task": "Collect signed offer letter", "required": True},
+            {"task": "Collect passport copy", "required": True},
+            {"task": "Collect educational certificates", "required": True},
+            {"task": "Initiate visa application", "required": True},
+            {"task": "Schedule medical fitness test", "required": True},
+            {"task": "Prepare workstation", "required": False},
+            {"task": "Create email account", "required": True},
+            {"task": "Add to attendance system", "required": True},
+            {"task": "Schedule orientation", "required": True},
+            {"task": "Assign buddy/mentor", "required": False},
+        ]
+    },
+    "employee_exit": {
+        "name": "Employee Exit Checklist",
+        "icon": "👋",
+        "steps": [
+            {"task": "Receive resignation letter", "required": True},
+            {"task": "Calculate gratuity", "required": True},
+            {"task": "Calculate remaining leave balance", "required": True},
+            {"task": "Collect company assets (laptop, ID card, keys)", "required": True},
+            {"task": "Disable system access", "required": True},
+            {"task": "Cancel visa within 30 days", "required": True},
+            {"task": "Issue experience certificate", "required": True},
+            {"task": "Process final settlement", "required": True},
+            {"task": "Conduct exit interview", "required": False},
+        ]
+    },
+    "visa_renewal": {
+        "name": "Visa Renewal Checklist",
+        "icon": "📋",
+        "steps": [
+            {"task": "Check visa expiry date (start 60 days before)", "required": True},
+            {"task": "Collect updated passport copy", "required": True},
+            {"task": "Collect updated photo (white background)", "required": True},
+            {"task": "Schedule medical fitness test", "required": True},
+            {"task": "Submit to PRO for processing", "required": True},
+            {"task": "Pay visa renewal fees", "required": True},
+            {"task": "Collect new visa stamp", "required": True},
+            {"task": "Update employee records", "required": True},
+        ]
+    }
+}
+
+def render_checklist(checklist_id):
+    """Render interactive checklist with save state."""
+    checklist = HR_CHECKLISTS.get(checklist_id)
+    if not checklist:
+        return
+    
+    st.markdown(f"### {checklist['icon']} {checklist['name']}")
+    
+    completed = 0
+    for i, step in enumerate(checklist['steps']):
+        key = f"check_{checklist_id}_{i}"
+        required = "🔴" if step['required'] else "⚪"
+        
+        checked = st.checkbox(
+            f"{required} {step['task']}", 
+            key=key,
+            help="Required" if step['required'] else "Optional"
+        )
+        if checked:
+            completed += 1
+    
+    progress = completed / len(checklist['steps'])
+    st.progress(progress, text=f"{completed}/{len(checklist['steps'])} completed")
+```
+
+### 4.9 Simple Search & Find
+
+**Purpose:** Find anything with simple search.
+
+```python
+def render_global_search():
+    """Simple search that finds employees, documents, or requests."""
+    
+    search = st.text_input(
+        "🔍 Search anything...",
+        placeholder="Type employee name, ID, or document type",
+        help="Search for employees, documents, requests, or anything else"
+    )
+    
+    if search and len(search) >= 2:
+        st.markdown("### 🔍 Search Results")
+        
+        # Mock results - in production, query database
+        results = {
+            "employees": [
+                {"name": "Ahmed Al-Maktoum", "id": "EMP-001", "type": "Employee"},
+                {"name": "Fatima Hassan", "id": "EMP-002", "type": "Employee"},
+            ],
+            "documents": [
+                {"name": "Ahmed's Visa", "expiry": "2026-05-15", "type": "Visa"},
+            ],
+            "requests": [
+                {"name": "Leave Request #123", "status": "Pending", "type": "Leave"},
+            ]
+        }
+        
+        for category, items in results.items():
+            for item in items:
+                col1, col2 = st.columns([4, 1])
+                with col1:
+                    st.markdown(f"**{item['name']}** ({item['type']})")
+                with col2:
+                    st.button("View", key=f"view_{item.get('id', item['name'])}")
+```
+
+### 4.10 Simplified Reports
+
+**Purpose:** Pre-built reports that generate with one click.
+
+```python
+SIMPLE_REPORTS = {
+    "monthly_headcount": {
+        "name": "📊 Monthly Headcount Report",
+        "description": "Shows total employees, new hires, and exits this month",
+        "format": "PDF"
+    },
+    "document_expiry": {
+        "name": "📅 Document Expiry Report",
+        "description": "All documents expiring in the next 60 days",
+        "format": "Excel"
+    },
+    "leave_balance": {
+        "name": "🏖️ Leave Balance Report",
+        "description": "Current leave balance for all employees",
+        "format": "Excel"
+    },
+    "attendance_summary": {
+        "name": "⏰ Attendance Summary",
+        "description": "Monthly attendance and overtime summary",
+        "format": "PDF"
+    },
+    "gratuity_liability": {
+        "name": "💰 Gratuity Liability Report",
+        "description": "Total gratuity liability for all employees",
+        "format": "Excel"
+    }
+}
+
+def render_simple_reports():
+    st.markdown("### 📊 Generate Reports (One Click)")
+    st.caption("All reports are generated automatically. Just click to download.")
+    
+    for report_id, report in SIMPLE_REPORTS.items():
+        col1, col2, col3 = st.columns([3, 1, 1])
+        
+        with col1:
+            st.markdown(f"**{report['name']}**")
+            st.caption(report['description'])
+        
+        with col2:
+            st.markdown(f"📄 {report['format']}")
+        
+        with col3:
+            if st.button("Generate", key=f"gen_{report_id}"):
+                st.success(f"✅ {report['name']} generated!")
+                st.download_button(
+                    "📥 Download",
+                    data="Report content here",
+                    file_name=f"{report_id}_{datetime.now().strftime('%Y%m%d')}.{report['format'].lower()}",
+                    key=f"dl_{report_id}"
+                )
+```
+
+---
+
+## 🎯 Solo HR User Experience Principles
+
+### Design Guidelines
+
+| Principle | Implementation |
+|-----------|----------------|
+| **Minimal Clicks** | Most tasks completed in 1-3 clicks |
+| **Clear Language** | No technical jargon, plain English |
+| **Visual Feedback** | Immediate confirmation of all actions |
+| **Smart Defaults** | Pre-fill common values |
+| **Guided Workflows** | Step-by-step for complex tasks |
+| **Error Prevention** | Validation before submission |
+| **Easy Recovery** | Undo/cancel always available |
+
+### Task Complexity Levels
+
+| Task | Clicks | Time Target |
+|------|--------|-------------|
+| View employee info | 2 | 5 seconds |
+| Check document expiry | 1 | 3 seconds |
+| Approve leave request | 2 | 10 seconds |
+| Generate report | 1 | 5 seconds |
+| Add new employee | 5-7 (wizard) | 5 minutes |
+| Calculate gratuity | 2 | 30 seconds |
+
+### Recommended UI Elements for Non-Technical Users
+
+1. ✅ **Large, clear buttons** with icons and text
+2. ✅ **Color-coded status badges** (green=good, yellow=warning, red=urgent)
+3. ✅ **Progress indicators** for multi-step processes
+4. ✅ **Inline help tooltips** on every field
+5. ✅ **Confirmation dialogs** before destructive actions
+6. ✅ **Success/error toast notifications**
+7. ✅ **Breadcrumb navigation** so users never feel lost
+8. ✅ **Recent actions list** to find what they just did
+
+---
+
+## 📱 Mobile-First Considerations for Solo HR
+
+Solo HR often works on mobile devices. Key considerations:
+
+```css
+/* Mobile-friendly sizing */
+@media (max-width: 768px) {
+  .action-button {
+    min-height: 48px;  /* Easy to tap */
+    font-size: 16px;   /* Readable without zooming */
+  }
+  
+  .form-field {
+    font-size: 16px;   /* Prevents iOS zoom on focus */
+  }
+  
+  .table-cell {
+    padding: 12px 8px; /* Easier to tap rows */
+  }
+}
+```
+
+---
+
+*This section ensures the HR Portal is accessible and efficient for non-technical users managing HR operations solo.*

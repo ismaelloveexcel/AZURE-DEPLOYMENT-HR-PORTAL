@@ -24,6 +24,49 @@ st.set_page_config(
 APP_BASE_URL = os.environ.get("APP_URL", "http://localhost:5000")
 ADMIN_PASSWORD = os.environ.get("ADMIN_PASSWORD", "admin2026")
 
+# Portal Settings - Configurable by HR
+# These can be toggled on/off based on company requirements
+def get_portal_settings():
+    """Get portal settings with sensible defaults for solo HR."""
+    if 'portal_settings' not in st.session_state:
+        st.session_state.portal_settings = {
+            # WPS is OFF by default (company uses govt visa)
+            "wps_enabled": False,
+            "wps_exemption_reason": "Visa issued by government company",
+            
+            # Soft compliance - warn but don't block
+            "soft_compliance_mode": True,
+            
+            # Features toggles
+            "show_gratuity_calculator": True,
+            "show_document_expiry": True,
+            "show_leave_balance": True,
+            
+            # Notification settings
+            "email_notifications": True,
+            "document_expiry_alert_days": 60,
+        }
+    return st.session_state.portal_settings
+
+def show_compliance_warning(message, alert_type="warning", allow_proceed=True):
+    """
+    Show compliance warning but allow user to proceed (soft compliance).
+    This is an HR Portal, not a blocking HRIS.
+    """
+    if alert_type == "info":
+        st.info(f"ℹ️ {message}")
+    elif alert_type == "warning":
+        st.warning(f"⚠️ {message}")
+    elif alert_type == "alert":
+        st.error(f"🔴 {message}")
+        st.caption("📧 HR has been notified of this issue.")
+    
+    # Always allow proceed in soft compliance mode (default)
+    settings = get_portal_settings()
+    if settings.get("soft_compliance_mode", True):
+        return True
+    return allow_proceed
+
 def generate_pass_sequence():
     """Generate a unique sequence number for passes."""
     # In production, this should query the database for the next sequence
@@ -641,31 +684,168 @@ def render_sidebar():
                 st.query_params["page"] = "admin"
             st.rerun()
         
+        # Portal Settings
+        if st.button("⚙️ Portal Settings", use_container_width=True, key="quick_settings"):
+            if st.session_state.get('admin_authenticated'):
+                st.query_params["page"] = "portal_settings"
+            else:
+                st.query_params["page"] = "admin"
+            st.rerun()
+        
         st.divider()
         
         # Help Section
         with st.expander("❓ Need Help?"):
             st.markdown("""
-            **Keyboard Shortcuts:**
-            - `Home` → Go to home page
-            - `R` → Open Recruitment
+            **This is an HR Portal, not HRIS**
+            - Streamlines HR processes
+            - Provides UAE Labor Law guidance
+            - Warns but doesn't block actions
             
             **UAE Labor Law Resources:**
-            - Federal Law No. 8 of 1980
+            - Federal Decree-Law No. 33 of 2021 (New Labor Law)
+            - Federal Law No. 8 of 1980 (Gratuity calculations)
             - MOHRE Guidelines
             
             **Support:**
             Contact IT Support for technical issues.
-            
-            View QUICK_START.md and RECRUITMENT_SYSTEM_README.md files in the repository for detailed documentation.
             """)
         
         # Footer with version
         st.markdown('''
         <div style="position: fixed; bottom: 10px; left: 10px; font-size: 0.7em; color: #95a5a6;">
-            HR Portal v1.1.0 🇦🇪
+            HR Portal v1.2.0 🇦🇪
         </div>
         ''', unsafe_allow_html=True)
+
+def render_portal_settings():
+    """Portal settings page for HR to configure features."""
+    if 'admin_authenticated' not in st.session_state or not st.session_state.admin_authenticated:
+        st.query_params["page"] = "admin"
+        st.rerun()
+        return
+    
+    st.markdown('''
+    <div style="padding: 20px 0;">
+        <h2 style="color: #2c3e50; margin-bottom: 10px;">⚙️ Portal Settings</h2>
+        <p style="color: #7f8c8d;">Configure portal features to match your company's needs.</p>
+    </div>
+    ''', unsafe_allow_html=True)
+    
+    settings = get_portal_settings()
+    
+    # WPS Settings
+    st.markdown("### 💳 WPS (Wage Protection System)")
+    
+    wps_enabled = st.toggle(
+        "Enable WPS Module",
+        value=settings.get("wps_enabled", False),
+        help="Disable if your company is exempt from WPS (e.g., government-linked, certain free zones)"
+    )
+    
+    if not wps_enabled:
+        st.info("""
+        ℹ️ **WPS Module Disabled**
+        
+        This is appropriate if:
+        - Your visas are issued by a government company
+        - You're in a free zone with WPS exemption
+        - You have special arrangements with MOHRE
+        
+        Salaries can still be processed through your normal banking channels.
+        """)
+        
+        exemption_reason = st.text_input(
+            "Exemption Reason (for records)",
+            value=settings.get("wps_exemption_reason", ""),
+            placeholder="e.g., Visa issued by government company"
+        )
+        settings["wps_exemption_reason"] = exemption_reason
+    
+    settings["wps_enabled"] = wps_enabled
+    
+    st.markdown("---")
+    
+    # Compliance Mode
+    st.markdown("### 🔔 Compliance Behavior")
+    
+    soft_mode = st.toggle(
+        "Soft Compliance Mode (Recommended)",
+        value=settings.get("soft_compliance_mode", True),
+        help="When enabled, compliance issues show warnings but don't block actions"
+    )
+    
+    if soft_mode:
+        st.success("""
+        ✅ **Soft Compliance Mode Active**
+        
+        - Compliance issues will show warnings
+        - Users can still proceed with actions
+        - HR is notified of potential issues
+        - This is an HR Portal, not a blocking HRIS
+        """)
+    else:
+        st.warning("""
+        ⚠️ **Strict Compliance Mode**
+        
+        Some actions may be blocked if compliance requirements aren't met.
+        Only recommended for highly regulated environments.
+        """)
+    
+    settings["soft_compliance_mode"] = soft_mode
+    
+    st.markdown("---")
+    
+    # Document Expiry Alerts
+    st.markdown("### 📅 Document Expiry Alerts")
+    
+    alert_days = st.slider(
+        "Alert before expiry (days)",
+        min_value=30,
+        max_value=90,
+        value=settings.get("document_expiry_alert_days", 60),
+        help="How many days before expiry to start showing alerts"
+    )
+    settings["document_expiry_alert_days"] = alert_days
+    
+    st.markdown("---")
+    
+    # Feature Toggles
+    st.markdown("### 🎛️ Feature Toggles")
+    
+    col1, col2 = st.columns(2)
+    
+    with col1:
+        settings["show_gratuity_calculator"] = st.checkbox(
+            "💰 Gratuity Calculator",
+            value=settings.get("show_gratuity_calculator", True)
+        )
+        settings["show_document_expiry"] = st.checkbox(
+            "📋 Document Expiry Dashboard",
+            value=settings.get("show_document_expiry", True)
+        )
+    
+    with col2:
+        settings["show_leave_balance"] = st.checkbox(
+            "🏖️ Leave Balance Tracking",
+            value=settings.get("show_leave_balance", True)
+        )
+        settings["email_notifications"] = st.checkbox(
+            "📧 Email Notifications",
+            value=settings.get("email_notifications", True)
+        )
+    
+    # Save settings
+    st.session_state.portal_settings = settings
+    
+    st.markdown("---")
+    
+    st.success("✅ Settings are automatically saved")
+    
+    st.markdown('<br>', unsafe_allow_html=True)
+    if st.button("← Back to Dashboard", use_container_width=False, key="settings_back"):
+        st.query_params["page"] = "recruitment_dashboard"
+        st.rerun()
 
 def render_pass_generation():
     """Render pass generation page with improved UX."""
@@ -844,6 +1024,8 @@ def main():
         render_active_rrfs()
     elif page == "pass_generation":
         render_pass_generation()
+    elif page == "portal_settings":
+        render_portal_settings()
     elif page == "uae_compliance":
         render_uae_compliance()
     elif page == "gratuity_calculator":
@@ -864,12 +1046,18 @@ def render_uae_compliance():
         st.rerun()
         return
     
+    settings = get_portal_settings()
+    
     st.markdown('''
     <div style="padding: 20px 0;">
         <h2 style="color: #2c3e50; margin-bottom: 10px;">🇦🇪 UAE Compliance Dashboard</h2>
-        <p style="color: #7f8c8d;">Track document expirations and ensure UAE Labor Law compliance.</p>
+        <p style="color: #7f8c8d;">Track document expirations and ensure UAE Labor Law alignment.</p>
     </div>
     ''', unsafe_allow_html=True)
+    
+    # Show portal mode reminder
+    if settings.get("soft_compliance_mode", True):
+        st.info("ℹ️ **Soft Compliance Mode:** Issues shown as warnings only. Actions are not blocked.")
     
     # Document Expiry Overview
     st.markdown("### 📋 Document Expiry Status")
