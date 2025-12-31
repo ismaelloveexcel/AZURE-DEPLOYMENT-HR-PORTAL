@@ -1,187 +1,75 @@
-import { useEffect, useState } from 'react'
-import { createRenewal, getHealth, listRenewals } from './services/api'
-import type { RenewalRequest, RenewalResponse } from './types/renewal'
+import { useState } from 'react'
 
-const defaultForm: RenewalRequest = {
-  employee_name: '',
-  contract_end_date: '',
-  renewal_period_months: 12,
-}
+type Section = 'home' | 'employees' | 'onboarding' | 'external' | 'admin'
 
 function App() {
-  const [token, setToken] = useState('')
-  const [health, setHealth] = useState<string>('token required')
-  const [resolvedRole, setResolvedRole] = useState<string>('unknown')
-  const [renewals, setRenewals] = useState<RenewalResponse[]>([])
-  const [form, setForm] = useState<RenewalRequest>(defaultForm)
-  const [error, setError] = useState<string>('')
-  const [success, setSuccess] = useState<string>('')
+  const [activeSection, setActiveSection] = useState<Section>('home')
 
-  useEffect(() => {
-    if (!token) {
-      setHealth('token required')
-      setResolvedRole('unknown')
-      return
-    }
-
-    async function fetchHealth() {
-      try {
-        const response = await getHealth(token)
-        setHealth(response.status)
-        setResolvedRole(response.role)
-      } catch (err) {
-        setHealth('offline')
-        setResolvedRole('unknown')
-      }
-    }
-
-    fetchHealth()
-  }, [token])
-
-  useEffect(() => {
-    if (!token) {
-      setRenewals([])
-      return
-    }
-
-    async function fetchRenewals() {
-      try {
-        const items = await listRenewals(token)
-        setRenewals(items)
-      } catch (err) {
-        setRenewals([])
-      }
-    }
-
-    fetchRenewals()
-  }, [token])
-
-  const handleChange = (field: keyof RenewalRequest, value: string | number) => {
-    setForm((prev) => ({ ...prev, [field]: value }))
-  }
-
-  const handleSubmit = async (event: React.FormEvent) => {
-    event.preventDefault()
-    setError('')
-    setSuccess('')
-    if (!token) {
-      setError('Paste a bearer token first')
-      return
-    }
-
-    try {
-      const created = await createRenewal(token, form)
-      setRenewals((prev) => [...prev, created])
-      setSuccess('Renewal captured')
-      setForm(defaultForm)
-    } catch (err: any) {
-      setError(err?.message || 'Unable to submit')
-    }
+  if (activeSection !== 'home') {
+    return (
+      <div className="min-h-screen bg-gray-100 flex flex-col items-center justify-center p-8">
+        <div className="bg-white rounded-2xl shadow-lg p-8 max-w-2xl w-full text-center">
+          <h2 className="text-2xl font-semibold text-gray-800 mb-4 capitalize">{activeSection === 'external' ? 'External Users' : activeSection}</h2>
+          <p className="text-gray-600 mb-6">This section is under development.</p>
+          <button
+            onClick={() => setActiveSection('home')}
+            className="px-6 py-2 bg-emerald-500 text-white rounded-lg hover:bg-emerald-600 transition-colors"
+          >
+            Back to Home
+          </button>
+        </div>
+      </div>
+    )
   }
 
   return (
-    <div className="min-h-screen bg-slate-50">
-      <header className="bg-white shadow-sm">
-        <div className="mx-auto flex max-w-5xl items-center justify-between px-6 py-4">
-          <div>
-            <p className="text-xs uppercase tracking-wide text-slate-500">Secure Renewals</p>
-            <h1 className="text-2xl font-semibold text-slate-900">Internal Renewal Console</h1>
-          </div>
-          <div className="flex items-center gap-3">
-            <div className="flex flex-col text-sm text-slate-700">
-              <label className="text-xs text-slate-500" htmlFor="token">Bearer token</label>
-              <input
-                id="token"
-                className="w-72 rounded border border-slate-200 bg-white px-2 py-1 text-xs"
-                placeholder="Enter authentication token"
-                value={token}
-                onChange={(e) => setToken(e.target.value)}
-              />
-            </div>
-            <div className="flex flex-col text-xs text-slate-600">
-              <span className="rounded-full bg-emerald-50 px-3 py-1 font-medium text-emerald-700">API: {health}</span>
-              <span className="text-[11px] text-slate-500">Resolved role: {resolvedRole}</span>
-            </div>
-          </div>
-        </div>
-      </header>
+    <div className="min-h-screen bg-gray-100 flex flex-col items-center justify-center p-8">
+      <div className="text-center mb-12">
+        <p className="text-gray-600 text-lg tracking-wide mb-2">baynunah<span className="text-emerald-500">.</span></p>
+        <h1 className="text-4xl font-light tracking-widest text-gray-800">HR PORTAL</h1>
+      </div>
 
-      <main className="mx-auto grid max-w-5xl gap-6 px-6 py-8 md:grid-cols-3">
-        <section className="md:col-span-2">
-          <div className="rounded-lg bg-white p-5 shadow-sm">
-            <div className="flex items-center justify-between pb-4">
-              <h2 className="text-lg font-semibold text-slate-900">Renewal Requests</h2>
-              <p className="text-sm text-slate-500">Fetched via secured API</p>
-            </div>
-            <div className="divide-y divide-slate-100">
-              {renewals.length === 0 && (
-                <p className="py-3 text-sm text-slate-600">No renewals captured yet.</p>
-              )}
-              {renewals.map((renewal) => (
-                <div key={renewal.id} className="flex items-center justify-between py-3">
-                  <div>
-                    <p className="font-medium text-slate-900">{renewal.employee_name}</p>
-                    <p className="text-sm text-slate-500">
-                      Ends on {renewal.contract_end_date} • {renewal.renewal_period_months} months
-                    </p>
-                  </div>
-                  <span className="rounded-full bg-blue-50 px-3 py-1 text-xs font-medium uppercase tracking-wide text-blue-700">
-                    {renewal.status}
-                  </span>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
+      <div className="grid grid-cols-2 gap-4 w-80">
+        <button
+          onClick={() => setActiveSection('employees')}
+          className="bg-white rounded-tl-[4rem] rounded-tr-lg rounded-bl-lg rounded-br-lg shadow-lg p-6 flex flex-col items-center justify-center hover:shadow-xl transition-shadow aspect-square"
+        >
+          <svg className="w-10 h-10 text-emerald-500 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+          </svg>
+          <span className="text-xs font-medium text-gray-700 uppercase tracking-wide">Employees</span>
+        </button>
 
-        <section>
-          <div className="rounded-lg bg-white p-5 shadow-sm">
-            <h2 className="text-lg font-semibold text-slate-900">New Renewal</h2>
-            <p className="text-sm text-slate-500">Admin & HR roles can submit.</p>
-            {error && <p className="mt-3 rounded bg-rose-50 px-3 py-2 text-sm text-rose-700">{error}</p>}
-            {success && <p className="mt-3 rounded bg-emerald-50 px-3 py-2 text-sm text-emerald-700">{success}</p>}
-            <form className="mt-4 space-y-3" onSubmit={handleSubmit}>
-              <div>
-                <label className="block text-sm font-medium text-slate-700">Employee name</label>
-                <input
-                  className="mt-1 w-full rounded border border-slate-200 px-3 py-2 text-sm"
-                  value={form.employee_name}
-                  onChange={(e) => handleChange('employee_name', e.target.value)}
-                  required
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-slate-700">Contract end date</label>
-                <input
-                  type="date"
-                  className="mt-1 w-full rounded border border-slate-200 px-3 py-2 text-sm"
-                  value={form.contract_end_date}
-                  onChange={(e) => handleChange('contract_end_date', e.target.value)}
-                  required
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-slate-700">Renewal length (months)</label>
-                <input
-                  type="number"
-                  min={1}
-                  max={36}
-                  className="mt-1 w-full rounded border border-slate-200 px-3 py-2 text-sm"
-                  value={form.renewal_period_months}
-                  onChange={(e) => handleChange('renewal_period_months', Number(e.target.value))}
-                  required
-                />
-              </div>
-              <button
-                type="submit"
-                className="w-full rounded bg-emerald-600 px-3 py-2 text-sm font-semibold text-white shadow hover:bg-emerald-700"
-              >
-                Submit request
-              </button>
-            </form>
-          </div>
-        </section>
-      </main>
+        <button
+          onClick={() => setActiveSection('onboarding')}
+          className="bg-white rounded-tr-[4rem] rounded-tl-lg rounded-bl-lg rounded-br-lg shadow-lg p-6 flex flex-col items-center justify-center hover:shadow-xl transition-shadow aspect-square"
+        >
+          <svg className="w-10 h-10 text-emerald-500 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
+          </svg>
+          <span className="text-xs font-medium text-gray-700 uppercase tracking-wide">Onboarding</span>
+        </button>
+
+        <button
+          onClick={() => setActiveSection('external')}
+          className="bg-white rounded-bl-[4rem] rounded-tl-lg rounded-tr-lg rounded-br-lg shadow-lg p-6 flex flex-col items-center justify-center hover:shadow-xl transition-shadow aspect-square"
+        >
+          <svg className="w-10 h-10 text-emerald-500 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" />
+          </svg>
+          <span className="text-xs font-medium text-gray-700 uppercase tracking-wide text-center">External<br/>Users</span>
+        </button>
+
+        <button
+          onClick={() => setActiveSection('admin')}
+          className="bg-white rounded-br-[4rem] rounded-tl-lg rounded-tr-lg rounded-bl-lg shadow-lg p-6 flex flex-col items-center justify-center hover:shadow-xl transition-shadow aspect-square"
+        >
+          <svg className="w-10 h-10 text-emerald-500 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+          </svg>
+          <span className="text-xs font-medium text-gray-700 uppercase tracking-wide">Admin</span>
+        </button>
+      </div>
     </div>
   )
 }
