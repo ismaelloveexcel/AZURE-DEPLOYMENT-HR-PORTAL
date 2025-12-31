@@ -10,34 +10,34 @@ async function handleResponse<T>(response: Response): Promise<T> {
   return response.json() as Promise<T>
 }
 
-function authHeaders(token: string): Record<string, string> {
-  if (!token) {
-    throw new Error('Missing auth token')
+function roleHeaders(role: string): Record<string, string> {
+  if (!role) {
+    throw new Error('Missing role header')
   }
 
-  return { Authorization: `Bearer ${token}` }
+  return { 'X-Role': role }
 }
 
-export async function getHealth(token: string): Promise<{ status: string; role: string }> {
+export async function getHealth(role: string): Promise<{ status: string; role: string }> {
   const response = await fetch(`${API_BASE_URL}/health`, {
-    headers: authHeaders(token),
+    headers: roleHeaders(role),
   })
   return handleResponse(response)
 }
 
-export async function listRenewals(token: string): Promise<RenewalResponse[]> {
+export async function listRenewals(role: string): Promise<RenewalResponse[]> {
   const response = await fetch(`${API_BASE_URL}/renewals`, {
-    headers: authHeaders(token),
+    headers: roleHeaders(role),
   })
   return handleResponse(response)
 }
 
-export async function createRenewal(token: string, data: RenewalRequest): Promise<RenewalResponse> {
+export async function createRenewal(role: string, data: RenewalRequest): Promise<RenewalResponse> {
   const response = await fetch(`${API_BASE_URL}/renewals`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      ...authHeaders(token),
+      ...roleHeaders(role),
     },
     body: JSON.stringify(data),
   })
