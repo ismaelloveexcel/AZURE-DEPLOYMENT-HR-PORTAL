@@ -588,6 +588,21 @@ def render_sidebar():
                 st.query_params["page"] = "admin"
             st.rerun()
         
+        # UAE Compliance Section
+        if st.button("🇦🇪 UAE Compliance", use_container_width=True, key="nav_compliance"):
+            if st.session_state.get('admin_authenticated'):
+                st.query_params["page"] = "uae_compliance"
+            else:
+                st.query_params["page"] = "admin"
+            st.rerun()
+        
+        if st.button("💰 Gratuity Calculator", use_container_width=True, key="nav_gratuity"):
+            if st.session_state.get('admin_authenticated'):
+                st.query_params["page"] = "gratuity_calculator"
+            else:
+                st.query_params["page"] = "admin"
+            st.rerun()
+        
         st.divider()
         
         # Quick Stats Section
@@ -597,6 +612,15 @@ def render_sidebar():
             st.metric("Open RRFs", "2", help="Active recruitment requests")
         with col2:
             st.metric("Pending", "0", help="Submissions awaiting review")
+        
+        # UAE Compliance Stats
+        st.markdown("### 🇦🇪 Compliance")
+        col1, col2 = st.columns(2)
+        with col1:
+            st.metric("🔴 Expiring", "2", delta="-3 from last month", delta_color="inverse", 
+                     help="Documents expiring in 30 days")
+        with col2:
+            st.metric("🟢 Valid", "45", help="All documents valid")
         
         st.divider()
         
@@ -626,6 +650,10 @@ def render_sidebar():
             - `Home` → Go to home page
             - `R` → Open Recruitment
             
+            **UAE Labor Law Resources:**
+            - Federal Law No. 8 of 1980
+            - MOHRE Guidelines
+            
             **Support:**
             Contact IT Support for technical issues.
             
@@ -635,7 +663,7 @@ def render_sidebar():
         # Footer with version
         st.markdown('''
         <div style="position: fixed; bottom: 10px; left: 10px; font-size: 0.7em; color: #95a5a6;">
-            HR Portal v1.0.0
+            HR Portal v1.1.0 🇦🇪
         </div>
         ''', unsafe_allow_html=True)
 
@@ -816,6 +844,10 @@ def main():
         render_active_rrfs()
     elif page == "pass_generation":
         render_pass_generation()
+    elif page == "uae_compliance":
+        render_uae_compliance()
+    elif page == "gratuity_calculator":
+        render_gratuity_calculator()
     elif page == "insurance_renewal":
         render_insurance_renewal()
     elif page == "life_insurance":
@@ -824,6 +856,303 @@ def main():
         render_medical_insurance()
     else:
         render_home()
+
+def render_uae_compliance():
+    """UAE Compliance Dashboard - Document expiry tracking and compliance status."""
+    if 'admin_authenticated' not in st.session_state or not st.session_state.admin_authenticated:
+        st.query_params["page"] = "admin"
+        st.rerun()
+        return
+    
+    st.markdown('''
+    <div style="padding: 20px 0;">
+        <h2 style="color: #2c3e50; margin-bottom: 10px;">🇦🇪 UAE Compliance Dashboard</h2>
+        <p style="color: #7f8c8d;">Track document expirations and ensure UAE Labor Law compliance.</p>
+    </div>
+    ''', unsafe_allow_html=True)
+    
+    # Document Expiry Overview
+    st.markdown("### 📋 Document Expiry Status")
+    
+    col1, col2, col3, col4 = st.columns(4)
+    
+    with col1:
+        st.metric(
+            label="🔴 Expired",
+            value="0",
+            help="Documents already expired - URGENT"
+        )
+    
+    with col2:
+        st.metric(
+            label="🟠 <30 Days",
+            value="2",
+            delta="-1",
+            delta_color="inverse",
+            help="Expiring within 30 days"
+        )
+    
+    with col3:
+        st.metric(
+            label="🟡 <60 Days",
+            value="5",
+            help="Expiring within 60 days"
+        )
+    
+    with col4:
+        st.metric(
+            label="🟢 Valid",
+            value="45",
+            help="Valid for 60+ days"
+        )
+    
+    st.markdown("---")
+    
+    # Document Types Breakdown
+    st.markdown("### 📄 Documents by Type")
+    
+    documents = [
+        {"type": "Emirates ID", "icon": "🪪", "expiring_30": 1, "expiring_60": 2, "valid": 44},
+        {"type": "UAE Visa", "icon": "📋", "expiring_30": 1, "expiring_60": 1, "valid": 45},
+        {"type": "Labor Card", "icon": "💼", "expiring_30": 0, "expiring_60": 1, "valid": 46},
+        {"type": "Medical Fitness", "icon": "🏥", "expiring_30": 0, "expiring_60": 1, "valid": 46},
+        {"type": "Passport", "icon": "📕", "expiring_30": 0, "expiring_60": 0, "valid": 47},
+    ]
+    
+    for doc in documents:
+        col1, col2, col3, col4, col5 = st.columns([3, 1, 1, 1, 2])
+        with col1:
+            st.write(f"{doc['icon']} **{doc['type']}**")
+        with col2:
+            if doc['expiring_30'] > 0:
+                st.error(f"🔴 {doc['expiring_30']}")
+            else:
+                st.write("✅ 0")
+        with col3:
+            if doc['expiring_60'] > 0:
+                st.warning(f"🟠 {doc['expiring_60']}")
+            else:
+                st.write("✅ 0")
+        with col4:
+            st.success(f"🟢 {doc['valid']}")
+        with col5:
+            progress = doc['valid'] / (doc['valid'] + doc['expiring_30'] + doc['expiring_60'])
+            st.progress(progress)
+    
+    st.markdown("---")
+    
+    # UAE Public Holidays 2026
+    st.markdown("### 🗓️ UAE Public Holidays 2026")
+    
+    holidays = [
+        {"name": "New Year's Day", "date": "Jan 1", "days": 1},
+        {"name": "Eid Al Fitr (Expected)", "date": "Mar 20-23", "days": 4},
+        {"name": "Eid Al Adha (Expected)", "date": "May 27-30", "days": 4},
+        {"name": "Islamic New Year", "date": "Jun 17", "days": 1},
+        {"name": "Prophet's Birthday", "date": "Aug 26", "days": 1},
+        {"name": "Commemoration Day", "date": "Nov 30", "days": 1},
+        {"name": "UAE National Day", "date": "Dec 2-3", "days": 2},
+    ]
+    
+    for holiday in holidays:
+        col1, col2, col3 = st.columns([3, 2, 1])
+        with col1:
+            st.write(f"🎉 **{holiday['name']}**")
+        with col2:
+            st.write(f"📅 {holiday['date']}")
+        with col3:
+            st.write(f"{holiday['days']} day(s)")
+    
+    st.markdown("---")
+    
+    # UAE Leave Types Reference
+    st.markdown("### 📚 UAE Leave Types (Labor Law Reference)")
+    
+    leave_types = [
+        {"type": "Annual Leave", "days": 30, "article": "Article 29", "condition": "After 1 year of service"},
+        {"type": "Sick Leave", "days": 90, "article": "Article 31", "condition": "15 full + 30 half + 45 unpaid"},
+        {"type": "Maternity Leave", "days": 60, "article": "Article 30", "condition": "45 full pay + 15 half pay"},
+        {"type": "Paternity Leave", "days": 5, "article": "Law No. 6/2020", "condition": "Within 1 month of birth"},
+        {"type": "Hajj Leave", "days": 30, "article": "Custom", "condition": "Once during employment"},
+        {"type": "Compassionate", "days": 5, "article": "Article 32", "condition": "Death of close relative"},
+    ]
+    
+    for leave in leave_types:
+        with st.expander(f"📅 {leave['type']} - {leave['days']} days"):
+            st.markdown(f"""
+            - **Legal Reference:** {leave['article']}
+            - **Entitlement:** {leave['days']} days
+            - **Conditions:** {leave['condition']}
+            """)
+    
+    st.markdown('<br>', unsafe_allow_html=True)
+    if st.button("← Back to Dashboard", use_container_width=False, key="compliance_back"):
+        st.query_params["page"] = "recruitment_dashboard"
+        st.rerun()
+
+def calculate_uae_gratuity(basic_salary: float, years_of_service: float) -> dict:
+    """
+    Calculate UAE End of Service Gratuity per Federal Law No. 8 of 1980.
+    
+    Rules:
+    - First 5 years: 21 days basic salary per year
+    - After 5 years: 30 days basic salary per year
+    - Maximum: 2 years' total salary
+    """
+    if years_of_service < 1:
+        return {"total": 0, "first_tier": 0, "second_tier": 0, "daily_rate": 0}
+    
+    daily_rate = basic_salary / 30
+    
+    # First 5 years: 21 days per year
+    years_first_tier = min(years_of_service, 5)
+    gratuity_first = years_first_tier * 21 * daily_rate
+    
+    # After 5 years: 30 days per year
+    years_second_tier = max(0, years_of_service - 5)
+    gratuity_second = years_second_tier * 30 * daily_rate
+    
+    total_gratuity = gratuity_first + gratuity_second
+    
+    # Cap at 2 years' salary
+    max_gratuity = basic_salary * 24
+    final_gratuity = min(total_gratuity, max_gratuity)
+    
+    return {
+        "total": final_gratuity,
+        "first_tier": gratuity_first,
+        "second_tier": gratuity_second,
+        "daily_rate": daily_rate,
+        "years_first_tier": years_first_tier,
+        "years_second_tier": years_second_tier,
+        "capped": total_gratuity > max_gratuity
+    }
+
+def render_gratuity_calculator():
+    """UAE End of Service Gratuity Calculator per Federal Law No. 8 of 1980."""
+    if 'admin_authenticated' not in st.session_state or not st.session_state.admin_authenticated:
+        st.query_params["page"] = "admin"
+        st.rerun()
+        return
+    
+    st.markdown('''
+    <div style="padding: 20px 0;">
+        <h2 style="color: #2c3e50; margin-bottom: 10px;">💰 End of Service Gratuity Calculator</h2>
+        <p style="color: #7f8c8d;">Calculate gratuity per UAE Federal Law No. 8 of 1980 (as amended).</p>
+    </div>
+    ''', unsafe_allow_html=True)
+    
+    # Legal Reference
+    st.info("""
+    **📚 UAE Gratuity Rules (Federal Law No. 8 of 1980):**
+    - **First 5 years:** 21 days of basic salary per year
+    - **After 5 years:** 30 days of basic salary per year  
+    - **Maximum:** Total gratuity cannot exceed 2 years' salary
+    - **Minimum tenure:** 1 year required for eligibility
+    """)
+    
+    st.markdown("---")
+    
+    col1, col2 = st.columns(2)
+    
+    with col1:
+        basic_salary = st.number_input(
+            "Basic Salary (AED/month) *", 
+            min_value=0, 
+            max_value=500000,
+            value=10000,
+            step=500,
+            help="Enter monthly basic salary (excluding allowances)"
+        )
+        
+        years = st.number_input(
+            "Years of Service *", 
+            min_value=0.0, 
+            max_value=50.0, 
+            value=5.0, 
+            step=0.5,
+            help="Enter total years worked"
+        )
+    
+    with col2:
+        contract_type = st.selectbox(
+            "Contract Type",
+            ["Limited (Fixed Term)", "Unlimited"],
+            help="Type of employment contract (affects resignation rules)"
+        )
+        
+        termination = st.selectbox(
+            "Termination By",
+            ["Employer", "Employee (Resigned)"],
+            help="Who initiated the termination (may affect pro-rata calculation)"
+        )
+    
+    st.markdown("---")
+    
+    # Note about contract type and termination
+    if termination == "Employee (Resigned)" and years < 5:
+        st.warning("""
+        ⚠️ **Note:** If employee resigns before completing 5 years, gratuity may be pro-rated:
+        - 1-3 years: 1/3 of gratuity
+        - 3-5 years: 2/3 of gratuity
+        - 5+ years: Full gratuity
+        
+        The calculation below shows the full entitlement. Consult HR for the final amount.
+        """)
+    
+    if st.button("Calculate Gratuity", type="primary", use_container_width=True):
+        if basic_salary > 0 and years >= 1:
+            result = calculate_uae_gratuity(basic_salary, years)
+            
+            st.success(f"### 💵 Estimated Gratuity: **AED {result['total']:,.2f}**")
+            
+            col1, col2, col3 = st.columns(3)
+            
+            with col1:
+                st.metric("Daily Rate", f"AED {result['daily_rate']:,.2f}")
+            
+            with col2:
+                st.metric("First 5 Years", f"AED {result['first_tier']:,.2f}")
+            
+            with col3:
+                st.metric("After 5 Years", f"AED {result['second_tier']:,.2f}")
+            
+            if result['capped']:
+                st.warning("⚠️ Gratuity has been capped at 2 years' salary as per UAE law.")
+            
+            st.markdown("---")
+            st.markdown("#### 📊 Calculation Breakdown")
+            st.markdown(f"""
+            | Component | Calculation | Amount |
+            |-----------|-------------|--------|
+            | Daily Rate | AED {basic_salary:,.0f} ÷ 30 days | AED {result['daily_rate']:,.2f} |
+            | First Tier | {result['years_first_tier']:.1f} years × 21 days × AED {result['daily_rate']:,.2f} | AED {result['first_tier']:,.2f} |
+            | Second Tier | {result['years_second_tier']:.1f} years × 30 days × AED {result['daily_rate']:,.2f} | AED {result['second_tier']:,.2f} |
+            | **Total** | | **AED {result['total']:,.2f}** |
+            """)
+            
+        elif years < 1:
+            st.error("❌ Employee must complete at least 1 year of service to be eligible for gratuity.")
+        else:
+            st.error("❌ Please enter a valid basic salary.")
+    
+    st.markdown("---")
+    
+    # Quick Reference Table
+    with st.expander("📋 Quick Gratuity Reference Table"):
+        st.markdown("""
+        | Years of Service | Gratuity Formula |
+        |-----------------|------------------|
+        | < 1 year | Not eligible |
+        | 1-5 years | 21 days × years × (basic salary ÷ 30) |
+        | 5+ years | (21 × 5) + (30 × remaining years) × daily rate |
+        | Maximum | 24 months' basic salary |
+        """)
+    
+    st.markdown('<br>', unsafe_allow_html=True)
+    if st.button("← Back to Dashboard", use_container_width=False, key="gratuity_back"):
+        st.query_params["page"] = "recruitment_dashboard"
+        st.rerun()
 
 if __name__ == "__main__":
     main()

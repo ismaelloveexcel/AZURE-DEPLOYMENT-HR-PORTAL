@@ -681,3 +681,528 @@ After implementing these changes, measure:
 ---
 
 *This document provides a roadmap for improving the HR Portal. Start with Phase 1 quick wins and progressively implement additional features based on user feedback.*
+
+---
+
+## 🇦🇪 Part 3: UAE-Specific Enhancements
+
+Based on common practices in UAE recruitment portals and employee self-service systems, the following enhancements are recommended:
+
+### 3.1 Document Expiry Dashboard (Critical for UAE Compliance)
+
+**Purpose:** UAE labor law requires valid Emirates ID, Visa, Labor Card, and Medical Fitness for all employees.
+
+```python
+# Add to app.py - Document Expiry Tracker
+def render_document_expiry_dashboard():
+    st.markdown("### 🇦🇪 UAE Document Expiry Tracker")
+    
+    # Color-coded expiry alerts
+    col1, col2, col3, col4 = st.columns(4)
+    
+    with col1:
+        st.metric(
+            label="🔴 Expired",
+            value="0",
+            help="Documents already expired - URGENT ACTION REQUIRED"
+        )
+    
+    with col2:
+        st.metric(
+            label="🟠 Expiring <30 Days",
+            value="2",
+            help="Documents expiring within 30 days"
+        )
+    
+    with col3:
+        st.metric(
+            label="🟡 Expiring <60 Days", 
+            value="5",
+            help="Documents expiring within 60 days"
+        )
+    
+    with col4:
+        st.metric(
+            label="🟢 Valid",
+            value="45",
+            help="All documents valid for 60+ days"
+        )
+    
+    # Document type breakdown
+    st.markdown("#### Document Status by Type")
+    
+    documents = [
+        {"type": "Emirates ID", "expiring": 3, "icon": "🪪"},
+        {"type": "UAE Visa", "expiring": 2, "icon": "📋"},
+        {"type": "Labor Card", "expiring": 1, "icon": "💼"},
+        {"type": "Medical Fitness", "expiring": 4, "icon": "🏥"},
+        {"type": "Passport", "expiring": 2, "icon": "📕"},
+    ]
+    
+    for doc in documents:
+        st.progress(0.85, text=f"{doc['icon']} {doc['type']}: {doc['expiring']} expiring soon")
+```
+
+### 3.2 WPS (Wage Protection System) Integration
+
+**Purpose:** UAE mandates salary payments through WPS for all private sector employees.
+
+```python
+# WPS Compliance Checklist
+WPS_REQUIREMENTS = {
+    "bank_iban": "Valid UAE Bank IBAN (23 characters)",
+    "employee_mol_number": "Ministry of Labor Registration",
+    "salary_amount": "Monthly salary as per contract",
+    "establishment_id": "Company MOL Establishment ID"
+}
+
+def render_wps_status():
+    st.markdown("### 💳 WPS Compliance Status")
+    
+    st.success("✅ All employees registered in WPS")
+    st.info("📅 Next payroll date: January 28, 2026")
+    
+    # WPS File Generation
+    if st.button("📄 Generate WPS File (.SIF)", type="primary"):
+        st.success("WPS SIF file generated successfully!")
+        st.download_button(
+            label="Download SIF File",
+            data="WPS_FILE_CONTENT",
+            file_name=f"WPS_{datetime.now().strftime('%Y%m')}.sif",
+            mime="text/plain"
+        )
+```
+
+### 3.3 End of Service Gratuity Calculator
+
+**Purpose:** UAE Labor Law mandates end-of-service gratuity based on tenure.
+
+```python
+def calculate_gratuity(basic_salary: float, years_of_service: float, 
+                       contract_type: str = "limited", 
+                       termination_type: str = "employer") -> float:
+    """
+    Calculate UAE End of Service Gratuity per Federal Law No. 8 of 1980
+    
+    Rules:
+    - First 5 years: 21 days basic salary per year
+    - After 5 years: 30 days basic salary per year
+    - Maximum: 2 years' total salary
+    """
+    if years_of_service < 1:
+        return 0.0
+    
+    daily_rate = basic_salary / 30
+    
+    # First 5 years: 21 days per year
+    years_first_tier = min(years_of_service, 5)
+    gratuity_first = years_first_tier * 21 * daily_rate
+    
+    # After 5 years: 30 days per year
+    years_second_tier = max(0, years_of_service - 5)
+    gratuity_second = years_second_tier * 30 * daily_rate
+    
+    total_gratuity = gratuity_first + gratuity_second
+    
+    # Cap at 2 years' salary
+    max_gratuity = basic_salary * 24
+    
+    return min(total_gratuity, max_gratuity)
+
+def render_gratuity_calculator():
+    st.markdown("### 💰 End of Service Gratuity Calculator")
+    st.caption("Per UAE Federal Law No. 8 of 1980 (as amended)")
+    
+    col1, col2 = st.columns(2)
+    
+    with col1:
+        basic_salary = st.number_input("Basic Salary (AED)", min_value=0, value=10000)
+        years = st.number_input("Years of Service", min_value=0.0, max_value=50.0, value=5.0, step=0.5)
+    
+    with col2:
+        contract_type = st.selectbox("Contract Type", ["Limited", "Unlimited"])
+        termination = st.selectbox("Termination By", ["Employer", "Employee (Resigned)"])
+    
+    if st.button("Calculate Gratuity"):
+        gratuity = calculate_gratuity(basic_salary, years, contract_type.lower(), termination.lower())
+        st.success(f"**Estimated Gratuity: AED {gratuity:,.2f}**")
+        
+        st.markdown(f"""
+        **Calculation Breakdown:**
+        - Daily Rate: AED {basic_salary/30:,.2f}
+        - First 5 years (21 days/year): AED {min(years, 5) * 21 * (basic_salary/30):,.2f}
+        - After 5 years (30 days/year): AED {max(0, years-5) * 30 * (basic_salary/30):,.2f}
+        """)
+```
+
+### 3.4 Leave Management with UAE Labor Law Compliance
+
+**Purpose:** Implement leave types per UAE Federal Law with automatic balance calculation.
+
+```python
+UAE_LEAVE_TYPES = {
+    "annual": {
+        "name": "Annual Leave",
+        "days": 30,
+        "article": "Article 29",
+        "conditions": "After 1 year of service",
+        "carry_forward": True,
+        "max_carry": 30
+    },
+    "sick": {
+        "name": "Sick Leave",
+        "days": 90,
+        "article": "Article 31",
+        "conditions": "Medical certificate required after 2 days",
+        "payment": "15 days full, 30 days half, 45 days unpaid"
+    },
+    "maternity": {
+        "name": "Maternity Leave",
+        "days": 60,
+        "article": "Article 30",
+        "conditions": "45 days full pay + 15 days half pay"
+    },
+    "paternity": {
+        "name": "Paternity Leave", 
+        "days": 5,
+        "article": "Federal Law No. 6/2020",
+        "conditions": "Within first month of child's birth"
+    },
+    "hajj": {
+        "name": "Hajj Leave",
+        "days": 30,
+        "article": "Custom Policy",
+        "conditions": "Once during employment tenure"
+    },
+    "compassionate": {
+        "name": "Compassionate Leave",
+        "days": 5,
+        "article": "Article 32",
+        "conditions": "Death of spouse/parent/child"
+    },
+    "study": {
+        "name": "Study Leave",
+        "days": 10,
+        "article": "Custom Policy",
+        "conditions": "UAE-registered institution"
+    }
+}
+
+def render_leave_request_form():
+    st.markdown("### 📅 Leave Request")
+    
+    leave_type = st.selectbox("Leave Type", list(UAE_LEAVE_TYPES.keys()))
+    leave_info = UAE_LEAVE_TYPES[leave_type]
+    
+    # Show leave policy info
+    st.info(f"""
+    **{leave_info['name']}** ({leave_info['article']})
+    - Entitlement: {leave_info['days']} days/year
+    - Conditions: {leave_info['conditions']}
+    """)
+    
+    col1, col2 = st.columns(2)
+    with col1:
+        start_date = st.date_input("Start Date")
+    with col2:
+        end_date = st.date_input("End Date")
+    
+    # Auto-calculate working days (excluding Fridays/public holidays)
+    if start_date and end_date:
+        working_days = calculate_working_days(start_date, end_date)
+        st.metric("Working Days", working_days)
+    
+    # Document upload for sick leave
+    if leave_type == "sick":
+        st.file_uploader("Medical Certificate (Required)", type=["pdf", "jpg", "png"])
+
+def calculate_working_days(start_date, end_date):
+    """Calculate working days between two dates, excluding Fridays (UAE weekend)."""
+    from datetime import timedelta
+    working_days = 0
+    current = start_date
+    while current <= end_date:
+        # Friday = 4 in Python's weekday() (0=Monday)
+        if current.weekday() != 4:  # Exclude Friday
+            working_days += 1
+        current += timedelta(days=1)
+    return working_days
+```
+
+### 3.5 Public Holiday Calendar (UAE)
+
+**Purpose:** Display UAE public holidays for leave planning.
+
+```python
+UAE_PUBLIC_HOLIDAYS_2026 = [
+    {"name": "New Year's Day", "date": "2026-01-01", "days": 1},
+    {"name": "Eid Al Fitr", "date": "2026-03-20", "days": 4},  # Approximate
+    {"name": "Eid Al Adha", "date": "2026-05-27", "days": 4},  # Approximate
+    {"name": "Islamic New Year", "date": "2026-06-17", "days": 1},
+    {"name": "Prophet's Birthday", "date": "2026-08-26", "days": 1},
+    {"name": "Commemoration Day", "date": "2026-11-30", "days": 1},
+    {"name": "UAE National Day", "date": "2026-12-02", "days": 2},
+]
+
+def render_holiday_calendar():
+    st.markdown("### 🗓️ UAE Public Holidays 2026")
+    
+    for holiday in UAE_PUBLIC_HOLIDAYS_2026:
+        col1, col2, col3 = st.columns([3, 2, 1])
+        with col1:
+            st.write(f"🎉 **{holiday['name']}**")
+        with col2:
+            st.write(holiday['date'])
+        with col3:
+            st.write(f"{holiday['days']} day(s)")
+```
+
+### 3.6 Recruitment Pipeline with UAE Visa Tracking
+
+**Purpose:** Track visa application status for new hires.
+
+```python
+UAE_HIRING_PIPELINE = [
+    {"stage": 1, "name": "Application Received", "days_typical": 1},
+    {"stage": 2, "name": "HR Screening", "days_typical": 3},
+    {"stage": 3, "name": "Technical Interview", "days_typical": 7},
+    {"stage": 4, "name": "Final Interview", "days_typical": 3},
+    {"stage": 5, "name": "Offer Extended", "days_typical": 2},
+    {"stage": 6, "name": "Offer Accepted", "days_typical": 3},
+    {"stage": 7, "name": "Visa Application", "days_typical": 14},  # UAE-specific
+    {"stage": 8, "name": "Medical Fitness", "days_typical": 3},   # UAE-specific
+    {"stage": 9, "name": "Emirates ID", "days_typical": 7},       # UAE-specific
+    {"stage": 10, "name": "Onboarding", "days_typical": 1},
+]
+
+VISA_DOCUMENT_CHECKLIST = [
+    "✅ Passport copy (valid 6+ months)",
+    "✅ Passport-sized photos (white background)",
+    "✅ Educational certificates (attested)",
+    "✅ Experience certificates",
+    "✅ Medical fitness certificate",
+    "✅ Security clearance (if applicable)",
+    "✅ Salary certificate from previous employer",
+    "✅ Entry permit application",
+]
+```
+
+### 3.7 Arabic Language Support (RTL)
+
+**Purpose:** UAE workforce is diverse; Arabic support improves accessibility.
+
+```css
+/* RTL Support for Arabic */
+[dir="rtl"] {
+  direction: rtl;
+  text-align: right;
+}
+
+[dir="rtl"] .sidebar {
+  right: 0;
+  left: auto;
+}
+
+[dir="rtl"] .menu-item {
+  flex-direction: row-reverse;
+}
+
+/* Arabic-friendly font */
+@font-face {
+  font-family: 'Dubai';
+  src: url('/fonts/Dubai-Regular.woff2') format('woff2');
+}
+
+.arabic-text {
+  font-family: 'Dubai', 'Poppins', sans-serif;
+}
+```
+
+```python
+# Language toggle in sidebar
+def render_language_toggle():
+    lang = st.sidebar.selectbox("🌐 Language", ["English", "العربية"])
+    if lang == "العربية":
+        st.session_state.rtl = True
+        st.session_state.locale = "ar"
+```
+
+### 3.8 MOHRE Integration Ready
+
+**Purpose:** Prepare for Ministry of Human Resources and Emiratisation integration.
+
+```python
+MOHRE_REQUIREMENTS = {
+    "establishment_card": "Valid MOHRE Establishment Card",
+    "labor_quota": "Available labor quota for hiring",
+    "tawjeeh_registration": "Employees registered in Tawjeeh",
+    "wps_compliance": "WPS registration and compliance",
+}
+
+def check_mohre_compliance():
+    """Check MOHRE compliance status for the organization."""
+    return {
+        "establishment_valid": True,
+        "quota_available": 15,
+        "quota_used": 42,
+        "next_renewal": "2026-06-15",
+        "emiratization_target": 4,  # % for private sector
+        "current_emiratization": 2,
+    }
+```
+
+### 3.9 Employee Self-Service Portal Features
+
+Based on UAE ESS portal best practices:
+
+```python
+ESS_MODULES = {
+    "my_profile": {
+        "name": "My Profile",
+        "icon": "👤",
+        "features": [
+            "View/update personal information",
+            "Upload profile photo",
+            "Update emergency contacts",
+            "View contract details"
+        ]
+    },
+    "attendance": {
+        "name": "Attendance",
+        "icon": "⏰",
+        "features": [
+            "Clock in/out (with GPS)",
+            "View attendance history",
+            "Request late arrival excuse",
+            "Request early departure"
+        ]
+    },
+    "leave": {
+        "name": "Leave Management",
+        "icon": "📅",
+        "features": [
+            "View leave balance",
+            "Apply for leave",
+            "Cancel leave request",
+            "View team calendar"
+        ]
+    },
+    "payslip": {
+        "name": "Payslip",
+        "icon": "💰",
+        "features": [
+            "View monthly payslips",
+            "Download salary certificate",
+            "View annual earnings summary",
+            "Request bank change"
+        ]
+    },
+    "documents": {
+        "name": "My Documents",
+        "icon": "📄",
+        "features": [
+            "View document expiry dates",
+            "Upload renewed documents",
+            "Download NOC letters",
+            "Request salary transfer letter"
+        ]
+    },
+    "requests": {
+        "name": "HR Requests",
+        "icon": "📝",
+        "features": [
+            "Business card request",
+            "Parking permit",
+            "IT equipment request",
+            "Expense reimbursement"
+        ]
+    }
+}
+```
+
+### 3.10 Compliance Dashboard Alerts
+
+**Purpose:** Proactive compliance monitoring critical in UAE.
+
+```python
+def render_compliance_alerts():
+    st.markdown("### 🚨 Compliance Alerts")
+    
+    alerts = [
+        {
+            "type": "danger",
+            "icon": "🔴",
+            "title": "2 Visas Expiring in 7 Days",
+            "action": "Initiate renewal immediately"
+        },
+        {
+            "type": "warning", 
+            "icon": "🟠",
+            "title": "5 Emirates IDs Expiring in 30 Days",
+            "action": "Schedule renewal appointments"
+        },
+        {
+            "type": "info",
+            "icon": "🔵",
+            "title": "WPS File Due in 5 Days",
+            "action": "Prepare payroll data"
+        },
+        {
+            "type": "success",
+            "icon": "🟢",
+            "title": "Emiratization Target Met",
+            "action": "No action required"
+        }
+    ]
+    
+    for alert in alerts:
+        if alert["type"] == "danger":
+            st.error(f"{alert['icon']} **{alert['title']}** - {alert['action']}")
+        elif alert["type"] == "warning":
+            st.warning(f"{alert['icon']} **{alert['title']}** - {alert['action']}")
+        elif alert["type"] == "info":
+            st.info(f"{alert['icon']} **{alert['title']}** - {alert['action']}")
+        else:
+            st.success(f"{alert['icon']} **{alert['title']}** - {alert['action']}")
+```
+
+---
+
+## 📋 UAE Feature Implementation Priority
+
+### Immediate (Week 1)
+1. ✅ Document Expiry Dashboard
+2. ✅ Leave Types with UAE Labor Law references
+3. ✅ Public Holiday Calendar
+4. ✅ Gratuity Calculator
+
+### Short-term (Week 2-3)
+5. WPS File Generation
+6. Compliance Alerts System
+7. Visa Tracking Pipeline
+8. Arabic Language Toggle
+
+### Medium-term (Month 2)
+9. MOHRE Integration Ready
+10. Full ESS Portal Modules
+11. Mobile-responsive design
+12. Offline attendance capture
+
+---
+
+## 🏆 UAE HR Portal Best Practices Summary
+
+| Feature | Importance | Implementation Status |
+|---------|------------|----------------------|
+| Document Expiry Tracking | Critical | 🟡 Planned |
+| WPS Compliance | Critical | 🟡 Planned |
+| UAE Leave Types | Critical | ✅ Schema Ready |
+| Gratuity Calculator | High | 🟡 Planned |
+| Visa Pipeline Tracking | High | 🟡 Planned |
+| Arabic RTL Support | Medium | 🟡 Planned |
+| MOHRE Integration | Medium | 🟡 Planned |
+| Mobile ESS App | Medium | 🟡 Planned |
+
+---
+
+*This UAE-specific section ensures the HR Portal meets local regulatory requirements and follows best practices established by leading UAE companies.*
