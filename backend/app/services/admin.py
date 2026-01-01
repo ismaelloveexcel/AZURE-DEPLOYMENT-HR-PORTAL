@@ -105,6 +105,8 @@ class AdminService:
                 result.reports.append(toggle)
             elif s.category == "documents":
                 result.documents.append(toggle)
+            elif s.category == "passes":
+                result.passes.append(toggle)
         
         return result
 

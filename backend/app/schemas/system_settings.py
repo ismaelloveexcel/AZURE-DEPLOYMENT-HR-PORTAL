@@ -53,6 +53,7 @@ class FeaturesByCategory(BaseModel):
     workflow: List[FeatureToggle] = Field(default_factory=list, description="Workflow features")
     reports: List[FeatureToggle] = Field(default_factory=list, description="Reporting features")
     documents: List[FeatureToggle] = Field(default_factory=list, description="Document features")
+    passes: List[FeatureToggle] = Field(default_factory=list, description="Pass generation features")
 
 
 class AdminDashboard(BaseModel):

@@ -148,4 +148,41 @@ DEFAULT_FEATURE_TOGGLES = [
         "is_enabled": False,
         "category": "documents"
     },
+    
+    # Pass Generation
+    {
+        "key": "feature_passes",
+        "value": "true",
+        "description": "Pass Generation - Generate recruitment, onboarding, visitor passes",
+        "is_enabled": True,
+        "category": "passes"
+    },
+    {
+        "key": "feature_recruitment_pass",
+        "value": "true",
+        "description": "Recruitment Pass - Generate passes for interview candidates",
+        "is_enabled": True,
+        "category": "passes"
+    },
+    {
+        "key": "feature_onboarding_pass",
+        "value": "true",
+        "description": "Onboarding Pass - Generate passes for new employees during onboarding",
+        "is_enabled": True,
+        "category": "passes"
+    },
+    {
+        "key": "feature_visitor_pass",
+        "value": "true",
+        "description": "Visitor Pass - Generate passes for office visitors",
+        "is_enabled": True,
+        "category": "passes"
+    },
+    {
+        "key": "feature_contractor_pass",
+        "value": "true",
+        "description": "Contractor Pass - Generate passes for contractors and external workers",
+        "is_enabled": True,
+        "category": "passes"
+    },
 ]
