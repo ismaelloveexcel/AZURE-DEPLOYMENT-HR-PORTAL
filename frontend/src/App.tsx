@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 
-type Section = 'home' | 'employees' | 'onboarding' | 'external' | 'admin'
+type Section = 'home' | 'employees' | 'onboarding' | 'external' | 'admin' | 'secret-chamber'
 
 interface Employee {
   id: number
@@ -47,13 +47,14 @@ function App() {
   const [features, setFeatures] = useState<FeatureToggle[]>([])
   const [dashboard, setDashboard] = useState<AdminDashboard | null>(null)
   const [loading, setLoading] = useState(false)
+  const [chamberLoading, setChamberLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [employeeId, setEmployeeId] = useState('')
   const [password, setPassword] = useState('')
   const [showLoginModal, setShowLoginModal] = useState(false)
   const [pendingSection, setPendingSection] = useState<Section | null>(null)
 
-  const isAdminLogin = pendingSection === 'admin'
+  const isAdminLogin = pendingSection === 'admin' || pendingSection === 'secret-chamber'
 
   const fetchWithAuth = async (url: string, options: RequestInit = {}) => {
     const headers: Record<string, string> = {
@@ -174,6 +175,21 @@ function App() {
     }
   }
 
+  const fetchSecretChamberData = async () => {
+    if (!user || user.role !== 'admin') return
+    setChamberLoading(true)
+    try {
+      const res = await fetchWithAuth(`${API_BASE}/admin/features`)
+      if (res.ok) {
+        setFeatures(await res.json())
+      }
+    } catch (err) {
+      console.error('Failed to fetch features:', err)
+    } finally {
+      setChamberLoading(false)
+    }
+  }
+
   const toggleFeature = async (key: string, enabled: boolean) => {
     try {
       const res = await fetchWithAuth(`${API_BASE}/admin/features/${key}?is_enabled=${enabled}`, {
@@ -192,6 +208,8 @@ function App() {
       fetchEmployees()
     } else if (activeSection === 'admin' && user?.role === 'admin') {
       fetchAdminData()
+    } else if (activeSection === 'secret-chamber' && user?.role === 'admin') {
+      fetchSecretChamberData()
     }
   }, [activeSection, user])
 
@@ -352,6 +370,93 @@ function App() {
     )
   }
 
+  if (activeSection === 'secret-chamber') {
+    if (user?.role !== 'admin') {
+      return (
+        <div className="min-h-screen bg-gray-100 flex flex-col items-center justify-center p-8">
+          {loginModal}
+          <div className="bg-white rounded-2xl shadow-lg p-8 max-w-md text-center">
+            <h2 className="text-xl font-semibold text-gray-800 mb-4">Access Denied</h2>
+            <p className="text-gray-600 mb-6">You need admin privileges to access this section.</p>
+            <button
+              onClick={() => handleNavigate('home')}
+              className="px-6 py-2 bg-emerald-500 text-white rounded-lg hover:bg-emerald-600 transition-colors"
+            >
+              Back to Home
+            </button>
+          </div>
+        </div>
+      )
+    }
+
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-purple-900 to-gray-900 p-8">
+        {loginModal}
+        <div className="max-w-4xl mx-auto">
+          <div className="flex items-center justify-between mb-8">
+            <div>
+              <p className="text-purple-300 text-sm tracking-widest uppercase mb-1">Secret Chamber</p>
+              <h1 className="text-2xl font-semibold text-white">System Configuration</h1>
+            </div>
+            <div className="flex items-center gap-4">
+              <span className="text-sm text-purple-300">
+                {user?.name}
+              </span>
+              <button
+                onClick={() => setActiveSection('admin')}
+                className="px-4 py-2 text-purple-300 hover:text-white hover:bg-purple-800/50 rounded-lg transition-colors"
+              >
+                ← Back to Admin
+              </button>
+            </div>
+          </div>
+
+          <div className="bg-white/10 backdrop-blur-sm rounded-2xl border border-purple-500/20 p-6">
+            <h2 className="text-lg font-semibold text-white mb-6 flex items-center gap-2">
+              <svg className="w-5 h-5 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
+              </svg>
+              Feature Toggles
+            </h2>
+            {chamberLoading ? (
+              <div className="text-center text-purple-300 py-8">Loading...</div>
+            ) : features.length === 0 ? (
+              <div className="text-center text-purple-300 py-8">No features configured</div>
+            ) : (
+              <div className="space-y-3">
+                {features.map(feature => (
+                  <div key={feature.key} className="flex items-center justify-between p-4 bg-white/5 rounded-xl border border-purple-500/10 hover:border-purple-500/30 transition-colors">
+                    <div>
+                      <p className="font-medium text-white">{feature.key}</p>
+                      <p className="text-sm text-purple-300">{feature.description}</p>
+                      <span className="text-xs text-purple-400">{feature.category}</span>
+                    </div>
+                    <button
+                      onClick={() => toggleFeature(feature.key, !feature.is_enabled)}
+                      className={`relative inline-flex h-7 w-12 items-center rounded-full transition-colors ${
+                        feature.is_enabled ? 'bg-purple-500' : 'bg-gray-600'
+                      }`}
+                    >
+                      <span
+                        className={`inline-block h-5 w-5 transform rounded-full bg-white transition-transform shadow-lg ${
+                          feature.is_enabled ? 'translate-x-6' : 'translate-x-1'
+                        }`}
+                      />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          <p className="text-purple-400/50 text-xs text-center mt-8">
+            This area is restricted to system administrators only.
+          </p>
+        </div>
+      </div>
+    )
+  }
+
   if (activeSection === 'admin') {
     if (user?.role !== 'admin') {
       return (
@@ -372,8 +477,36 @@ function App() {
     }
 
     return (
-      <div className="min-h-screen bg-gray-100 p-8">
+      <div className="min-h-screen bg-gray-100 p-8 relative">
         {loginModal}
+        
+        <button
+          onClick={() => setActiveSection('secret-chamber')}
+          className="absolute bottom-6 right-6 p-3 rounded-2xl bg-gradient-to-br from-gray-100 to-gray-200 hover:from-purple-100 hover:to-purple-200 transition-all duration-300 group"
+          style={{ boxShadow: '0 4px 15px -3px rgba(0,0,0,0.1), inset 0 1px 0 rgba(255,255,255,0.8)' }}
+          title="Secret Chamber"
+        >
+          <svg 
+            className="w-6 h-6 text-purple-300 group-hover:text-purple-500 transition-colors" 
+            fill="none" 
+            stroke="currentColor" 
+            viewBox="0 0 24 24"
+          >
+            <path 
+              strokeLinecap="round" 
+              strokeLinejoin="round" 
+              strokeWidth={1.5} 
+              d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" 
+            />
+            <path 
+              strokeLinecap="round" 
+              strokeLinejoin="round" 
+              strokeWidth={1.5} 
+              d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" 
+            />
+          </svg>
+        </button>
+
         <div className="max-w-6xl mx-auto">
           <div className="flex items-center justify-between mb-6">
             <div>
@@ -415,36 +548,30 @@ function App() {
           )}
 
           <div className="bg-white rounded-xl shadow-lg p-6">
-            <h2 className="text-lg font-semibold text-gray-800 mb-4">Feature Toggles</h2>
-            {loading ? (
-              <div className="text-center text-gray-500 py-4">Loading...</div>
-            ) : features.length === 0 ? (
-              <div className="text-center text-gray-500 py-4">No features configured</div>
-            ) : (
-              <div className="space-y-3">
-                {features.map(feature => (
-                  <div key={feature.key} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-                    <div>
-                      <p className="font-medium text-gray-800">{feature.key}</p>
-                      <p className="text-sm text-gray-500">{feature.description}</p>
-                      <span className="text-xs text-gray-400">{feature.category}</span>
-                    </div>
-                    <button
-                      onClick={() => toggleFeature(feature.key, !feature.is_enabled)}
-                      className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                        feature.is_enabled ? 'bg-emerald-500' : 'bg-gray-300'
-                      }`}
-                    >
-                      <span
-                        className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                          feature.is_enabled ? 'translate-x-6' : 'translate-x-1'
-                        }`}
-                      />
-                    </button>
-                  </div>
-                ))}
-              </div>
-            )}
+            <h2 className="text-lg font-semibold text-gray-800 mb-4">Quick Actions</h2>
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+              <button className="p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors text-left">
+                <svg className="w-8 h-8 text-emerald-500 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+                </svg>
+                <p className="font-medium text-gray-800">Manage Employees</p>
+                <p className="text-sm text-gray-500">Add, edit, or remove employees</p>
+              </button>
+              <button className="p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors text-left">
+                <svg className="w-8 h-8 text-blue-500 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+                <p className="font-medium text-gray-800">View Reports</p>
+                <p className="text-sm text-gray-500">Generate HR reports</p>
+              </button>
+              <button className="p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors text-left">
+                <svg className="w-8 h-8 text-amber-500 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                </svg>
+                <p className="font-medium text-gray-800">Contract Renewals</p>
+                <p className="text-sm text-gray-500">Review pending renewals</p>
+              </button>
+            </div>
           </div>
         </div>
       </div>
