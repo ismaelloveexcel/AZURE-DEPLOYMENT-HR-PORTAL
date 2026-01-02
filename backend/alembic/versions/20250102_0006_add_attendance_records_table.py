@@ -1,7 +1,7 @@
 """Add attendance records table
 
-Revision ID: 0006
-Revises: 0005
+Revision ID: 20250102_0006
+Revises: 20250102_0005
 Create Date: 2025-01-02
 
 """
@@ -10,8 +10,8 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = '0006'
-down_revision = '0005'
+revision = '20250102_0006'
+down_revision = '20250102_0005'
 branch_labels = None
 depends_on = None
 
