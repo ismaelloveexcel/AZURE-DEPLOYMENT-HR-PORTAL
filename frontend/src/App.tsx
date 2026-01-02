@@ -48,9 +48,12 @@ function App() {
   const [dashboard, setDashboard] = useState<AdminDashboard | null>(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const [loginForm, setLoginForm] = useState({ employee_id: '', password: '' })
+  const [employeeId, setEmployeeId] = useState('')
+  const [password, setPassword] = useState('')
   const [showLoginModal, setShowLoginModal] = useState(false)
   const [pendingSection, setPendingSection] = useState<Section | null>(null)
+
+  const isAdminLogin = pendingSection === 'admin'
 
   const fetchWithAuth = async (url: string, options: RequestInit = {}) => {
     const headers: Record<string, string> = {
@@ -83,11 +86,14 @@ function App() {
     e.preventDefault()
     setLoading(true)
     setError(null)
+    
+    const loginEmployeeId = isAdminLogin ? 'ADMIN001' : employeeId
+    
     try {
       const res = await fetch(`${API_BASE}/auth/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(loginForm),
+        body: JSON.stringify({ employee_id: loginEmployeeId, password }),
       })
       if (!res.ok) {
         const data = await res.json()
@@ -102,7 +108,8 @@ function App() {
       }
       setUser(loggedInUser)
       setShowLoginModal(false)
-      setLoginForm({ employee_id: '', password: '' })
+      setEmployeeId('')
+      setPassword('')
       if (pendingSection) {
         setActiveSection(pendingSection)
         setPendingSection(null)
@@ -126,7 +133,8 @@ function App() {
     setShowLoginModal(false)
     setPendingSection(null)
     setError(null)
-    setLoginForm({ employee_id: '', password: '' })
+    setEmployeeId('')
+    setPassword('')
   }
 
   const fetchEmployees = async () => {
@@ -187,11 +195,12 @@ function App() {
     }
   }, [activeSection, user])
 
-  const LoginModal = () => (
+  const loginModal = showLoginModal ? (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
       <div className="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-md relative">
         <button
           onClick={closeLoginModal}
+          type="button"
           className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors"
         >
           <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -201,7 +210,9 @@ function App() {
         
         <div className="text-center mb-6">
           <p className="text-gray-600 text-sm tracking-wide mb-1">baynunah<span className="text-emerald-500">.</span></p>
-          <h2 className="text-xl font-semibold text-gray-800">Sign In</h2>
+          <h2 className="text-xl font-semibold text-gray-800">
+            {isAdminLogin ? 'Admin Sign In' : 'Sign In'}
+          </h2>
         </div>
         
         {error && (
@@ -209,31 +220,37 @@ function App() {
         )}
         
         <form onSubmit={handleLogin} className="space-y-4" data-testid="login-form">
+          {!isAdminLogin && (
+            <div>
+              <label htmlFor="employee-id" className="block text-sm font-medium text-gray-700 mb-1">Employee ID</label>
+              <input
+                id="employee-id"
+                name="employee_id"
+                type="text"
+                value={employeeId}
+                onChange={e => setEmployeeId(e.target.value)}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+                placeholder="e.g., EMP001"
+                required
+                autoComplete="username"
+                data-testid="employee-id-input"
+              />
+            </div>
+          )}
           <div>
-            <label htmlFor="employee-id" className="block text-sm font-medium text-gray-700 mb-1">Employee ID</label>
-            <input
-              id="employee-id"
-              name="employee_id"
-              type="text"
-              value={loginForm.employee_id}
-              onChange={e => setLoginForm({ ...loginForm, employee_id: e.target.value })}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
-              placeholder="e.g., EMP001"
-              required
-              data-testid="employee-id-input"
-            />
-          </div>
-          <div>
-            <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">Password</label>
+            <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
+              {isAdminLogin ? 'Admin Password' : 'Password'}
+            </label>
             <input
               id="password"
               name="password"
               type="password"
-              value={loginForm.password}
-              onChange={e => setLoginForm({ ...loginForm, password: e.target.value })}
+              value={password}
+              onChange={e => setPassword(e.target.value)}
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
-              placeholder="First login: DOB as DDMMYYYY"
+              placeholder={isAdminLogin ? 'Enter admin password' : 'First login: DOB as DDMMYYYY'}
               required
+              autoComplete="current-password"
               data-testid="password-input"
             />
           </div>
@@ -247,16 +264,19 @@ function App() {
           </button>
         </form>
         <p className="text-xs text-gray-500 text-center mt-4">
-          First-time login? Use your date of birth (DDMMYYYY) as password.
+          {isAdminLogin 
+            ? 'Enter the admin password to access the admin panel.'
+            : 'First-time login? Use your date of birth (DDMMYYYY) as password.'
+          }
         </p>
       </div>
     </div>
-  )
+  ) : null
 
   if (activeSection === 'employees') {
     return (
       <div className="min-h-screen bg-gray-100 p-8">
-        {showLoginModal && <LoginModal />}
+        {loginModal}
         <div className="max-w-6xl mx-auto">
           <div className="flex items-center justify-between mb-6">
             <div>
@@ -336,7 +356,7 @@ function App() {
     if (user?.role !== 'admin') {
       return (
         <div className="min-h-screen bg-gray-100 flex flex-col items-center justify-center p-8">
-          {showLoginModal && <LoginModal />}
+          {loginModal}
           <div className="bg-white rounded-2xl shadow-lg p-8 max-w-md text-center">
             <h2 className="text-xl font-semibold text-gray-800 mb-4">Access Denied</h2>
             <p className="text-gray-600 mb-6">You need admin privileges to access this section.</p>
@@ -353,7 +373,7 @@ function App() {
 
     return (
       <div className="min-h-screen bg-gray-100 p-8">
-        {showLoginModal && <LoginModal />}
+        {loginModal}
         <div className="max-w-6xl mx-auto">
           <div className="flex items-center justify-between mb-6">
             <div>
@@ -434,7 +454,7 @@ function App() {
   if (activeSection === 'onboarding' || activeSection === 'external') {
     return (
       <div className="min-h-screen bg-gray-100 flex flex-col items-center justify-center p-8">
-        {showLoginModal && <LoginModal />}
+        {loginModal}
         <div className="bg-white rounded-2xl shadow-lg p-8 max-w-2xl w-full text-center">
           <h2 className="text-2xl font-semibold text-gray-800 mb-4 capitalize">
             {activeSection === 'external' ? 'External Users' : activeSection}
@@ -453,7 +473,7 @@ function App() {
 
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col items-center justify-center p-8">
-      {showLoginModal && <LoginModal />}
+      {loginModal}
       
       {user && (
         <div className="absolute top-4 right-4">
