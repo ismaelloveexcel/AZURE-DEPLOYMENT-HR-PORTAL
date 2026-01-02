@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 
-type Section = 'home' | 'employees' | 'onboarding' | 'external' | 'admin' | 'secret-chamber' | 'passes' | 'public-onboarding' | 'recruitment' | 'recruitment-request' | 'recruitment-benefits' | 'templates' | 'template-manager' | 'template-candidate' | 'template-onboarding' | 'template-employee'
+type Section = 'home' | 'employees' | 'onboarding' | 'external' | 'admin' | 'secret-chamber' | 'passes' | 'public-onboarding' | 'recruitment' | 'recruitment-request' | 'recruitment-benefits' | 'templates' | 'template-manager' | 'template-candidate' | 'template-onboarding' | 'template-employee' | 'attendance'
 
 interface Employee {
   id: number
@@ -131,6 +131,49 @@ interface PendingProfile {
   submitted_at: string | null
 }
 
+interface TodayAttendanceStatus {
+  date: string
+  is_clocked_in: boolean
+  clock_in_time: string | null
+  is_on_break: boolean
+  break_start_time: string | null
+  work_type: string | null
+  can_clock_in: boolean
+  can_clock_out: boolean
+  can_start_break: boolean
+  can_end_break: boolean
+  message: string
+}
+
+interface AttendanceRecord {
+  id: number
+  employee_id: number
+  employee_name: string
+  attendance_date: string
+  clock_in: string | null
+  clock_out: string | null
+  work_type: string
+  total_hours: number | null
+  regular_hours: number | null
+  overtime_hours: number | null
+  status: string
+  is_late: boolean
+  late_minutes: number | null
+  is_early_departure: boolean
+  notes: string | null
+}
+
+interface AttendanceDashboard {
+  total_employees: number
+  clocked_in_today: number
+  wfh_today: number
+  absent_today: number
+  late_today: number
+  pending_wfh_approvals: number
+  pending_overtime_approvals: number
+  on_leave_today: number
+}
+
 const API_BASE = '/api'
 
 function App() {
@@ -199,6 +242,15 @@ function App() {
     shoe_size: '',
   })
   const [profileSubmitted, setProfileSubmitted] = useState(false)
+  
+  // Attendance state
+  const [attendanceStatus, setAttendanceStatus] = useState<TodayAttendanceStatus | null>(null)
+  const [attendanceRecords, setAttendanceRecords] = useState<AttendanceRecord[]>([])
+  const [attendanceDashboard, setAttendanceDashboard] = useState<AttendanceDashboard | null>(null)
+  const [attendanceLoading, setAttendanceLoading] = useState(false)
+  const [clockInWorkType, setClockInWorkType] = useState<'office' | 'wfh' | 'field'>('office')
+  const [wfhReason, setWfhReason] = useState('')
+  const [gpsCoords, setGpsCoords] = useState<{latitude: number, longitude: number} | null>(null)
 
   const isAdminLogin = pendingSection === 'admin' || pendingSection === 'secret-chamber'
 
@@ -529,6 +581,143 @@ function App() {
     navigator.clipboard.writeText(text)
   }
 
+  // Attendance functions
+  const fetchAttendanceData = async () => {
+    if (!user) return
+    setAttendanceLoading(true)
+    try {
+      const [statusRes, recordsRes] = await Promise.all([
+        fetchWithAuth(`${API_BASE}/attendance/today`),
+        fetchWithAuth(`${API_BASE}/attendance/my-records`)
+      ])
+      if (statusRes.ok) {
+        setAttendanceStatus(await statusRes.json())
+      }
+      if (recordsRes.ok) {
+        setAttendanceRecords(await recordsRes.json())
+      }
+      if (user.role === 'admin' || user.role === 'hr') {
+        const dashRes = await fetchWithAuth(`${API_BASE}/attendance/dashboard`)
+        if (dashRes.ok) {
+          setAttendanceDashboard(await dashRes.json())
+        }
+      }
+    } catch (err) {
+      console.error('Failed to fetch attendance data:', err)
+    } finally {
+      setAttendanceLoading(false)
+    }
+  }
+
+  const requestGPSLocation = () => {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          setGpsCoords({
+            latitude: position.coords.latitude,
+            longitude: position.coords.longitude
+          })
+        },
+        (err) => {
+          console.warn('GPS location not available:', err.message)
+          setGpsCoords(null)
+        },
+        { enableHighAccuracy: true, timeout: 10000 }
+      )
+    }
+  }
+
+  const handleClockIn = async () => {
+    if (!user) return
+    setAttendanceLoading(true)
+    setError(null)
+    try {
+      const body: Record<string, unknown> = {
+        work_type: clockInWorkType,
+        latitude: gpsCoords?.latitude,
+        longitude: gpsCoords?.longitude,
+      }
+      if (clockInWorkType === 'wfh' && wfhReason) {
+        body.wfh_reason = wfhReason
+      }
+      const res = await fetchWithAuth(`${API_BASE}/attendance/clock-in`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+      })
+      if (!res.ok) {
+        const data = await res.json()
+        throw new Error(data.detail || 'Failed to clock in')
+      }
+      await fetchAttendanceData()
+      setClockInWorkType('office')
+      setWfhReason('')
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to clock in')
+    } finally {
+      setAttendanceLoading(false)
+    }
+  }
+
+  const handleClockOut = async () => {
+    if (!user) return
+    setAttendanceLoading(true)
+    setError(null)
+    try {
+      const res = await fetchWithAuth(`${API_BASE}/attendance/clock-out`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          latitude: gpsCoords?.latitude,
+          longitude: gpsCoords?.longitude,
+        }),
+      })
+      if (!res.ok) {
+        const data = await res.json()
+        throw new Error(data.detail || 'Failed to clock out')
+      }
+      await fetchAttendanceData()
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to clock out')
+    } finally {
+      setAttendanceLoading(false)
+    }
+  }
+
+  const handleBreakStart = async () => {
+    if (!user) return
+    setAttendanceLoading(true)
+    try {
+      await fetchWithAuth(`${API_BASE}/attendance/break/start`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({}),
+      })
+      await fetchAttendanceData()
+    } catch (err) {
+      console.error('Failed to start break:', err)
+    } finally {
+      setAttendanceLoading(false)
+    }
+  }
+
+  const handleBreakEnd = async () => {
+    if (!user) return
+    setAttendanceLoading(true)
+    try {
+      await fetchWithAuth(`${API_BASE}/attendance/break/end`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({}),
+      })
+      await fetchAttendanceData()
+    } catch (err) {
+      console.error('Failed to end break:', err)
+    } finally {
+      setAttendanceLoading(false)
+    }
+  }
+
   useEffect(() => {
     if (activeSection === 'employees' && user) {
       fetchEmployees()
@@ -540,6 +729,9 @@ function App() {
       fetchPasses()
     } else if (activeSection === 'onboarding' && user && (user.role === 'admin' || user.role === 'hr')) {
       fetchOnboardingData()
+    } else if (activeSection === 'attendance' && user) {
+      fetchAttendanceData()
+      requestGPSLocation()
     }
   }, [activeSection, user])
 
@@ -2567,6 +2759,274 @@ function App() {
     )
   }
 
+  if (activeSection === 'attendance') {
+    return (
+      <div className="min-h-screen bg-gray-100 p-8">
+        <div className="max-w-4xl mx-auto">
+          <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center gap-4">
+              <button
+                onClick={() => handleNavigate('home')}
+                className="text-gray-500 hover:text-gray-700"
+              >
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                </svg>
+              </button>
+              <h1 className="text-2xl font-semibold text-gray-800">Attendance</h1>
+            </div>
+            <div className="text-sm text-gray-600">
+              {user?.name} ({user?.role})
+            </div>
+          </div>
+
+          {error && (
+            <div className="bg-red-50 text-red-600 p-4 rounded-lg mb-6">{error}</div>
+          )}
+
+          {/* Today's Status Card */}
+          <div className="bg-white rounded-xl shadow-lg p-6 mb-6">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-lg font-semibold text-gray-800">Today's Status</h2>
+              <span className="text-sm text-gray-500">
+                {new Date().toLocaleDateString('en-GB', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
+              </span>
+            </div>
+
+            {attendanceLoading && !attendanceStatus ? (
+              <div className="text-center py-8 text-gray-500">Loading...</div>
+            ) : attendanceStatus ? (
+              <div className="space-y-4">
+                <div className="flex items-center gap-3">
+                  <div className={`w-4 h-4 rounded-full ${attendanceStatus.is_clocked_in ? 'bg-emerald-500' : 'bg-gray-300'}`}></div>
+                  <span className="text-gray-700">{attendanceStatus.message}</span>
+                </div>
+
+                {gpsCoords && (
+                  <div className="flex items-center gap-2 text-sm text-gray-500">
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                    </svg>
+                    <span>GPS location captured</span>
+                  </div>
+                )}
+
+                {/* Clock In Form */}
+                {attendanceStatus.can_clock_in && (
+                  <div className="border-t pt-4 mt-4">
+                    <div className="grid grid-cols-3 gap-2 mb-4">
+                      <button
+                        onClick={() => setClockInWorkType('office')}
+                        className={`p-3 rounded-lg border text-center transition-all ${
+                          clockInWorkType === 'office' 
+                            ? 'border-emerald-500 bg-emerald-50 text-emerald-700' 
+                            : 'border-gray-200 hover:border-gray-300'
+                        }`}
+                      >
+                        <svg className="w-6 h-6 mx-auto mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                        </svg>
+                        <span className="text-sm">Office</span>
+                      </button>
+                      <button
+                        onClick={() => setClockInWorkType('wfh')}
+                        className={`p-3 rounded-lg border text-center transition-all ${
+                          clockInWorkType === 'wfh' 
+                            ? 'border-blue-500 bg-blue-50 text-blue-700' 
+                            : 'border-gray-200 hover:border-gray-300'
+                        }`}
+                      >
+                        <svg className="w-6 h-6 mx-auto mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+                        </svg>
+                        <span className="text-sm">WFH</span>
+                      </button>
+                      <button
+                        onClick={() => setClockInWorkType('field')}
+                        className={`p-3 rounded-lg border text-center transition-all ${
+                          clockInWorkType === 'field' 
+                            ? 'border-amber-500 bg-amber-50 text-amber-700' 
+                            : 'border-gray-200 hover:border-gray-300'
+                        }`}
+                      >
+                        <svg className="w-6 h-6 mx-auto mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                        </svg>
+                        <span className="text-sm">Field</span>
+                      </button>
+                    </div>
+
+                    {clockInWorkType === 'wfh' && (
+                      <div className="mb-4">
+                        <label className="block text-sm font-medium text-gray-700 mb-1">WFH Reason</label>
+                        <textarea
+                          value={wfhReason}
+                          onChange={(e) => setWfhReason(e.target.value)}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+                          placeholder="Please provide a reason for working from home..."
+                          rows={2}
+                        />
+                      </div>
+                    )}
+
+                    <button
+                      onClick={handleClockIn}
+                      disabled={attendanceLoading}
+                      className="w-full py-3 bg-emerald-500 text-white rounded-lg hover:bg-emerald-600 transition-colors font-medium disabled:opacity-50"
+                    >
+                      {attendanceLoading ? 'Processing...' : 'Clock In'}
+                    </button>
+                  </div>
+                )}
+
+                {/* Break & Clock Out Buttons */}
+                {(attendanceStatus.can_clock_out || attendanceStatus.can_start_break || attendanceStatus.can_end_break) && (
+                  <div className="flex gap-3 border-t pt-4 mt-4">
+                    {attendanceStatus.can_start_break && (
+                      <button
+                        onClick={handleBreakStart}
+                        disabled={attendanceLoading}
+                        className="flex-1 py-3 bg-amber-500 text-white rounded-lg hover:bg-amber-600 transition-colors font-medium disabled:opacity-50"
+                      >
+                        Start Break
+                      </button>
+                    )}
+                    {attendanceStatus.can_end_break && (
+                      <button
+                        onClick={handleBreakEnd}
+                        disabled={attendanceLoading}
+                        className="flex-1 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors font-medium disabled:opacity-50"
+                      >
+                        End Break
+                      </button>
+                    )}
+                    {attendanceStatus.can_clock_out && (
+                      <button
+                        onClick={handleClockOut}
+                        disabled={attendanceLoading}
+                        className="flex-1 py-3 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors font-medium disabled:opacity-50"
+                      >
+                        Clock Out
+                      </button>
+                    )}
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div className="text-center py-8 text-gray-500">Unable to load attendance status</div>
+            )}
+          </div>
+
+          {/* Admin Dashboard */}
+          {(user?.role === 'admin' || user?.role === 'hr') && attendanceDashboard && (
+            <div className="bg-white rounded-xl shadow-lg p-6 mb-6">
+              <h2 className="text-lg font-semibold text-gray-800 mb-4">Today's Overview</h2>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div className="text-center p-4 bg-emerald-50 rounded-lg">
+                  <div className="text-2xl font-bold text-emerald-600">{attendanceDashboard.clocked_in_today}</div>
+                  <div className="text-sm text-gray-600">Clocked In</div>
+                </div>
+                <div className="text-center p-4 bg-blue-50 rounded-lg">
+                  <div className="text-2xl font-bold text-blue-600">{attendanceDashboard.wfh_today}</div>
+                  <div className="text-sm text-gray-600">WFH</div>
+                </div>
+                <div className="text-center p-4 bg-amber-50 rounded-lg">
+                  <div className="text-2xl font-bold text-amber-600">{attendanceDashboard.late_today}</div>
+                  <div className="text-sm text-gray-600">Late</div>
+                </div>
+                <div className="text-center p-4 bg-red-50 rounded-lg">
+                  <div className="text-2xl font-bold text-red-600">{attendanceDashboard.absent_today}</div>
+                  <div className="text-sm text-gray-600">Absent</div>
+                </div>
+              </div>
+              {(attendanceDashboard.pending_wfh_approvals > 0 || attendanceDashboard.pending_overtime_approvals > 0) && (
+                <div className="mt-4 flex gap-4">
+                  {attendanceDashboard.pending_wfh_approvals > 0 && (
+                    <span className="inline-flex items-center px-3 py-1 bg-yellow-100 text-yellow-700 rounded-full text-sm">
+                      {attendanceDashboard.pending_wfh_approvals} WFH pending
+                    </span>
+                  )}
+                  {attendanceDashboard.pending_overtime_approvals > 0 && (
+                    <span className="inline-flex items-center px-3 py-1 bg-purple-100 text-purple-700 rounded-full text-sm">
+                      {attendanceDashboard.pending_overtime_approvals} OT pending
+                    </span>
+                  )}
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Recent Records */}
+          <div className="bg-white rounded-xl shadow-lg overflow-hidden">
+            <div className="p-4 border-b border-gray-200">
+              <h2 className="text-lg font-semibold text-gray-800">Recent Attendance</h2>
+            </div>
+            {attendanceLoading && attendanceRecords.length === 0 ? (
+              <div className="p-8 text-center text-gray-500">Loading...</div>
+            ) : attendanceRecords.length === 0 ? (
+              <div className="p-8 text-center text-gray-500">No attendance records yet</div>
+            ) : (
+              <table className="w-full">
+                <thead className="bg-gray-50 border-b border-gray-200">
+                  <tr>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Date</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Clock In</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Clock Out</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Type</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Hours</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-200">
+                  {attendanceRecords.slice(0, 10).map(record => (
+                    <tr key={record.id} className="hover:bg-gray-50">
+                      <td className="px-6 py-4 text-sm text-gray-900">
+                        {new Date(record.attendance_date).toLocaleDateString('en-GB')}
+                      </td>
+                      <td className="px-6 py-4 text-sm text-gray-600">
+                        {record.clock_in ? new Date(record.clock_in).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' }) : '-'}
+                      </td>
+                      <td className="px-6 py-4 text-sm text-gray-600">
+                        {record.clock_out ? new Date(record.clock_out).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' }) : '-'}
+                      </td>
+                      <td className="px-6 py-4">
+                        <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${
+                          record.work_type === 'office' ? 'bg-emerald-100 text-emerald-700' :
+                          record.work_type === 'wfh' ? 'bg-blue-100 text-blue-700' :
+                          'bg-amber-100 text-amber-700'
+                        }`}>
+                          {record.work_type.toUpperCase()}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 text-sm text-gray-600">
+                        {record.total_hours ? `${record.total_hours}h` : '-'}
+                        {record.overtime_hours && record.overtime_hours > 0 && (
+                          <span className="ml-1 text-purple-600">(+{record.overtime_hours}h OT)</span>
+                        )}
+                      </td>
+                      <td className="px-6 py-4">
+                        <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${
+                          record.status === 'present' ? 'bg-emerald-100 text-emerald-700' :
+                          record.status === 'late' ? 'bg-amber-100 text-amber-700' :
+                          record.status === 'absent' ? 'bg-red-100 text-red-700' :
+                          'bg-gray-100 text-gray-700'
+                        }`}>
+                          {record.status}
+                          {record.is_late && record.late_minutes && ` (${record.late_minutes}m)`}
+                        </span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
+          </div>
+        </div>
+      </div>
+    )
+  }
+
   if (activeSection === 'external') {
     return (
       <div className="min-h-screen bg-gray-100 flex flex-col items-center justify-center p-8">
@@ -2657,7 +3117,18 @@ function App() {
       </div>
 
       {/* Quick Access Row */}
-      <div className="flex gap-4 mt-8">
+      <div className="flex flex-wrap gap-4 mt-8 justify-center">
+        <button
+          onClick={() => handleNavigate('attendance')}
+          className="bg-white rounded-xl px-6 py-4 flex items-center gap-3 transition-all duration-300 hover:scale-105 hover:-translate-y-1"
+          style={{ boxShadow: '0 10px 40px -10px rgba(0,0,0,0.15), 0 4px 6px -2px rgba(0,0,0,0.05), inset 0 1px 0 rgba(255,255,255,0.8)' }}
+        >
+          <svg className="w-6 h-6 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          <span className="text-sm font-medium text-gray-700">Attendance</span>
+        </button>
+
         <button
           onClick={() => setActiveSection('templates')}
           className="bg-white rounded-xl px-6 py-4 flex items-center gap-3 transition-all duration-300 hover:scale-105 hover:-translate-y-1"
