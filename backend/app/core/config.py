@@ -80,39 +80,4 @@ class Settings(BaseSettings):
 def get_settings() -> Settings:
     return Settings()
 
-# Secret Chamber: Feature toggles for advanced/admin features
-SECRET_CHAMBER_FEATURES = {
-    "attendance": True,
-    "undo_redo": True,
-    "wizard": True,
-    "help": True,
-    "notifications": True,
-    "audit_log": True,
-    "bulk_import_export": True,
-    "attendance_analytics": True,
-}
 
-def is_feature_enabled(feature: str) -> bool:
-    return SECRET_CHAMBER_FEATURES.get(feature, False)
-
-# Secret Chamber: Undo/Redo action log (in-memory demo)
-undo_stack = []
-redo_stack = []
-
-def log_action(action):
-    undo_stack.append(action)
-    redo_stack.clear()
-
-def undo():
-    if undo_stack:
-        action = undo_stack.pop()
-        redo_stack.append(action)
-        return action
-    return None
-
-def redo():
-    if redo_stack:
-        action = redo_stack.pop()
-        undo_stack.append(action)
-        return action
-    return None
