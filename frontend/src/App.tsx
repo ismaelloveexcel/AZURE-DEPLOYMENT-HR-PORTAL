@@ -1,20 +1,3041 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 
-type Section = 'home' | 'employees' | 'onboarding' | 'external' | 'admin'
+type Section = 'home' | 'employees' | 'onboarding' | 'external' | 'admin' | 'secret-chamber' | 'passes' | 'public-onboarding' | 'recruitment' | 'recruitment-request' | 'recruitment-benefits' | 'templates' | 'template-manager' | 'template-candidate' | 'template-onboarding' | 'template-employee' | 'attendance'
+
+interface Employee {
+  id: number
+  employee_id: string
+  name: string
+  email: string | null
+  department: string | null
+  date_of_birth: string
+  role: string
+  is_active: boolean
+  password_changed: boolean
+  created_at: string
+  job_title?: string
+  location?: string
+  probation_status?: string
+  employment_status?: string
+  profile_status?: string
+}
+
+interface FeatureToggle {
+  key: string
+  description: string
+  is_enabled: boolean
+  category: string
+}
+
+interface AdminDashboard {
+  total_employees: number
+  active_employees: number
+  pending_renewals: number
+  features_enabled: number
+  features_total: number
+  system_status: string
+}
+
+interface User {
+  employee_id: string
+  name: string
+  role: string
+  token: string
+}
+
+interface Pass {
+  id: number
+  pass_number: string
+  pass_type: string
+  full_name: string
+  email: string | null
+  phone: string | null
+  department: string | null
+  position: string | null
+  valid_from: string
+  valid_until: string
+  access_areas: string | null
+  purpose: string | null
+  sponsor_name: string | null
+  employee_id: string | null
+  status: string
+  is_printed: boolean
+  created_by: string
+  created_at: string
+}
+
+interface PassFormData {
+  pass_type: string
+  full_name: string
+  email: string
+  phone: string
+  department: string
+  position: string
+  valid_from: string
+  valid_until: string
+  access_areas: string
+  purpose: string
+  sponsor_name: string
+  employee_id: string
+}
+
+interface OnboardingToken {
+  token: string
+  employee_id: string
+  employee_name: string
+  created_at: string
+  expires_at: string
+  is_used: boolean
+  is_expired: boolean
+  access_count: number
+}
+
+interface OnboardingWelcome {
+  employee_id: string
+  name: string
+  email: string | null
+  department: string | null
+  job_title: string | null
+  joining_date: string | null
+  line_manager_name: string | null
+  location: string | null
+}
+
+interface ProfileFormData {
+  emergency_contact_name: string
+  emergency_contact_phone: string
+  emergency_contact_relationship: string
+  personal_phone: string
+  personal_email: string
+  current_address: string
+  city: string
+  country: string
+  bank_name: string
+  bank_account_number: string
+  bank_iban: string
+  passport_number: string
+  passport_expiry: string
+  uae_id_number: string
+  uae_id_expiry: string
+  highest_education: string
+  shirt_size: string
+  pants_size: string
+  shoe_size: string
+}
+
+interface PendingProfile {
+  employee_id: string
+  name: string
+  department: string | null
+  job_title: string | null
+  submitted_at: string | null
+}
+
+interface TodayAttendanceStatus {
+  date: string
+  is_clocked_in: boolean
+  clock_in_time: string | null
+  is_on_break: boolean
+  break_start_time: string | null
+  work_type: string | null
+  can_clock_in: boolean
+  can_clock_out: boolean
+  can_start_break: boolean
+  can_end_break: boolean
+  message: string
+}
+
+interface AttendanceRecord {
+  id: number
+  employee_id: number
+  employee_name: string
+  attendance_date: string
+  clock_in: string | null
+  clock_out: string | null
+  work_type: string
+  total_hours: number | null
+  regular_hours: number | null
+  overtime_hours: number | null
+  status: string
+  is_late: boolean
+  late_minutes: number | null
+  is_early_departure: boolean
+  notes: string | null
+}
+
+interface AttendanceDashboard {
+  total_employees: number
+  clocked_in_today: number
+  wfh_today: number
+  absent_today: number
+  late_today: number
+  pending_wfh_approvals: number
+  pending_overtime_approvals: number
+  on_leave_today: number
+}
+
+const API_BASE = '/api'
 
 function App() {
   const [activeSection, setActiveSection] = useState<Section>('home')
+  const [user, setUser] = useState<User | null>(null)
+  const [employees, setEmployees] = useState<Employee[]>([])
+  const [features, setFeatures] = useState<FeatureToggle[]>([])
+  const [dashboard, setDashboard] = useState<AdminDashboard | null>(null)
+  const [loading, setLoading] = useState(false)
+  const [chamberLoading, setChamberLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const [employeeId, setEmployeeId] = useState('')
+  const [password, setPassword] = useState('')
+  const [showLoginModal, setShowLoginModal] = useState(false)
+  const [pendingSection, setPendingSection] = useState<Section | null>(null)
+  const [passes, setPasses] = useState<Pass[]>([])
+  const [showPassForm, setShowPassForm] = useState(false)
+  const [passFormData, setPassFormData] = useState<PassFormData>({
+    pass_type: 'recruitment',
+    full_name: '',
+    email: '',
+    phone: '',
+    department: '',
+    position: '',
+    valid_from: new Date().toISOString().split('T')[0],
+    valid_until: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+    access_areas: '',
+    purpose: '',
+    sponsor_name: '',
+    employee_id: '',
+  })
+  const [passesLoading, setPassesLoading] = useState(false)
+  const [passFilter, setPassFilter] = useState<'all' | 'active' | 'expired' | 'revoked'>('all')
+  const [viewingPass, setViewingPass] = useState<Pass | null>(null)
+  
+  // Onboarding state
+  const [onboardingTokens, setOnboardingTokens] = useState<OnboardingToken[]>([])
+  const [pendingProfiles, setPendingProfiles] = useState<PendingProfile[]>([])
+  const [showInviteModal, setShowInviteModal] = useState(false)
+  const [inviteEmployeeId, setInviteEmployeeId] = useState('')
+  const [generatedLink, setGeneratedLink] = useState('')
+  const [onboardingLoading, setOnboardingLoading] = useState(false)
+  
+  // Public onboarding state
+  const [onboardingToken, setOnboardingToken] = useState<string | null>(null)
+  const [onboardingWelcome, setOnboardingWelcome] = useState<OnboardingWelcome | null>(null)
+  const [profileFormData, setProfileFormData] = useState<ProfileFormData>({
+    emergency_contact_name: '',
+    emergency_contact_phone: '',
+    emergency_contact_relationship: '',
+    personal_phone: '',
+    personal_email: '',
+    current_address: '',
+    city: '',
+    country: '',
+    bank_name: '',
+    bank_account_number: '',
+    bank_iban: '',
+    passport_number: '',
+    passport_expiry: '',
+    uae_id_number: '',
+    uae_id_expiry: '',
+    highest_education: '',
+    shirt_size: '',
+    pants_size: '',
+    shoe_size: '',
+  })
+  const [profileSubmitted, setProfileSubmitted] = useState(false)
+  
+  // Attendance state
+  const [attendanceStatus, setAttendanceStatus] = useState<TodayAttendanceStatus | null>(null)
+  const [attendanceRecords, setAttendanceRecords] = useState<AttendanceRecord[]>([])
+  const [attendanceDashboard, setAttendanceDashboard] = useState<AttendanceDashboard | null>(null)
+  const [attendanceLoading, setAttendanceLoading] = useState(false)
+  const [clockInWorkType, setClockInWorkType] = useState<'office' | 'wfh' | 'field'>('office')
+  const [wfhReason, setWfhReason] = useState('')
+  const [gpsCoords, setGpsCoords] = useState<{latitude: number, longitude: number} | null>(null)
 
-  if (activeSection !== 'home') {
+  const isAdminLogin = pendingSection === 'admin' || pendingSection === 'secret-chamber'
+
+  // Check for onboarding token in URL on mount
+  useEffect(() => {
+    const path = window.location.pathname
+    if (path.startsWith('/onboarding/')) {
+      const token = path.replace('/onboarding/', '')
+      if (token) {
+        setOnboardingToken(token)
+        setActiveSection('public-onboarding')
+        validateAndLoadOnboarding(token)
+      }
+    }
+  }, [])
+
+  const validateAndLoadOnboarding = async (token: string) => {
+    setLoading(true)
+    setError(null)
+    try {
+      const res = await fetch(`${API_BASE}/onboarding/welcome/${token}`)
+      if (!res.ok) {
+        const data = await res.json()
+        throw new Error(data.detail || 'Invalid or expired link')
+      }
+      const data = await res.json()
+      setOnboardingWelcome(data)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to validate onboarding link')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const fetchWithAuth = async (url: string, options: RequestInit = {}) => {
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json',
+      ...(options.headers as Record<string, string> || {}),
+    }
+    if (user?.token) {
+      headers['Authorization'] = `Bearer ${user.token}`
+    }
+    if (user?.role) {
+      headers['X-Role'] = user.role
+    }
+    return fetch(url, { ...options, headers })
+  }
+
+  const handleNavigate = (section: Section) => {
+    if (section === 'home') {
+      setActiveSection('home')
+      return
+    }
+    if (!user) {
+      setPendingSection(section)
+      setShowLoginModal(true)
+      return
+    }
+    setActiveSection(section)
+  }
+
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setLoading(true)
+    setError(null)
+    
+    const loginEmployeeId = isAdminLogin ? 'ADMIN001' : employeeId
+    
+    try {
+      const res = await fetch(`${API_BASE}/auth/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ employee_id: loginEmployeeId, password }),
+      })
+      if (!res.ok) {
+        const data = await res.json()
+        throw new Error(data.detail || 'Login failed')
+      }
+      const data = await res.json()
+      const loggedInUser = {
+        employee_id: data.employee_id,
+        name: data.name,
+        role: data.role,
+        token: data.access_token,
+      }
+      setUser(loggedInUser)
+      setShowLoginModal(false)
+      setEmployeeId('')
+      setPassword('')
+      if (pendingSection) {
+        setActiveSection(pendingSection)
+        setPendingSection(null)
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Login failed')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleLogout = () => {
+    setUser(null)
+    setActiveSection('home')
+    setEmployees([])
+    setFeatures([])
+    setDashboard(null)
+  }
+
+  const closeLoginModal = () => {
+    setShowLoginModal(false)
+    setPendingSection(null)
+    setError(null)
+    setEmployeeId('')
+    setPassword('')
+  }
+
+  const fetchEmployees = async () => {
+    if (!user) return
+    setLoading(true)
+    try {
+      const res = await fetchWithAuth(`${API_BASE}/employees?active_only=false`)
+      if (res.ok) {
+        const data = await res.json()
+        setEmployees(data)
+      }
+    } catch (err) {
+      console.error('Failed to fetch employees:', err)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const fetchAdminData = async () => {
+    if (!user || user.role !== 'admin') return
+    setLoading(true)
+    try {
+      const [dashRes, featuresRes] = await Promise.all([
+        fetchWithAuth(`${API_BASE}/admin/dashboard`),
+        fetchWithAuth(`${API_BASE}/admin/features`),
+      ])
+      if (dashRes.ok) {
+        setDashboard(await dashRes.json())
+      }
+      if (featuresRes.ok) {
+        setFeatures(await featuresRes.json())
+      }
+    } catch (err) {
+      console.error('Failed to fetch admin data:', err)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const fetchSecretChamberData = async () => {
+    if (!user || user.role !== 'admin') return
+    setChamberLoading(true)
+    try {
+      const res = await fetchWithAuth(`${API_BASE}/admin/features`)
+      if (res.ok) {
+        setFeatures(await res.json())
+      }
+    } catch (err) {
+      console.error('Failed to fetch features:', err)
+    } finally {
+      setChamberLoading(false)
+    }
+  }
+
+  const toggleFeature = async (key: string, enabled: boolean) => {
+    try {
+      const res = await fetchWithAuth(`${API_BASE}/admin/features/${key}?is_enabled=${enabled}`, {
+        method: 'PUT',
+      })
+      if (res.ok) {
+        setFeatures(features.map(f => f.key === key ? { ...f, is_enabled: enabled } : f))
+      }
+    } catch (err) {
+      console.error('Failed to toggle feature:', err)
+    }
+  }
+
+  const fetchPasses = async () => {
+    if (!user) return
+    setPassesLoading(true)
+    try {
+      const res = await fetchWithAuth(`${API_BASE}/passes`)
+      if (res.ok) {
+        const data = await res.json()
+        setPasses(data)
+      }
+    } catch (err) {
+      console.error('Failed to fetch passes:', err)
+    } finally {
+      setPassesLoading(false)
+    }
+  }
+
+  const createPass = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setPassesLoading(true)
+    setError(null)
+    try {
+      const res = await fetchWithAuth(`${API_BASE}/passes`, {
+        method: 'POST',
+        body: JSON.stringify(passFormData),
+      })
+      if (!res.ok) {
+        const data = await res.json()
+        throw new Error(data.detail || 'Failed to create pass')
+      }
+      setShowPassForm(false)
+      setPassFormData({
+        pass_type: 'recruitment',
+        full_name: '',
+        email: '',
+        phone: '',
+        department: '',
+        position: '',
+        valid_from: new Date().toISOString().split('T')[0],
+        valid_until: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+        access_areas: '',
+        purpose: '',
+        sponsor_name: '',
+        employee_id: '',
+      })
+      await fetchPasses()
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to create pass')
+    } finally {
+      setPassesLoading(false)
+    }
+  }
+
+  const revokePass = async (passNumber: string) => {
+    try {
+      const res = await fetchWithAuth(`${API_BASE}/passes/${passNumber}/revoke`, {
+        method: 'POST',
+      })
+      if (res.ok) {
+        await fetchPasses()
+      }
+    } catch (err) {
+      console.error('Failed to revoke pass:', err)
+    }
+  }
+
+  const fetchOnboardingData = async () => {
+    if (!user || (user.role !== 'admin' && user.role !== 'hr')) return
+    setOnboardingLoading(true)
+    try {
+      const [tokensRes, pendingRes] = await Promise.all([
+        fetchWithAuth(`${API_BASE}/onboarding/tokens`),
+        fetchWithAuth(`${API_BASE}/onboarding/pending`),
+      ])
+      if (tokensRes.ok) {
+        setOnboardingTokens(await tokensRes.json())
+      }
+      if (pendingRes.ok) {
+        setPendingProfiles(await pendingRes.json())
+      }
+    } catch (err) {
+      console.error('Failed to fetch onboarding data:', err)
+    } finally {
+      setOnboardingLoading(false)
+    }
+  }
+
+  const generateInviteLink = async () => {
+    if (!inviteEmployeeId.trim()) return
+    setOnboardingLoading(true)
+    setError(null)
+    try {
+      const res = await fetchWithAuth(`${API_BASE}/onboarding/invite`, {
+        method: 'POST',
+        body: JSON.stringify({ employee_id: inviteEmployeeId, expires_in_days: 7 }),
+      })
+      if (!res.ok) {
+        const data = await res.json()
+        throw new Error(data.detail || 'Failed to generate invite')
+      }
+      const data = await res.json()
+      setGeneratedLink(`${window.location.origin}/onboarding/${data.token}`)
+      await fetchOnboardingData()
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to generate invite')
+    } finally {
+      setOnboardingLoading(false)
+    }
+  }
+
+  const approveProfile = async (empId: string) => {
+    try {
+      const res = await fetchWithAuth(`${API_BASE}/onboarding/approve/${empId}`, {
+        method: 'POST',
+      })
+      if (res.ok) {
+        await fetchOnboardingData()
+      }
+    } catch (err) {
+      console.error('Failed to approve profile:', err)
+    }
+  }
+
+  const submitProfile = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!onboardingToken) return
+    setLoading(true)
+    setError(null)
+    try {
+      const res = await fetch(`${API_BASE}/onboarding/submit/${onboardingToken}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(profileFormData),
+      })
+      if (!res.ok) {
+        const data = await res.json()
+        throw new Error(data.detail || 'Failed to submit profile')
+      }
+      setProfileSubmitted(true)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to submit profile')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const copyToClipboard = (text: string) => {
+    navigator.clipboard.writeText(text)
+  }
+
+  // Attendance functions
+  const fetchAttendanceData = async () => {
+    if (!user) return
+    setAttendanceLoading(true)
+    try {
+      const [statusRes, recordsRes] = await Promise.all([
+        fetchWithAuth(`${API_BASE}/attendance/today`),
+        fetchWithAuth(`${API_BASE}/attendance/my-records`)
+      ])
+      if (statusRes.ok) {
+        setAttendanceStatus(await statusRes.json())
+      }
+      if (recordsRes.ok) {
+        setAttendanceRecords(await recordsRes.json())
+      }
+      if (user.role === 'admin' || user.role === 'hr') {
+        const dashRes = await fetchWithAuth(`${API_BASE}/attendance/dashboard`)
+        if (dashRes.ok) {
+          setAttendanceDashboard(await dashRes.json())
+        }
+      }
+    } catch (err) {
+      console.error('Failed to fetch attendance data:', err)
+    } finally {
+      setAttendanceLoading(false)
+    }
+  }
+
+  const requestGPSLocation = () => {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          setGpsCoords({
+            latitude: position.coords.latitude,
+            longitude: position.coords.longitude
+          })
+        },
+        (err) => {
+          console.warn('GPS location not available:', err.message)
+          setGpsCoords(null)
+        },
+        { enableHighAccuracy: true, timeout: 10000 }
+      )
+    }
+  }
+
+  const handleClockIn = async () => {
+    if (!user) return
+    setAttendanceLoading(true)
+    setError(null)
+    try {
+      const body: Record<string, unknown> = {
+        work_type: clockInWorkType,
+        latitude: gpsCoords?.latitude,
+        longitude: gpsCoords?.longitude,
+      }
+      if (clockInWorkType === 'wfh' && wfhReason) {
+        body.wfh_reason = wfhReason
+      }
+      const res = await fetchWithAuth(`${API_BASE}/attendance/clock-in`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+      })
+      if (!res.ok) {
+        const data = await res.json()
+        throw new Error(data.detail || 'Failed to clock in')
+      }
+      await fetchAttendanceData()
+      setClockInWorkType('office')
+      setWfhReason('')
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to clock in')
+    } finally {
+      setAttendanceLoading(false)
+    }
+  }
+
+  const handleClockOut = async () => {
+    if (!user) return
+    setAttendanceLoading(true)
+    setError(null)
+    try {
+      const res = await fetchWithAuth(`${API_BASE}/attendance/clock-out`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          latitude: gpsCoords?.latitude,
+          longitude: gpsCoords?.longitude,
+        }),
+      })
+      if (!res.ok) {
+        const data = await res.json()
+        throw new Error(data.detail || 'Failed to clock out')
+      }
+      await fetchAttendanceData()
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to clock out')
+    } finally {
+      setAttendanceLoading(false)
+    }
+  }
+
+  const handleBreakStart = async () => {
+    if (!user) return
+    setAttendanceLoading(true)
+    try {
+      await fetchWithAuth(`${API_BASE}/attendance/break/start`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({}),
+      })
+      await fetchAttendanceData()
+    } catch (err) {
+      console.error('Failed to start break:', err)
+    } finally {
+      setAttendanceLoading(false)
+    }
+  }
+
+  const handleBreakEnd = async () => {
+    if (!user) return
+    setAttendanceLoading(true)
+    try {
+      await fetchWithAuth(`${API_BASE}/attendance/break/end`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({}),
+      })
+      await fetchAttendanceData()
+    } catch (err) {
+      console.error('Failed to end break:', err)
+    } finally {
+      setAttendanceLoading(false)
+    }
+  }
+
+  useEffect(() => {
+    if (activeSection === 'employees' && user) {
+      fetchEmployees()
+    } else if (activeSection === 'admin' && user?.role === 'admin') {
+      fetchAdminData()
+    } else if (activeSection === 'secret-chamber' && user?.role === 'admin') {
+      fetchSecretChamberData()
+    } else if (activeSection === 'passes' && user) {
+      fetchPasses()
+    } else if (activeSection === 'onboarding' && user && (user.role === 'admin' || user.role === 'hr')) {
+      fetchOnboardingData()
+    } else if (activeSection === 'attendance' && user) {
+      fetchAttendanceData()
+      requestGPSLocation()
+    }
+  }, [activeSection, user])
+
+  const loginModal = showLoginModal ? (
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+      <div className="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-md relative">
+        <button
+          onClick={closeLoginModal}
+          type="button"
+          className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors"
+        >
+          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+        
+        <div className="text-center mb-6">
+          <img src="/assets/logo.png" alt="Baynunah" className="h-8 mx-auto mb-2" />
+          <h2 className="text-xl font-semibold text-gray-800">
+            {isAdminLogin ? 'Admin Sign In' : 'Sign In'}
+          </h2>
+        </div>
+        
+        {error && (
+          <div className="bg-red-50 text-red-600 p-3 rounded-lg mb-4 text-sm">{error}</div>
+        )}
+        
+        <form onSubmit={handleLogin} className="space-y-4" data-testid="login-form">
+          {!isAdminLogin && (
+            <div>
+              <label htmlFor="employee-id" className="block text-sm font-medium text-gray-700 mb-1">Employee ID</label>
+              <input
+                id="employee-id"
+                name="employee_id"
+                type="text"
+                value={employeeId}
+                onChange={e => setEmployeeId(e.target.value)}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+                placeholder="e.g., BAYN00008"
+                required
+                autoComplete="username"
+                data-testid="employee-id-input"
+              />
+            </div>
+          )}
+          <div>
+            <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
+              {isAdminLogin ? 'Admin Password' : 'Password'}
+            </label>
+            <input
+              id="password"
+              name="password"
+              type="password"
+              value={password}
+              onChange={e => setPassword(e.target.value)}
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+              placeholder={isAdminLogin ? 'Enter admin password' : 'First login: DOB as DDMMYYYY'}
+              required
+              autoComplete="current-password"
+              data-testid="password-input"
+            />
+          </div>
+          <button
+            type="submit"
+            disabled={loading}
+            className="w-full py-3 bg-emerald-500 text-white rounded-lg hover:bg-emerald-600 transition-colors disabled:opacity-50"
+            data-testid="sign-in-button"
+          >
+            {loading ? 'Signing in...' : 'Sign In'}
+          </button>
+        </form>
+        <p className="text-xs text-gray-500 text-center mt-4">
+          {isAdminLogin 
+            ? 'Enter the admin password to access the admin panel.'
+            : 'First-time login? Use your date of birth (DDMMYYYY) as password.'
+          }
+        </p>
+      </div>
+    </div>
+  ) : null
+
+  // Public Onboarding Page (for new joiners)
+  if (activeSection === 'public-onboarding') {
+    if (loading) {
+      return (
+        <div className="min-h-screen bg-gradient-to-br from-emerald-50 to-teal-100 flex items-center justify-center">
+          <div className="text-center">
+            <div className="animate-spin w-12 h-12 border-4 border-emerald-500 border-t-transparent rounded-full mx-auto mb-4"></div>
+            <p className="text-gray-600">Loading your onboarding...</p>
+          </div>
+        </div>
+      )
+    }
+
+    if (error) {
+      return (
+        <div className="min-h-screen bg-gradient-to-br from-red-50 to-orange-100 flex items-center justify-center p-8">
+          <div className="bg-white rounded-2xl shadow-xl p-8 max-w-md text-center">
+            <svg className="w-16 h-16 text-red-500 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+            </svg>
+            <h2 className="text-xl font-semibold text-gray-800 mb-2">Link Invalid or Expired</h2>
+            <p className="text-gray-600 mb-6">{error}</p>
+            <p className="text-sm text-gray-500">Please contact HR for a new onboarding link.</p>
+          </div>
+        </div>
+      )
+    }
+
+    if (profileSubmitted) {
+      return (
+        <div className="min-h-screen bg-gradient-to-br from-emerald-50 to-teal-100 flex items-center justify-center p-8">
+          <div className="bg-white rounded-2xl shadow-xl p-8 max-w-md text-center">
+            <svg className="w-16 h-16 text-emerald-500 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <h2 className="text-xl font-semibold text-gray-800 mb-2">Profile Submitted!</h2>
+            <p className="text-gray-600 mb-6">Thank you for completing your profile. HR will review your information shortly.</p>
+            <p className="text-sm text-gray-500">You can close this window now.</p>
+          </div>
+        </div>
+      )
+    }
+
+    if (onboardingWelcome) {
+      return (
+        <div className="min-h-screen bg-gradient-to-br from-emerald-50 to-teal-100 py-8 px-4">
+          <div className="max-w-2xl mx-auto">
+            <div className="bg-white rounded-2xl shadow-xl overflow-hidden">
+              {/* Header */}
+              <div className="bg-gradient-to-r from-emerald-500 to-teal-600 p-6 text-white">
+                <img src="/assets/logo.png" alt="Baynunah" className="h-8 mb-4 brightness-0 invert" />
+                <h1 className="text-2xl font-semibold mb-1">Welcome, {onboardingWelcome.name}!</h1>
+                <p className="text-emerald-100">Please complete your profile information below</p>
+              </div>
+
+              {/* Employee Info Card */}
+              <div className="p-6 bg-gray-50 border-b">
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                  <div>
+                    <p className="text-gray-500">Employee ID</p>
+                    <p className="font-medium">{onboardingWelcome.employee_id}</p>
+                  </div>
+                  <div>
+                    <p className="text-gray-500">Department</p>
+                    <p className="font-medium">{onboardingWelcome.department || '-'}</p>
+                  </div>
+                  <div>
+                    <p className="text-gray-500">Job Title</p>
+                    <p className="font-medium">{onboardingWelcome.job_title || '-'}</p>
+                  </div>
+                  <div>
+                    <p className="text-gray-500">Location</p>
+                    <p className="font-medium">{onboardingWelcome.location || '-'}</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Form */}
+              <form onSubmit={submitProfile} className="p-6 space-y-6">
+                {error && (
+                  <div className="bg-red-50 text-red-600 p-3 rounded-lg text-sm">{error}</div>
+                )}
+
+                {/* Emergency Contact */}
+                <div>
+                  <h3 className="text-lg font-medium text-gray-800 mb-4 flex items-center gap-2">
+                    <svg className="w-5 h-5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+                    </svg>
+                    Emergency Contact
+                  </h3>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <input
+                      type="text"
+                      placeholder="Contact Name *"
+                      value={profileFormData.emergency_contact_name}
+                      onChange={e => setProfileFormData({...profileFormData, emergency_contact_name: e.target.value})}
+                      className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500"
+                      required
+                    />
+                    <input
+                      type="tel"
+                      placeholder="Phone Number *"
+                      value={profileFormData.emergency_contact_phone}
+                      onChange={e => setProfileFormData({...profileFormData, emergency_contact_phone: e.target.value})}
+                      className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500"
+                      required
+                    />
+                    <select
+                      value={profileFormData.emergency_contact_relationship}
+                      onChange={e => setProfileFormData({...profileFormData, emergency_contact_relationship: e.target.value})}
+                      className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500"
+                      required
+                    >
+                      <option value="">Relationship *</option>
+                      <option value="Spouse">Spouse</option>
+                      <option value="Parent">Parent</option>
+                      <option value="Sibling">Sibling</option>
+                      <option value="Friend">Friend</option>
+                      <option value="Other">Other</option>
+                    </select>
+                  </div>
+                </div>
+
+                {/* Personal Contact */}
+                <div>
+                  <h3 className="text-lg font-medium text-gray-800 mb-4 flex items-center gap-2">
+                    <svg className="w-5 h-5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                    </svg>
+                    Personal Contact
+                  </h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <input
+                      type="tel"
+                      placeholder="Personal Phone"
+                      value={profileFormData.personal_phone}
+                      onChange={e => setProfileFormData({...profileFormData, personal_phone: e.target.value})}
+                      className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500"
+                    />
+                    <input
+                      type="email"
+                      placeholder="Personal Email"
+                      value={profileFormData.personal_email}
+                      onChange={e => setProfileFormData({...profileFormData, personal_email: e.target.value})}
+                      className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500"
+                    />
+                  </div>
+                </div>
+
+                {/* Address */}
+                <div>
+                  <h3 className="text-lg font-medium text-gray-800 mb-4 flex items-center gap-2">
+                    <svg className="w-5 h-5 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                    </svg>
+                    Current Address
+                  </h3>
+                  <div className="space-y-4">
+                    <textarea
+                      placeholder="Street Address"
+                      value={profileFormData.current_address}
+                      onChange={e => setProfileFormData({...profileFormData, current_address: e.target.value})}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500"
+                      rows={2}
+                    />
+                    <div className="grid grid-cols-2 gap-4">
+                      <input
+                        type="text"
+                        placeholder="City"
+                        value={profileFormData.city}
+                        onChange={e => setProfileFormData({...profileFormData, city: e.target.value})}
+                        className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500"
+                      />
+                      <input
+                        type="text"
+                        placeholder="Country"
+                        value={profileFormData.country}
+                        onChange={e => setProfileFormData({...profileFormData, country: e.target.value})}
+                        className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Bank Details */}
+                <div>
+                  <h3 className="text-lg font-medium text-gray-800 mb-4 flex items-center gap-2">
+                    <svg className="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+                    </svg>
+                    Bank Details (for salary)
+                  </h3>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <input
+                      type="text"
+                      placeholder="Bank Name"
+                      value={profileFormData.bank_name}
+                      onChange={e => setProfileFormData({...profileFormData, bank_name: e.target.value})}
+                      className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500"
+                    />
+                    <input
+                      type="text"
+                      placeholder="Account Number"
+                      value={profileFormData.bank_account_number}
+                      onChange={e => setProfileFormData({...profileFormData, bank_account_number: e.target.value})}
+                      className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500"
+                    />
+                    <input
+                      type="text"
+                      placeholder="IBAN"
+                      value={profileFormData.bank_iban}
+                      onChange={e => setProfileFormData({...profileFormData, bank_iban: e.target.value})}
+                      className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500"
+                    />
+                  </div>
+                </div>
+
+                {/* ID Documents */}
+                <div>
+                  <h3 className="text-lg font-medium text-gray-800 mb-4 flex items-center gap-2">
+                    <svg className="w-5 h-5 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V8a2 2 0 00-2-2h-5m-4 0V5a2 2 0 114 0v1m-4 0a2 2 0 104 0m-5 8a2 2 0 100-4 2 2 0 000 4zm0 0c1.306 0 2.417.835 2.83 2M9 14a3.001 3.001 0 00-2.83 2M15 11h3m-3 4h2" />
+                    </svg>
+                    ID Documents
+                  </h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <input
+                      type="text"
+                      placeholder="Passport Number"
+                      value={profileFormData.passport_number}
+                      onChange={e => setProfileFormData({...profileFormData, passport_number: e.target.value})}
+                      className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500"
+                    />
+                    <input
+                      type="text"
+                      placeholder="Passport Expiry (DD/MM/YYYY)"
+                      value={profileFormData.passport_expiry}
+                      onChange={e => setProfileFormData({...profileFormData, passport_expiry: e.target.value})}
+                      className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500"
+                    />
+                    <input
+                      type="text"
+                      placeholder="UAE ID Number"
+                      value={profileFormData.uae_id_number}
+                      onChange={e => setProfileFormData({...profileFormData, uae_id_number: e.target.value})}
+                      className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500"
+                    />
+                    <input
+                      type="text"
+                      placeholder="UAE ID Expiry (DD/MM/YYYY)"
+                      value={profileFormData.uae_id_expiry}
+                      onChange={e => setProfileFormData({...profileFormData, uae_id_expiry: e.target.value})}
+                      className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500"
+                    />
+                  </div>
+                </div>
+
+                {/* Other Info */}
+                <div>
+                  <h3 className="text-lg font-medium text-gray-800 mb-4 flex items-center gap-2">
+                    <svg className="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    Additional Information
+                  </h3>
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <input
+                      type="text"
+                      placeholder="Highest Education"
+                      value={profileFormData.highest_education}
+                      onChange={e => setProfileFormData({...profileFormData, highest_education: e.target.value})}
+                      className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500"
+                    />
+                    <input
+                      type="text"
+                      placeholder="Shirt Size"
+                      value={profileFormData.shirt_size}
+                      onChange={e => setProfileFormData({...profileFormData, shirt_size: e.target.value})}
+                      className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500"
+                    />
+                    <input
+                      type="text"
+                      placeholder="Pants Size"
+                      value={profileFormData.pants_size}
+                      onChange={e => setProfileFormData({...profileFormData, pants_size: e.target.value})}
+                      className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500"
+                    />
+                    <input
+                      type="text"
+                      placeholder="Shoe Size"
+                      value={profileFormData.shoe_size}
+                      onChange={e => setProfileFormData({...profileFormData, shoe_size: e.target.value})}
+                      className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500"
+                    />
+                  </div>
+                </div>
+
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="w-full py-3 bg-emerald-500 text-white rounded-lg hover:bg-emerald-600 transition-colors disabled:opacity-50 font-medium"
+                >
+                  {loading ? 'Submitting...' : 'Submit Profile'}
+                </button>
+              </form>
+            </div>
+          </div>
+        </div>
+      )
+    }
+
+    return null
+  }
+
+  if (activeSection === 'employees') {
+    return (
+      <div className="min-h-screen bg-gray-100 p-8">
+        {loginModal}
+        <div className="max-w-6xl mx-auto">
+          <div className="flex items-center justify-between mb-6">
+            <div>
+              <img src="/assets/logo.png" alt="Baynunah" className="h-6 mb-1" />
+              <h1 className="text-2xl font-semibold text-gray-800">Employees</h1>
+            </div>
+            <div className="flex items-center gap-4">
+              {user && (
+                <span className="text-sm text-gray-600">
+                  {user.name} ({user.role})
+                </span>
+              )}
+              <button
+                onClick={() => handleNavigate('home')}
+                className="px-4 py-2 text-emerald-600 hover:bg-emerald-50 rounded-lg transition-colors"
+              >
+                ← Back to Home
+              </button>
+            </div>
+          </div>
+          
+          <div className="bg-white rounded-xl shadow-lg overflow-hidden">
+            {loading ? (
+              <div className="p-8 text-center text-gray-500">Loading employees...</div>
+            ) : employees.length === 0 ? (
+              <div className="p-8 text-center">
+                <p className="text-gray-500 mb-4">No employees found</p>
+                <p className="text-sm text-gray-400">Add employees via CSV import or the admin panel</p>
+              </div>
+            ) : (
+              <table className="w-full">
+                <thead className="bg-gray-50 border-b border-gray-200">
+                  <tr>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">ID</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Name</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Job Title</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Department</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Profile</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-200">
+                  {employees.map(emp => (
+                    <tr key={emp.id} className="hover:bg-gray-50">
+                      <td className="px-6 py-4 text-sm font-medium text-gray-900">{emp.employee_id}</td>
+                      <td className="px-6 py-4 text-sm text-gray-900">{emp.name}</td>
+                      <td className="px-6 py-4 text-sm text-gray-500">{emp.job_title || '-'}</td>
+                      <td className="px-6 py-4 text-sm text-gray-500">{emp.department || '-'}</td>
+                      <td className="px-6 py-4">
+                        <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${
+                          emp.employment_status === 'Active' ? 'bg-green-100 text-green-700' :
+                          emp.employment_status === 'Terminated' ? 'bg-red-100 text-red-700' :
+                          emp.employment_status === 'Resigned' ? 'bg-gray-100 text-gray-700' :
+                          'bg-yellow-100 text-yellow-700'
+                        }`}>
+                          {emp.employment_status || (emp.is_active ? 'Active' : 'Inactive')}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4">
+                        <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${
+                          emp.profile_status === 'complete' ? 'bg-emerald-100 text-emerald-700' :
+                          emp.profile_status === 'pending_review' ? 'bg-blue-100 text-blue-700' :
+                          'bg-gray-100 text-gray-500'
+                        }`}>
+                          {emp.profile_status === 'complete' ? 'Complete' :
+                           emp.profile_status === 'pending_review' ? 'Pending Review' :
+                           'Incomplete'}
+                        </span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
+          </div>
+          <p className="text-sm text-gray-500 mt-4">Total: {employees.length} employees</p>
+        </div>
+      </div>
+    )
+  }
+
+  if (activeSection === 'secret-chamber') {
+    if (user?.role !== 'admin') {
+      return (
+        <div className="min-h-screen bg-gray-100 flex flex-col items-center justify-center p-8">
+          {loginModal}
+          <div className="bg-white rounded-2xl shadow-lg p-8 max-w-md text-center">
+            <h2 className="text-xl font-semibold text-gray-800 mb-4">Access Denied</h2>
+            <p className="text-gray-600 mb-6">You need admin privileges to access this section.</p>
+            <button
+              onClick={() => handleNavigate('home')}
+              className="px-6 py-2 bg-emerald-500 text-white rounded-lg hover:bg-emerald-600 transition-colors"
+            >
+              Back to Home
+            </button>
+          </div>
+        </div>
+      )
+    }
+
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-purple-900 to-gray-900 p-8">
+        {loginModal}
+        <div className="max-w-4xl mx-auto">
+          <div className="flex items-center justify-between mb-8">
+            <div>
+              <p className="text-purple-300 text-sm tracking-widest uppercase mb-1">Secret Chamber</p>
+              <h1 className="text-2xl font-semibold text-white">System Configuration</h1>
+            </div>
+            <div className="flex items-center gap-4">
+              <span className="text-sm text-purple-300">
+                {user?.name}
+              </span>
+              <button
+                onClick={() => setActiveSection('admin')}
+                className="px-4 py-2 text-purple-300 hover:text-white hover:bg-purple-800/50 rounded-lg transition-colors"
+              >
+                ← Back to Admin
+              </button>
+            </div>
+          </div>
+
+          <div className="bg-white/10 backdrop-blur-sm rounded-2xl border border-purple-500/20 p-6">
+            <h2 className="text-lg font-semibold text-white mb-6 flex items-center gap-2">
+              <svg className="w-5 h-5 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
+              </svg>
+              Feature Toggles
+            </h2>
+            {chamberLoading ? (
+              <div className="text-center text-purple-300 py-8">Loading...</div>
+            ) : features.length === 0 ? (
+              <div className="text-center text-purple-300 py-8">No features configured</div>
+            ) : (
+              <div className="space-y-3">
+                {features.map(feature => (
+                  <div key={feature.key} className="flex items-center justify-between p-4 bg-white/5 rounded-xl border border-purple-500/10 hover:border-purple-500/30 transition-colors">
+                    <div>
+                      <p className="font-medium text-white">{feature.key}</p>
+                      <p className="text-sm text-purple-300">{feature.description}</p>
+                      <span className="text-xs text-purple-400">{feature.category}</span>
+                    </div>
+                    <button
+                      onClick={() => toggleFeature(feature.key, !feature.is_enabled)}
+                      className={`relative inline-flex h-7 w-12 items-center rounded-full transition-colors ${
+                        feature.is_enabled ? 'bg-purple-500' : 'bg-gray-600'
+                      }`}
+                    >
+                      <span
+                        className={`inline-block h-5 w-5 transform rounded-full bg-white transition-transform shadow-lg ${
+                          feature.is_enabled ? 'translate-x-6' : 'translate-x-1'
+                        }`}
+                      />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          <p className="text-purple-400/50 text-xs text-center mt-8">
+            This area is restricted to system administrators only.
+          </p>
+        </div>
+      </div>
+    )
+  }
+
+  if (activeSection === 'admin') {
+    if (user?.role !== 'admin') {
+      return (
+        <div className="min-h-screen bg-gray-100 flex flex-col items-center justify-center p-8">
+          {loginModal}
+          <div className="bg-white rounded-2xl shadow-lg p-8 max-w-md text-center">
+            <h2 className="text-xl font-semibold text-gray-800 mb-4">Access Denied</h2>
+            <p className="text-gray-600 mb-6">You need admin privileges to access this section.</p>
+            <button
+              onClick={() => handleNavigate('home')}
+              className="px-6 py-2 bg-emerald-500 text-white rounded-lg hover:bg-emerald-600 transition-colors"
+            >
+              Back to Home
+            </button>
+          </div>
+        </div>
+      )
+    }
+
+    return (
+      <div className="min-h-screen bg-gray-100 p-8 relative">
+        {loginModal}
+        
+        <button
+          onClick={() => setActiveSection('secret-chamber')}
+          className="absolute bottom-6 right-6 p-3 rounded-2xl bg-gradient-to-br from-gray-100 to-gray-200 hover:from-purple-100 hover:to-purple-200 transition-all duration-300 group"
+          style={{ boxShadow: '0 4px 15px -3px rgba(0,0,0,0.1), inset 0 1px 0 rgba(255,255,255,0.8)' }}
+          title="Secret Chamber"
+        >
+          <svg 
+            className="w-6 h-6 text-purple-300 group-hover:text-purple-500 transition-colors" 
+            fill="none" 
+            stroke="currentColor" 
+            viewBox="0 0 24 24"
+          >
+            <path 
+              strokeLinecap="round" 
+              strokeLinejoin="round" 
+              strokeWidth={1.5} 
+              d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" 
+            />
+            <path 
+              strokeLinecap="round" 
+              strokeLinejoin="round" 
+              strokeWidth={1.5} 
+              d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" 
+            />
+          </svg>
+        </button>
+
+        <div className="max-w-6xl mx-auto">
+          <div className="flex items-center justify-between mb-6">
+            <div>
+              <img src="/assets/logo.png" alt="Baynunah" className="h-6 mb-1" />
+              <h1 className="text-2xl font-semibold text-gray-800">Admin Dashboard</h1>
+            </div>
+            <div className="flex items-center gap-4">
+              <span className="text-sm text-gray-600">
+                {user?.name} ({user?.role})
+              </span>
+              <button
+                onClick={() => handleNavigate('home')}
+                className="px-4 py-2 text-emerald-600 hover:bg-emerald-50 rounded-lg transition-colors"
+              >
+                ← Back to Home
+              </button>
+            </div>
+          </div>
+
+          {dashboard && (
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+              <div className="bg-white rounded-xl shadow p-6">
+                <p className="text-sm text-gray-500">Total Employees</p>
+                <p className="text-3xl font-semibold text-gray-800">{dashboard.total_employees}</p>
+              </div>
+              <div className="bg-white rounded-xl shadow p-6">
+                <p className="text-sm text-gray-500">Active Employees</p>
+                <p className="text-3xl font-semibold text-emerald-600">{dashboard.active_employees}</p>
+              </div>
+              <div className="bg-white rounded-xl shadow p-6">
+                <p className="text-sm text-gray-500">Pending Renewals</p>
+                <p className="text-3xl font-semibold text-amber-600">{dashboard.pending_renewals}</p>
+              </div>
+              <div className="bg-white rounded-xl shadow p-6">
+                <p className="text-sm text-gray-500">Features Enabled</p>
+                <p className="text-3xl font-semibold text-blue-600">{dashboard.features_enabled}/{dashboard.features_total}</p>
+              </div>
+            </div>
+          )}
+
+          <div className="bg-white rounded-xl shadow-lg p-6">
+            <h2 className="text-lg font-semibold text-gray-800 mb-4">Quick Actions</h2>
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+              <button 
+                onClick={() => setActiveSection('employees')}
+                className="p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors text-left"
+              >
+                <svg className="w-8 h-8 text-emerald-500 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+                </svg>
+                <p className="font-medium text-gray-800">Manage Employees</p>
+                <p className="text-sm text-gray-500">View and manage employees</p>
+              </button>
+              <button 
+                onClick={() => setActiveSection('onboarding')}
+                className="p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors text-left"
+              >
+                <svg className="w-8 h-8 text-blue-500 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
+                </svg>
+                <p className="font-medium text-gray-800">Onboarding</p>
+                <p className="text-sm text-gray-500">Invite new joiners</p>
+              </button>
+              <button 
+                onClick={() => setActiveSection('passes')}
+                className="p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors text-left"
+              >
+                <svg className="w-8 h-8 text-amber-500 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z" />
+                </svg>
+                <p className="font-medium text-gray-800">Pass Generation</p>
+                <p className="text-sm text-gray-500">Create visitor passes</p>
+              </button>
+              <button 
+                onClick={() => setActiveSection('recruitment')}
+                className="p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors text-left"
+              >
+                <svg className="w-8 h-8 text-purple-500 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                </svg>
+                <p className="font-medium text-gray-800">Recruitment</p>
+                <p className="text-sm text-gray-500">Requests & Benefits</p>
+              </button>
+              <button 
+                onClick={() => setActiveSection('templates')}
+                className="p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors text-left"
+              >
+                <svg className="w-8 h-8 text-indigo-500 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z" />
+                </svg>
+                <p className="font-medium text-gray-800">Templates</p>
+                <p className="text-sm text-gray-500">Pass templates</p>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  if (activeSection === 'passes') {
+    return (
+      <div className="min-h-screen bg-gray-100 p-8">
+        {loginModal}
+        <div className="max-w-6xl mx-auto">
+          <div className="flex items-center justify-between mb-6">
+            <div>
+              <img src="/assets/logo.png" alt="Baynunah" className="h-6 mb-1" />
+              <h1 className="text-2xl font-semibold text-gray-800">Pass Generation</h1>
+            </div>
+            <div className="flex items-center gap-4">
+              {user && (
+                <span className="text-sm text-gray-600">
+                  {user.name} ({user.role})
+                </span>
+              )}
+              <button
+                onClick={() => handleNavigate('home')}
+                className="px-4 py-2 text-emerald-600 hover:bg-emerald-50 rounded-lg transition-colors"
+              >
+                ← Back to Home
+              </button>
+            </div>
+          </div>
+
+          {/* Dashboard Stats */}
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+            <button
+              onClick={() => setPassFilter('all')}
+              className={`bg-white rounded-xl shadow-sm p-5 border-l-4 border-emerald-500 text-left transition-all hover:shadow-md ${passFilter === 'all' ? 'ring-2 ring-emerald-500' : ''}`}
+            >
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-gray-500 font-medium">Total Passes</p>
+                  <p className="text-2xl font-bold text-gray-800">{passes.length}</p>
+                </div>
+                <div className="w-12 h-12 bg-emerald-100 rounded-full flex items-center justify-center">
+                  <svg className="w-6 h-6 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z" />
+                  </svg>
+                </div>
+              </div>
+            </button>
+            <button
+              onClick={() => setPassFilter('active')}
+              className={`bg-white rounded-xl shadow-sm p-5 border-l-4 border-green-500 text-left transition-all hover:shadow-md ${passFilter === 'active' ? 'ring-2 ring-green-500' : ''}`}
+            >
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-gray-500 font-medium">Active</p>
+                  <p className="text-2xl font-bold text-green-600">{passes.filter(p => p.status === 'active').length}</p>
+                </div>
+                <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
+                  <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                </div>
+              </div>
+            </button>
+            <button
+              onClick={() => setPassFilter('expired')}
+              className={`bg-white rounded-xl shadow-sm p-5 border-l-4 border-amber-500 text-left transition-all hover:shadow-md ${passFilter === 'expired' ? 'ring-2 ring-amber-500' : ''}`}
+            >
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-gray-500 font-medium">Expired</p>
+                  <p className="text-2xl font-bold text-amber-600">{passes.filter(p => p.status === 'expired').length}</p>
+                </div>
+                <div className="w-12 h-12 bg-amber-100 rounded-full flex items-center justify-center">
+                  <svg className="w-6 h-6 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                </div>
+              </div>
+            </button>
+            <button
+              onClick={() => setPassFilter('revoked')}
+              className={`bg-white rounded-xl shadow-sm p-5 border-l-4 border-red-500 text-left transition-all hover:shadow-md ${passFilter === 'revoked' ? 'ring-2 ring-red-500' : ''}`}
+            >
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-gray-500 font-medium">Revoked</p>
+                  <p className="text-2xl font-bold text-red-600">{passes.filter(p => p.status === 'revoked').length}</p>
+                </div>
+                <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center">
+                  <svg className="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" />
+                  </svg>
+                </div>
+              </div>
+            </button>
+          </div>
+
+          <div className="flex gap-4 mb-6">
+            <button
+              onClick={() => setShowPassForm(true)}
+              className="px-4 py-2 bg-emerald-500 text-white rounded-lg hover:bg-emerald-600 transition-colors flex items-center gap-2"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+              </svg>
+              Generate New Pass
+            </button>
+          </div>
+
+          {showPassForm && (
+            <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+              <div className="bg-white rounded-2xl shadow-2xl p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+                <div className="flex items-center justify-between mb-4">
+                  <h2 className="text-xl font-semibold text-gray-800">Generate New Pass</h2>
+                  <button
+                    onClick={() => setShowPassForm(false)}
+                    className="text-gray-400 hover:text-gray-600"
+                  >
+                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </button>
+                </div>
+                
+                {error && (
+                  <div className="bg-red-50 text-red-600 p-3 rounded-lg mb-4 text-sm">{error}</div>
+                )}
+                
+                <form onSubmit={createPass} className="space-y-4">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Pass Type</label>
+                      <select
+                        value={passFormData.pass_type}
+                        onChange={e => setPassFormData({...passFormData, pass_type: e.target.value})}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500"
+                      >
+                        <option value="recruitment">Recruitment</option>
+                        <option value="onboarding">Onboarding</option>
+                        <option value="visitor">Visitor</option>
+                        <option value="contractor">Contractor</option>
+                        <option value="temporary">Temporary</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Full Name *</label>
+                      <input
+                        type="text"
+                        value={passFormData.full_name}
+                        onChange={e => setPassFormData({...passFormData, full_name: e.target.value})}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500"
+                        required
+                      />
+                    </div>
+                  </div>
+                  
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Valid From *</label>
+                      <input
+                        type="date"
+                        value={passFormData.valid_from}
+                        onChange={e => setPassFormData({...passFormData, valid_from: e.target.value})}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500"
+                        required
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Valid Until *</label>
+                      <input
+                        type="date"
+                        value={passFormData.valid_until}
+                        onChange={e => setPassFormData({...passFormData, valid_until: e.target.value})}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500"
+                        required
+                      />
+                    </div>
+                  </div>
+                  
+                  <div className="flex gap-3 pt-4">
+                    <button
+                      type="submit"
+                      disabled={passesLoading}
+                      className="flex-1 py-2 bg-emerald-500 text-white rounded-lg hover:bg-emerald-600 transition-colors disabled:opacity-50"
+                    >
+                      {passesLoading ? 'Creating...' : 'Generate Pass'}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setShowPassForm(false)}
+                      className="px-6 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          )}
+
+          {/* Filter indicator */}
+          {passFilter !== 'all' && (
+            <div className="flex items-center gap-2 mb-4">
+              <span className="text-sm text-gray-600">Showing:</span>
+              <span className={`inline-flex px-3 py-1 text-sm font-medium rounded-full ${
+                passFilter === 'active' ? 'bg-green-100 text-green-700' :
+                passFilter === 'expired' ? 'bg-amber-100 text-amber-700' :
+                'bg-red-100 text-red-700'
+              }`}>
+                {passFilter.charAt(0).toUpperCase() + passFilter.slice(1)} passes
+              </span>
+              <button
+                onClick={() => setPassFilter('all')}
+                className="text-sm text-emerald-600 hover:text-emerald-800"
+              >
+                Clear filter
+              </button>
+            </div>
+          )}
+
+          <div className="bg-white rounded-xl shadow-lg overflow-hidden">
+            {passesLoading && passes.length === 0 ? (
+              <div className="p-8 text-center text-gray-500">Loading passes...</div>
+            ) : passes.filter(p => passFilter === 'all' || p.status === passFilter).length === 0 ? (
+              <div className="p-8 text-center">
+                <p className="text-gray-500 mb-2">
+                  {passFilter === 'all' ? 'No passes generated yet' : `No ${passFilter} passes`}
+                </p>
+              </div>
+            ) : (
+              <table className="w-full">
+                <thead className="bg-emerald-50 border-b border-emerald-100">
+                  <tr>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-emerald-700 uppercase">Pass #</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-emerald-700 uppercase">Type</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-emerald-700 uppercase">Name</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-emerald-700 uppercase">Valid</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-emerald-700 uppercase">Status</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-emerald-700 uppercase">Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-200">
+                  {passes.filter(p => passFilter === 'all' || p.status === passFilter).map(pass => (
+                    <tr key={pass.id} className="hover:bg-emerald-50/50">
+                      <td className="px-6 py-4 text-sm font-mono text-gray-900">{pass.pass_number}</td>
+                      <td className="px-6 py-4">
+                        <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${
+                          pass.pass_type === 'recruitment' ? 'bg-blue-100 text-blue-700' :
+                          pass.pass_type === 'onboarding' ? 'bg-emerald-100 text-emerald-700' :
+                          pass.pass_type === 'visitor' ? 'bg-purple-100 text-purple-700' :
+                          pass.pass_type === 'contractor' ? 'bg-orange-100 text-orange-700' :
+                          'bg-gray-100 text-gray-700'
+                        }`}>
+                          {pass.pass_type}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 text-sm text-gray-900">{pass.full_name}</td>
+                      <td className="px-6 py-4 text-sm text-gray-500">
+                        {pass.valid_from} to {pass.valid_until}
+                      </td>
+                      <td className="px-6 py-4">
+                        <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${
+                          pass.status === 'active' ? 'bg-green-100 text-green-700' :
+                          pass.status === 'expired' ? 'bg-amber-100 text-amber-700' :
+                          'bg-red-100 text-red-700'
+                        }`}>
+                          {pass.status}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 flex gap-2">
+                        <button
+                          onClick={() => setViewingPass(pass)}
+                          className="text-emerald-600 hover:text-emerald-800 text-sm font-medium"
+                        >
+                          View
+                        </button>
+                        {pass.status === 'active' && (
+                          <button
+                            onClick={() => revokePass(pass.pass_number)}
+                            className="text-red-600 hover:text-red-800 text-sm"
+                          >
+                            Revoke
+                          </button>
+                        )}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
+          </div>
+
+          {/* View Pass Modal */}
+          {viewingPass && (
+            <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+              <div className="bg-white rounded-2xl shadow-2xl p-6 w-full max-w-lg">
+                <div className="flex items-center justify-between mb-6">
+                  <h2 className="text-xl font-semibold text-gray-800">Pass Details</h2>
+                  <button
+                    onClick={() => setViewingPass(null)}
+                    className="text-gray-400 hover:text-gray-600"
+                  >
+                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </button>
+                </div>
+                
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between p-4 bg-emerald-50 rounded-lg">
+                    <span className="text-sm text-gray-600">Pass Number</span>
+                    <span className="font-mono font-bold text-emerald-700">{viewingPass.pass_number}</span>
+                  </div>
+                  
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <p className="text-sm text-gray-500">Full Name</p>
+                      <p className="font-medium text-gray-800">{viewingPass.full_name}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-gray-500">Pass Type</p>
+                      <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${
+                        viewingPass.pass_type === 'recruitment' ? 'bg-blue-100 text-blue-700' :
+                        viewingPass.pass_type === 'onboarding' ? 'bg-emerald-100 text-emerald-700' :
+                        viewingPass.pass_type === 'visitor' ? 'bg-purple-100 text-purple-700' :
+                        viewingPass.pass_type === 'contractor' ? 'bg-orange-100 text-orange-700' :
+                        'bg-gray-100 text-gray-700'
+                      }`}>
+                        {viewingPass.pass_type}
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <p className="text-sm text-gray-500">Valid From</p>
+                      <p className="font-medium text-gray-800">{viewingPass.valid_from}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-gray-500">Valid Until</p>
+                      <p className="font-medium text-gray-800">{viewingPass.valid_until}</p>
+                    </div>
+                  </div>
+
+                  <div>
+                    <p className="text-sm text-gray-500">Status</p>
+                    <span className={`inline-flex px-3 py-1 text-sm font-medium rounded-full ${
+                      viewingPass.status === 'active' ? 'bg-green-100 text-green-700' :
+                      viewingPass.status === 'expired' ? 'bg-amber-100 text-amber-700' :
+                      'bg-red-100 text-red-700'
+                    }`}>
+                      {viewingPass.status.charAt(0).toUpperCase() + viewingPass.status.slice(1)}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="flex gap-3 mt-6">
+                  {viewingPass.status === 'active' && (
+                    <button
+                      onClick={() => {
+                        revokePass(viewingPass.pass_number)
+                        setViewingPass(null)
+                      }}
+                      className="flex-1 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"
+                    >
+                      Revoke Pass
+                    </button>
+                  )}
+                  <button
+                    onClick={() => setViewingPass(null)}
+                    className="flex-1 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+                  >
+                    Close
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+    )
+  }
+
+  // Templates Section
+  if (activeSection === 'templates' || activeSection === 'template-manager' || activeSection === 'template-candidate' || activeSection === 'template-onboarding' || activeSection === 'template-employee') {
+    const templateType = activeSection === 'template-manager' ? 'manager' :
+                         activeSection === 'template-candidate' ? 'candidate' :
+                         activeSection === 'template-onboarding' ? 'onboarding' :
+                         activeSection === 'template-employee' ? 'employee' : null
+
+    return (
+      <div className="min-h-screen bg-gray-100 p-8">
+        {loginModal}
+        <div className="max-w-6xl mx-auto">
+          <div className="flex items-center justify-between mb-6">
+            <div>
+              <img src="/assets/logo.png" alt="Baynunah" className="h-6 mb-1" />
+              <h1 className="text-2xl font-semibold text-gray-800">Pass Templates</h1>
+            </div>
+            <div className="flex items-center gap-4">
+              {user && (
+                <span className="text-sm text-gray-600">
+                  {user.name} ({user.role})
+                </span>
+              )}
+              <button
+                onClick={() => templateType ? setActiveSection('templates') : handleNavigate('home')}
+                className="px-4 py-2 text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors"
+              >
+                ← {templateType ? 'Back to Templates' : 'Back to Home'}
+              </button>
+            </div>
+          </div>
+
+          {/* Template Cards Grid */}
+          {!templateType && (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* Manager Pass Card */}
+              <button
+                onClick={() => setActiveSection('template-manager')}
+                className="bg-white rounded-xl shadow-lg p-6 text-left hover:shadow-xl transition-all border-l-4 border-blue-500"
+              >
+                <div className="flex items-start gap-4">
+                  <div className="w-14 h-14 bg-blue-100 rounded-xl flex items-center justify-center flex-shrink-0">
+                    <svg className="w-7 h-7 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                    </svg>
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-semibold text-gray-800 mb-1">Manager Pass</h3>
+                    <p className="text-sm text-gray-500 mb-3">Recruitment governance, approvals, visibility, next actions</p>
+                    <div className="flex flex-wrap gap-2">
+                      <span className="px-2 py-1 bg-blue-50 text-blue-600 text-xs rounded-full">Approvals</span>
+                      <span className="px-2 py-1 bg-blue-50 text-blue-600 text-xs rounded-full">Pipeline</span>
+                      <span className="px-2 py-1 bg-blue-50 text-blue-600 text-xs rounded-full">Actions</span>
+                    </div>
+                  </div>
+                </div>
+              </button>
+
+              {/* Candidate Pass Card */}
+              <button
+                onClick={() => setActiveSection('template-candidate')}
+                className="bg-white rounded-xl shadow-lg p-6 text-left hover:shadow-xl transition-all border-l-4 border-purple-500"
+              >
+                <div className="flex items-start gap-4">
+                  <div className="w-14 h-14 bg-purple-100 rounded-xl flex items-center justify-center flex-shrink-0">
+                    <svg className="w-7 h-7 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                    </svg>
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-semibold text-gray-800 mb-1">Candidate Pass</h3>
+                    <p className="text-sm text-gray-500 mb-3">Candidate experience, HR visibility, recruitment timeline</p>
+                    <div className="flex flex-wrap gap-2">
+                      <span className="px-2 py-1 bg-purple-50 text-purple-600 text-xs rounded-full">Stages</span>
+                      <span className="px-2 py-1 bg-purple-50 text-purple-600 text-xs rounded-full">Timeline</span>
+                      <span className="px-2 py-1 bg-purple-50 text-purple-600 text-xs rounded-full">Contact</span>
+                    </div>
+                  </div>
+                </div>
+              </button>
+
+              {/* Onboarding Pass Card */}
+              <button
+                onClick={() => setActiveSection('template-onboarding')}
+                className="bg-white rounded-xl shadow-lg p-6 text-left hover:shadow-xl transition-all border-l-4 border-emerald-500"
+              >
+                <div className="flex items-start gap-4">
+                  <div className="w-14 h-14 bg-emerald-100 rounded-xl flex items-center justify-center flex-shrink-0">
+                    <svg className="w-7 h-7 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
+                    </svg>
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-semibold text-gray-800 mb-1">Onboarding Pass</h3>
+                    <p className="text-sm text-gray-500 mb-3">Post-offer acceptance, new joiner checklist, document collection</p>
+                    <div className="flex flex-wrap gap-2">
+                      <span className="px-2 py-1 bg-emerald-50 text-emerald-600 text-xs rounded-full">Checklist</span>
+                      <span className="px-2 py-1 bg-emerald-50 text-emerald-600 text-xs rounded-full">Documents</span>
+                      <span className="px-2 py-1 bg-emerald-50 text-emerald-600 text-xs rounded-full">Setup</span>
+                    </div>
+                  </div>
+                </div>
+              </button>
+
+              {/* Employee Pass Card */}
+              <button
+                onClick={() => setActiveSection('template-employee')}
+                className="bg-white rounded-xl shadow-lg p-6 text-left hover:shadow-xl transition-all border-l-4 border-amber-500"
+              >
+                <div className="flex items-start gap-4">
+                  <div className="w-14 h-14 bg-amber-100 rounded-xl flex items-center justify-center flex-shrink-0">
+                    <svg className="w-7 h-7 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M10 6H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V8a2 2 0 00-2-2h-5m-4 0V5a2 2 0 114 0v1m-4 0a2 2 0 104 0m-5 8a2 2 0 100-4 2 2 0 000 4zm0 0c1.306 0 2.417.835 2.83 2M9 14a3.001 3.001 0 00-2.83 2M15 11h3m-3 4h2" />
+                    </svg>
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-semibold text-gray-800 mb-1">Employee Pass</h3>
+                    <p className="text-sm text-gray-500 mb-3">Living digital identity for the employee lifecycle</p>
+                    <div className="flex flex-wrap gap-2">
+                      <span className="px-2 py-1 bg-amber-50 text-amber-600 text-xs rounded-full">Profile</span>
+                      <span className="px-2 py-1 bg-amber-50 text-amber-600 text-xs rounded-full">Requests</span>
+                      <span className="px-2 py-1 bg-amber-50 text-amber-600 text-xs rounded-full">Actions</span>
+                    </div>
+                  </div>
+                </div>
+              </button>
+            </div>
+          )}
+
+          {/* Manager Pass Template */}
+          {templateType === 'manager' && (
+            <div className="space-y-6">
+              {/* Pass Preview Card */}
+              <div className="bg-white rounded-2xl shadow-xl overflow-hidden max-w-md mx-auto">
+                {/* Header */}
+                <div className="bg-gradient-to-r from-blue-600 to-blue-700 p-6 text-white">
+                  <div className="flex items-start justify-between">
+                    <div className="flex items-center gap-4">
+                      <div className="w-16 h-16 bg-white/20 rounded-xl flex items-center justify-center">
+                        <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                        </svg>
+                      </div>
+                      <div>
+                        <p className="text-blue-100 text-sm">Manager Name</p>
+                        <p className="text-xl font-bold">[Manager Name]</p>
+                        <p className="text-blue-200 text-sm">ID: [Manager ID]</p>
+                      </div>
+                    </div>
+                    <div className="w-16 h-16 bg-white rounded-lg flex items-center justify-center">
+                      <svg className="w-12 h-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" />
+                      </svg>
+                    </div>
+                  </div>
+                  <div className="mt-4 flex items-center gap-2">
+                    <span className="px-2 py-1 bg-white/20 rounded text-xs">Department</span>
+                    <span className="px-2 py-1 bg-green-500/80 rounded text-xs">Active</span>
+                  </div>
+                </div>
+
+                {/* Recruitment Overview */}
+                <div className="p-4 border-b">
+                  <h4 className="text-sm font-semibold text-gray-500 uppercase mb-3">Recruitment Overview</h4>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="p-3 bg-gray-50 rounded-lg">
+                      <p className="text-xs text-gray-500">Position</p>
+                      <p className="font-medium text-gray-800">[Position Title]</p>
+                    </div>
+                    <div className="p-3 bg-gray-50 rounded-lg">
+                      <p className="text-xs text-gray-500">Status</p>
+                      <span className="px-2 py-0.5 bg-green-100 text-green-700 text-xs rounded-full">Open</span>
+                    </div>
+                    <div className="p-3 bg-gray-50 rounded-lg">
+                      <p className="text-xs text-gray-500">SLA Days</p>
+                      <p className="font-medium text-gray-800">[X] days</p>
+                    </div>
+                    <div className="p-3 bg-gray-50 rounded-lg">
+                      <p className="text-xs text-gray-500">Pipeline</p>
+                      <p className="font-medium text-gray-800">[X] candidates</p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Approvals Block */}
+                <div className="p-4 border-b">
+                  <h4 className="text-sm font-semibold text-gray-500 uppercase mb-3">Approvals</h4>
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between p-2 bg-amber-50 rounded-lg">
+                      <span className="text-sm text-gray-700">Job Requisition</span>
+                      <span className="px-2 py-0.5 bg-amber-100 text-amber-700 text-xs rounded-full">Pending</span>
+                    </div>
+                    <div className="flex items-center justify-between p-2 bg-green-50 rounded-lg">
+                      <span className="text-sm text-gray-700">Budget/Salary</span>
+                      <span className="px-2 py-0.5 bg-green-100 text-green-700 text-xs rounded-full">Approved</span>
+                    </div>
+                    <div className="flex items-center justify-between p-2 bg-gray-50 rounded-lg">
+                      <span className="text-sm text-gray-700">Offer Approval</span>
+                      <span className="px-2 py-0.5 bg-gray-200 text-gray-600 text-xs rounded-full">Not Started</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Pipeline Snapshot */}
+                <div className="p-4 border-b">
+                  <h4 className="text-sm font-semibold text-gray-500 uppercase mb-3">Pipeline Snapshot</h4>
+                  <div className="flex items-center justify-between">
+                    <div className="text-center">
+                      <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-1">
+                        <span className="text-blue-600 font-bold text-sm">5</span>
+                      </div>
+                      <p className="text-xs text-gray-500">Screen</p>
+                    </div>
+                    <div className="text-center">
+                      <div className="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-1">
+                        <span className="text-purple-600 font-bold text-sm">3</span>
+                      </div>
+                      <p className="text-xs text-gray-500">Assess</p>
+                    </div>
+                    <div className="text-center">
+                      <div className="w-10 h-10 bg-amber-100 rounded-full flex items-center justify-center mx-auto mb-1">
+                        <span className="text-amber-600 font-bold text-sm">2</span>
+                      </div>
+                      <p className="text-xs text-gray-500">Interview</p>
+                    </div>
+                    <div className="text-center">
+                      <div className="w-10 h-10 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-1">
+                        <span className="text-emerald-600 font-bold text-sm">1</span>
+                      </div>
+                      <p className="text-xs text-gray-500">Offer</p>
+                    </div>
+                    <div className="text-center">
+                      <div className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-1">
+                        <span className="text-gray-600 font-bold text-sm">0</span>
+                      </div>
+                      <p className="text-xs text-gray-500">Onboard</p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Next Actions */}
+                <div className="p-4">
+                  <h4 className="text-sm font-semibold text-gray-500 uppercase mb-3">Next Actions</h4>
+                  <div className="space-y-2">
+                    <button className="w-full p-3 bg-blue-50 text-blue-700 rounded-lg text-sm font-medium hover:bg-blue-100 transition-colors text-left flex items-center gap-2">
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                      Approve Pending Items
+                    </button>
+                    <button className="w-full p-3 bg-gray-50 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-100 transition-colors text-left flex items-center gap-2">
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                      </svg>
+                      Review Candidates
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              {/* Template Info */}
+              <div className="bg-blue-50 rounded-xl p-6 max-w-md mx-auto">
+                <h4 className="font-semibold text-blue-800 mb-2">Manager Pass Template</h4>
+                <p className="text-sm text-blue-700">This template provides recruitment governance, approvals visibility, candidate pipeline tracking, and actionable next steps for hiring managers.</p>
+              </div>
+            </div>
+          )}
+
+          {/* Candidate Pass Template */}
+          {templateType === 'candidate' && (
+            <div className="space-y-6">
+              <div className="bg-white rounded-2xl shadow-xl overflow-hidden max-w-md mx-auto">
+                {/* Header */}
+                <div className="bg-gradient-to-r from-purple-600 to-purple-700 p-6 text-white">
+                  <div className="flex items-start justify-between">
+                    <div className="flex items-center gap-4">
+                      <div className="w-16 h-16 bg-white/20 rounded-xl flex items-center justify-center">
+                        <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                        </svg>
+                      </div>
+                      <div>
+                        <p className="text-purple-100 text-sm">Candidate</p>
+                        <p className="text-xl font-bold">[Candidate Name]</p>
+                        <p className="text-purple-200 text-sm">ID: [Candidate ID]</p>
+                      </div>
+                    </div>
+                    <div className="w-16 h-16 bg-white rounded-lg flex items-center justify-center">
+                      <svg className="w-12 h-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" />
+                      </svg>
+                    </div>
+                  </div>
+                  <div className="mt-4 flex items-center gap-2">
+                    <span className="px-2 py-1 bg-white/20 rounded text-xs">[Position Title]</span>
+                    <span className="px-2 py-1 bg-amber-500/80 rounded text-xs">Interview Stage</span>
+                  </div>
+                </div>
+
+                {/* Quick Actions */}
+                <div className="p-4 border-b flex gap-2">
+                  <button className="flex-1 p-2 bg-green-50 text-green-700 rounded-lg text-xs font-medium flex items-center justify-center gap-1">
+                    <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981z"/></svg>
+                    WhatsApp HR
+                  </button>
+                  <button className="flex-1 p-2 bg-blue-50 text-blue-700 rounded-lg text-xs font-medium flex items-center justify-center gap-1">
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>
+                    Email HR
+                  </button>
+                  <button className="flex-1 p-2 bg-gray-50 text-gray-700 rounded-lg text-xs font-medium flex items-center justify-center gap-1">
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+                    Download JD
+                  </button>
+                </div>
+
+                {/* Stage Panel */}
+                <div className="p-4 border-b">
+                  <h4 className="text-sm font-semibold text-gray-500 uppercase mb-3">Recruitment Stages</h4>
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-3 p-2 bg-green-50 rounded-lg">
+                      <div className="w-6 h-6 bg-green-500 rounded-full flex items-center justify-center">
+                        <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
+                      </div>
+                      <span className="text-sm text-gray-700 flex-1">Application Received</span>
+                      <span className="text-xs text-gray-500">Jan 15</span>
+                    </div>
+                    <div className="flex items-center gap-3 p-2 bg-green-50 rounded-lg">
+                      <div className="w-6 h-6 bg-green-500 rounded-full flex items-center justify-center">
+                        <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
+                      </div>
+                      <span className="text-sm text-gray-700 flex-1">Screening</span>
+                      <span className="text-xs text-gray-500">Jan 18</span>
+                    </div>
+                    <div className="flex items-center gap-3 p-2 bg-green-50 rounded-lg">
+                      <div className="w-6 h-6 bg-green-500 rounded-full flex items-center justify-center">
+                        <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
+                      </div>
+                      <span className="text-sm text-gray-700 flex-1">Assessment</span>
+                      <span className="text-xs text-gray-500">Jan 22</span>
+                    </div>
+                    <div className="flex items-center gap-3 p-2 bg-amber-50 rounded-lg">
+                      <div className="w-6 h-6 bg-amber-500 rounded-full flex items-center justify-center">
+                        <span className="text-white text-xs font-bold">4</span>
+                      </div>
+                      <span className="text-sm text-gray-700 flex-1 font-medium">Interview</span>
+                      <span className="px-2 py-0.5 bg-amber-100 text-amber-700 text-xs rounded-full">In Progress</span>
+                    </div>
+                    <div className="flex items-center gap-3 p-2 bg-gray-50 rounded-lg opacity-60">
+                      <div className="w-6 h-6 bg-gray-300 rounded-full flex items-center justify-center">
+                        <span className="text-white text-xs font-bold">5</span>
+                      </div>
+                      <span className="text-sm text-gray-500 flex-1">Offer</span>
+                    </div>
+                    <div className="flex items-center gap-3 p-2 bg-gray-50 rounded-lg opacity-60">
+                      <div className="w-6 h-6 bg-gray-300 rounded-full flex items-center justify-center">
+                        <span className="text-white text-xs font-bold">6</span>
+                      </div>
+                      <span className="text-sm text-gray-500 flex-1">Onboarding</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Next Actions */}
+                <div className="p-4">
+                  <h4 className="text-sm font-semibold text-gray-500 uppercase mb-3">Next Actions</h4>
+                  <div className="space-y-2">
+                    <button className="w-full p-3 bg-purple-50 text-purple-700 rounded-lg text-sm font-medium hover:bg-purple-100 transition-colors text-left flex items-center gap-2">
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+                      Attend Interview
+                    </button>
+                    <button className="w-full p-3 bg-gray-50 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-100 transition-colors text-left flex items-center gap-2">
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+                      Submit Documents
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-purple-50 rounded-xl p-6 max-w-md mx-auto">
+                <h4 className="font-semibold text-purple-800 mb-2">Candidate Pass Template</h4>
+                <p className="text-sm text-purple-700">This template tracks candidate progress through recruitment stages, provides quick HR contact options, and shows clear next steps for the candidate.</p>
+              </div>
+            </div>
+          )}
+
+          {/* Onboarding Pass Template */}
+          {templateType === 'onboarding' && (
+            <div className="space-y-6">
+              <div className="bg-white rounded-2xl shadow-xl overflow-hidden max-w-md mx-auto">
+                {/* Header */}
+                <div className="bg-gradient-to-r from-emerald-600 to-emerald-700 p-6 text-white">
+                  <div className="flex items-start justify-between">
+                    <div className="flex items-center gap-4">
+                      <div className="w-16 h-16 bg-white/20 rounded-xl flex items-center justify-center">
+                        <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
+                        </svg>
+                      </div>
+                      <div>
+                        <p className="text-emerald-100 text-sm">New Joiner</p>
+                        <p className="text-xl font-bold">[Employee Name]</p>
+                        <p className="text-emerald-200 text-sm">Temp ID: [TEMP-XXX]</p>
+                      </div>
+                    </div>
+                    <div className="w-16 h-16 bg-white rounded-lg flex items-center justify-center">
+                      <svg className="w-12 h-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" />
+                      </svg>
+                    </div>
+                  </div>
+                  <div className="mt-4 flex items-center gap-2">
+                    <span className="px-2 py-1 bg-white/20 rounded text-xs">[Position]</span>
+                    <span className="px-2 py-1 bg-blue-500/80 rounded text-xs">New Joiner</span>
+                  </div>
+                </div>
+
+                {/* Onboarding Checklist */}
+                <div className="p-4 border-b">
+                  <h4 className="text-sm font-semibold text-gray-500 uppercase mb-3">Onboarding Checklist</h4>
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-3 p-2 bg-green-50 rounded-lg">
+                      <div className="w-6 h-6 bg-green-500 rounded-full flex items-center justify-center">
+                        <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
+                      </div>
+                      <span className="text-sm text-gray-700 flex-1">Document Collection</span>
+                      <span className="text-xs text-gray-500">By HR</span>
+                    </div>
+                    <div className="flex items-center gap-3 p-2 bg-amber-50 rounded-lg">
+                      <div className="w-6 h-6 bg-amber-500 rounded-full flex items-center justify-center">
+                        <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                      </div>
+                      <span className="text-sm text-gray-700 flex-1 font-medium">Visa / Clearance</span>
+                      <span className="px-2 py-0.5 bg-amber-100 text-amber-700 text-xs rounded-full">Pending</span>
+                    </div>
+                    <div className="flex items-center gap-3 p-2 bg-gray-50 rounded-lg opacity-70">
+                      <div className="w-6 h-6 bg-gray-300 rounded-full flex items-center justify-center">
+                        <span className="text-white text-xs">3</span>
+                      </div>
+                      <span className="text-sm text-gray-500 flex-1">Medical</span>
+                    </div>
+                    <div className="flex items-center gap-3 p-2 bg-gray-50 rounded-lg opacity-70">
+                      <div className="w-6 h-6 bg-gray-300 rounded-full flex items-center justify-center">
+                        <span className="text-white text-xs">4</span>
+                      </div>
+                      <span className="text-sm text-gray-500 flex-1">IT Setup</span>
+                    </div>
+                    <div className="flex items-center gap-3 p-2 bg-gray-50 rounded-lg opacity-70">
+                      <div className="w-6 h-6 bg-gray-300 rounded-full flex items-center justify-center">
+                        <span className="text-white text-xs">5</span>
+                      </div>
+                      <span className="text-sm text-gray-500 flex-1">Induction Schedule</span>
+                    </div>
+                    <div className="flex items-center gap-3 p-2 bg-gray-50 rounded-lg opacity-70">
+                      <div className="w-6 h-6 bg-gray-300 rounded-full flex items-center justify-center">
+                        <span className="text-white text-xs">6</span>
+                      </div>
+                      <span className="text-sm text-gray-500 flex-1">Insurance Activation</span>
+                    </div>
+                    <div className="flex items-center gap-3 p-2 bg-gray-50 rounded-lg opacity-70">
+                      <div className="w-6 h-6 bg-gray-300 rounded-full flex items-center justify-center">
+                        <span className="text-white text-xs">7</span>
+                      </div>
+                      <span className="text-sm text-gray-500 flex-1">Bank Setup</span>
+                    </div>
+                    <div className="flex items-center gap-3 p-2 bg-gray-50 rounded-lg opacity-70">
+                      <div className="w-6 h-6 bg-gray-300 rounded-full flex items-center justify-center">
+                        <span className="text-white text-xs">8</span>
+                      </div>
+                      <span className="text-sm text-gray-500 flex-1">Attendance Registration</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Next Actions */}
+                <div className="p-4">
+                  <h4 className="text-sm font-semibold text-gray-500 uppercase mb-3">Next Actions</h4>
+                  <div className="space-y-2">
+                    <button className="w-full p-3 bg-emerald-50 text-emerald-700 rounded-lg text-sm font-medium hover:bg-emerald-100 transition-colors text-left flex items-center gap-2">
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" /></svg>
+                      Upload Document
+                    </button>
+                    <button className="w-full p-3 bg-gray-50 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-100 transition-colors text-left flex items-center gap-2">
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                      Acknowledge Policies
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-emerald-50 rounded-xl p-6 max-w-md mx-auto">
+                <h4 className="font-semibold text-emerald-800 mb-2">Onboarding Pass Template</h4>
+                <p className="text-sm text-emerald-700">This template is used after offer acceptance to track new joiner onboarding progress including documents, visa, IT setup, and induction scheduling.</p>
+              </div>
+            </div>
+          )}
+
+          {/* Employee Pass Template */}
+          {templateType === 'employee' && (
+            <div className="space-y-6">
+              <div className="bg-white rounded-2xl shadow-xl overflow-hidden max-w-md mx-auto">
+                {/* Header */}
+                <div className="bg-gradient-to-r from-amber-500 to-amber-600 p-6 text-white">
+                  <div className="flex items-start justify-between">
+                    <div className="flex items-center gap-4">
+                      <div className="w-16 h-16 bg-white/20 rounded-xl flex items-center justify-center">
+                        <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M10 6H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V8a2 2 0 00-2-2h-5m-4 0V5a2 2 0 114 0v1m-4 0a2 2 0 104 0m-5 8a2 2 0 100-4 2 2 0 000 4zm0 0c1.306 0 2.417.835 2.83 2M9 14a3.001 3.001 0 00-2.83 2M15 11h3m-3 4h2" />
+                        </svg>
+                      </div>
+                      <div>
+                        <p className="text-amber-100 text-sm">Employee</p>
+                        <p className="text-xl font-bold">[Employee Name]</p>
+                        <p className="text-amber-200 text-sm">ID: [EMP-XXX]</p>
+                      </div>
+                    </div>
+                    <div className="w-16 h-16 bg-white rounded-lg flex items-center justify-center">
+                      <svg className="w-12 h-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" />
+                      </svg>
+                    </div>
+                  </div>
+                  <div className="mt-4 flex items-center gap-2">
+                    <span className="px-2 py-1 bg-white/20 rounded text-xs">[Position] - [Department]</span>
+                    <span className="px-2 py-1 bg-green-500/80 rounded text-xs">Active</span>
+                  </div>
+                </div>
+
+                {/* Quick Actions */}
+                <div className="p-4 border-b">
+                  <h4 className="text-sm font-semibold text-gray-500 uppercase mb-3">Quick Actions</h4>
+                  <div className="grid grid-cols-3 gap-2">
+                    <button className="p-3 bg-green-50 text-green-700 rounded-lg text-xs font-medium flex flex-col items-center gap-1 hover:bg-green-100">
+                      <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981z"/></svg>
+                      WhatsApp
+                    </button>
+                    <button className="p-3 bg-blue-50 text-blue-700 rounded-lg text-xs font-medium flex flex-col items-center gap-1 hover:bg-blue-100">
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>
+                      Email HR
+                    </button>
+                    <button className="p-3 bg-amber-50 text-amber-700 rounded-lg text-xs font-medium flex flex-col items-center gap-1 hover:bg-amber-100">
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+                      Payslip
+                    </button>
+                    <button className="p-3 bg-purple-50 text-purple-700 rounded-lg text-xs font-medium flex flex-col items-center gap-1 hover:bg-purple-100">
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+                      Documents
+                    </button>
+                    <button className="p-3 bg-emerald-50 text-emerald-700 rounded-lg text-xs font-medium flex flex-col items-center gap-1 hover:bg-emerald-100">
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+                      Leave
+                    </button>
+                    <button className="p-3 bg-gray-50 text-gray-700 rounded-lg text-xs font-medium flex flex-col items-center gap-1 hover:bg-gray-100">
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" /></svg>
+                      Bank Details
+                    </button>
+                  </div>
+                </div>
+
+                {/* Profile Snapshot */}
+                <div className="p-4 border-b">
+                  <h4 className="text-sm font-semibold text-gray-500 uppercase mb-3">Profile Snapshot</h4>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="p-3 bg-gray-50 rounded-lg">
+                      <p className="text-xs text-gray-500">Join Date</p>
+                      <p className="font-medium text-gray-800">[DD/MM/YYYY]</p>
+                    </div>
+                    <div className="p-3 bg-gray-50 rounded-lg">
+                      <p className="text-xs text-gray-500">Visa Expiry</p>
+                      <p className="font-medium text-gray-800">[DD/MM/YYYY]</p>
+                    </div>
+                    <div className="p-3 bg-gray-50 rounded-lg">
+                      <p className="text-xs text-gray-500">Insurance Plan</p>
+                      <p className="font-medium text-gray-800">[Plan Name]</p>
+                    </div>
+                    <div className="p-3 bg-gray-50 rounded-lg">
+                      <p className="text-xs text-gray-500">Work Schedule</p>
+                      <p className="font-medium text-gray-800">5 days/week</p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Current Requests */}
+                <div className="p-4">
+                  <h4 className="text-sm font-semibold text-gray-500 uppercase mb-3">Current Requests</h4>
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between p-3 bg-amber-50 rounded-lg">
+                      <div className="flex items-center gap-2">
+                        <svg className="w-4 h-4 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+                        <span className="text-sm text-gray-700">Leave Request</span>
+                      </div>
+                      <span className="px-2 py-0.5 bg-amber-100 text-amber-700 text-xs rounded-full">Pending</span>
+                    </div>
+                    <div className="flex items-center justify-between p-3 bg-green-50 rounded-lg">
+                      <div className="flex items-center gap-2">
+                        <svg className="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+                        <span className="text-sm text-gray-700">Document Request</span>
+                      </div>
+                      <span className="px-2 py-0.5 bg-green-100 text-green-700 text-xs rounded-full">Completed</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-amber-50 rounded-xl p-6 max-w-md mx-auto">
+                <h4 className="font-semibold text-amber-800 mb-2">Employee Pass Template</h4>
+                <p className="text-sm text-amber-700">This template serves as a living digital identity for employees, providing quick access to HR actions, profile information, and tracking of current requests.</p>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+    )
+  }
+
+  // Recruitment Section
+  if (activeSection === 'recruitment' || activeSection === 'recruitment-request' || activeSection === 'recruitment-benefits') {
+    const recruitmentTab = activeSection === 'recruitment-benefits' ? 'benefits' : 'request'
+    
+    return (
+      <div className="min-h-screen bg-gray-100 p-8">
+        {loginModal}
+        <div className="max-w-6xl mx-auto">
+          <div className="flex items-center justify-between mb-6">
+            <div>
+              <img src="/assets/logo.png" alt="Baynunah" className="h-6 mb-1" />
+              <h1 className="text-2xl font-semibold text-gray-800">Recruitment</h1>
+            </div>
+            <div className="flex items-center gap-4">
+              {user && (
+                <span className="text-sm text-gray-600">
+                  {user.name} ({user.role})
+                </span>
+              )}
+              <button
+                onClick={() => handleNavigate('home')}
+                className="px-4 py-2 text-emerald-600 hover:bg-emerald-50 rounded-lg transition-colors"
+              >
+                ← Back to Home
+              </button>
+            </div>
+          </div>
+
+          {/* Tab Navigation */}
+          <div className="flex gap-2 mb-6">
+            <button
+              onClick={() => setActiveSection('recruitment-request')}
+              className={`px-6 py-3 rounded-lg font-medium transition-all ${
+                recruitmentTab === 'request'
+                  ? 'bg-purple-500 text-white shadow-md'
+                  : 'bg-white text-gray-600 hover:bg-purple-50'
+              }`}
+            >
+              <div className="flex items-center gap-2">
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+                Request
+              </div>
+            </button>
+            <button
+              onClick={() => setActiveSection('recruitment-benefits')}
+              className={`px-6 py-3 rounded-lg font-medium transition-all ${
+                recruitmentTab === 'benefits'
+                  ? 'bg-purple-500 text-white shadow-md'
+                  : 'bg-white text-gray-600 hover:bg-purple-50'
+              }`}
+            >
+              <div className="flex items-center gap-2">
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                Benefits
+              </div>
+            </button>
+          </div>
+
+          {/* Request Tab Content */}
+          {recruitmentTab === 'request' && (
+            <div className="bg-white rounded-xl shadow-lg p-8">
+              <div className="text-center py-12">
+                <svg className="w-16 h-16 text-purple-200 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+                <h3 className="text-xl font-semibold text-gray-800 mb-2">Recruitment Requests</h3>
+                <p className="text-gray-500 mb-6">Manage job requisitions and hiring requests</p>
+                <p className="text-sm text-gray-400">Coming soon - this section will allow you to submit and track recruitment requests</p>
+              </div>
+            </div>
+          )}
+
+          {/* Benefits Tab Content */}
+          {recruitmentTab === 'benefits' && (
+            <div className="bg-white rounded-xl shadow-lg p-8">
+              <div className="text-center py-12">
+                <svg className="w-16 h-16 text-purple-200 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <h3 className="text-xl font-semibold text-gray-800 mb-2">Benefits Information</h3>
+                <p className="text-gray-500 mb-6">View and manage employee benefits packages</p>
+                <p className="text-sm text-gray-400">Coming soon - this section will display benefits details for candidates and employees</p>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+    )
+  }
+
+  // Onboarding Management (HR View)
+  if (activeSection === 'onboarding') {
+    if (!user || (user.role !== 'admin' && user.role !== 'hr')) {
+      return (
+        <div className="min-h-screen bg-gray-100 flex flex-col items-center justify-center p-8">
+          {loginModal}
+          <div className="bg-white rounded-2xl shadow-lg p-8 max-w-md text-center">
+            <h2 className="text-xl font-semibold text-gray-800 mb-4">Access Required</h2>
+            <p className="text-gray-600 mb-6">Please sign in with HR or Admin access.</p>
+            <button
+              onClick={() => handleNavigate('home')}
+              className="px-6 py-2 bg-emerald-500 text-white rounded-lg hover:bg-emerald-600 transition-colors"
+            >
+              Back to Home
+            </button>
+          </div>
+        </div>
+      )
+    }
+
+    return (
+      <div className="min-h-screen bg-gray-100 p-8">
+        {loginModal}
+        <div className="max-w-6xl mx-auto">
+          <div className="flex items-center justify-between mb-6">
+            <div>
+              <img src="/assets/logo.png" alt="Baynunah" className="h-6 mb-1" />
+              <h1 className="text-2xl font-semibold text-gray-800">Onboarding Management</h1>
+            </div>
+            <div className="flex items-center gap-4">
+              <span className="text-sm text-gray-600">
+                {user.name} ({user.role})
+              </span>
+              <button
+                onClick={() => handleNavigate('home')}
+                className="px-4 py-2 text-emerald-600 hover:bg-emerald-50 rounded-lg transition-colors"
+              >
+                ← Back to Home
+              </button>
+            </div>
+          </div>
+
+          {/* Invite New Joiner Button */}
+          <div className="flex gap-4 mb-6">
+            <button
+              onClick={() => {
+                setShowInviteModal(true)
+                setGeneratedLink('')
+                setInviteEmployeeId('')
+                setError(null)
+              }}
+              className="px-4 py-2 bg-emerald-500 text-white rounded-lg hover:bg-emerald-600 transition-colors flex items-center gap-2"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+              </svg>
+              Invite New Joiner
+            </button>
+          </div>
+
+          {/* Invite Modal */}
+          {showInviteModal && (
+            <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+              <div className="bg-white rounded-2xl shadow-2xl p-6 w-full max-w-md">
+                <div className="flex items-center justify-between mb-4">
+                  <h2 className="text-xl font-semibold text-gray-800">Generate Onboarding Link</h2>
+                  <button
+                    onClick={() => setShowInviteModal(false)}
+                    className="text-gray-400 hover:text-gray-600"
+                  >
+                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </button>
+                </div>
+
+                {error && (
+                  <div className="bg-red-50 text-red-600 p-3 rounded-lg mb-4 text-sm">{error}</div>
+                )}
+
+                {!generatedLink ? (
+                  <div className="space-y-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Employee ID</label>
+                      <input
+                        type="text"
+                        value={inviteEmployeeId}
+                        onChange={e => setInviteEmployeeId(e.target.value)}
+                        placeholder="e.g., BAYN00010"
+                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500"
+                      />
+                    </div>
+                    <button
+                      onClick={generateInviteLink}
+                      disabled={onboardingLoading || !inviteEmployeeId.trim()}
+                      className="w-full py-2 bg-emerald-500 text-white rounded-lg hover:bg-emerald-600 transition-colors disabled:opacity-50"
+                    >
+                      {onboardingLoading ? 'Generating...' : 'Generate Link'}
+                    </button>
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    <div className="bg-emerald-50 p-4 rounded-lg">
+                      <p className="text-sm text-emerald-800 mb-2">Share this link with the new joiner:</p>
+                      <div className="flex gap-2">
+                        <input
+                          type="text"
+                          value={generatedLink}
+                          readOnly
+                          className="flex-1 px-3 py-2 bg-white border border-emerald-200 rounded-lg text-sm"
+                        />
+                        <button
+                          onClick={() => copyToClipboard(generatedLink)}
+                          className="px-3 py-2 bg-emerald-500 text-white rounded-lg hover:bg-emerald-600"
+                        >
+                          Copy
+                        </button>
+                      </div>
+                    </div>
+                    <p className="text-sm text-gray-500">This link expires in 7 days.</p>
+                    <button
+                      onClick={() => setShowInviteModal(false)}
+                      className="w-full py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+                    >
+                      Done
+                    </button>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* Pending Profiles */}
+          {pendingProfiles.length > 0 && (
+            <div className="bg-white rounded-xl shadow-lg p-6 mb-6">
+              <h2 className="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
+                <span className="w-3 h-3 bg-blue-500 rounded-full animate-pulse"></span>
+                Pending Profile Reviews ({pendingProfiles.length})
+              </h2>
+              <div className="space-y-3">
+                {pendingProfiles.map(profile => (
+                  <div key={profile.employee_id} className="flex items-center justify-between p-4 bg-blue-50 rounded-lg">
+                    <div>
+                      <p className="font-medium text-gray-800">{profile.name}</p>
+                      <p className="text-sm text-gray-500">
+                        {profile.employee_id} • {profile.department || 'No department'} • {profile.job_title || 'No title'}
+                      </p>
+                      {profile.submitted_at && (
+                        <p className="text-xs text-gray-400 mt-1">
+                          Submitted: {new Date(profile.submitted_at).toLocaleDateString()}
+                        </p>
+                      )}
+                    </div>
+                    <button
+                      onClick={() => approveProfile(profile.employee_id)}
+                      className="px-4 py-2 bg-emerald-500 text-white rounded-lg hover:bg-emerald-600 transition-colors text-sm"
+                    >
+                      Approve
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Onboarding Tokens */}
+          <div className="bg-white rounded-xl shadow-lg overflow-hidden">
+            <div className="p-4 border-b border-gray-200">
+              <h2 className="text-lg font-semibold text-gray-800">Onboarding Invites</h2>
+            </div>
+            {onboardingLoading && onboardingTokens.length === 0 ? (
+              <div className="p-8 text-center text-gray-500">Loading...</div>
+            ) : onboardingTokens.length === 0 ? (
+              <div className="p-8 text-center">
+                <p className="text-gray-500">No onboarding invites yet</p>
+                <p className="text-sm text-gray-400 mt-1">Click "Invite New Joiner" to create one</p>
+              </div>
+            ) : (
+              <table className="w-full">
+                <thead className="bg-gray-50 border-b border-gray-200">
+                  <tr>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Employee</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Created</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Expires</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Views</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-200">
+                  {onboardingTokens.map(token => (
+                    <tr key={token.token} className="hover:bg-gray-50">
+                      <td className="px-6 py-4">
+                        <p className="text-sm font-medium text-gray-900">{token.employee_name}</p>
+                        <p className="text-xs text-gray-500">{token.employee_id}</p>
+                      </td>
+                      <td className="px-6 py-4 text-sm text-gray-500">
+                        {new Date(token.created_at).toLocaleDateString()}
+                      </td>
+                      <td className="px-6 py-4 text-sm text-gray-500">
+                        {new Date(token.expires_at).toLocaleDateString()}
+                      </td>
+                      <td className="px-6 py-4">
+                        <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${
+                          token.is_used ? 'bg-emerald-100 text-emerald-700' :
+                          token.is_expired ? 'bg-red-100 text-red-700' :
+                          'bg-yellow-100 text-yellow-700'
+                        }`}>
+                          {token.is_used ? 'Completed' : token.is_expired ? 'Expired' : 'Pending'}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 text-sm text-gray-500">{token.access_count}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  if (activeSection === 'attendance') {
+    return (
+      <div className="min-h-screen bg-gray-100 p-8">
+        <div className="max-w-4xl mx-auto">
+          <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center gap-4">
+              <button
+                onClick={() => handleNavigate('home')}
+                className="text-gray-500 hover:text-gray-700"
+              >
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                </svg>
+              </button>
+              <h1 className="text-2xl font-semibold text-gray-800">Attendance</h1>
+            </div>
+            <div className="text-sm text-gray-600">
+              {user?.name} ({user?.role})
+            </div>
+          </div>
+
+          {error && (
+            <div className="bg-red-50 text-red-600 p-4 rounded-lg mb-6">{error}</div>
+          )}
+
+          {/* Today's Status Card */}
+          <div className="bg-white rounded-xl shadow-lg p-6 mb-6">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-lg font-semibold text-gray-800">Today's Status</h2>
+              <span className="text-sm text-gray-500">
+                {new Date().toLocaleDateString('en-GB', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
+              </span>
+            </div>
+
+            {attendanceLoading && !attendanceStatus ? (
+              <div className="text-center py-8 text-gray-500">Loading...</div>
+            ) : attendanceStatus ? (
+              <div className="space-y-4">
+                <div className="flex items-center gap-3">
+                  <div className={`w-4 h-4 rounded-full ${attendanceStatus.is_clocked_in ? 'bg-emerald-500' : 'bg-gray-300'}`}></div>
+                  <span className="text-gray-700">{attendanceStatus.message}</span>
+                </div>
+
+                {gpsCoords && (
+                  <div className="flex items-center gap-2 text-sm text-gray-500">
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                    </svg>
+                    <span>GPS location captured</span>
+                  </div>
+                )}
+
+                {/* Clock In Form */}
+                {attendanceStatus.can_clock_in && (
+                  <div className="border-t pt-4 mt-4">
+                    <div className="grid grid-cols-3 gap-2 mb-4">
+                      <button
+                        onClick={() => setClockInWorkType('office')}
+                        className={`p-3 rounded-lg border text-center transition-all ${
+                          clockInWorkType === 'office' 
+                            ? 'border-emerald-500 bg-emerald-50 text-emerald-700' 
+                            : 'border-gray-200 hover:border-gray-300'
+                        }`}
+                      >
+                        <svg className="w-6 h-6 mx-auto mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                        </svg>
+                        <span className="text-sm">Office</span>
+                      </button>
+                      <button
+                        onClick={() => setClockInWorkType('wfh')}
+                        className={`p-3 rounded-lg border text-center transition-all ${
+                          clockInWorkType === 'wfh' 
+                            ? 'border-blue-500 bg-blue-50 text-blue-700' 
+                            : 'border-gray-200 hover:border-gray-300'
+                        }`}
+                      >
+                        <svg className="w-6 h-6 mx-auto mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+                        </svg>
+                        <span className="text-sm">WFH</span>
+                      </button>
+                      <button
+                        onClick={() => setClockInWorkType('field')}
+                        className={`p-3 rounded-lg border text-center transition-all ${
+                          clockInWorkType === 'field' 
+                            ? 'border-amber-500 bg-amber-50 text-amber-700' 
+                            : 'border-gray-200 hover:border-gray-300'
+                        }`}
+                      >
+                        <svg className="w-6 h-6 mx-auto mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                        </svg>
+                        <span className="text-sm">Field</span>
+                      </button>
+                    </div>
+
+                    {clockInWorkType === 'wfh' && (
+                      <div className="mb-4">
+                        <label className="block text-sm font-medium text-gray-700 mb-1">WFH Reason</label>
+                        <textarea
+                          value={wfhReason}
+                          onChange={(e) => setWfhReason(e.target.value)}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+                          placeholder="Please provide a reason for working from home..."
+                          rows={2}
+                        />
+                      </div>
+                    )}
+
+                    <button
+                      onClick={handleClockIn}
+                      disabled={attendanceLoading}
+                      className="w-full py-3 bg-emerald-500 text-white rounded-lg hover:bg-emerald-600 transition-colors font-medium disabled:opacity-50"
+                    >
+                      {attendanceLoading ? 'Processing...' : 'Clock In'}
+                    </button>
+                  </div>
+                )}
+
+                {/* Break & Clock Out Buttons */}
+                {(attendanceStatus.can_clock_out || attendanceStatus.can_start_break || attendanceStatus.can_end_break) && (
+                  <div className="flex gap-3 border-t pt-4 mt-4">
+                    {attendanceStatus.can_start_break && (
+                      <button
+                        onClick={handleBreakStart}
+                        disabled={attendanceLoading}
+                        className="flex-1 py-3 bg-amber-500 text-white rounded-lg hover:bg-amber-600 transition-colors font-medium disabled:opacity-50"
+                      >
+                        Start Break
+                      </button>
+                    )}
+                    {attendanceStatus.can_end_break && (
+                      <button
+                        onClick={handleBreakEnd}
+                        disabled={attendanceLoading}
+                        className="flex-1 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors font-medium disabled:opacity-50"
+                      >
+                        End Break
+                      </button>
+                    )}
+                    {attendanceStatus.can_clock_out && (
+                      <button
+                        onClick={handleClockOut}
+                        disabled={attendanceLoading}
+                        className="flex-1 py-3 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors font-medium disabled:opacity-50"
+                      >
+                        Clock Out
+                      </button>
+                    )}
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div className="text-center py-8 text-gray-500">Unable to load attendance status</div>
+            )}
+          </div>
+
+          {/* Admin Dashboard */}
+          {(user?.role === 'admin' || user?.role === 'hr') && attendanceDashboard && (
+            <div className="bg-white rounded-xl shadow-lg p-6 mb-6">
+              <h2 className="text-lg font-semibold text-gray-800 mb-4">Today's Overview</h2>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div className="text-center p-4 bg-emerald-50 rounded-lg">
+                  <div className="text-2xl font-bold text-emerald-600">{attendanceDashboard.clocked_in_today}</div>
+                  <div className="text-sm text-gray-600">Clocked In</div>
+                </div>
+                <div className="text-center p-4 bg-blue-50 rounded-lg">
+                  <div className="text-2xl font-bold text-blue-600">{attendanceDashboard.wfh_today}</div>
+                  <div className="text-sm text-gray-600">WFH</div>
+                </div>
+                <div className="text-center p-4 bg-amber-50 rounded-lg">
+                  <div className="text-2xl font-bold text-amber-600">{attendanceDashboard.late_today}</div>
+                  <div className="text-sm text-gray-600">Late</div>
+                </div>
+                <div className="text-center p-4 bg-red-50 rounded-lg">
+                  <div className="text-2xl font-bold text-red-600">{attendanceDashboard.absent_today}</div>
+                  <div className="text-sm text-gray-600">Absent</div>
+                </div>
+              </div>
+              {(attendanceDashboard.pending_wfh_approvals > 0 || attendanceDashboard.pending_overtime_approvals > 0) && (
+                <div className="mt-4 flex gap-4">
+                  {attendanceDashboard.pending_wfh_approvals > 0 && (
+                    <span className="inline-flex items-center px-3 py-1 bg-yellow-100 text-yellow-700 rounded-full text-sm">
+                      {attendanceDashboard.pending_wfh_approvals} WFH pending
+                    </span>
+                  )}
+                  {attendanceDashboard.pending_overtime_approvals > 0 && (
+                    <span className="inline-flex items-center px-3 py-1 bg-purple-100 text-purple-700 rounded-full text-sm">
+                      {attendanceDashboard.pending_overtime_approvals} OT pending
+                    </span>
+                  )}
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Recent Records */}
+          <div className="bg-white rounded-xl shadow-lg overflow-hidden">
+            <div className="p-4 border-b border-gray-200">
+              <h2 className="text-lg font-semibold text-gray-800">Recent Attendance</h2>
+            </div>
+            {attendanceLoading && attendanceRecords.length === 0 ? (
+              <div className="p-8 text-center text-gray-500">Loading...</div>
+            ) : attendanceRecords.length === 0 ? (
+              <div className="p-8 text-center text-gray-500">No attendance records yet</div>
+            ) : (
+              <table className="w-full">
+                <thead className="bg-gray-50 border-b border-gray-200">
+                  <tr>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Date</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Clock In</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Clock Out</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Type</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Hours</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-200">
+                  {attendanceRecords.slice(0, 10).map(record => (
+                    <tr key={record.id} className="hover:bg-gray-50">
+                      <td className="px-6 py-4 text-sm text-gray-900">
+                        {new Date(record.attendance_date).toLocaleDateString('en-GB')}
+                      </td>
+                      <td className="px-6 py-4 text-sm text-gray-600">
+                        {record.clock_in ? new Date(record.clock_in).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' }) : '-'}
+                      </td>
+                      <td className="px-6 py-4 text-sm text-gray-600">
+                        {record.clock_out ? new Date(record.clock_out).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' }) : '-'}
+                      </td>
+                      <td className="px-6 py-4">
+                        <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${
+                          record.work_type === 'office' ? 'bg-emerald-100 text-emerald-700' :
+                          record.work_type === 'wfh' ? 'bg-blue-100 text-blue-700' :
+                          'bg-amber-100 text-amber-700'
+                        }`}>
+                          {record.work_type.toUpperCase()}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 text-sm text-gray-600">
+                        {record.total_hours ? `${record.total_hours}h` : '-'}
+                        {record.overtime_hours && record.overtime_hours > 0 && (
+                          <span className="ml-1 text-purple-600">(+{record.overtime_hours}h OT)</span>
+                        )}
+                      </td>
+                      <td className="px-6 py-4">
+                        <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${
+                          record.status === 'present' ? 'bg-emerald-100 text-emerald-700' :
+                          record.status === 'late' ? 'bg-amber-100 text-amber-700' :
+                          record.status === 'absent' ? 'bg-red-100 text-red-700' :
+                          'bg-gray-100 text-gray-700'
+                        }`}>
+                          {record.status}
+                          {record.is_late && record.late_minutes && ` (${record.late_minutes}m)`}
+                        </span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  if (activeSection === 'external') {
     return (
       <div className="min-h-screen bg-gray-100 flex flex-col items-center justify-center p-8">
+        {loginModal}
         <div className="bg-white rounded-2xl shadow-lg p-8 max-w-2xl w-full text-center">
-          <h2 className="text-2xl font-semibold text-gray-800 mb-4 capitalize">
-            {activeSection === 'external' ? 'External Users' : activeSection}
-          </h2>
+          <h2 className="text-2xl font-semibold text-gray-800 mb-4">External Users</h2>
           <p className="text-gray-600 mb-6">This section is under development.</p>
           <button
-            onClick={() => setActiveSection('home')}
+            onClick={() => handleNavigate('home')}
             className="px-6 py-2 bg-emerald-500 text-white rounded-lg hover:bg-emerald-600 transition-colors"
           >
             Back to Home
@@ -25,53 +3046,124 @@ function App() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-100 flex flex-col items-center justify-center p-8">
+    <div className="min-h-screen bg-gray-100 flex flex-col items-center justify-center p-8" style={{ transform: 'scale(0.95)', transformOrigin: 'center center' }}>
+      {loginModal}
+      
+      {user && (
+        <div className="absolute top-4 right-4">
+          <div className="flex items-center gap-4">
+            <span className="text-sm text-gray-600">
+              {user.name} ({user.role})
+            </span>
+            <button
+              onClick={handleLogout}
+              className="text-sm text-red-600 hover:text-red-700"
+            >
+              Sign Out
+            </button>
+          </div>
+        </div>
+      )}
+
       <div className="text-center mb-12">
-        <p className="text-gray-600 text-lg tracking-wide mb-2">baynunah<span className="text-emerald-500">.</span></p>
+        <img src="/assets/logo.png" alt="Baynunah" className="h-6 mx-auto mb-4" />
         <h1 className="text-4xl font-light tracking-widest text-gray-800">HR PORTAL</h1>
       </div>
 
-      <div className="grid grid-cols-2 gap-4 w-80">
+      <div className="grid grid-cols-2 gap-3" style={{ width: '420px' }}>
         <button
-          onClick={() => setActiveSection('employees')}
-          className="bg-white rounded-tl-[4rem] rounded-tr-lg rounded-bl-lg rounded-br-lg shadow-lg p-6 flex flex-col items-center justify-center hover:shadow-xl transition-shadow aspect-square"
+          onClick={() => handleNavigate('employees')}
+          className="bg-gradient-to-br from-white to-gray-50 rounded-tl-full rounded-tr-md rounded-bl-md rounded-br-md p-8 flex flex-col items-center justify-center aspect-square transition-all duration-300 hover:scale-105 hover:-translate-y-1"
+          style={{ boxShadow: '0 10px 40px -10px rgba(0,0,0,0.15), 0 4px 6px -2px rgba(0,0,0,0.05), inset 0 1px 0 rgba(255,255,255,0.8)' }}
         >
-          <svg className="w-10 h-10 text-emerald-500 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg className="w-12 h-12 text-emerald-500 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
           </svg>
-          <span className="text-xs font-medium text-gray-700 uppercase tracking-wide">Employees</span>
+          <span className="text-sm font-medium text-gray-700 uppercase tracking-wide">Employees</span>
         </button>
 
         <button
-          onClick={() => setActiveSection('onboarding')}
-          className="bg-white rounded-tr-[4rem] rounded-tl-lg rounded-bl-lg rounded-br-lg shadow-lg p-6 flex flex-col items-center justify-center hover:shadow-xl transition-shadow aspect-square"
+          onClick={() => handleNavigate('onboarding')}
+          className="bg-gradient-to-br from-white to-gray-50 rounded-tr-full rounded-tl-md rounded-bl-md rounded-br-md p-8 flex flex-col items-center justify-center aspect-square transition-all duration-300 hover:scale-105 hover:-translate-y-1"
+          style={{ boxShadow: '0 10px 40px -10px rgba(0,0,0,0.15), 0 4px 6px -2px rgba(0,0,0,0.05), inset 0 1px 0 rgba(255,255,255,0.8)' }}
         >
-          <svg className="w-10 h-10 text-emerald-500 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
+          <svg className="w-12 h-12 text-emerald-500 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
           </svg>
-          <span className="text-xs font-medium text-gray-700 uppercase tracking-wide">Onboarding</span>
+          <span className="text-sm font-medium text-gray-700 uppercase tracking-wide">Onboarding</span>
         </button>
 
         <button
-          onClick={() => setActiveSection('external')}
-          className="bg-white rounded-bl-[4rem] rounded-tl-lg rounded-tr-lg rounded-br-lg shadow-lg p-6 flex flex-col items-center justify-center hover:shadow-xl transition-shadow aspect-square"
+          onClick={() => handleNavigate('external')}
+          className="bg-gradient-to-br from-white to-gray-50 rounded-bl-full rounded-tl-md rounded-tr-md rounded-br-md p-8 flex flex-col items-center justify-center aspect-square transition-all duration-300 hover:scale-105 hover:-translate-y-1"
+          style={{ boxShadow: '0 10px 40px -10px rgba(0,0,0,0.15), 0 4px 6px -2px rgba(0,0,0,0.05), inset 0 1px 0 rgba(255,255,255,0.8)' }}
         >
-          <svg className="w-10 h-10 text-emerald-500 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg className="w-12 h-12 text-emerald-500 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" />
           </svg>
-          <span className="text-xs font-medium text-gray-700 uppercase tracking-wide text-center">External<br/>Users</span>
+          <span className="text-sm font-medium text-gray-700 uppercase tracking-wide text-center">External<br/>Users</span>
         </button>
 
         <button
-          onClick={() => setActiveSection('admin')}
-          className="bg-white rounded-br-[4rem] rounded-tl-lg rounded-tr-lg rounded-bl-lg shadow-lg p-6 flex flex-col items-center justify-center hover:shadow-xl transition-shadow aspect-square"
+          onClick={() => handleNavigate('admin')}
+          className="bg-gradient-to-br from-white to-gray-50 rounded-br-full rounded-tl-md rounded-tr-md rounded-bl-md p-8 flex flex-col items-center justify-center aspect-square transition-all duration-300 hover:scale-105 hover:-translate-y-1"
+          style={{ boxShadow: '0 10px 40px -10px rgba(0,0,0,0.15), 0 4px 6px -2px rgba(0,0,0,0.05), inset 0 1px 0 rgba(255,255,255,0.8)' }}
         >
-          <svg className="w-10 h-10 text-emerald-500 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg className="w-12 h-12 text-emerald-500 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
           </svg>
-          <span className="text-xs font-medium text-gray-700 uppercase tracking-wide">Admin</span>
+          <span className="text-sm font-medium text-gray-700 uppercase tracking-wide">Admin</span>
         </button>
       </div>
+
+      {/* Quick Access Row */}
+      <div className="flex flex-wrap gap-4 mt-8 justify-center">
+        <button
+          onClick={() => handleNavigate('attendance')}
+          className="bg-white rounded-xl px-6 py-4 flex items-center gap-3 transition-all duration-300 hover:scale-105 hover:-translate-y-1"
+          style={{ boxShadow: '0 10px 40px -10px rgba(0,0,0,0.15), 0 4px 6px -2px rgba(0,0,0,0.05), inset 0 1px 0 rgba(255,255,255,0.8)' }}
+        >
+          <svg className="w-6 h-6 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          <span className="text-sm font-medium text-gray-700">Attendance</span>
+        </button>
+
+        <button
+          onClick={() => setActiveSection('templates')}
+          className="bg-white rounded-xl px-6 py-4 flex items-center gap-3 transition-all duration-300 hover:scale-105 hover:-translate-y-1"
+          style={{ boxShadow: '0 10px 40px -10px rgba(0,0,0,0.15), 0 4px 6px -2px rgba(0,0,0,0.05), inset 0 1px 0 rgba(255,255,255,0.8)' }}
+        >
+          <svg className="w-6 h-6 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z" />
+          </svg>
+          <span className="text-sm font-medium text-gray-700">Templates</span>
+        </button>
+
+        <button
+          onClick={() => setActiveSection('passes')}
+          className="bg-white rounded-xl px-6 py-4 flex items-center gap-3 transition-all duration-300 hover:scale-105 hover:-translate-y-1"
+          style={{ boxShadow: '0 10px 40px -10px rgba(0,0,0,0.15), 0 4px 6px -2px rgba(0,0,0,0.05), inset 0 1px 0 rgba(255,255,255,0.8)' }}
+        >
+          <svg className="w-6 h-6 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z" />
+          </svg>
+          <span className="text-sm font-medium text-gray-700">Passes</span>
+        </button>
+
+        <button
+          onClick={() => setActiveSection('recruitment')}
+          className="bg-white rounded-xl px-6 py-4 flex items-center gap-3 transition-all duration-300 hover:scale-105 hover:-translate-y-1"
+          style={{ boxShadow: '0 10px 40px -10px rgba(0,0,0,0.15), 0 4px 6px -2px rgba(0,0,0,0.05), inset 0 1px 0 rgba(255,255,255,0.8)' }}
+        >
+          <svg className="w-6 h-6 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+          </svg>
+          <span className="text-sm font-medium text-gray-700">Recruitment</span>
+        </button>
+      </div>
+
+      <p className="text-gray-400 text-xs mt-12">Conceptualised by Baynunah HR|IS</p>
     </div>
   )
 }

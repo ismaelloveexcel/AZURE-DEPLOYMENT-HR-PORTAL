@@ -11,6 +11,7 @@
 ## 📋 Table of Contents
 
 - [Quick Start for HR Users](#-quick-start-for-hr-users)
+- [GitHub Copilot Agents](#-github-copilot-agents)
 - [Documentation](#-documentation)
 - [Features](#-features)
 - [Project Structure](#-project-structure)
@@ -34,13 +35,49 @@
 
 ---
 
+## 🤖 GitHub Copilot Agents
+
+**Need development assistance?** We have specialized AI agents to help!
+
+### Available Agents
+
+| Agent | Purpose | Use When |
+|-------|---------|----------|
+| [HR Assistant](.github/agents/hr-assistant.md) | HR workflows & portal engineering | Planning features, automation ideas, finding HR modules |
+| [Portal Engineer](.github/agents/portal-engineer.md) | Technical implementation | Building features, fixing bugs, optimizing code |
+| [Code Quality Monitor](.github/agents/code-quality-monitor.md) | Security & quality scanning | Checking security, code quality, performance |
+
+### Quick Start with Agents
+
+```bash
+# Get help planning a feature
+Open: .github/agents/hr-assistant.md
+Ask: "Help me implement an onboarding module"
+
+# Get help with implementation
+Open: .github/agents/portal-engineer.md  
+Ask: "Create API endpoints for probation tracking"
+
+# Check code quality
+Open: .github/agents/code-quality-monitor.md
+Ask: "Scan for security vulnerabilities"
+```
+
+**📖 Full Documentation**: [Copilot Agents Guide](docs/COPILOT_AGENTS.md) | [Quick Reference](.github/agents/QUICK_REFERENCE.md) | [Deployment Guide](docs/AGENT_DEPLOYMENT_GUIDE.md)
+
+---
+
 ## 📚 Documentation
 
 | Document | Description | Audience |
 |----------|-------------|----------|
 | [HR User Guide](docs/HR_USER_GUIDE.md) | How to use the portal | HR Users |
+| [Copilot Agents Guide](docs/COPILOT_AGENTS.md) | AI agents for development assistance | Developers |
+| [Agent Deployment Guide](docs/AGENT_DEPLOYMENT_GUIDE.md) | How to deploy and use agents | Developers |
 | [System Health Check](docs/SYSTEM_HEALTH_CHECK.md) | Application assessment & roadmap | Admins/Developers |
 | [Recommended Add-ons](docs/RECOMMENDED_ADDONS.md) | Integration options | Developers |
+| [HR Implementation Plan](docs/HR_IMPLEMENTATION_PLAN.md) | Migration, admin hardening, and HR ops structure | HR Leadership/Admins |
+| [HR Apps Integration Guide](docs/HR_APPS_INTEGRATION_GUIDE.md) | **NEW!** Complete guide to GitHub HR apps & integration strategies | HR Leadership/Developers |
 
 ---
 

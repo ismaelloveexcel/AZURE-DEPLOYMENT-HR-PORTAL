@@ -15,7 +15,19 @@ config = context.config
 if config.config_file_name is not None:
     fileConfig(config.config_file_name)
 
-config.set_main_option("sqlalchemy.url", settings.database_url)
+db_url = settings.database_url
+if db_url.startswith("postgresql://"):
+    db_url = db_url.replace("postgresql://", "postgresql+asyncpg://", 1)
+elif db_url.startswith("postgres://"):
+    db_url = db_url.replace("postgres://", "postgresql+asyncpg://", 1)
+
+# Remove sslmode parameter (not supported by asyncpg directly)
+if "?sslmode=" in db_url:
+    db_url = db_url.split("?sslmode=")[0]
+elif "&sslmode=" in db_url:
+    db_url = db_url.replace("&sslmode=disable", "").replace("&sslmode=require", "")
+
+config.set_main_option("sqlalchemy.url", db_url)
 target_metadata = Base.metadata
 
 
