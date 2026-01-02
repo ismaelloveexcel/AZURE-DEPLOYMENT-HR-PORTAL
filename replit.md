@@ -25,7 +25,9 @@ Preferred communication style: Simple, everyday language.
 **Database**: PostgreSQL with async driver (asyncpg). Uses SQLAlchemy ORM with Alembic for migrations.
 
 **Key Models**:
-- `Employee`: User accounts with role-based access (admin, hr, viewer)
+- `Employee`: User accounts with 30+ fields (role, job title, function, line manager, location, salary, leave entitlement, probation dates, visa status, etc.)
+- `EmployeeProfile`: Self-service profile data (emergency contact, bank details, address, ID documents)
+- `OnboardingToken`: Secure single-use invite tokens for new joiners (7-day expiry)
 - `Renewal`: Contract renewal requests with approval workflow
 - `Pass`: Recruitment/onboarding access passes
 - `SystemSetting`: Feature toggles for admin configuration
