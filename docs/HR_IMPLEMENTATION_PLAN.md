@@ -48,7 +48,7 @@ Add submenus to the Admin area so HR work is grouped and permissions stay centra
    - Checklist for asset return, access revocation, and final pay inputs.  
    - Block account login via `DELETE /employees/{id}` when completed.
 7. **Document Automation**  
-   - Templates for offer letters, probation confirmations, NOCs, and experience letters.  
+   - Templates for offer letters, probation confirmations, No Objection Certificates (NOCs), and experience letters.  
    - Fill from employee + request context; generate PDF and log to the employee record.
 8. **Reports & Audit**  
    - CSV exports and KPI tiles (open onboarding tasks, probation ending soon, pending passes).
@@ -77,7 +77,9 @@ Immediate actions (no backend rewrite required):
 
 ## 5) Automation & Templates
 
-- **Doc templates:** Store DOCX/Markdown templates per document type; render via backend service (e.g., docx templating) and return signed PDFs. Validate and sanitize all dynamic fields (allowlist expected fields, escape user input with an HTML/Markdown sanitizer, and use parameterized rendering with template auto-escaping) to prevent template/code injection; add a Content Security Policy when serving generated documents.  
+- **Doc templates:** Store DOCX/Markdown templates per document type; render via backend service (e.g., docx templating) and return signed PDFs.  
+  - Validate and sanitize dynamic fields (allowlist expected fields, escape user input with an HTML/Markdown sanitizer, and use parameterized rendering with template auto-escaping) to prevent template/code injection.  
+  - Serve generated documents with a Content Security Policy (CSP) to block inline scripts and untrusted sources.  
 - **Reminders:** Use a daily cron/worker to email or post Teams/Slack reminders for probation, onboarding tasks, and pending passes.  
 - **Exports:** Provide CSV exports for each submenu; align columns with the import schema for round-tripping data.
 
