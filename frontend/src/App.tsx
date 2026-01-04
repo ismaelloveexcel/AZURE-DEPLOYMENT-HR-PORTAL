@@ -320,6 +320,9 @@ function App() {
     contract_end_date: '',
   })
   const [employeeModalLoading, setEmployeeModalLoading] = useState(false)
+  const [showImportModal, setShowImportModal] = useState(false)
+  const [importLoading, setImportLoading] = useState(false)
+  const [importResult, setImportResult] = useState<{created: number, skipped: number, errors: string[]} | null>(null)
 
   const isAdminLogin = pendingSection === 'admin' || pendingSection === 'secret-chamber'
 
@@ -355,8 +358,10 @@ function App() {
   }
 
   const fetchWithAuth = async (url: string, options: RequestInit = {}) => {
+    const isFormData = options.body instanceof FormData
     const headers: Record<string, string> = {
-      'Content-Type': 'application/json',
+      // Don't set Content-Type for FormData - browser will set it with boundary
+      ...(isFormData ? {} : { 'Content-Type': 'application/json' }),
       ...(options.headers as Record<string, string> || {}),
     }
     if (user?.token) {
@@ -519,6 +524,42 @@ function App() {
       setError(err instanceof Error ? err.message : 'Failed to update employee')
     } finally {
       setEmployeeModalLoading(false)
+    }
+  }
+
+  const handleImportCSV = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    
+    setImportLoading(true)
+    setImportResult(null)
+    setError(null)
+    
+    try {
+      const formData = new FormData()
+      formData.append('file', file)
+      
+      const res = await fetchWithAuth(`${API_BASE}/employees/import`, {
+        method: 'POST',
+        body: formData,
+      })
+      
+      if (!res.ok) {
+        const data = await res.json()
+        throw new Error(data.detail || 'Import failed')
+      }
+      
+      const result = await res.json()
+      setImportResult(result)
+      
+      // Refresh employees list
+      await fetchEmployees()
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to import employees')
+    } finally {
+      setImportLoading(false)
+      // Reset file input
+      e.target.value = ''
     }
   }
 
@@ -1601,12 +1642,70 @@ function App() {
             </div>
           </div>
           
-          {/* Instructions */}
+          {/* Instructions and Import */}
           {(user?.role === 'admin' || user?.role === 'hr') && (
-            <div className="bg-emerald-50 border border-emerald-200 rounded-lg p-4 mb-6">
-              <p className="text-emerald-700 text-sm">
-                <strong>Tip:</strong> Click on any employee row to view and edit their details including UAE compliance information.
+            <div className="flex flex-col sm:flex-row gap-4 mb-6">
+              <div className="bg-emerald-50 border border-emerald-200 rounded-lg p-4 flex-1">
+                <p className="text-emerald-700 text-sm">
+                  <strong>Tip:</strong> Click on any employee row to view and edit their details including UAE compliance information.
+                </p>
+              </div>
+              <div className="flex gap-2">
+                <label className="px-4 py-2 bg-emerald-500 text-white rounded-lg hover:bg-emerald-600 transition-colors cursor-pointer flex items-center gap-2">
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+                  </svg>
+                  {importLoading ? 'Importing...' : 'Import CSV'}
+                  <input
+                    type="file"
+                    accept=".csv"
+                    onChange={handleImportCSV}
+                    className="hidden"
+                    disabled={importLoading}
+                  />
+                </label>
+              </div>
+            </div>
+          )}
+          
+          {/* Import Result */}
+          {importResult && (
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+              <h4 className="font-medium text-blue-800 mb-2">Import Complete</h4>
+              <p className="text-blue-700 text-sm">
+                <strong>{importResult.created}</strong> employees created, 
+                <strong> {importResult.skipped}</strong> skipped (already exist)
               </p>
+              {importResult.errors && importResult.errors.length > 0 && (
+                <div className="mt-2 text-red-600 text-sm">
+                  <p className="font-medium">Errors:</p>
+                  <ul className="list-disc pl-5">
+                    {importResult.errors.slice(0, 5).map((err, i) => (
+                      <li key={i}>{err}</li>
+                    ))}
+                    {importResult.errors.length > 5 && <li>...and {importResult.errors.length - 5} more</li>}
+                  </ul>
+                </div>
+              )}
+              <button 
+                onClick={() => setImportResult(null)}
+                className="mt-2 text-blue-600 text-sm hover:underline"
+              >
+                Dismiss
+              </button>
+            </div>
+          )}
+          
+          {/* Error Display */}
+          {error && !showEmployeeModal && (
+            <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
+              <p className="text-red-700 text-sm">{error}</p>
+              <button 
+                onClick={() => setError(null)}
+                className="mt-2 text-red-600 text-sm hover:underline"
+              >
+                Dismiss
+              </button>
             </div>
           )}
           
