@@ -72,12 +72,13 @@ Ask: "Scan for security vulnerabilities"
 | Document | Description | Audience |
 |----------|-------------|----------|
 | [HR User Guide](docs/HR_USER_GUIDE.md) | How to use the portal | HR Users |
+| [Azure Deployment Guide](docs/AZURE_DEPLOYMENT_GUIDE.md) | **NEW!** Complete Azure deployment with automated CI/CD | DevOps/Admins |
 | [Copilot Agents Guide](docs/COPILOT_AGENTS.md) | AI agents for development assistance | Developers |
 | [Agent Deployment Guide](docs/AGENT_DEPLOYMENT_GUIDE.md) | How to deploy and use agents | Developers |
 | [System Health Check](docs/SYSTEM_HEALTH_CHECK.md) | Application assessment & roadmap | Admins/Developers |
 | [Recommended Add-ons](docs/RECOMMENDED_ADDONS.md) | Integration options | Developers |
 | [HR Implementation Plan](docs/HR_IMPLEMENTATION_PLAN.md) | Migration, admin hardening, and HR ops structure | HR Leadership/Admins |
-| [HR Apps Integration Guide](docs/HR_APPS_INTEGRATION_GUIDE.md) | **NEW!** Complete guide to GitHub HR apps & integration strategies | HR Leadership/Developers |
+| [HR Apps Integration Guide](docs/HR_APPS_INTEGRATION_GUIDE.md) | Complete guide to GitHub HR apps & integration strategies | HR Leadership/Developers |
 
 ---
 
@@ -288,6 +289,35 @@ VITE_API_BASE_URL=https://your-app.your-company.com:3000/api
 - [ ] Click Run to start the application
 - [ ] Add admin user (first user with admin role)
 - [ ] Share portal URL with HR team
+
+### Azure Deployment (Recommended for Enterprise)
+
+For production deployments, **Azure App Service** is recommended:
+
+| Option | Best For | Setup Time | Monthly Cost |
+|--------|----------|------------|--------------|
+| **Azure App Service** ⭐ | Most teams | 15-30 min | ~$33/month |
+| Azure Container Apps | Microservices | 30-60 min | ~$35/month |
+| Azure Kubernetes | Large enterprise | 2-4 hours | ~$100+/month |
+
+**Quick Start with Azure:**
+
+1. **Run the setup script** in [Azure Cloud Shell](https://shell.azure.com):
+   ```bash
+   cd scripts
+   chmod +x azure-setup.sh
+   ./azure-setup.sh
+   ```
+
+2. **Add GitHub Secrets** (from script output):
+   - `AZURE_CREDENTIALS`
+   - `AZURE_WEBAPP_NAME_BACKEND`
+   - `AZURE_WEBAPP_NAME_FRONTEND`
+   - `AZURE_RESOURCE_GROUP`
+
+3. **Push to main branch** - GitHub Actions deploys automatically!
+
+**📖 Full Azure Guide**: [Azure Deployment Guide](docs/AZURE_DEPLOYMENT_GUIDE.md)
 
 ---
 
