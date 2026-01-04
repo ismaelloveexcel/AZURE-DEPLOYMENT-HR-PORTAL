@@ -1,4 +1,6 @@
 import { useState, useEffect } from 'react'
+import { GlassLoader } from './components/GlassLoader'
+import { TemplateList } from './components/Templates/TemplateList'
 
 type Section = 'home' | 'employees' | 'onboarding' | 'external' | 'admin' | 'secret-chamber' | 'passes' | 'public-onboarding' | 'recruitment' | 'recruitment-request' | 'recruitment-benefits' | 'templates' | 'template-manager' | 'template-candidate' | 'template-onboarding' | 'template-employee' | 'attendance'
 
@@ -797,7 +799,7 @@ function App() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full py-3 bg-emerald-500 text-white rounded-lg hover:bg-emerald-600 transition-colors disabled:opacity-50"
+            className="btn-submit w-full"
             data-testid="sign-in-button"
           >
             {loading ? 'Signing in...' : 'Sign In'}
@@ -813,18 +815,17 @@ function App() {
     </div>
   ) : null
 
+  // Universal loader for all loading states
+  if (loading || passesLoading || onboardingLoading || attendanceLoading || chamberLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-emerald-50 to-teal-100 flex items-center justify-center">
+        <GlassLoader />
+      </div>
+    )
+  }
+
   // Public Onboarding Page (for new joiners)
   if (activeSection === 'public-onboarding') {
-    if (loading) {
-      return (
-        <div className="min-h-screen bg-gradient-to-br from-emerald-50 to-teal-100 flex items-center justify-center">
-          <div className="text-center">
-            <div className="animate-spin w-12 h-12 border-4 border-emerald-500 border-t-transparent rounded-full mx-auto mb-4"></div>
-            <p className="text-gray-600">Loading your onboarding...</p>
-          </div>
-        </div>
-      )
-    }
 
     if (error) {
       return (
@@ -1115,7 +1116,7 @@ function App() {
                 <button
                   type="submit"
                   disabled={loading}
-                  className="w-full py-3 bg-emerald-500 text-white rounded-lg hover:bg-emerald-600 transition-colors disabled:opacity-50 font-medium"
+                  className="btn-submit w-full"
                 >
                   {loading ? 'Submitting...' : 'Submit Profile'}
                 </button>
@@ -1451,6 +1452,9 @@ function App() {
     )
   }
 
+  if (activeSection === 'templates') {
+    return <TemplateList />
+  }
   if (activeSection === 'passes') {
     return (
       <div className="min-h-screen bg-gray-100 p-8">
@@ -1630,14 +1634,14 @@ function App() {
                     <button
                       type="submit"
                       disabled={passesLoading}
-                      className="flex-1 py-2 bg-emerald-500 text-white rounded-lg hover:bg-emerald-600 transition-colors disabled:opacity-50"
+                      className="btn-submit flex-1"
                     >
                       {passesLoading ? 'Creating...' : 'Generate Pass'}
                     </button>
                     <button
                       type="button"
                       onClick={() => setShowPassForm(false)}
-                      className="px-6 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+                      className="btn-cancel flex-1"
                     >
                       Cancel
                     </button>

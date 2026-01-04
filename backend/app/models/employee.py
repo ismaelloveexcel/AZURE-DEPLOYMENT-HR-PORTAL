@@ -110,3 +110,6 @@ class Employee(Base):
     line_manager: Mapped[Optional["Employee"]] = relationship(
         "Employee", remote_side=[id], foreign_keys=[line_manager_id]
     )
+    renewals: Mapped[list["Renewal"]] = relationship(
+        "Renewal", back_populates="employee", cascade="all, delete-orphan"
+    )

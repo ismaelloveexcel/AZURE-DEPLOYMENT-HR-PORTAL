@@ -23,8 +23,9 @@ class EmployeeRepository:
         return result.scalar_one_or_none()
 
     async def list_all(self, session: AsyncSession, active_only: bool = True) -> Sequence[Employee]:
-        """List all employees."""
-        query = select(Employee).order_by(Employee.name)
+        """List all employees with renewals eagerly loaded."""
+        from sqlalchemy.orm import selectinload
+        query = select(Employee).options(selectinload(Employee.renewals)).order_by(Employee.name)
         if active_only:
             query = query.where(Employee.is_active.is_(True))
         result = await session.execute(query)

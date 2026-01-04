@@ -12,6 +12,8 @@ class Renewal(Base):
     __tablename__ = "renewals"
 
     id: Mapped[int] = mapped_column(primary_key=True, index=True)
+    employee_id: Mapped[int] = mapped_column(ForeignKey("employees.id"), nullable=False, index=True)
+    employee: Mapped["Employee"] = relationship("Employee", back_populates="renewals")
     employee_name: Mapped[str] = mapped_column(String(120), nullable=False)
     contract_end_date: Mapped[date] = mapped_column(Date, nullable=False)
     renewal_period_months: Mapped[int] = mapped_column(Integer, nullable=False)

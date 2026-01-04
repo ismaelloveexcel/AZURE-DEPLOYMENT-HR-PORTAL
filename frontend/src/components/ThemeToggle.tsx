@@ -3,7 +3,7 @@ import React from 'react';
 export const ThemeToggle: React.FC<{ onToggle: () => void; dark: boolean }> = ({ onToggle, dark }) => (
   <button
     onClick={onToggle}
-    className="fixed top-4 right-4 z-50 bg-gray-200 dark:bg-gray-800 rounded-full p-2 shadow hover:scale-105 transition"
+    className="btn-action fixed top-4 right-4 z-50"
     aria-label="Toggle theme"
   >
     {dark ? (

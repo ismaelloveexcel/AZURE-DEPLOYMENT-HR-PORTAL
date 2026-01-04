@@ -41,6 +41,10 @@ def create_app() -> FastAPI:
     app.include_router(onboarding.router, prefix=settings.api_prefix)
     app.include_router(attendance.router, prefix=settings.api_prefix)
     app.include_router(admin.router, prefix=settings.api_prefix)
+    from app.routers import templates, audit_logs, notifications
+    app.include_router(templates.router, prefix=settings.api_prefix)
+    app.include_router(audit_logs.router, prefix=settings.api_prefix)
+    app.include_router(notifications.router, prefix=settings.api_prefix)
 
     @app.on_event("startup")
     async def on_startup():

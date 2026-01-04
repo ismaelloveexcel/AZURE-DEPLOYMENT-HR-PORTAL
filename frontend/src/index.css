@@ -1,4 +1,7 @@
 @import "tailwindcss";
+@import "./button.css";
+
+@import "./loader.css";
 
 body {
   color: #0f172a;
