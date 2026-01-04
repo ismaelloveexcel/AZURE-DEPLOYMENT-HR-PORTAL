@@ -81,6 +81,7 @@ Ask: "Scan for security vulnerabilities"
 | [Recommended Add-ons](docs/RECOMMENDED_ADDONS.md) | Integration options | Developers |
 | [HR Implementation Plan](docs/HR_IMPLEMENTATION_PLAN.md) | Migration, admin hardening, and HR ops structure | HR Leadership/Admins |
 | [HR Apps Integration Guide](docs/HR_APPS_INTEGRATION_GUIDE.md) | Complete guide to GitHub HR apps & integration strategies | HR Leadership/Developers |
+| [Employee Migration Apps Guide](docs/EMPLOYEE_MIGRATION_APPS_GUIDE.md) | **NEW!** GitHub apps for layered employee migration strategy | HR Leadership/Developers |
 
 ---
 
