@@ -9,6 +9,9 @@ from app.models.renewal import Base
 
 if TYPE_CHECKING:
     from app.models.employee_profile import EmployeeProfile
+    from app.models.employee_compliance import EmployeeCompliance
+    from app.models.employee_bank import EmployeeBank
+    from app.models.employee_document import EmployeeDocument
     from app.models.onboarding_token import OnboardingToken
 
 
@@ -125,6 +128,15 @@ class Employee(Base):
     # Relationships
     profile: Mapped[Optional["EmployeeProfile"]] = relationship(
         back_populates="employee", uselist=False, cascade="all, delete-orphan"
+    )
+    compliance: Mapped[Optional["EmployeeCompliance"]] = relationship(
+        back_populates="employee", uselist=False, cascade="all, delete-orphan"
+    )
+    bank_details: Mapped[Optional["EmployeeBank"]] = relationship(
+        back_populates="employee", uselist=False, cascade="all, delete-orphan"
+    )
+    documents: Mapped[list["EmployeeDocument"]] = relationship(
+        back_populates="employee", cascade="all, delete-orphan"
     )
     onboarding_tokens: Mapped[list["OnboardingToken"]] = relationship(
         back_populates="employee", cascade="all, delete-orphan"
