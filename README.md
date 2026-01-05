@@ -87,6 +87,7 @@ Ask: "Scan for security vulnerabilities"
 | [Recruitment Systems Research](docs/RECRUITMENT_SYSTEMS_RESEARCH.md) | **NEW!** Comprehensive analysis of open-source ATS options & custom build recommendation | HR Leadership/Developers |
 | [Recruitment Implementation Architecture](docs/RECRUITMENT_IMPLEMENTATION_ARCHITECTURE.md) | **NEW!** Technical architecture for custom lightweight ATS with pass integration | Developers |
 | [Recruitment Quick Reference](docs/RECRUITMENT_QUICK_REFERENCE.md) | **NEW!** Executive summary and quick decision guide for recruitment system | HR Leadership |
+| [AI CV Parsing Solutions](docs/AI_CV_PARSING_SOLUTIONS.md) | **NEW!** AI-powered resume parsing with pyresparser for automatic candidate data extraction | Developers/HR |
 
 ---
 

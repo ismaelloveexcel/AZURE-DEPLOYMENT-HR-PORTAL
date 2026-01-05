@@ -1075,10 +1075,16 @@ Before deploying recruitment module:
    - Custom skill tests
    - Personality assessments
 
-5. **Resume Parsing**
-   - pyresparser integration
-   - Auto-fill candidate data
-   - Skills extraction
+5. **AI-Powered Resume Parsing (Recommended ⭐)**
+   - **pyresparser integration** with spaCy NLP models
+   - Auto-extract data from PDF/DOCX resumes
+   - Automatic candidate data population
+   - Skills, experience, education extraction
+   - 85% accuracy with AI/ML
+   - **Time Savings:** 5-10 minutes per candidate
+   - **See:** [AI_CV_PARSING_SOLUTIONS.md](./AI_CV_PARSING_SOLUTIONS.md) for detailed guide
+   - **Implementation:** 1-2 days
+   - **Cost:** $0 (free open source)
 
 6. **Analytics & Reporting**
    - Recruitment source effectiveness

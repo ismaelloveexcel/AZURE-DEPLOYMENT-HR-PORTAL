@@ -198,10 +198,16 @@ recruitment_requests (Job openings)
 - Automated reminders
 - **Effort:** 2-3 days
 
-**pyresparser** (Resume Parsing)
-- Extract data from PDF resumes
-- Auto-fill candidate info
+**pyresparser** (AI Resume Parsing) ⭐ **RECOMMENDED**
+- **AI-powered CV parsing** using spaCy NLP models
+- Extract data from PDF/DOCX resumes automatically
+- Auto-fill candidate info (name, email, phone, skills, experience, education)
+- **85% accuracy** with machine learning
+- **Saves 5-10 minutes per candidate**
+- Supports bulk resume upload
 - **Effort:** 1-2 days
+- **Cost:** $0 (free open source)
+- **See:** [AI_CV_PARSING_SOLUTIONS.md](./AI_CV_PARSING_SOLUTIONS.md) for complete guide
 
 **pdfme** (Document Generation)
 - Generate offer letters
@@ -209,6 +215,11 @@ recruitment_requests (Job openings)
 - **Effort:** 1-2 days
 
 **Total Optional:** 4-7 days extra
+
+**Recommended Priority:**
+1. ⭐ AI Resume Parsing (pyresparser) - Highest ROI, major time savings
+2. Interview Scheduling (Cal.com) - Enhanced UX
+3. Document Generation (pdfme) - Professional output
 
 ---
 
