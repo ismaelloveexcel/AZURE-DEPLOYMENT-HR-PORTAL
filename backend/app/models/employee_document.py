@@ -27,6 +27,7 @@ class DocumentType(str, enum.Enum):
     TRAINING_CERTIFICATE = "training_certificate"
     SECURITY_CLEARANCE = "security_clearance"
     BANK_LETTER = "bank_letter"
+    JOB_DESCRIPTION = "job_description"
     OTHER = "other"
 
 
