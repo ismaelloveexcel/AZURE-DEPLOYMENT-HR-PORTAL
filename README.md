@@ -85,6 +85,22 @@ Ask: "Scan for security vulnerabilities"
 | [Employee Migration Apps Guide](docs/EMPLOYEE_MIGRATION_APPS_GUIDE.md) | GitHub apps for layered employee migration strategy | HR Leadership/Developers |
 | [Frappe HRMS Implementation Plan](docs/FRAPPE_HRMS_IMPLEMENTATION_PLAN.md) | 6-week plan to integrate Frappe HRMS (if needed later) | HR Leadership/Developers |
 
+### 📋 Recruitment Documentation Review
+
+> **NEW!** Comprehensive review of recruitment system documentation
+
+| Document | Description | Audience |
+|----------|-------------|----------|
+| [📊 Quick Reference](docs/RECRUITMENT_DOCS_QUICK_REFERENCE.md) | **START HERE!** TL;DR summary, top actions, quick fixes | Everyone |
+| [📝 Full Review](docs/RECRUITMENT_DOCUMENTATION_REVIEW.md) | Complete 900+ line review with ratings and recommendations | Leadership/Developers |
+| [📅 Action Plan](docs/RECRUITMENT_DOCUMENTATION_ACTION_PLAN.md) | 4-week implementation plan with timeline and resources | Project Managers |
+
+**Key Findings:**
+- Grade: 7/10 - Good strategic planning, needs operational depth
+- 6 documents reviewed, 7 critical documents missing
+- Top priority: Create recruitment system overview and workflow diagrams
+- Timeline: 2-3 days for critical gaps, 4 weeks for complete documentation
+
 ---
 
 ## ✨ Features
