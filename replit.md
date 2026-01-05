@@ -52,11 +52,34 @@ Preferred communication style: Simple, everyday language.
 
 ### Database Schema
 
-Four main tables with migrations managed by Alembic:
-1. `employees` - User accounts and authentication
+Eight main tables with migrations managed by Alembic:
+1. `employees` - User accounts and authentication (76 employees seeded)
 2. `renewals` - Contract renewal tracking with audit log
 3. `passes` - Access pass management
 4. `system_settings` - Feature toggles and configuration
+5. `employee_compliance` - Visa/work permit/medical fitness tracking linked by employee_id
+6. `employee_bank` - Bank details with self-service workflow (pending_changes, verified_by, verified_at)
+7. `employee_documents` - Document registry with file uploads, OCR data, verification status
+8. `employee_profiles` - Extended profile data (emergency contacts, personal info)
+
+### Key Features
+
+**Self-Service Onboarding System**:
+- Employee profile completion with progress tracking
+- Self-service bank details submission requiring HR approval
+- Document upload with OCR auto-extraction (EID/passport patterns)
+- Tabbed profile UI: Overview, Personal, Documents, Compliance
+
+**HR Dashboard Features**:
+- Compliance Alerts Dashboard (Quick Access button for HR/Admin)
+- Color-coded urgency: Red=expired, Orange=7 days, Yellow=30 days, Amber=60 days
+- Bulk CSV import with Employee ID matching
+- View Profile integration from alerts
+
+**Document Registry**:
+- Supported types: passport, visa, emirates_id, work_permit, medical_fitness, contract, educational, training, security_clearance
+- OCR integration using Tesseract with EID pattern matching
+- Expiry tracking and verification workflow
 
 ### Development Setup
 
