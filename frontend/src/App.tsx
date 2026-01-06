@@ -3048,149 +3048,26 @@ function App() {
                 </div>
 
                 {/* Content */}
-                <div className="p-6 space-y-6">
-                  {/* Contact Information */}
-                  <div className="bg-gray-50 rounded-xl p-4">
-                    <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-3">Contact Information</h3>
-                    <div className="grid grid-cols-2 gap-4">
-                      <div className="flex items-center gap-3">
-                        <div className="p-2 bg-blue-100 rounded-lg">
-                          <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                          </svg>
-                        </div>
-                        <div>
-                          <p className="text-xs text-gray-500">Email</p>
-                          <p className="font-medium text-gray-800">{selectedCandidate.email}</p>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-3">
-                        <div className="p-2 bg-green-100 rounded-lg">
-                          <svg className="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
-                          </svg>
-                        </div>
-                        <div>
-                          <p className="text-xs text-gray-500">Phone</p>
-                          <p className="font-medium text-gray-800">{selectedCandidate.phone || 'Not provided'}</p>
-                        </div>
-                      </div>
-                      {selectedCandidate.linkedin_url && (
-                        <div className="flex items-center gap-3 col-span-2">
-                          <div className="p-2 bg-blue-100 rounded-lg">
-                            <svg className="w-5 h-5 text-blue-600" fill="currentColor" viewBox="0 0 24 24">
-                              <path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/>
-                            </svg>
-                          </div>
-                          <div>
-                            <p className="text-xs text-gray-500">LinkedIn</p>
-                            <a href={selectedCandidate.linkedin_url} target="_blank" rel="noopener noreferrer" className="font-medium text-blue-600 hover:underline">View Profile</a>
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Current Employment */}
-                  <div className="bg-gray-50 rounded-xl p-4">
-                    <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-3">Current Employment</h3>
-                    <div className="grid grid-cols-2 gap-4">
-                      <div>
-                        <p className="text-xs text-gray-500">Current Position</p>
-                        <p className="font-medium text-gray-800">{selectedCandidate.current_position || 'Not specified'}</p>
-                      </div>
-                      <div>
-                        <p className="text-xs text-gray-500">Current Company</p>
-                        <p className="font-medium text-gray-800">{selectedCandidate.current_company || 'Not specified'}</p>
-                      </div>
-                      <div>
-                        <p className="text-xs text-gray-500">Years of Experience</p>
-                        <p className="font-medium text-gray-800">{selectedCandidate.years_experience ? `${selectedCandidate.years_experience} years` : 'Not specified'}</p>
-                      </div>
-                      <div>
-                        <p className="text-xs text-gray-500">Notice Period</p>
-                        <p className="font-medium text-gray-800">{selectedCandidate.notice_period_days ? `${selectedCandidate.notice_period_days} days` : 'Not specified'}</p>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Expectations */}
-                  <div className="bg-gray-50 rounded-xl p-4">
-                    <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-3">Expectations & Source</h3>
-                    <div className="grid grid-cols-2 gap-4">
-                      <div>
-                        <p className="text-xs text-gray-500">Expected Salary (AED)</p>
-                        <p className="font-medium text-gray-800">{selectedCandidate.expected_salary ? `AED ${Number(selectedCandidate.expected_salary).toLocaleString()}` : 'Not specified'}</p>
-                      </div>
-                      <div>
-                        <p className="text-xs text-gray-500">Source</p>
-                        <p className="font-medium text-gray-800">{selectedCandidate.source || 'Direct Application'}</p>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Location & Work Eligibility */}
-                  <div className="bg-amber-50 rounded-xl p-4">
-                    <h3 className="text-sm font-semibold text-amber-700 uppercase tracking-wider mb-3">Location & Work Eligibility</h3>
-                    <div className="grid grid-cols-2 gap-4">
-                      <div>
-                        <p className="text-xs text-amber-600">Current Location</p>
-                        <p className="font-medium text-gray-800">{selectedCandidate.current_location || 'Not specified'}</p>
-                      </div>
-                      {selectedCandidate.current_location && selectedCandidate.current_location !== 'Abu Dhabi' && (
-                        <div>
-                          <p className="text-xs text-amber-600">Willing to Relocate to Abu Dhabi</p>
-                          <p className="font-medium text-gray-800">
-                            {selectedCandidate.willing_to_relocate === true ? (
-                              <span className="text-green-600">Yes</span>
-                            ) : selectedCandidate.willing_to_relocate === false ? (
-                              <span className="text-red-600">No</span>
-                            ) : 'Not specified'}
-                          </p>
-                        </div>
-                      )}
-                      <div>
-                        <p className="text-xs text-amber-600">Driving License</p>
-                        <p className="font-medium text-gray-800">
-                          {selectedCandidate.has_driving_license === true ? (
-                            <span className="text-green-600">Yes</span>
-                          ) : selectedCandidate.has_driving_license === false ? (
-                            <span className="text-red-600">No</span>
-                          ) : 'Not specified'}
-                        </p>
-                      </div>
-                      <div>
-                        <p className="text-xs text-amber-600">Visa Status</p>
-                        <p className="font-medium text-gray-800">{selectedCandidate.visa_status || 'Not specified'}</p>
-                      </div>
-                      {selectedCandidate.emirates_id && (
-                        <div>
-                          <p className="text-xs text-amber-600">Emirates ID</p>
-                          <p className="font-medium text-gray-800">{selectedCandidate.emirates_id}</p>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Position Details */}
+                <div className="p-6 space-y-4">
+                  {/* Position Applied For - First for context */}
                   {selectedCandidate.position && (
-                    <div className="bg-purple-50 rounded-xl p-4">
-                      <h3 className="text-sm font-semibold text-purple-700 uppercase tracking-wider mb-3">Position Applied For</h3>
-                      <div className="grid grid-cols-2 gap-4">
+                    <div className="border border-gray-200 rounded-lg p-4">
+                      <h3 className="text-sm font-semibold text-gray-600 mb-3">Position Applied For</h3>
+                      <div className="grid grid-cols-2 gap-x-6 gap-y-3">
                         <div>
-                          <p className="text-xs text-purple-600">Position Title</p>
+                          <p className="text-xs text-gray-400">Position Title</p>
                           <p className="font-medium text-gray-800">{selectedCandidate.position.position_title}</p>
                         </div>
                         <div>
-                          <p className="text-xs text-purple-600">Department</p>
+                          <p className="text-xs text-gray-400">Department</p>
                           <p className="font-medium text-gray-800">{selectedCandidate.position.department}</p>
                         </div>
                         <div>
-                          <p className="text-xs text-purple-600">Employment Type</p>
+                          <p className="text-xs text-gray-400">Employment Type</p>
                           <p className="font-medium text-gray-800">{selectedCandidate.position.employment_type}</p>
                         </div>
                         <div>
-                          <p className="text-xs text-purple-600">Salary Range</p>
+                          <p className="text-xs text-gray-400">Salary Range</p>
                           <p className="font-medium text-gray-800">
                             {selectedCandidate.position.salary_range_min && selectedCandidate.position.salary_range_max
                               ? `AED ${Number(selectedCandidate.position.salary_range_min).toLocaleString()} - ${Number(selectedCandidate.position.salary_range_max).toLocaleString()}`
@@ -3201,19 +3078,106 @@ function App() {
                     </div>
                   )}
 
+                  {/* Contact Information */}
+                  <div className="border border-gray-200 rounded-lg p-4">
+                    <h3 className="text-sm font-semibold text-gray-600 mb-3">Contact Information</h3>
+                    <div className="grid grid-cols-2 gap-x-6 gap-y-3">
+                      <div>
+                        <p className="text-xs text-gray-400">Email</p>
+                        <p className="font-medium text-gray-800">{selectedCandidate.email}</p>
+                      </div>
+                      <div>
+                        <p className="text-xs text-gray-400">Phone</p>
+                        <p className="font-medium text-gray-800">{selectedCandidate.phone || 'Not provided'}</p>
+                      </div>
+                      {selectedCandidate.linkedin_url && (
+                        <div className="col-span-2">
+                          <p className="text-xs text-gray-400">LinkedIn</p>
+                          <a href={selectedCandidate.linkedin_url} target="_blank" rel="noopener noreferrer" className="font-medium text-blue-600 hover:underline">View Profile</a>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Current Employment & Experience */}
+                  <div className="border border-gray-200 rounded-lg p-4">
+                    <h3 className="text-sm font-semibold text-gray-600 mb-3">Experience & Employment</h3>
+                    <div className="grid grid-cols-2 gap-x-6 gap-y-3">
+                      <div>
+                        <p className="text-xs text-gray-400">Current Position</p>
+                        <p className="font-medium text-gray-800">{selectedCandidate.current_position || 'Not specified'}</p>
+                      </div>
+                      <div>
+                        <p className="text-xs text-gray-400">Current Company</p>
+                        <p className="font-medium text-gray-800">{selectedCandidate.current_company || 'Not specified'}</p>
+                      </div>
+                      <div>
+                        <p className="text-xs text-gray-400">Years of Experience</p>
+                        <p className="font-medium text-gray-800">{selectedCandidate.years_experience ? `${selectedCandidate.years_experience} years` : 'Not specified'}</p>
+                      </div>
+                      <div>
+                        <p className="text-xs text-gray-400">Notice Period</p>
+                        <p className="font-medium text-gray-800">{selectedCandidate.notice_period_days ? `${selectedCandidate.notice_period_days} days` : 'Not specified'}</p>
+                      </div>
+                      <div>
+                        <p className="text-xs text-gray-400">Expected Salary</p>
+                        <p className="font-medium text-gray-800">{selectedCandidate.expected_salary ? `AED ${Number(selectedCandidate.expected_salary).toLocaleString()}` : 'Not specified'}</p>
+                      </div>
+                      <div>
+                        <p className="text-xs text-gray-400">Source</p>
+                        <p className="font-medium text-gray-800">{selectedCandidate.source || 'Direct Application'}</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Location & Work Eligibility */}
+                  <div className="border border-gray-200 rounded-lg p-4">
+                    <h3 className="text-sm font-semibold text-gray-600 mb-3">Location & Work Eligibility</h3>
+                    <div className="grid grid-cols-2 gap-x-6 gap-y-3">
+                      <div>
+                        <p className="text-xs text-gray-400">Current Location</p>
+                        <p className="font-medium text-gray-800">{selectedCandidate.current_location || 'Not specified'}</p>
+                      </div>
+                      {selectedCandidate.current_location && selectedCandidate.current_location !== 'Abu Dhabi' && (
+                        <div>
+                          <p className="text-xs text-gray-400">Willing to Relocate to Abu Dhabi</p>
+                          <p className="font-medium text-gray-800">
+                            {selectedCandidate.willing_to_relocate === true ? 'Yes' : selectedCandidate.willing_to_relocate === false ? 'No' : 'Not specified'}
+                          </p>
+                        </div>
+                      )}
+                      <div>
+                        <p className="text-xs text-gray-400">Driving License</p>
+                        <p className="font-medium text-gray-800">
+                          {selectedCandidate.has_driving_license === true ? 'Yes' : selectedCandidate.has_driving_license === false ? 'No' : 'Not specified'}
+                        </p>
+                      </div>
+                      <div>
+                        <p className="text-xs text-gray-400">Visa Status</p>
+                        <p className="font-medium text-gray-800">{selectedCandidate.visa_status || 'Not specified'}</p>
+                      </div>
+                      {selectedCandidate.emirates_id && (
+                        <div>
+                          <p className="text-xs text-gray-400">Emirates ID</p>
+                          <p className="font-medium text-gray-800">{selectedCandidate.emirates_id}</p>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
                   {/* Notes */}
                   {selectedCandidate.notes && (
-                    <div className="bg-gray-50 rounded-xl p-4">
-                      <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-3">Notes</h3>
-                      <p className="text-gray-700 whitespace-pre-wrap">{selectedCandidate.notes}</p>
+                    <div className="border border-gray-200 rounded-lg p-4">
+                      <h3 className="text-sm font-semibold text-gray-600 mb-3">Notes</h3>
+                      <p className="text-gray-700 whitespace-pre-wrap text-sm">{selectedCandidate.notes}</p>
                     </div>
                   )}
 
                   {/* Actions */}
-                  <div className="flex justify-end gap-3 pt-4 border-t">
+                  <div className="flex justify-end pt-4">
                     <button
                       onClick={() => { setShowCandidateProfileModal(false); setSelectedCandidate(null); }}
-                      className="px-6 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50"
+                      className="px-6 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 font-medium"
                     >
                       Close
                     </button>
