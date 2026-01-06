@@ -62,17 +62,34 @@ class CandidateBase(BaseModel):
     full_name: str = Field(..., min_length=1, max_length=200)
     email: EmailStr
     phone: Optional[str] = Field(None, max_length=50)
+    preferred_contact_method: Optional[str] = Field(None, max_length=50)
+    timezone: Optional[str] = Field(None, max_length=100)
     current_position: Optional[str] = Field(None, max_length=200)
     current_company: Optional[str] = Field(None, max_length=200)
     years_experience: Optional[int] = Field(None, ge=0)
-    expected_salary: Optional[float] = Field(None, ge=0)
+    industry_function: Optional[str] = Field(None, max_length=200)
     notice_period_days: Optional[int] = Field(None, ge=0)
+    availability_date: Optional[date] = None
+    expected_salary: Optional[float] = Field(None, ge=0)
+    current_salary: Optional[float] = Field(None, ge=0)
+    salary_currency: Optional[str] = Field("AED", max_length=10)
+    salary_negotiable: Optional[bool] = None
     source: Optional[str] = Field(None, max_length=100)
     source_details: Optional[str] = None
     linkedin_url: Optional[str] = Field(None, max_length=500)
+    portfolio_url: Optional[str] = Field(None, max_length=500)
+    core_skills: Optional[List[str]] = None
+    programming_languages: Optional[List[str]] = None
+    hardware_platforms: Optional[List[str]] = None
+    protocols_tools: Optional[List[str]] = None
     notes: Optional[str] = None
+    recruiter_notes: Optional[str] = None
+    interview_observations: Optional[str] = None
+    risk_flags: Optional[str] = None
     emirates_id: Optional[str] = Field(None, max_length=50)
     visa_status: Optional[str] = Field(None, max_length=100)
+    visa_expiry_date: Optional[date] = None
+    current_country: Optional[str] = Field(None, max_length=100)
     current_location: Optional[str] = Field(None, max_length=100)
     willing_to_relocate: Optional[bool] = None
     has_driving_license: Optional[bool] = None
@@ -88,23 +105,44 @@ class CandidateUpdate(BaseModel):
     full_name: Optional[str] = Field(None, min_length=1, max_length=200)
     email: Optional[EmailStr] = None
     phone: Optional[str] = Field(None, max_length=50)
+    preferred_contact_method: Optional[str] = Field(None, max_length=50)
+    timezone: Optional[str] = Field(None, max_length=100)
     current_position: Optional[str] = Field(None, max_length=200)
     current_company: Optional[str] = Field(None, max_length=200)
     years_experience: Optional[int] = Field(None, ge=0)
-    expected_salary: Optional[float] = Field(None, ge=0)
+    industry_function: Optional[str] = Field(None, max_length=200)
     notice_period_days: Optional[int] = Field(None, ge=0)
+    availability_date: Optional[date] = None
+    expected_salary: Optional[float] = Field(None, ge=0)
+    current_salary: Optional[float] = Field(None, ge=0)
+    salary_currency: Optional[str] = Field(None, max_length=10)
+    salary_negotiable: Optional[bool] = None
     source: Optional[str] = Field(None, max_length=100)
     source_details: Optional[str] = None
     linkedin_url: Optional[str] = Field(None, max_length=500)
+    portfolio_url: Optional[str] = Field(None, max_length=500)
+    documents: Optional[Dict[str, Any]] = None
+    core_skills: Optional[List[str]] = None
+    programming_languages: Optional[List[str]] = None
+    hardware_platforms: Optional[List[str]] = None
+    protocols_tools: Optional[List[str]] = None
     notes: Optional[str] = None
+    recruiter_notes: Optional[str] = None
+    interview_observations: Optional[str] = None
+    risk_flags: Optional[str] = None
     status: Optional[str] = None
     stage: Optional[str] = None
     rejection_reason: Optional[str] = None
     emirates_id: Optional[str] = Field(None, max_length=50)
     visa_status: Optional[str] = Field(None, max_length=100)
+    visa_expiry_date: Optional[date] = None
+    current_country: Optional[str] = Field(None, max_length=100)
     current_location: Optional[str] = Field(None, max_length=100)
     willing_to_relocate: Optional[bool] = None
     has_driving_license: Optional[bool] = None
+    details_confirmed_by_candidate: Optional[bool] = None
+    details_confirmed_at: Optional[datetime] = None
+    last_updated_by: Optional[str] = None
 
 
 class CandidateResponse(CandidateBase):
@@ -113,10 +151,14 @@ class CandidateResponse(CandidateBase):
     candidate_number: str
     pass_number: Optional[str] = None
     resume_path: Optional[str] = None
+    documents: Optional[Dict[str, Any]] = None
     status: str
     stage: str
     stage_changed_at: Optional[datetime] = None
     rejection_reason: Optional[str] = None
+    details_confirmed_by_candidate: Optional[bool] = None
+    details_confirmed_at: Optional[datetime] = None
+    last_updated_by: Optional[str] = None
     created_at: datetime
     updated_at: datetime
 

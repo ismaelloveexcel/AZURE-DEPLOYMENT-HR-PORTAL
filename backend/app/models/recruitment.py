@@ -75,24 +75,41 @@ class Candidate(Base):
     full_name: Mapped[str] = mapped_column(String(200), nullable=False)
     email: Mapped[str] = mapped_column(String(255), nullable=False, index=True)
     phone: Mapped[Optional[str]] = mapped_column(String(50), nullable=True)
+    
+    # Contact preferences (NEW)
+    preferred_contact_method: Mapped[Optional[str]] = mapped_column(String(50), nullable=True)  # Email, WhatsApp, Call
+    timezone: Mapped[Optional[str]] = mapped_column(String(100), nullable=True)
 
-    # Current employment
+    # Professional Summary
     current_position: Mapped[Optional[str]] = mapped_column(String(200), nullable=True)
     current_company: Mapped[Optional[str]] = mapped_column(String(200), nullable=True)
     years_experience: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
+    industry_function: Mapped[Optional[str]] = mapped_column(String(200), nullable=True)  # Industry / Function
 
-    # Expectations
-    expected_salary: Mapped[Optional[float]] = mapped_column(DECIMAL(10, 2), nullable=True)
+    # Availability & Compensation
     notice_period_days: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
+    availability_date: Mapped[Optional[date]] = mapped_column(Date, nullable=True)  # Auto-calc from notice period
+    expected_salary: Mapped[Optional[float]] = mapped_column(DECIMAL(10, 2), nullable=True)
+    current_salary: Mapped[Optional[float]] = mapped_column(DECIMAL(10, 2), nullable=True)
+    salary_currency: Mapped[Optional[str]] = mapped_column(String(10), default="AED", nullable=True)
+    salary_negotiable: Mapped[Optional[bool]] = mapped_column(Boolean, nullable=True)
 
     # Source
     source: Mapped[Optional[str]] = mapped_column(String(100), nullable=True)
     # LinkedIn, Referral, Agency, Direct Application, etc.
     source_details: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
 
-    # Resume
+    # Resume & Documents
     resume_path: Mapped[Optional[str]] = mapped_column(String(500), nullable=True)
     linkedin_url: Mapped[Optional[str]] = mapped_column(String(500), nullable=True)
+    portfolio_url: Mapped[Optional[str]] = mapped_column(String(500), nullable=True)
+    documents: Mapped[Optional[dict]] = mapped_column(JSON, nullable=True)  # {cv: path, portfolio: path, certificates: [], passport: path, visa: path}
+
+    # Skills (structured)
+    core_skills: Mapped[Optional[list]] = mapped_column(JSON, nullable=True)  # Array of skill tags
+    programming_languages: Mapped[Optional[list]] = mapped_column(JSON, nullable=True)
+    hardware_platforms: Mapped[Optional[list]] = mapped_column(JSON, nullable=True)
+    protocols_tools: Mapped[Optional[list]] = mapped_column(JSON, nullable=True)
 
     # Status & stage
     status: Mapped[str] = mapped_column(String(50), default="applied", nullable=False)
@@ -103,17 +120,27 @@ class Candidate(Base):
     # Rejection
     rejection_reason: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
 
-    # Notes
-    notes: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    # Notes (split)
+    notes: Mapped[Optional[str]] = mapped_column(Text, nullable=True)  # Legacy - kept for migration
+    recruiter_notes: Mapped[Optional[str]] = mapped_column(Text, nullable=True)  # HR-only
+    interview_observations: Mapped[Optional[str]] = mapped_column(Text, nullable=True)  # HR-only
+    risk_flags: Mapped[Optional[str]] = mapped_column(Text, nullable=True)  # HR-only
 
     # UAE-specific (parsed from CV or manually entered)
     emirates_id: Mapped[Optional[str]] = mapped_column(String(50), nullable=True)
     visa_status: Mapped[Optional[str]] = mapped_column(String(100), nullable=True)
+    visa_expiry_date: Mapped[Optional[date]] = mapped_column(Date, nullable=True)
     
     # Location & Mobility
-    current_location: Mapped[Optional[str]] = mapped_column(String(100), nullable=True)  # Emirates dropdown
-    willing_to_relocate: Mapped[Optional[bool]] = mapped_column(Boolean, nullable=True)  # If not in Abu Dhabi
+    current_country: Mapped[Optional[str]] = mapped_column(String(100), nullable=True)  # Country
+    current_location: Mapped[Optional[str]] = mapped_column(String(100), nullable=True)  # Emirate
+    willing_to_relocate: Mapped[Optional[bool]] = mapped_column(Boolean, nullable=True)
     has_driving_license: Mapped[Optional[bool]] = mapped_column(Boolean, nullable=True)
+    
+    # Candidate confirmation & audit
+    details_confirmed_by_candidate: Mapped[Optional[bool]] = mapped_column(Boolean, default=False, nullable=True)
+    details_confirmed_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
+    last_updated_by: Mapped[Optional[str]] = mapped_column(String(100), nullable=True)  # "Candidate" or employee_id
 
     # Audit
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
