@@ -3129,26 +3129,48 @@ function App() {
                     </div>
                   </div>
 
-                  {/* UAE Compliance */}
-                  {(selectedCandidate.emirates_id || selectedCandidate.visa_status) && (
-                    <div className="bg-amber-50 rounded-xl p-4">
-                      <h3 className="text-sm font-semibold text-amber-700 uppercase tracking-wider mb-3">UAE Compliance</h3>
-                      <div className="grid grid-cols-2 gap-4">
-                        {selectedCandidate.emirates_id && (
-                          <div>
-                            <p className="text-xs text-amber-600">Emirates ID</p>
-                            <p className="font-medium text-gray-800">{selectedCandidate.emirates_id}</p>
-                          </div>
-                        )}
-                        {selectedCandidate.visa_status && (
-                          <div>
-                            <p className="text-xs text-amber-600">Visa Status</p>
-                            <p className="font-medium text-gray-800">{selectedCandidate.visa_status}</p>
-                          </div>
-                        )}
+                  {/* Location & Work Eligibility */}
+                  <div className="bg-amber-50 rounded-xl p-4">
+                    <h3 className="text-sm font-semibold text-amber-700 uppercase tracking-wider mb-3">Location & Work Eligibility</h3>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <p className="text-xs text-amber-600">Current Location</p>
+                        <p className="font-medium text-gray-800">{selectedCandidate.current_location || 'Not specified'}</p>
                       </div>
+                      {selectedCandidate.current_location && selectedCandidate.current_location !== 'Abu Dhabi' && (
+                        <div>
+                          <p className="text-xs text-amber-600">Willing to Relocate to Abu Dhabi</p>
+                          <p className="font-medium text-gray-800">
+                            {selectedCandidate.willing_to_relocate === true ? (
+                              <span className="text-green-600">Yes</span>
+                            ) : selectedCandidate.willing_to_relocate === false ? (
+                              <span className="text-red-600">No</span>
+                            ) : 'Not specified'}
+                          </p>
+                        </div>
+                      )}
+                      <div>
+                        <p className="text-xs text-amber-600">Driving License</p>
+                        <p className="font-medium text-gray-800">
+                          {selectedCandidate.has_driving_license === true ? (
+                            <span className="text-green-600">Yes</span>
+                          ) : selectedCandidate.has_driving_license === false ? (
+                            <span className="text-red-600">No</span>
+                          ) : 'Not specified'}
+                        </p>
+                      </div>
+                      <div>
+                        <p className="text-xs text-amber-600">Visa Status</p>
+                        <p className="font-medium text-gray-800">{selectedCandidate.visa_status || 'Not specified'}</p>
+                      </div>
+                      {selectedCandidate.emirates_id && (
+                        <div>
+                          <p className="text-xs text-amber-600">Emirates ID</p>
+                          <p className="font-medium text-gray-800">{selectedCandidate.emirates_id}</p>
+                        </div>
+                      )}
                     </div>
-                  )}
+                  </div>
 
                   {/* Position Details */}
                   {selectedCandidate.position && (

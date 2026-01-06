@@ -109,6 +109,11 @@ class Candidate(Base):
     # UAE-specific (parsed from CV or manually entered)
     emirates_id: Mapped[Optional[str]] = mapped_column(String(50), nullable=True)
     visa_status: Mapped[Optional[str]] = mapped_column(String(100), nullable=True)
+    
+    # Location & Mobility
+    current_location: Mapped[Optional[str]] = mapped_column(String(100), nullable=True)  # Emirates dropdown
+    willing_to_relocate: Mapped[Optional[bool]] = mapped_column(Boolean, nullable=True)  # If not in Abu Dhabi
+    has_driving_license: Mapped[Optional[bool]] = mapped_column(Boolean, nullable=True)
 
     # Audit
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())

@@ -73,6 +73,9 @@ class CandidateBase(BaseModel):
     notes: Optional[str] = None
     emirates_id: Optional[str] = Field(None, max_length=50)
     visa_status: Optional[str] = Field(None, max_length=100)
+    current_location: Optional[str] = Field(None, max_length=100)
+    willing_to_relocate: Optional[bool] = None
+    has_driving_license: Optional[bool] = None
 
 
 class CandidateCreate(CandidateBase):
@@ -99,6 +102,9 @@ class CandidateUpdate(BaseModel):
     rejection_reason: Optional[str] = None
     emirates_id: Optional[str] = Field(None, max_length=50)
     visa_status: Optional[str] = Field(None, max_length=100)
+    current_location: Optional[str] = Field(None, max_length=100)
+    willing_to_relocate: Optional[bool] = None
+    has_driving_license: Optional[bool] = None
 
 
 class CandidateResponse(CandidateBase):
