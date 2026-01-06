@@ -317,6 +317,20 @@ function App() {
   // Compliance alerts state
   const [complianceAlerts, setComplianceAlerts] = useState<ComplianceAlerts | null>(null)
   const [complianceAlertsLoading, setComplianceAlertsLoading] = useState(false)
+  const [recruitmentRequests, setRecruitmentRequests] = useState<any[]>([])
+  const [recruitmentStats, setRecruitmentStats] = useState<{active_positions: number, total_candidates: number, in_interview: number, hired_30_days: number} | null>(null)
+  const [pipelineCounts, setPipelineCounts] = useState<{applied: number, screening: number, interview: number, offer: number, hired: number} | null>(null)
+  const [showNewRequestModal, setShowNewRequestModal] = useState(false)
+  const [newRequestForm, setNewRequestForm] = useState({
+    position_title: '',
+    department: 'Engineering / R&D',
+    employment_type: 'Full-time',
+    salary_range_min: '',
+    salary_range_max: '',
+    headcount: '1',
+    job_description: '',
+    requirements: ''
+  })
 
   // Employee management state
   const [selectedEmployee, setSelectedEmployee] = useState<Employee | null>(null)
@@ -622,6 +636,66 @@ function App() {
       console.error('Failed to fetch compliance alerts:', err)
     } finally {
       setComplianceAlertsLoading(false)
+    }
+  }
+
+  const fetchRecruitmentData = async () => {
+    if (!user || (user.role !== 'admin' && user.role !== 'hr')) return
+    try {
+      const [statsRes, requestsRes, pipelineRes] = await Promise.all([
+        fetchWithAuth(`${API_BASE}/recruitment/stats`),
+        fetchWithAuth(`${API_BASE}/recruitment/requests`),
+        fetchWithAuth(`${API_BASE}/recruitment/pipeline`)
+      ])
+      if (statsRes.ok) setRecruitmentStats(await statsRes.json())
+      if (requestsRes.ok) setRecruitmentRequests(await requestsRes.json())
+      if (pipelineRes.ok) setPipelineCounts(await pipelineRes.json())
+    } catch (err) {
+      console.error('Failed to fetch recruitment data:', err)
+    }
+  }
+
+  const handleCreateRecruitmentRequest = async () => {
+    if (!user) return
+    setLoading(true)
+    try {
+      const payload = {
+        position_title: newRequestForm.position_title,
+        department: newRequestForm.department,
+        employment_type: newRequestForm.employment_type,
+        salary_range_min: newRequestForm.salary_range_min ? parseFloat(newRequestForm.salary_range_min) : null,
+        salary_range_max: newRequestForm.salary_range_max ? parseFloat(newRequestForm.salary_range_max) : null,
+        headcount: parseInt(newRequestForm.headcount) || 1,
+        job_description: newRequestForm.job_description || null,
+        requirements: newRequestForm.requirements || null
+      }
+      const res = await fetchWithAuth(`${API_BASE}/recruitment/requests`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      })
+      if (res.ok) {
+        setShowNewRequestModal(false)
+        setNewRequestForm({
+          position_title: '',
+          department: 'Engineering / R&D',
+          employment_type: 'Full-time',
+          salary_range_min: '',
+          salary_range_max: '',
+          headcount: '1',
+          job_description: '',
+          requirements: ''
+        })
+        fetchRecruitmentData()
+      } else {
+        const err = await res.json()
+        alert(err.detail || 'Failed to create recruitment request')
+      }
+    } catch (err) {
+      console.error('Failed to create recruitment request:', err)
+      alert('Failed to create recruitment request')
+    } finally {
+      setLoading(false)
     }
   }
 
@@ -965,6 +1039,8 @@ function App() {
         fetchEmployees()
       } else if (adminTab === 'compliance') {
         fetchComplianceAlerts()
+      } else if (adminTab === 'recruitment') {
+        fetchRecruitmentData()
       }
     }
   }, [adminTab, activeSection, user])
@@ -2539,7 +2615,7 @@ function App() {
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="text-sm text-gray-500">Active Positions</p>
-                      <p className="text-3xl font-semibold text-purple-600">--</p>
+                      <p className="text-3xl font-semibold text-purple-600">{recruitmentStats?.active_positions ?? recruitmentRequests.length}</p>
                     </div>
                     <div className="p-3 bg-purple-100 rounded-full">
                       <svg className="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -2552,7 +2628,7 @@ function App() {
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="text-sm text-gray-500">Total Candidates</p>
-                      <p className="text-3xl font-semibold text-blue-600">--</p>
+                      <p className="text-3xl font-semibold text-blue-600">{recruitmentStats?.total_candidates ?? 0}</p>
                     </div>
                     <div className="p-3 bg-blue-100 rounded-full">
                       <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -2565,7 +2641,7 @@ function App() {
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="text-sm text-gray-500">In Interview</p>
-                      <p className="text-3xl font-semibold text-orange-600">--</p>
+                      <p className="text-3xl font-semibold text-orange-600">{recruitmentStats?.in_interview ?? pipelineCounts?.interview ?? 0}</p>
                     </div>
                     <div className="p-3 bg-orange-100 rounded-full">
                       <svg className="w-6 h-6 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -2578,7 +2654,7 @@ function App() {
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="text-sm text-gray-500">Hired (30 days)</p>
-                      <p className="text-3xl font-semibold text-emerald-600">--</p>
+                      <p className="text-3xl font-semibold text-emerald-600">{recruitmentStats?.hired_30_days ?? pipelineCounts?.hired ?? 0}</p>
                     </div>
                     <div className="p-3 bg-emerald-100 rounded-full">
                       <svg className="w-6 h-6 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -2588,6 +2664,46 @@ function App() {
                   </div>
                 </div>
               </div>
+
+              {/* Active Job Positions */}
+              {recruitmentRequests.length > 0 && (
+                <div className="bg-white rounded-xl shadow-lg p-6">
+                  <h2 className="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
+                    <svg className="w-5 h-5 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                    </svg>
+                    Open Positions ({recruitmentRequests.length})
+                  </h2>
+                  <div className="grid gap-4">
+                    {recruitmentRequests.map((req: any) => (
+                      <div key={req.id} className="border border-gray-200 rounded-lg p-4 hover:border-purple-300 transition-colors">
+                        <div className="flex items-start justify-between">
+                          <div>
+                            <h3 className="font-semibold text-gray-800">{req.position_title}</h3>
+                            <p className="text-sm text-gray-500">{req.department} • {req.employment_type}</p>
+                            <div className="flex items-center gap-2 mt-2">
+                              <span className={`px-2 py-1 text-xs rounded-full ${
+                                req.status === 'open' ? 'bg-green-100 text-green-700' :
+                                req.status === 'pending_approval' ? 'bg-yellow-100 text-yellow-700' :
+                                'bg-gray-100 text-gray-700'
+                              }`}>
+                                {req.status?.replace('_', ' ')}
+                              </span>
+                              <span className="text-xs text-gray-400">{req.request_number}</span>
+                            </div>
+                          </div>
+                          <div className="text-right">
+                            <p className="text-sm font-medium text-gray-600">Headcount: {req.headcount || 1}</p>
+                            {req.salary_range_min && req.salary_range_max && (
+                              <p className="text-xs text-gray-400">AED {req.salary_range_min.toLocaleString()} - {req.salary_range_max.toLocaleString()}</p>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
 
               {/* Kanban Pipeline */}
               <div className="bg-white rounded-xl shadow-lg p-6">
@@ -2600,17 +2716,26 @@ function App() {
                 
                 {/* Pipeline Stages */}
                 <div className="grid grid-cols-5 gap-4">
-                  {['Applied', 'Screening', 'Interview', 'Offer', 'Hired'].map((stage, idx) => (
-                    <div key={stage} className="bg-gray-50 rounded-lg p-4 min-h-[300px]">
+                  {[
+                    { key: 'applied', label: 'Applied' },
+                    { key: 'screening', label: 'Screening' },
+                    { key: 'interview', label: 'Interview' },
+                    { key: 'offer', label: 'Offer' },
+                    { key: 'hired', label: 'Hired' }
+                  ].map((stage) => (
+                    <div key={stage.key} className="bg-gray-50 rounded-lg p-4 min-h-[200px]">
                       <div className="flex items-center justify-between mb-3">
-                        <h3 className="font-medium text-gray-700">{stage}</h3>
-                        <span className="bg-gray-200 text-gray-600 text-xs px-2 py-1 rounded-full">0</span>
+                        <h3 className="font-medium text-gray-700">{stage.label}</h3>
+                        <span className="bg-gray-200 text-gray-600 text-xs px-2 py-1 rounded-full">
+                          {pipelineCounts?.[stage.key as keyof typeof pipelineCounts] ?? 0}
+                        </span>
                       </div>
                       <div className="space-y-2">
-                        {/* Placeholder for candidates */}
-                        <div className="text-center py-8 text-gray-400 text-sm">
-                          <p>No candidates</p>
-                        </div>
+                        {(pipelineCounts?.[stage.key as keyof typeof pipelineCounts] ?? 0) === 0 && (
+                          <div className="text-center py-8 text-gray-400 text-sm">
+                            <p>No candidates</p>
+                          </div>
+                        )}
                       </div>
                     </div>
                   ))}
@@ -2621,15 +2746,15 @@ function App() {
               <div className="bg-white rounded-xl shadow-lg p-6">
                 <h2 className="text-lg font-semibold text-gray-800 mb-4">Quick Actions</h2>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                  <button className="flex items-center gap-3 p-4 bg-purple-50 hover:bg-purple-100 rounded-lg transition-colors">
+                  <button onClick={() => setShowNewRequestModal(true)} className="flex items-center gap-3 p-4 bg-purple-50 hover:bg-purple-100 rounded-lg transition-colors">
                     <div className="p-2 bg-purple-500 rounded-lg">
                       <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
                       </svg>
                     </div>
-                    <span className="font-medium text-gray-700">New Request</span>
+                    <span className="font-medium text-gray-700">New Position</span>
                   </button>
-                  <button className="flex items-center gap-3 p-4 bg-blue-50 hover:bg-blue-100 rounded-lg transition-colors">
+                  <button onClick={() => alert('Add Candidate feature - requires selecting a position first')} className="flex items-center gap-3 p-4 bg-blue-50 hover:bg-blue-100 rounded-lg transition-colors">
                     <div className="p-2 bg-blue-500 rounded-lg">
                       <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
@@ -2637,7 +2762,7 @@ function App() {
                     </div>
                     <span className="font-medium text-gray-700">Add Candidate</span>
                   </button>
-                  <button className="flex items-center gap-3 p-4 bg-green-50 hover:bg-green-100 rounded-lg transition-colors">
+                  <button onClick={() => alert('Upload CV feature - AI-powered resume parsing coming soon')} className="flex items-center gap-3 p-4 bg-green-50 hover:bg-green-100 rounded-lg transition-colors">
                     <div className="p-2 bg-green-500 rounded-lg">
                       <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
@@ -2645,7 +2770,7 @@ function App() {
                     </div>
                     <span className="font-medium text-gray-700">Upload CV</span>
                   </button>
-                  <button className="flex items-center gap-3 p-4 bg-orange-50 hover:bg-orange-100 rounded-lg transition-colors">
+                  <button onClick={() => alert('Schedule Interview feature - requires candidates in pipeline')} className="flex items-center gap-3 p-4 bg-orange-50 hover:bg-orange-100 rounded-lg transition-colors">
                     <div className="p-2 bg-orange-500 rounded-lg">
                       <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
@@ -2665,7 +2790,7 @@ function App() {
                     </svg>
                   </div>
                   <div>
-                    <h3 className="text-lg font-semibold mb-2">Recruitment Module Ready</h3>
+                    <h3 className="text-lg font-semibold mb-2">Recruitment Module Active</h3>
                     <p className="text-purple-100 mb-3">
                       Backend API is fully implemented with 25+ endpoints. Features include:
                     </p>
@@ -2678,6 +2803,119 @@ function App() {
                     </ul>
                   </div>
                 </div>
+              </div>
+            </div>
+          )}
+
+          {/* New Recruitment Request Modal */}
+          {showNewRequestModal && (
+            <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+              <div className="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+                <div className="flex items-center justify-between mb-6">
+                  <h2 className="text-xl font-semibold text-gray-800">Create New Position</h2>
+                  <button onClick={() => setShowNewRequestModal(false)} className="text-gray-400 hover:text-gray-600">
+                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </button>
+                </div>
+                <form onSubmit={(e) => { e.preventDefault(); handleCreateRecruitmentRequest(); }} className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Position Title *</label>
+                    <input
+                      type="text"
+                      value={newRequestForm.position_title}
+                      onChange={(e) => setNewRequestForm(prev => ({ ...prev, position_title: e.target.value }))}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+                      placeholder="e.g., Thermodynamics Engineer"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Department *</label>
+                    <input
+                      type="text"
+                      value={newRequestForm.department}
+                      onChange={(e) => setNewRequestForm(prev => ({ ...prev, department: e.target.value }))}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+                      placeholder="e.g., Engineering / R&D"
+                      required
+                    />
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Employment Type</label>
+                      <select
+                        value={newRequestForm.employment_type}
+                        onChange={(e) => setNewRequestForm(prev => ({ ...prev, employment_type: e.target.value }))}
+                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+                      >
+                        <option value="Full-time">Full-time</option>
+                        <option value="Part-time">Part-time</option>
+                        <option value="Contract">Contract</option>
+                        <option value="Internship">Internship</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Headcount</label>
+                      <input
+                        type="number"
+                        value={newRequestForm.headcount}
+                        onChange={(e) => setNewRequestForm(prev => ({ ...prev, headcount: e.target.value }))}
+                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+                        min="1"
+                      />
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Salary Range Min (AED)</label>
+                      <input
+                        type="number"
+                        value={newRequestForm.salary_range_min}
+                        onChange={(e) => setNewRequestForm(prev => ({ ...prev, salary_range_min: e.target.value }))}
+                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+                        placeholder="e.g., 15000"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Salary Range Max (AED)</label>
+                      <input
+                        type="number"
+                        value={newRequestForm.salary_range_max}
+                        onChange={(e) => setNewRequestForm(prev => ({ ...prev, salary_range_max: e.target.value }))}
+                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+                        placeholder="e.g., 25000"
+                      />
+                    </div>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Job Description</label>
+                    <textarea
+                      value={newRequestForm.job_description}
+                      onChange={(e) => setNewRequestForm(prev => ({ ...prev, job_description: e.target.value }))}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 min-h-[100px]"
+                      placeholder="Enter job description..."
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Requirements</label>
+                    <textarea
+                      value={newRequestForm.requirements}
+                      onChange={(e) => setNewRequestForm(prev => ({ ...prev, requirements: e.target.value }))}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 min-h-[100px]"
+                      placeholder="Enter requirements..."
+                    />
+                  </div>
+                  <div className="flex justify-end gap-3 pt-4">
+                    <button type="button" onClick={() => setShowNewRequestModal(false)} className="px-6 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50">
+                      Cancel
+                    </button>
+                    <button type="submit" disabled={loading || !newRequestForm.position_title} className="px-6 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 disabled:opacity-50">
+                      {loading ? 'Creating...' : 'Create Position'}
+                    </button>
+                  </div>
+                </form>
               </div>
             </div>
           )}
