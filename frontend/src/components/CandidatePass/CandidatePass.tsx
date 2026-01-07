@@ -216,37 +216,42 @@ export function CandidatePass({ candidateId, token, onBack }: CandidatePassProps
           </div>
 
           {/* ===== CANDIDATE INFO CARD (Fixed) ===== */}
-          <div 
-            className="mx-4 mb-3 p-3 bg-slate-50/80 rounded-xl border-4 flex-shrink-0"
-            style={{ borderColor: passData.entity?.includes('Agriculture') ? '#00bf63' : '#00B0F0' }}
-          >
-            <div className="flex items-start justify-between mb-2">
-              <div className="flex-1 min-w-0">
-                <p className="text-[9px] uppercase tracking-widest text-slate-400 mb-0.5 font-medium">Candidate</p>
-                <h2 className="text-base font-bold text-slate-800 leading-tight truncate">{passData.full_name}</h2>
-                <p className="text-xs text-slate-500 truncate font-medium">{passData.position_title}</p>
-                <p className="text-[10px] text-emerald-600 font-mono mt-0.5 font-bold tracking-tight">{passData.candidate_number}</p>
-              </div>
-              <div className="w-12 h-12 bg-white rounded-lg border border-slate-200 flex items-center justify-center flex-shrink-0 ml-2 shadow-sm">
-                <svg className="w-8 h-8 text-slate-300" viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M3 3h6v6H3V3zm2 2v2h2V5H5zm8-2h6v6h-6V3zm2 2v2h2V5h-2zM3 13h6v6H3v-6zm2 2v2h2v-2H5z"/>
-                </svg>
-              </div>
-            </div>
-            <div className="flex gap-4 pt-3 border-t border-slate-200/60">
-              <div className="flex-1 flex items-center gap-2">
-                <div className="w-2.5 h-2.5 rounded-full bg-emerald-500 flex-shrink-0 shadow-[0_0_8px_rgba(16,185,129,0.4)]"></div>
-                <div>
-                  <p className="text-[9px] uppercase tracking-wider text-slate-400 font-bold leading-none mb-1">Stage</p>
-                  <p className="text-xs font-bold text-slate-800 leading-tight">{stageLabels[passData.current_stage.toLowerCase()] || passData.current_stage}</p>
+          <div className="mx-4 mb-5 relative z-20 flex-shrink-0">
+            <div 
+              className="p-5 bg-white rounded-2xl border-4 shadow-[0_20px_50px_rgba(0,0,0,0.1),0_10px_20px_rgba(0,0,0,0.05)] transform -translate-y-1 transition-transform"
+              style={{ borderColor: passData.entity?.includes('Agriculture') ? '#00bf63' : '#00B0F0' }}
+            >
+              <div className="flex items-start justify-between mb-4">
+                <div className="flex-1 min-w-0">
+                  <p className="text-[10px] uppercase tracking-[0.15em] text-slate-400 mb-1.5 font-bold">Candidate</p>
+                  <h2 className="text-xl font-black text-slate-900 leading-tight truncate tracking-tight">{passData.full_name}</h2>
+                  <p className="text-sm text-slate-600 truncate font-semibold mt-0.5">{passData.position_title}</p>
+                  <div className="inline-block mt-2 px-2 py-0.5 bg-emerald-50 rounded-md">
+                    <p className="text-[11px] text-emerald-700 font-mono font-bold tracking-wider">{passData.candidate_number}</p>
+                  </div>
+                </div>
+                <div className="w-16 h-16 bg-slate-50 rounded-xl border border-slate-100 flex items-center justify-center flex-shrink-0 ml-3 shadow-inner">
+                  <svg className="w-10 h-10 text-slate-300" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M3 3h6v6H3V3zm2 2v2h2V5H5zm8-2h6v6h-6V3zm2 2v2h2V5h-2zM3 13h6v6H3v-6zm2 2v2h2v-2H5z"/>
+                  </svg>
                 </div>
               </div>
-              <div className="w-px bg-slate-200 self-stretch my-1"></div>
-              <div className="flex-1 flex items-center gap-2">
-                <div className="w-2.5 h-2.5 rounded-full bg-blue-500 flex-shrink-0 shadow-[0_0_8px_rgba(59,130,246,0.4)]"></div>
-                <div>
-                  <p className="text-[9px] uppercase tracking-wider text-slate-400 font-bold leading-none mb-1">Status</p>
-                  <p className="text-xs font-bold text-slate-800 leading-tight capitalize">{passData.status}</p>
+              
+              <div className="flex gap-6 pt-4 border-t border-slate-100">
+                <div className="flex-1 flex items-center gap-2.5">
+                  <div className="w-3 h-3 rounded-full bg-emerald-500 flex-shrink-0 shadow-[0_0_12px_rgba(16,185,129,0.6)] animate-pulse"></div>
+                  <div>
+                    <p className="text-[10px] uppercase tracking-wider text-slate-400 font-extrabold leading-none mb-1.5">Stage</p>
+                    <p className="text-[13px] font-black text-slate-800 leading-tight">{stageLabels[passData.current_stage.toLowerCase()] || passData.current_stage}</p>
+                  </div>
+                </div>
+                <div className="w-px bg-slate-100 self-stretch my-1"></div>
+                <div className="flex-1 flex items-center gap-2.5">
+                  <div className="w-3 h-3 rounded-full bg-blue-500 flex-shrink-0 shadow-[0_0_12px_rgba(59,130,246,0.6)]"></div>
+                  <div>
+                    <p className="text-[10px] uppercase tracking-wider text-slate-400 font-extrabold leading-none mb-1.5">Status</p>
+                    <p className="text-[13px] font-black text-slate-800 leading-tight capitalize">{passData.status}</p>
+                  </div>
                 </div>
               </div>
             </div>
