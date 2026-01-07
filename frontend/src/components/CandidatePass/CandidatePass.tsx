@@ -407,49 +407,46 @@ export function CandidatePass({ candidateId, token, onBack }: CandidatePassProps
             </div>
           </div>
 
-          {/* ===== NEXT ACTION (Always visible) ===== */}
-          {activeTab === 'home' && (
-            <div className="mx-4 mb-3 flex-shrink-0">
-              <p className="text-[9px] uppercase tracking-widest text-slate-400 mb-2">Next Action</p>
-              {primaryAction ? (
-                <button
-                  onClick={handlePrimaryAction}
-                  disabled={bookingLoading}
-                  className="w-full p-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl flex items-center justify-between transition-colors disabled:opacity-50"
-                >
-                  <div className="flex items-center gap-2">
-                    <div className="w-7 h-7 bg-white/20 rounded-lg flex items-center justify-center">
-                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                      </svg>
-                    </div>
-                    <span className="text-sm font-semibold">{primaryAction.label}</span>
-                  </div>
-                  <span className="text-[10px] bg-white/20 px-2 py-0.5 rounded-full">Required</span>
-                </button>
-              ) : (
-                <div className="p-4 bg-gradient-to-br from-emerald-50 to-teal-50 rounded-xl border border-emerald-100">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-emerald-100 rounded-xl flex items-center justify-center">
-                      <svg className="w-5 h-5 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                      </svg>
-                    </div>
-                    <div>
-                      <p className="text-sm font-semibold text-emerald-800">You're all caught up!</p>
-                      <p className="text-xs text-emerald-600">No pending actions at the moment</p>
-                    </div>
-                  </div>
-                </div>
-              )}
-            </div>
-          )}
-
           {/* ===== CONTENT AREA (Scrollable - Swaps by activeTab) ===== */}
           <div className="flex-1 overflow-y-auto mx-4 mb-2">
             {/* HOME TAB */}
             {activeTab === 'home' && (
               <div className="space-y-3">
+                {/* Next Action */}
+                <div>
+                  <p className="text-[9px] uppercase tracking-widest text-slate-400 mb-2">Next Action</p>
+                  {primaryAction ? (
+                    <button
+                      onClick={handlePrimaryAction}
+                      disabled={bookingLoading}
+                      className="w-full p-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl flex items-center justify-between transition-colors disabled:opacity-50"
+                    >
+                      <div className="flex items-center gap-2">
+                        <div className="w-7 h-7 bg-white/20 rounded-lg flex items-center justify-center">
+                          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                          </svg>
+                        </div>
+                        <span className="text-sm font-semibold">{primaryAction.label}</span>
+                      </div>
+                      <span className="text-[10px] bg-white/20 px-2 py-0.5 rounded-full">Required</span>
+                    </button>
+                  ) : (
+                    <div className="p-3 bg-gradient-to-br from-emerald-50 to-teal-50 rounded-xl border border-emerald-100">
+                      <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 bg-emerald-100 rounded-lg flex items-center justify-center">
+                          <svg className="w-4 h-4 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                          </svg>
+                        </div>
+                        <div>
+                          <p className="text-sm font-semibold text-emerald-800">You're all caught up!</p>
+                          <p className="text-xs text-emerald-600">No pending actions at the moment</p>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
                 {/* Activity History (Collapsed) */}
                 <div className="border border-slate-100 rounded-xl overflow-hidden shadow-sm">
                   <button 
