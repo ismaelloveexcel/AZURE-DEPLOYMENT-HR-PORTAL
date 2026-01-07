@@ -268,7 +268,9 @@ export function CandidatePass({ candidateId, token, onBack }: CandidatePassProps
             </div>
             <div className="flex-1">
               <p className="text-[10px] uppercase tracking-widest text-slate-400 mb-1">Status</p>
-              <p className="text-sm font-medium text-slate-800">{passData.status === 'applied' ? 'Active' : passData.status}</p>
+              <p className="text-sm font-medium text-slate-800">
+                {passData.stages.find(s => s.name === passData.current_stage)?.status || 'Active'}
+              </p>
             </div>
           </div>
 
