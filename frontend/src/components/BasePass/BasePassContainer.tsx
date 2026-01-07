@@ -29,7 +29,7 @@ export function BasePassContainer({
 }: BasePassContainerProps) {
   return (
     <div className="h-screen bg-slate-50 flex items-center justify-center p-2 sm:p-4">
-      <div className="w-full max-w-md h-full max-h-[700px] sm:max-h-[750px]">
+      <div className="w-full max-w-md h-full max-h-[580px] sm:max-h-[620px]">
         <div className="bg-white/90 backdrop-blur-md border border-slate-200/60 shadow-[0_8px_30px_rgba(0,0,0,0.06)] rounded-2xl sm:rounded-3xl overflow-hidden flex flex-col h-full">
           {header}
           
