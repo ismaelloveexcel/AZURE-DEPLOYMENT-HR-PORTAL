@@ -283,72 +283,61 @@ export function CandidatePass({ candidateId, token, onBack }: CandidatePassProps
           className="p-4 bg-white rounded-xl border-[3px] shadow-md"
           style={{ borderColor: getEntityColor() }}
         >
-          <div className="flex items-start justify-between mb-2">
+          <div className="flex items-start justify-between mb-3">
             <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-1 mb-0.5">
+              <div className="flex items-center gap-1.5 mb-1">
                 <h2 className="text-base font-black text-slate-900 leading-tight tracking-tight">{passData.full_name}</h2>
-                <button className="relative p-0.5 rounded-full hover:bg-slate-100 transition-colors flex-shrink-0">
-                  <svg className="w-3 h-3 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75v-.7V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0" />
-                  </svg>
-                  {passData.unread_messages > 0 && (
-                    <span className="absolute -top-0.5 -right-0.5 w-1.5 h-1.5 bg-red-500 rounded-full border border-white animate-pulse"></span>
-                  )}
-                </button>
-                <span className={`px-1.5 py-0.5 rounded-full text-[7px] font-bold uppercase tracking-wide flex-shrink-0 ${
-                  passData.status === 'revoked' ? 'bg-red-100 text-red-700' : 'bg-emerald-100 text-emerald-700'
-                }`}>Active</span>
+                <span 
+                  className="px-2 py-0.5 rounded-full text-[7px] font-bold uppercase tracking-wide flex-shrink-0"
+                  style={{ 
+                    backgroundColor: passData.status === 'revoked' ? '#FEE2E2' : `${getEntityColor()}20`,
+                    color: passData.status === 'revoked' ? '#B91C1C' : getEntityColor()
+                  }}
+                >
+                  {passData.status === 'revoked' ? 'Revoked' : 'Active'}
+                </span>
               </div>
               <p className="text-[11px] text-slate-600 truncate font-semibold">{passData.position_title}</p>
-              <div className="inline-block mt-1 px-1.5 py-0.5 bg-emerald-50 rounded">
-                <p className="text-[9px] text-emerald-700 font-mono font-bold tracking-wider">{passData.candidate_number}</p>
+              <div 
+                className="inline-block mt-1.5 px-2 py-0.5 rounded"
+                style={{ backgroundColor: `${getEntityColor()}10` }}
+              >
+                <p className="text-[9px] font-mono font-bold tracking-wider" style={{ color: getEntityColor() }}>{passData.candidate_number}</p>
               </div>
             </div>
-            <div className="relative flex-shrink-0 ml-2">
-              <a 
-                href={getProfileUrl()}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="block w-16 h-16 bg-white rounded-lg border-2 flex items-center justify-center shadow hover:shadow-md transition-all cursor-pointer active:scale-95 group"
-                style={{ borderColor: getEntityColor() }}
-                title="Click to open profile"
-              >
-                <QRCodeSVG 
-                  value={getProfileUrl()} 
-                  size={48}
-                  level="M"
-                  fgColor={getEntityColor()}
-                  className="group-hover:scale-105 transition-transform"
-                />
-              </a>
-              <button 
-                onClick={() => setShowProfile(true)}
-                className="absolute -bottom-1 -right-1 w-5 h-5 text-white rounded-full flex items-center justify-center shadow hover:opacity-90 transition-colors"
-                style={{ backgroundColor: getEntityColor() }}
-                title="Expand QR code"
-              >
-                <svg className="w-2.5 h-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7" />
-                </svg>
-              </button>
+            <div 
+              onClick={() => setShowProfile(true)}
+              className="flex-shrink-0 ml-3 w-16 h-16 bg-white rounded-xl border-2 flex items-center justify-center shadow-sm hover:shadow-md transition-all cursor-pointer active:scale-95"
+              style={{ borderColor: getEntityColor() }}
+              title="Click to view profile"
+            >
+              <QRCodeSVG 
+                value={getProfileUrl()} 
+                size={48}
+                level="M"
+                fgColor={getEntityColor()}
+              />
             </div>
           </div>
           
-          <div className="flex pt-2 border-t border-slate-100">
-            <div className="flex-1 flex flex-col items-center justify-center text-center px-2">
-              <div className="flex items-center gap-1 mb-0.5">
-                <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 shadow-[0_0_4px_rgba(16,185,129,0.5)] animate-pulse"></div>
-                <p className="text-[8px] uppercase tracking-wider text-slate-400 font-semibold">Stage</p>
-              </div>
-              <p className="text-[11px] font-semibold text-slate-700">{stageLabels[passData.current_stage.toLowerCase()] || passData.current_stage}</p>
+          <div className="flex gap-2">
+            <div 
+              className="flex-1 py-2 px-3 rounded-lg text-center"
+              style={{ backgroundColor: `${getEntityColor()}08` }}
+            >
+              <p className="text-[8px] uppercase tracking-wider text-slate-400 font-semibold mb-0.5">Stage</p>
+              <span 
+                className="inline-block px-2 py-0.5 rounded-full text-[10px] font-bold"
+                style={{ backgroundColor: `${getEntityColor()}20`, color: getEntityColor() }}
+              >
+                {stageLabels[passData.current_stage.toLowerCase()] || passData.current_stage}
+              </span>
             </div>
-            <div className="w-px bg-slate-200 self-stretch my-0.5"></div>
-            <div className="flex-1 flex flex-col items-center justify-center text-center px-2">
-              <div className="flex items-center gap-1 mb-0.5">
-                <div className="w-1.5 h-1.5 rounded-full bg-blue-500 shadow-[0_0_4px_rgba(59,130,246,0.5)]"></div>
-                <p className="text-[8px] uppercase tracking-wider text-slate-400 font-semibold">Status</p>
-              </div>
-              <p className="text-[10px] font-semibold text-slate-700 leading-tight">{getStatusLabel(passData.current_stage, passData.status)}</p>
+            <div className="flex-1 py-2 px-3 rounded-lg text-center bg-slate-50">
+              <p className="text-[8px] uppercase tracking-wider text-slate-400 font-semibold mb-0.5">Status</p>
+              <span className="inline-block px-2 py-0.5 rounded-full text-[10px] font-bold bg-blue-100 text-blue-700">
+                {getStatusLabel(passData.current_stage, passData.status)}
+              </span>
             </div>
           </div>
         </div>
