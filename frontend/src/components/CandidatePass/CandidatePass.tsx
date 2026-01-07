@@ -243,11 +243,18 @@ export function CandidatePass({ candidateId, token, onBack }: CandidatePassProps
           </div>
 
           {/* Candidate Info Card */}
-          <div className="mx-4 mb-4 p-4 bg-slate-50/80 rounded-2xl border border-slate-100">
-            <p className="text-[10px] uppercase tracking-widest text-slate-400 mb-1">Candidate Journey</p>
-            <h2 className="text-xl font-semibold text-slate-800 mb-0.5">{passData.full_name}</h2>
-            <p className="text-sm text-slate-500 mb-2">{passData.position_title}</p>
-            <p className="text-xs text-emerald-600 font-mono">{passData.candidate_number}</p>
+          <div className="mx-4 mb-4 p-4 bg-slate-50/80 rounded-2xl border border-slate-100 flex items-center justify-between">
+            <div>
+              <p className="text-[10px] uppercase tracking-widest text-slate-400 mb-1">Candidate Journey</p>
+              <h2 className="text-xl font-semibold text-slate-800 mb-0.5">{passData.full_name}</h2>
+              <p className="text-sm text-slate-500 mb-2">{passData.position_title}</p>
+              <p className="text-xs text-emerald-600 font-mono">{passData.candidate_number}</p>
+            </div>
+            <div className="w-16 h-16 bg-white rounded-lg border border-slate-200 flex items-center justify-center flex-shrink-0">
+              <svg className="w-12 h-12 text-slate-300" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M3 3h6v6H3V3zm2 2v2h2V5H5zm8-2h6v6h-6V3zm2 2v2h2V5h-2zM3 13h6v6H3v-6zm2 2v2h2v-2H5zm13-2h1v1h-1v-1zm-3 0h1v1h-1v-1zm3 3h1v1h-1v-1zm-3 0h1v1h-1v-1zm3 3h1v1h-1v-1zm-3 0h1v1h-1v-1z"/>
+              </svg>
+            </div>
           </div>
 
           {/* Status Row */}
@@ -292,7 +299,7 @@ export function CandidatePass({ candidateId, token, onBack }: CandidatePassProps
             </div>
             <div className="flex-1">
               <p className="text-[10px] uppercase tracking-widest text-slate-400 mb-0.5">Wallet QR</p>
-              <p className="text-sm text-slate-600">Tap to verify</p>
+              <p className="text-sm text-slate-600">Next Action</p>
               <span className="inline-block mt-1 px-2 py-0.5 bg-emerald-100 text-emerald-700 text-[10px] font-medium rounded-full">Active</span>
             </div>
           </div>
