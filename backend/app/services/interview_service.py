@@ -333,7 +333,7 @@ class InterviewService:
         candidate, position = row
         
         # Build stage tracking
-        all_stages = ["applied", "screening", "assessment", "interview", "offer", "onboarding"]
+        all_stages = ["application", "screening", "interview", "offer", "onboarding"]
         current_stage_idx = all_stages.index(candidate.stage) if candidate.stage in all_stages else 0
         stages = []
         for i, stage in enumerate(all_stages):
@@ -362,7 +362,7 @@ class InterviewService:
         
         # Build next actions based on stage
         next_actions = []
-        if candidate.stage == "applied":
+        if candidate.stage == "application":
             next_actions.append({"action_id": "complete_profile", "label": "Complete Profile", "type": "form"})
         elif candidate.stage == "screening":
             next_actions.append({"action_id": "upload_documents", "label": "Upload Documents", "type": "upload"})

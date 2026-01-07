@@ -187,16 +187,47 @@ export function CandidatePass({ candidateId, token, onBack }: CandidatePassProps
   }
 
   const stageLabels: Record<string, string> = {
-    applied: 'Application',
+    application: 'Application',
     screening: 'Screening',
-    assessment: 'Assessment',
     interview: 'Interview',
     offer: 'Offer',
     onboarding: 'Onboarding'
   }
 
+  const statusLabels: Record<string, string> = {
+    // Application
+    submitted: 'Submitted',
+    incomplete: 'Incomplete',
+    withdrawn: 'Withdrawn',
+    received: 'Application Received',
+    // Screening
+    under_screening: 'Under Screening',
+    shortlisted: 'Shortlisted',
+    on_hold: 'On Hold',
+    rejected_screening: 'Rejected at Screening',
+    // Interview
+    interview_scheduled: 'Interview Scheduled',
+    interview_completed: 'Interview Completed',
+    second_interview: 'Second Interview Required',
+    pending_feedback: 'Pending Interview Feedback',
+    rejected_interview: 'Rejected After Interview',
+    // Offer
+    offer_preparation: 'Offer In Preparation',
+    offer_sent: 'Offer Sent',
+    offer_accepted: 'Offer Accepted',
+    offer_declined: 'Offer Declined',
+    offer_expired: 'Offer Expired',
+    offer_withdrawn: 'Offer Withdrawn',
+    // Onboarding
+    onboarding_initiated: 'Onboarding Initiated',
+    documents_pending: 'Documents Pending',
+    clearance_in_progress: 'Background / Clearance in Progress',
+    onboarding_completed: 'Onboarding Completed',
+    no_show: 'No Show / Onboarding Failed'
+  }
+
   const getStageIndex = (stageName: string) => {
-    const stages = ['applied', 'screening', 'assessment', 'interview', 'offer', 'onboarding']
+    const stages = ['application', 'screening', 'interview', 'offer', 'onboarding']
     return stages.indexOf(stageName)
   }
 
@@ -263,12 +294,12 @@ export function CandidatePass({ candidateId, token, onBack }: CandidatePassProps
           <div className="mx-4 mb-4 flex gap-4">
             <div className="flex-1">
               <p className="text-[10px] uppercase tracking-widest text-slate-400 mb-1">Current Stage</p>
-              <p className="text-sm font-medium text-slate-800">{stageLabels[passData.current_stage] || passData.current_stage}</p>
+              <p className="text-sm font-medium text-slate-800 capitalize">{stageLabels[passData.current_stage] || passData.current_stage}</p>
             </div>
             <div className="flex-1">
               <p className="text-[10px] uppercase tracking-widest text-slate-400 mb-1">Status</p>
               <p className="text-sm font-medium text-slate-800">
-                {passData.stages.find(s => s.name === passData.current_stage)?.status || 'Active'}
+                {statusLabels[passData.status] || passData.status || 'Active'}
               </p>
             </div>
           </div>
@@ -281,13 +312,13 @@ export function CandidatePass({ candidateId, token, onBack }: CandidatePassProps
               <div className="absolute top-6 left-0 right-0 h-0.5 bg-slate-100 -z-0">
                 <div 
                   className="h-full bg-emerald-500 transition-all duration-500" 
-                  style={{ width: `${(currentStageIndex / 5) * 100}%` }}
+                  style={{ width: `${(currentStageIndex / 4) * 100}%` }}
                 ></div>
               </div>
               
               <div className="flex items-center justify-between relative z-10">
                 {[
-                  { id: 'applied', label: 'Application', icon: 'M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z' },
+                  { id: 'application', label: 'Application', icon: 'M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z' },
                   { id: 'screening', label: 'Screening', icon: 'M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z' },
                   { id: 'interview', label: 'Interview', icon: 'M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z' },
                   { id: 'offer', label: 'Offer', icon: 'M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z' },
