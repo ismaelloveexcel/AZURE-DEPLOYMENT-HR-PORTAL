@@ -552,8 +552,7 @@ class InterviewService:
     ) -> ActivityLog:
         """Log an activity entry (immutable audit trail)."""
         log = ActivityLog(
-            entity_type="candidate",
-            entity_id=str(candidate_id),
+            candidate_id=candidate_id,
             stage=stage,
             action_type=action_type,
             action_description=action_description,
@@ -574,8 +573,7 @@ class InterviewService:
         result = await session.execute(
             select(ActivityLog).where(
                 and_(
-                    ActivityLog.entity_type == "candidate",
-                    ActivityLog.entity_id == str(candidate_id),
+                    ActivityLog.candidate_id == candidate_id,
                     ActivityLog.visibility == "candidate"
                 )
             ).order_by(ActivityLog.timestamp.desc()).limit(20)
@@ -589,10 +587,7 @@ class InterviewService:
         """Get full activity history (HR/admin only)."""
         result = await session.execute(
             select(ActivityLog).where(
-                and_(
-                    ActivityLog.entity_type == "candidate",
-                    ActivityLog.entity_id == str(candidate_id)
-                )
+                ActivityLog.candidate_id == candidate_id
             ).order_by(ActivityLog.timestamp.desc())
         )
         logs = result.scalars().all()

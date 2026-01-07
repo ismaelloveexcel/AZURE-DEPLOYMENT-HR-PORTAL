@@ -9,8 +9,7 @@ class ActivityLog(Base):
     __tablename__ = "activity_logs"
     
     id: Mapped[int] = mapped_column(primary_key=True)
-    entity_type: Mapped[str] = mapped_column(String(50), nullable=False, index=True)
-    entity_id: Mapped[str] = mapped_column(String(100), nullable=False, index=True)
+    candidate_id: Mapped[int] = mapped_column(Integer, nullable=False, index=True)
     stage: Mapped[str] = mapped_column(String(50), nullable=False)
     action_type: Mapped[str] = mapped_column(String(100), nullable=False)
     action_description: Mapped[str] = mapped_column(Text, nullable=False)
@@ -18,7 +17,6 @@ class ActivityLog(Base):
     performed_by_id: Mapped[str] = mapped_column(String(100), nullable=True)
     timestamp: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=datetime.utcnow, nullable=False)
     visibility: Mapped[str] = mapped_column(String(20), default="internal", nullable=False)
-    extra_data: Mapped[dict] = mapped_column(JSON, nullable=True)
 
 
 ENTITY_TYPES = ["candidate", "requisition", "interview", "manager", "offer", "onboarding"]
