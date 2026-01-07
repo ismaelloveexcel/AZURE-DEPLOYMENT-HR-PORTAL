@@ -285,17 +285,17 @@ export function CandidatePass({ candidateId, token, onBack }: CandidatePassProps
         >
           <div className="flex items-start justify-between mb-2">
             <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-2 mb-0.5">
-                <h2 className="text-base font-black text-slate-900 leading-tight truncate tracking-tight">{passData.full_name}</h2>
-                <button className="relative p-1 rounded-full hover:bg-slate-100 transition-colors flex-shrink-0">
-                  <svg className="w-3.5 h-3.5 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+              <div className="flex items-center gap-1 mb-0.5">
+                <h2 className="text-base font-black text-slate-900 leading-tight tracking-tight">{passData.full_name}</h2>
+                <button className="relative p-0.5 rounded-full hover:bg-slate-100 transition-colors flex-shrink-0">
+                  <svg className="w-3 h-3 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75v-.7V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0" />
                   </svg>
                   {passData.unread_messages > 0 && (
-                    <span className="absolute top-0 right-0 w-1.5 h-1.5 bg-red-500 rounded-full border border-white animate-pulse"></span>
+                    <span className="absolute -top-0.5 -right-0.5 w-1.5 h-1.5 bg-red-500 rounded-full border border-white animate-pulse"></span>
                   )}
                 </button>
-                <span className={`px-1.5 py-0.5 rounded-full text-[8px] font-bold uppercase tracking-wider flex-shrink-0 ${
+                <span className={`px-1.5 py-0.5 rounded-full text-[7px] font-bold uppercase tracking-wide flex-shrink-0 ${
                   passData.status === 'revoked' ? 'bg-red-100 text-red-700' : 'bg-emerald-100 text-emerald-700'
                 }`}>Active</span>
               </div>
