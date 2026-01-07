@@ -412,25 +412,6 @@ export function CandidatePass({ candidateId, token, onBack }: CandidatePassProps
         <div className="mt-4 bg-white/80 backdrop-blur-md border border-slate-200/60 shadow-[0_8px_30px_rgba(0,0,0,0.06)] rounded-2xl p-4 max-h-64 overflow-y-auto">
           {activeTab === 'journey' && (
             <div className="space-y-3">
-              <h3 className="text-xs font-medium text-slate-400 uppercase tracking-widest">Next Steps</h3>
-              {passData.next_actions.length > 0 ? (
-                passData.next_actions.map(action => (
-                  <button
-                    key={action.action_id}
-                    className="w-full p-3 rounded-xl border border-slate-200 text-left hover:bg-slate-50 transition-colors flex items-center gap-3"
-                  >
-                    <div className="w-8 h-8 bg-slate-100 rounded-lg flex items-center justify-center">
-                      <svg className="w-4 h-4 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
-                      </svg>
-                    </div>
-                    <span className="text-sm text-slate-700">{action.label}</span>
-                  </button>
-                ))
-              ) : (
-                <p className="text-sm text-slate-500">No pending actions</p>
-              )}
-
               {/* Interview Slot Selection */}
               {passData.current_stage === 'interview' && !passData.booked_slot && passData.interview_slots.length > 0 && (
                 <div className="mt-4 pt-4 border-t border-slate-100">
