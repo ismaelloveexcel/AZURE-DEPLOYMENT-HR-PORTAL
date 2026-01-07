@@ -321,18 +321,21 @@ export function CandidatePass({ candidateId, token, onBack }: CandidatePassProps
           {/* Next Action Section */}
           <div className="mx-4 mb-4">
             <p className="text-[10px] uppercase tracking-widest text-slate-400 mb-2">Next Action</p>
-            <div className="p-4 bg-white rounded-2xl border border-slate-100 shadow-sm flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="w-8 h-8 rounded-lg bg-slate-50 flex items-center justify-center text-slate-400">
-                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
-                  </svg>
-                </div>
-                <div>
-                  <p className="text-sm font-semibold text-slate-700">Complete Profile</p>
-                </div>
-              </div>
-            </div>
+                <button 
+                  onClick={() => setActiveTab('journey')}
+                  className="w-full p-4 bg-white rounded-2xl border border-slate-100 shadow-sm flex items-center justify-between hover:bg-slate-50 transition-colors"
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 rounded-lg bg-slate-50 flex items-center justify-center text-slate-400">
+                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+                      </svg>
+                    </div>
+                    <div>
+                      <p className="text-sm font-semibold text-slate-700">Complete Profile</p>
+                    </div>
+                  </div>
+                </button>
           </div>
 
           {/* Interview Info */}
@@ -408,7 +411,39 @@ export function CandidatePass({ candidateId, token, onBack }: CandidatePassProps
         {/* Tab Content */}
         <div className="mt-4 bg-white/80 backdrop-blur-md border border-slate-200/60 shadow-[0_8px_30px_rgba(0,0,0,0.06)] rounded-2xl p-4 max-h-64 overflow-y-auto">
           {activeTab === 'journey' && (
-            <div className="space-y-3">
+            <div className="space-y-4">
+              {/* Profile Completion Status */}
+              <div className="p-4 bg-emerald-50 rounded-2xl border border-emerald-100">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-xs font-semibold text-emerald-700 uppercase tracking-wider">Profile Setup</span>
+                  <span className="text-xs font-bold text-emerald-700">65%</span>
+                </div>
+                <div className="h-1.5 w-full bg-emerald-100 rounded-full overflow-hidden">
+                  <div className="h-full bg-emerald-500 rounded-full" style={{ width: '65%' }}></div>
+                </div>
+                <p className="text-[10px] text-emerald-600 mt-2">Finish uploading your EID and Passport to proceed to Screening.</p>
+              </div>
+
+              {/* Action Buttons */}
+              <div className="grid grid-cols-2 gap-3">
+                <button className="flex flex-col items-center justify-center p-4 bg-white rounded-2xl border border-slate-100 shadow-sm hover:border-emerald-200 hover:bg-emerald-50/50 transition-all group">
+                  <div className="w-10 h-10 rounded-xl bg-slate-50 flex items-center justify-center text-slate-400 group-hover:bg-emerald-100 group-hover:text-emerald-600 transition-colors mb-2">
+                    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                    </svg>
+                  </div>
+                  <span className="text-xs font-medium text-slate-600">Personal Details</span>
+                </button>
+                <button className="flex flex-col items-center justify-center p-4 bg-white rounded-2xl border border-slate-100 shadow-sm hover:border-emerald-200 hover:bg-emerald-50/50 transition-all group">
+                  <div className="w-10 h-10 rounded-xl bg-slate-50 flex items-center justify-center text-slate-400 group-hover:bg-emerald-100 group-hover:text-emerald-600 transition-colors mb-2">
+                    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                  </div>
+                  <span className="text-xs font-medium text-slate-600">Documents</span>
+                </button>
+              </div>
+
               {/* Interview Slot Selection */}
               {passData.current_stage === 'interview' && !passData.booked_slot && passData.interview_slots.length > 0 && (
                 <div className="mt-4 pt-4 border-t border-slate-100">
