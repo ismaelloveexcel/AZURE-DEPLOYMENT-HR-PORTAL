@@ -236,8 +236,15 @@ export function CandidatePass({ candidateId, token, onBack }: CandidatePassProps
                 </div>
               </div>
             </div>
-            <div className="flex items-center gap-2">
-              <span className="text-sm font-medium text-slate-700">Candidate Pass</span>
+            <div className="flex items-center justify-between w-full">
+              <span className="text-lg font-bold text-slate-800 tracking-tight">Candidate Pass</span>
+              <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${
+                passData.status === 'revoked' || new Date(passData.valid_until) < new Date() 
+                  ? 'bg-red-100 text-red-700 border border-red-200' 
+                  : 'bg-emerald-100 text-emerald-700 border border-emerald-200'
+              }`}>
+                {new Date(passData.valid_until) < new Date() ? 'Expired' : passData.status === 'revoked' ? 'Revoked' : 'Active'}
+              </span>
             </div>
           </div>
 
