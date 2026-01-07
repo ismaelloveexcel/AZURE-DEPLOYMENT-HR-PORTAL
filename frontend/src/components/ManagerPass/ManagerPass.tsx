@@ -65,20 +65,21 @@ export function ManagerPass({ recruitmentRequestId, managerId, token, onBack }: 
   const [activeTab, setActiveTab] = useState<ActiveTab>('pipeline')
   const [showInterviewSetup, setShowInterviewSetup] = useState(false)
   const [setupForm, setSetupForm] = useState({
-    interview_format: 'online',
-    interview_rounds: 1,
     technical_assessment_required: false,
+    interview_format: 'online',
+    interview_rounds: 2,
     notes: ''
   })
-  const [newSlots, setNewSlots] = useState<Array<{ date: string; start: string; end: string }>>([])
+  const [selectedDates, setSelectedDates] = useState<string[]>([])
+  const [selectedSlots, setSelectedSlots] = useState<string[]>([])
+  const [additionalInterviewer, setAdditionalInterviewer] = useState('')
 
   const API_URL = '/api'
 
-  const entityColors = {
-    primary: '#003D7A',
-    secondary: '#E6F0FA',
-    accent: '#0066CC'
-  }
+  const timeSlots = [
+    '09:00-10:00', '10:00-11:00', '11:00-12:00',
+    '14:00-15:00', '15:00-16:00', '16:00-17:00'
+  ]
 
   useEffect(() => {
     fetchPassData()
@@ -110,69 +111,74 @@ export function ManagerPass({ recruitmentRequestId, managerId, token, onBack }: 
         },
         body: JSON.stringify({
           recruitment_request_id: recruitmentRequestId,
-          ...setupForm
+          ...setupForm,
+          additional_interviewers: additionalInterviewer ? [additionalInterviewer] : []
         })
       })
       if (!response.ok) throw new Error('Failed to save setup')
+      
+      let setupData = null
+      const contentType = response.headers.get('content-type')
+      if (contentType && contentType.includes('application/json') && response.status !== 204) {
+        try {
+          setupData = await response.json()
+        } catch {
+          setupData = null
+        }
+      }
+      
+      if (selectedDates.length > 0 && selectedSlots.length > 0 && setupData?.id) {
+        const slotsPayload = {
+          interview_setup_id: setupData.id,
+          dates: selectedDates,
+          time_slots: selectedSlots.map(slot => {
+            const [start, end] = slot.split('-')
+            return { start_time: start + ':00', end_time: end + ':00' }
+          }),
+          round_number: 1
+        }
+        
+        await fetch(`${API_URL}/interview/slots/bulk`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify(slotsPayload)
+        })
+      }
+      
       setShowInterviewSetup(false)
+      setSelectedDates([])
+      setSelectedSlots([])
       await fetchPassData()
     } catch (err) {
       alert(err instanceof Error ? err.message : 'Save failed')
     }
   }
 
-  const addSlotRow = () => {
-    setNewSlots([...newSlots, { date: '', start: '09:00', end: '10:00' }])
-  }
-
-  const updateSlotRow = (idx: number, field: string, value: string) => {
-    const updated = [...newSlots]
-    updated[idx] = { ...updated[idx], [field]: value }
-    setNewSlots(updated)
-  }
-
-  const removeSlotRow = (idx: number) => {
-    setNewSlots(newSlots.filter((_, i) => i !== idx))
-  }
-
-  const createSlots = async () => {
-    if (!passData?.interview_setup || newSlots.length === 0) return
-    
-    const validSlots = newSlots.filter(s => s.date && s.start && s.end)
-    if (validSlots.length === 0) {
-      alert('Please add at least one valid slot')
-      return
+  const toggleDate = (date: string) => {
+    if (selectedDates.includes(date)) {
+      setSelectedDates(selectedDates.filter(d => d !== date))
+    } else {
+      setSelectedDates([...selectedDates, date])
     }
+  }
 
-    try {
-      const response = await fetch(`${API_URL}/interview/slots/bulk`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify({
-          interview_setup_id: passData.interview_setup.id,
-          dates: validSlots.map(s => s.date),
-          time_slots: validSlots.map(s => ({ start_time: s.start, end_time: s.end })),
-          round_number: 1
-        })
-      })
-      if (!response.ok) throw new Error('Failed to create slots')
-      setNewSlots([])
-      await fetchPassData()
-      alert('Interview slots created successfully!')
-    } catch (err) {
-      alert(err instanceof Error ? err.message : 'Failed to create slots')
+  const toggleSlot = (slot: string) => {
+    if (selectedSlots.includes(slot)) {
+      setSelectedSlots(selectedSlots.filter(s => s !== slot))
+    } else {
+      setSelectedSlots([...selectedSlots, slot])
     }
   }
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-slate-100">
+      <div className="min-h-screen flex items-center justify-center bg-slate-50">
         <div className="text-center">
-          <div className="w-12 h-12 border-4 border-blue-800 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading manager pass...</p>
+          <div className="w-10 h-10 border-2 border-slate-300 border-t-slate-600 rounded-full animate-spin mx-auto mb-3"></div>
+          <p className="text-slate-500 text-sm">Loading...</p>
         </div>
       </div>
     )
@@ -180,17 +186,17 @@ export function ManagerPass({ recruitmentRequestId, managerId, token, onBack }: 
 
   if (error || !passData) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-slate-100">
-        <div className="bg-white rounded-xl shadow-lg p-8 max-w-md text-center">
-          <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
-            <svg className="w-8 h-8 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+      <div className="min-h-screen flex items-center justify-center bg-slate-50">
+        <div className="bg-white/80 backdrop-blur-md border border-slate-200/60 shadow-lg rounded-2xl p-6 max-w-sm text-center">
+          <div className="w-12 h-12 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-3">
+            <svg className="w-6 h-6 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
             </svg>
           </div>
-          <h2 className="text-xl font-semibold text-gray-800 mb-2">Access Error</h2>
-          <p className="text-gray-600">{error || 'Unable to load pass data'}</p>
+          <h2 className="text-base font-medium text-slate-800 mb-1">Access Error</h2>
+          <p className="text-sm text-slate-500">{error || 'Unable to load pass'}</p>
           {onBack && (
-            <button onClick={onBack} className="mt-6 px-6 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200">
+            <button onClick={onBack} className="mt-4 px-4 py-2 text-sm text-slate-600 hover:bg-slate-100 rounded-lg transition-colors">
               Go Back
             </button>
           )}
@@ -208,472 +214,434 @@ export function ManagerPass({ recruitmentRequestId, managerId, token, onBack }: 
     hired: 'Hired'
   }
 
-  const stageColors: Record<string, string> = {
-    applied: '#64748b',
-    screening: '#f59e0b',
-    assessment: '#8b5cf6',
-    interview: '#3b82f6',
-    offer: '#10b981',
-    hired: '#22c55e'
-  }
-
   return (
-    <div className="min-h-screen bg-slate-100">
-      {/* Header */}
-      <header className="text-white p-6" style={{ backgroundColor: entityColors.primary }}>
-        <div className="max-w-5xl mx-auto">
-          <div className="flex items-center justify-between mb-4">
-            {onBack && (
-              <button onClick={onBack} className="text-white/80 hover:text-white flex items-center gap-2">
-                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-                </svg>
-                Back
-              </button>
-            )}
-            <span className="text-sm font-mono opacity-80">{passData.pass_id}</span>
-          </div>
-          
-          <div className="flex items-start justify-between">
-            <div>
-              <p className="text-sm opacity-70 mb-1">Hiring for</p>
-              <h1 className="text-2xl font-bold">{passData.position_title}</h1>
-              <p className="opacity-90">{passData.department}</p>
-            </div>
-            <div className="text-right">
-              <div className={`inline-flex items-center gap-2 px-4 py-2 rounded-lg ${
-                passData.position_status === 'open' ? 'bg-green-500/20 text-green-100' : 'bg-gray-500/20 text-gray-200'
-              }`}>
-                <span className={`w-2 h-2 rounded-full ${passData.position_status === 'open' ? 'bg-green-400' : 'bg-gray-400'}`}></span>
-                {passData.position_status}
+    <div className="min-h-screen bg-slate-50 p-4">
+      <div className="max-w-2xl mx-auto">
+        {/* Pass Card */}
+        <div className="bg-white/80 backdrop-blur-md border border-slate-200/60 shadow-[0_8px_30px_rgba(0,0,0,0.06)] rounded-3xl overflow-hidden">
+          {/* Header */}
+          <div className="px-6 pt-6 pb-4">
+            <div className="flex items-center justify-between mb-2">
+              <div className="flex items-center gap-2">
+                {onBack && (
+                  <button onClick={onBack} className="p-1 -ml-1 text-slate-400 hover:text-slate-600 transition-colors">
+                    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
+                    </svg>
+                  </button>
+                )}
+                <span className="text-[10px] uppercase tracking-widest text-slate-400 font-medium">Manager Pass</span>
               </div>
-              <p className="text-sm opacity-70 mt-2">SLA: {passData.sla_days} days</p>
+              <span className="text-xs font-mono text-slate-400">{passData.pass_id}</span>
+            </div>
+            
+            <h1 className="text-xl font-semibold text-slate-800 mb-1">{passData.position_title}</h1>
+            <p className="text-sm text-slate-500">{passData.department}</p>
+            
+            <div className="flex items-center gap-3 mt-3">
+              <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium rounded-full ${
+                passData.position_status === 'open' || passData.position_status === 'pending' 
+                  ? 'bg-emerald-100 text-emerald-700' 
+                  : 'bg-slate-100 text-slate-600'
+              }`}>
+                <span className={`w-1.5 h-1.5 rounded-full ${
+                  passData.position_status === 'open' || passData.position_status === 'pending' 
+                    ? 'bg-emerald-500' 
+                    : 'bg-slate-400'
+                }`}></span>
+                {passData.position_status}
+              </span>
+              <span className="text-xs text-slate-400">SLA: {passData.sla_days} days</span>
             </div>
           </div>
 
-          {/* Quick Stats */}
-          <div className="grid grid-cols-4 gap-4 mt-6">
-            <div className="bg-white/10 rounded-lg p-3 text-center">
-              <p className="text-2xl font-bold">{passData.total_candidates}</p>
-              <p className="text-sm opacity-70">Total Candidates</p>
-            </div>
-            <div className="bg-white/10 rounded-lg p-3 text-center">
-              <p className="text-2xl font-bold">{passData.pipeline_stats['interview'] || 0}</p>
-              <p className="text-sm opacity-70">In Interview</p>
-            </div>
-            <div className="bg-white/10 rounded-lg p-3 text-center">
-              <p className="text-2xl font-bold">{passData.confirmed_interviews.length}</p>
-              <p className="text-sm opacity-70">Scheduled</p>
-            </div>
-            <div className="bg-white/10 rounded-lg p-3 text-center">
-              <p className="text-2xl font-bold">{passData.pipeline_stats['offer'] || 0}</p>
-              <p className="text-sm opacity-70">Offers Sent</p>
+          {/* Stats Row */}
+          <div className="px-6 pb-4 grid grid-cols-4 gap-3">
+            {[
+              { label: 'Total', value: passData.total_candidates },
+              { label: 'Interview', value: passData.pipeline_stats['interview'] || 0 },
+              { label: 'Scheduled', value: passData.confirmed_interviews.length },
+              { label: 'Offers', value: passData.pipeline_stats['offer'] || 0 }
+            ].map(stat => (
+              <div key={stat.label} className="bg-slate-50/80 rounded-xl p-3 text-center border border-slate-100">
+                <p className="text-lg font-semibold text-slate-800">{stat.value}</p>
+                <p className="text-[10px] text-slate-500 uppercase tracking-wider">{stat.label}</p>
+              </div>
+            ))}
+          </div>
+
+          {/* Navigation Tabs */}
+          <div className="border-t border-slate-100 px-2">
+            <div className="flex">
+              {[
+                { id: 'pipeline', label: 'Pipeline', icon: (
+                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M3 4h13M3 8h9m-9 4h6m4 0l4-4m0 0l4 4m-4-4v12" />
+                  </svg>
+                )},
+                { id: 'documents', label: 'Docs', icon: (
+                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                  </svg>
+                )},
+                { id: 'interviews', label: 'Setup', icon: (
+                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                  </svg>
+                )},
+                { id: 'calendar', label: 'Calendar', icon: (
+                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                  </svg>
+                )},
+                { id: 'contact', label: 'HR', icon: (
+                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                  </svg>
+                )}
+              ].map(tab => (
+                <button
+                  key={tab.id}
+                  onClick={() => setActiveTab(tab.id as ActiveTab)}
+                  className={`flex-1 py-3 flex flex-col items-center gap-1 relative transition-colors ${
+                    activeTab === tab.id ? 'text-slate-800' : 'text-slate-400 hover:text-slate-600'
+                  }`}
+                >
+                  {tab.icon}
+                  <span className="text-[10px]">{tab.label}</span>
+                  {activeTab === tab.id && (
+                    <div className="absolute bottom-0 left-1/4 right-1/4 h-0.5 bg-slate-800 rounded-full"></div>
+                  )}
+                </button>
+              ))}
             </div>
           </div>
         </div>
-      </header>
 
-      {/* Navigation */}
-      <nav className="bg-white shadow-sm sticky top-0 z-10">
-        <div className="max-w-5xl mx-auto flex">
-          {[
-            { id: 'pipeline', label: 'Pipeline', icon: '📊' },
-            { id: 'documents', label: 'Documents', icon: '📄' },
-            { id: 'interviews', label: 'Setup', icon: '⚙️' },
-            { id: 'calendar', label: 'Calendar', icon: '📅' },
-            { id: 'contact', label: 'HR', icon: '💬' }
-          ].map(tab => (
-            <button
-              key={tab.id}
-              onClick={() => setActiveTab(tab.id as ActiveTab)}
-              className={`flex-1 py-4 px-2 text-center text-sm font-medium transition-colors ${
-                activeTab === tab.id
-                  ? 'border-b-2 text-blue-900'
-                  : 'text-gray-500 hover:text-gray-700'
-              }`}
-              style={activeTab === tab.id ? { borderColor: entityColors.primary } : {}}
-            >
-              <span className="mr-1">{tab.icon}</span>
-              {tab.label}
-            </button>
-          ))}
-        </div>
-      </nav>
-
-      {/* Content */}
-      <main className="max-w-5xl mx-auto p-6">
-        {activeTab === 'pipeline' && (
-          <div className="space-y-6">
-            {/* Pipeline Visualization */}
-            <div className="bg-white rounded-xl shadow-sm p-6">
-              <h2 className="text-lg font-semibold text-gray-800 mb-6">Candidate Pipeline</h2>
-              <div className="flex gap-4">
+        {/* Tab Content */}
+        <div className="mt-4 bg-white/80 backdrop-blur-md border border-slate-200/60 shadow-[0_8px_30px_rgba(0,0,0,0.06)] rounded-2xl p-4 max-h-80 overflow-y-auto">
+          {activeTab === 'pipeline' && (
+            <div>
+              <h3 className="text-xs font-medium text-slate-400 uppercase tracking-widest mb-3">Candidate Pipeline</h3>
+              <div className="space-y-2">
                 {['applied', 'screening', 'assessment', 'interview', 'offer', 'hired'].map(stage => (
-                  <div key={stage} className="flex-1">
-                    <div 
-                      className="text-white text-center py-2 rounded-t-lg font-medium text-sm"
-                      style={{ backgroundColor: stageColors[stage] }}
-                    >
-                      {stageLabels[stage]}
-                    </div>
-                    <div 
-                      className="bg-gray-50 rounded-b-lg p-4 text-center border-2 border-t-0"
-                      style={{ borderColor: stageColors[stage] }}
-                    >
-                      <p className="text-3xl font-bold text-gray-800">{passData.pipeline_stats[stage] || 0}</p>
-                      <p className="text-xs text-gray-500 mt-1">candidates</p>
-                    </div>
+                  <div key={stage} className="flex items-center justify-between p-3 rounded-xl bg-slate-50 border border-slate-100">
+                    <span className="text-sm text-slate-700">{stageLabels[stage]}</span>
+                    <span className="text-sm font-semibold text-slate-800 bg-white px-3 py-1 rounded-full border border-slate-200">
+                      {passData.pipeline_stats[stage] || 0}
+                    </span>
                   </div>
                 ))}
               </div>
             </div>
+          )}
 
-            {/* Recent Activity */}
-            <div className="bg-white rounded-xl shadow-sm p-6">
-              <h2 className="text-lg font-semibold text-gray-800 mb-4">Upcoming Interviews</h2>
-              {passData.confirmed_interviews.length > 0 ? (
+          {activeTab === 'documents' && (
+            <div>
+              <h3 className="text-xs font-medium text-slate-400 uppercase tracking-widest mb-3">Documents</h3>
+              <div className="space-y-2">
+                <div className="flex items-center justify-between p-3 rounded-xl bg-slate-50 border border-slate-100">
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 bg-white rounded-lg flex items-center justify-center border border-slate-200">
+                      <svg className="w-4 h-4 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                      </svg>
+                    </div>
+                    <span className="text-sm text-slate-700">Job Description</span>
+                  </div>
+                  <span className={`text-xs px-2.5 py-1 rounded-full font-medium ${
+                    passData.jd_status === 'approved' ? 'bg-emerald-100 text-emerald-700' :
+                    passData.jd_status === 'submitted' ? 'bg-amber-100 text-amber-700' :
+                    'bg-slate-100 text-slate-600'
+                  }`}>
+                    {passData.jd_status}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between p-3 rounded-xl bg-slate-50 border border-slate-100">
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 bg-white rounded-lg flex items-center justify-center border border-slate-200">
+                      <svg className="w-4 h-4 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                      </svg>
+                    </div>
+                    <span className="text-sm text-slate-700">Recruitment Form</span>
+                  </div>
+                  <span className={`text-xs px-2.5 py-1 rounded-full font-medium ${
+                    passData.recruitment_form_status === 'approved' ? 'bg-emerald-100 text-emerald-700' :
+                    passData.recruitment_form_status === 'submitted' ? 'bg-amber-100 text-amber-700' :
+                    'bg-slate-100 text-slate-600'
+                  }`}>
+                    {passData.recruitment_form_status}
+                  </span>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {activeTab === 'interviews' && (
+            <div>
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-xs font-medium text-slate-400 uppercase tracking-widest">Interview Setup</h3>
+                {!passData.interview_setup && !showInterviewSetup && (
+                  <button
+                    onClick={() => setShowInterviewSetup(true)}
+                    className="text-xs text-slate-600 hover:text-slate-800 font-medium"
+                  >
+                    + Configure
+                  </button>
+                )}
+              </div>
+
+              {passData.interview_setup && !showInterviewSetup ? (
                 <div className="space-y-3">
-                  {passData.confirmed_interviews.slice(0, 5).map(interview => (
-                    <div key={interview.id} className="flex items-center gap-4 p-3 bg-blue-50 rounded-lg">
-                      <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center text-xl">👤</div>
-                      <div className="flex-1">
-                        <p className="font-medium text-gray-800">{interview.candidate_name || 'Candidate'}</p>
-                        <p className="text-sm text-gray-600">
-                          {new Date(interview.slot_date).toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short' })} • {interview.start_time}
-                        </p>
+                  <div className="p-4 rounded-xl bg-slate-50 border border-slate-100">
+                    <div className="grid grid-cols-2 gap-4 text-sm">
+                      <div>
+                        <p className="text-slate-500 text-xs">Format</p>
+                        <p className="text-slate-800 font-medium capitalize">{passData.interview_setup.interview_format}</p>
                       </div>
-                      <span className="px-3 py-1 text-xs font-medium rounded-full bg-green-100 text-green-700">
-                        Confirmed
-                      </span>
+                      <div>
+                        <p className="text-slate-500 text-xs">Rounds</p>
+                        <p className="text-slate-800 font-medium">{passData.interview_setup.interview_rounds}</p>
+                      </div>
+                      <div>
+                        <p className="text-slate-500 text-xs">Technical Assessment</p>
+                        <p className="text-slate-800 font-medium">{passData.interview_setup.technical_assessment_required ? 'Yes' : 'No'}</p>
+                      </div>
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => setShowInterviewSetup(true)}
+                    className="w-full py-2.5 text-sm text-slate-600 border border-slate-200 rounded-xl hover:bg-slate-50 transition-colors"
+                  >
+                    Add More Slots
+                  </button>
+                </div>
+              ) : showInterviewSetup ? (
+                <div className="space-y-4">
+                  {/* Technical Assessment */}
+                  <div>
+                    <p className="text-xs font-medium text-slate-600 uppercase tracking-wider mb-2">Technical Assessment Required?</p>
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() => setSetupForm({ ...setupForm, technical_assessment_required: true })}
+                        className={`flex-1 py-2 text-sm rounded-lg border transition-colors ${
+                          setupForm.technical_assessment_required 
+                            ? 'bg-slate-800 text-white border-slate-800' 
+                            : 'bg-white text-slate-600 border-slate-200 hover:border-slate-300'
+                        }`}
+                      >
+                        Yes
+                      </button>
+                      <button
+                        onClick={() => setSetupForm({ ...setupForm, technical_assessment_required: false })}
+                        className={`flex-1 py-2 text-sm rounded-lg border transition-colors ${
+                          !setupForm.technical_assessment_required 
+                            ? 'bg-slate-800 text-white border-slate-800' 
+                            : 'bg-white text-slate-600 border-slate-200 hover:border-slate-300'
+                        }`}
+                      >
+                        No
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Interview Format */}
+                  <div>
+                    <p className="text-xs font-medium text-slate-600 uppercase tracking-wider mb-2">Interview Format</p>
+                    <div className="flex gap-2">
+                      {['online', 'in-person', 'hybrid'].map(format => (
+                        <button
+                          key={format}
+                          onClick={() => setSetupForm({ ...setupForm, interview_format: format })}
+                          className={`flex-1 py-2 text-sm rounded-lg border transition-colors capitalize ${
+                            setupForm.interview_format === format 
+                              ? 'bg-slate-800 text-white border-slate-800' 
+                              : 'bg-white text-slate-600 border-slate-200 hover:border-slate-300'
+                          }`}
+                        >
+                          {format === 'in-person' ? 'In-Person' : format}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Interview Rounds */}
+                  <div>
+                    <p className="text-xs font-medium text-slate-600 uppercase tracking-wider mb-2">Interview Rounds</p>
+                    <select
+                      value={setupForm.interview_rounds}
+                      onChange={(e) => setSetupForm({ ...setupForm, interview_rounds: parseInt(e.target.value) })}
+                      className="w-full p-3 border border-slate-200 rounded-xl text-sm text-slate-700 bg-white focus:outline-none focus:border-slate-400"
+                    >
+                      {[1, 2, 3, 4].map(n => (
+                        <option key={n} value={n}>{n} Round{n > 1 ? 's' : ''}</option>
+                      ))}
+                    </select>
+                  </div>
+
+                  {/* Interview Dates */}
+                  <div>
+                    <p className="text-xs font-medium text-slate-600 uppercase tracking-wider mb-2">Interview Dates</p>
+                    <input
+                      type="date"
+                      min={new Date().toISOString().split('T')[0]}
+                      onChange={(e) => {
+                        if (e.target.value && !selectedDates.includes(e.target.value)) {
+                          setSelectedDates([...selectedDates, e.target.value])
+                        }
+                      }}
+                      className="w-full p-3 border border-slate-200 rounded-xl text-sm text-slate-700 bg-white focus:outline-none focus:border-slate-400"
+                    />
+                    {selectedDates.length > 0 && (
+                      <div className="flex flex-wrap gap-2 mt-2">
+                        {selectedDates.map(date => (
+                          <span
+                            key={date}
+                            className="inline-flex items-center gap-1 px-3 py-1.5 bg-slate-100 text-slate-700 text-xs rounded-full"
+                          >
+                            {new Date(date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}
+                            <button
+                              onClick={() => toggleDate(date)}
+                              className="ml-1 text-slate-400 hover:text-slate-600"
+                            >
+                              ×
+                            </button>
+                          </span>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Available Time Slots */}
+                  <div>
+                    <p className="text-xs font-medium text-slate-600 uppercase tracking-wider mb-2">Available Time Slots</p>
+                    <div className="flex flex-wrap gap-2">
+                      {timeSlots.map(slot => (
+                        <button
+                          key={slot}
+                          onClick={() => toggleSlot(slot)}
+                          className={`px-3 py-2 text-xs rounded-lg border transition-colors ${
+                            selectedSlots.includes(slot)
+                              ? 'bg-slate-800 text-white border-slate-800'
+                              : 'bg-white text-slate-600 border-slate-200 hover:border-slate-300'
+                          }`}
+                        >
+                          {slot}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Additional Interviewer */}
+                  <div>
+                    <p className="text-xs font-medium text-slate-600 uppercase tracking-wider mb-2">Additional Interviewer</p>
+                    <select
+                      value={additionalInterviewer}
+                      onChange={(e) => setAdditionalInterviewer(e.target.value)}
+                      className="w-full p-3 border border-slate-200 rounded-xl text-sm text-slate-700 bg-white focus:outline-none focus:border-slate-400"
+                    >
+                      <option value="">Select interviewer</option>
+                      <option value="Sarah Ahmed">Sarah Ahmed</option>
+                      <option value="Mohammed Ali">Mohammed Ali</option>
+                      <option value="Fatima Hassan">Fatima Hassan</option>
+                    </select>
+                  </div>
+
+                  {/* Actions */}
+                  <div className="flex gap-3 pt-2">
+                    <button
+                      onClick={() => setShowInterviewSetup(false)}
+                      className="flex-1 py-2.5 text-sm text-slate-600 border border-slate-200 rounded-xl hover:bg-slate-50 transition-colors"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      onClick={saveInterviewSetup}
+                      className="flex-1 py-2.5 text-sm text-white bg-slate-800 rounded-xl hover:bg-slate-700 transition-colors"
+                    >
+                      Save Setup
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <p className="text-sm text-slate-500">No interview setup configured yet.</p>
+              )}
+            </div>
+          )}
+
+          {activeTab === 'calendar' && (
+            <div>
+              <h3 className="text-xs font-medium text-slate-400 uppercase tracking-widest mb-3">Confirmed Interviews</h3>
+              {passData.confirmed_interviews.length > 0 ? (
+                <div className="space-y-2">
+                  {passData.confirmed_interviews.map(interview => (
+                    <div key={interview.id} className="p-3 rounded-xl bg-slate-50 border border-slate-100">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 bg-white rounded-lg flex items-center justify-center border border-slate-200">
+                          <svg className="w-5 h-5 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                          </svg>
+                        </div>
+                        <div className="flex-1">
+                          <p className="text-sm font-medium text-slate-700">{interview.candidate_name || 'Candidate'}</p>
+                          <p className="text-xs text-slate-500">
+                            {new Date(interview.slot_date).toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short' })} · {interview.start_time.substring(0, 5)}
+                          </p>
+                        </div>
+                        {interview.candidate_confirmed && (
+                          <span className="text-xs px-2 py-1 bg-emerald-100 text-emerald-700 rounded-full">Confirmed</span>
+                        )}
+                      </div>
                     </div>
                   ))}
                 </div>
               ) : (
-                <div className="text-center py-8 text-gray-500">
-                  <p>No interviews scheduled yet</p>
-                  <button 
-                    onClick={() => setActiveTab('interviews')}
-                    className="mt-2 text-blue-600 hover:underline text-sm"
-                  >
-                    Set up interview slots →
-                  </button>
-                </div>
+                <p className="text-sm text-slate-500">No confirmed interviews yet.</p>
               )}
             </div>
-          </div>
-        )}
+          )}
 
-        {activeTab === 'documents' && (
-          <div className="space-y-4">
-            <div className="bg-white rounded-xl shadow-sm p-6">
-              <h2 className="text-lg font-semibold text-gray-800 mb-4">Required Documents</h2>
-              <div className="space-y-4">
-                {/* JD Status */}
-                <div className={`p-4 rounded-lg border-2 ${passData.jd_status === 'submitted' ? 'border-green-300 bg-green-50' : 'border-amber-300 bg-amber-50'}`}>
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <span className="text-2xl">{passData.jd_status === 'submitted' ? '✅' : '📋'}</span>
-                      <div>
-                        <p className="font-medium text-gray-800">Job Description</p>
-                        <p className="text-sm text-gray-600">{passData.jd_status === 'submitted' ? 'Submitted' : 'Pending submission'}</p>
-                      </div>
-                    </div>
-                    {passData.jd_status !== 'submitted' && (
-                      <button className="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700">
-                        Upload
-                      </button>
-                    )}
+          {activeTab === 'contact' && (
+            <div>
+              <h3 className="text-xs font-medium text-slate-400 uppercase tracking-widest mb-3">Contact HR</h3>
+              <div className="space-y-2">
+                <a
+                  href={`https://wa.me/${passData.hr_whatsapp.replace(/[^0-9]/g, '')}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-3 p-3 rounded-xl border border-slate-200 hover:bg-slate-50 transition-colors"
+                >
+                  <div className="w-10 h-10 bg-emerald-100 rounded-lg flex items-center justify-center">
+                    <svg className="w-5 h-5 text-emerald-600" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+                    </svg>
                   </div>
-                </div>
-
-                {/* Recruitment Form Status */}
-                <div className={`p-4 rounded-lg border-2 ${passData.recruitment_form_status === 'submitted' ? 'border-green-300 bg-green-50' : 'border-amber-300 bg-amber-50'}`}>
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <span className="text-2xl">{passData.recruitment_form_status === 'submitted' ? '✅' : '📝'}</span>
-                      <div>
-                        <p className="font-medium text-gray-800">Recruitment Request Form</p>
-                        <p className="text-sm text-gray-600">{passData.recruitment_form_status === 'submitted' ? 'Submitted' : 'Pending submission'}</p>
-                      </div>
-                    </div>
-                    {passData.recruitment_form_status !== 'submitted' && (
-                      <button className="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700">
-                        Complete Form
-                      </button>
-                    )}
+                  <div>
+                    <p className="text-sm font-medium text-slate-700">WhatsApp</p>
+                    <p className="text-xs text-slate-500">{passData.hr_whatsapp}</p>
                   </div>
-                </div>
+                </a>
+                <a
+                  href={`mailto:${passData.hr_email}`}
+                  className="flex items-center gap-3 p-3 rounded-xl border border-slate-200 hover:bg-slate-50 transition-colors"
+                >
+                  <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
+                    <svg className="w-5 h-5 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                    </svg>
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-slate-700">Email</p>
+                    <p className="text-xs text-slate-500">{passData.hr_email}</p>
+                  </div>
+                </a>
               </div>
             </div>
-
-            {/* All Documents */}
-            {passData.documents.length > 0 && (
-              <div className="bg-white rounded-xl shadow-sm p-6">
-                <h3 className="font-semibold text-gray-800 mb-4">All Documents</h3>
-                <div className="divide-y">
-                  {passData.documents.map(doc => (
-                    <div key={doc.id} className="py-3 flex items-center justify-between">
-                      <div className="flex items-center gap-3">
-                        <span className="text-xl">📄</span>
-                        <div>
-                          <p className="font-medium text-gray-800">{doc.document_name}</p>
-                          <p className="text-sm text-gray-500">{doc.document_type}</p>
-                        </div>
-                      </div>
-                      <span className={`px-3 py-1 text-xs font-medium rounded-full ${
-                        doc.status === 'submitted' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600'
-                      }`}>
-                        {doc.status}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-          </div>
-        )}
-
-        {activeTab === 'interviews' && (
-          <div className="space-y-6">
-            {/* Interview Setup */}
-            {!passData.interview_setup ? (
-              <div className="bg-white rounded-xl shadow-sm p-6">
-                <h2 className="text-lg font-semibold text-gray-800 mb-4">Interview Setup</h2>
-                {!showInterviewSetup ? (
-                  <div className="text-center py-8">
-                    <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4 text-3xl">⚙️</div>
-                    <p className="text-gray-600 mb-4">Configure interview settings to start scheduling</p>
-                    <button 
-                      onClick={() => setShowInterviewSetup(true)}
-                      className="px-6 py-3 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700"
-                    >
-                      Set Up Interviews
-                    </button>
-                  </div>
-                ) : (
-                  <div className="space-y-4">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">Interview Format</label>
-                      <select
-                        value={setupForm.interview_format}
-                        onChange={(e) => setSetupForm({ ...setupForm, interview_format: e.target.value })}
-                        className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                      >
-                        <option value="online">Online (Video Call)</option>
-                        <option value="in-person">In-Person</option>
-                        <option value="hybrid">Hybrid</option>
-                      </select>
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">Number of Rounds</label>
-                      <select
-                        value={setupForm.interview_rounds}
-                        onChange={(e) => setSetupForm({ ...setupForm, interview_rounds: parseInt(e.target.value) })}
-                        className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                      >
-                        {[1, 2, 3, 4, 5].map(n => (
-                          <option key={n} value={n}>{n} Round{n > 1 ? 's' : ''}</option>
-                        ))}
-                      </select>
-                    </div>
-                    <div className="flex items-center gap-3">
-                      <input
-                        type="checkbox"
-                        id="tech-assessment"
-                        checked={setupForm.technical_assessment_required}
-                        onChange={(e) => setSetupForm({ ...setupForm, technical_assessment_required: e.target.checked })}
-                        className="w-5 h-5 rounded text-blue-600"
-                      />
-                      <label htmlFor="tech-assessment" className="text-gray-700">Require Technical Assessment</label>
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">Notes</label>
-                      <textarea
-                        value={setupForm.notes}
-                        onChange={(e) => setSetupForm({ ...setupForm, notes: e.target.value })}
-                        className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                        rows={3}
-                        placeholder="Any special instructions..."
-                      />
-                    </div>
-                    <div className="flex gap-3">
-                      <button
-                        onClick={() => setShowInterviewSetup(false)}
-                        className="px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50"
-                      >
-                        Cancel
-                      </button>
-                      <button
-                        onClick={saveInterviewSetup}
-                        className="px-6 py-3 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700"
-                      >
-                        Save Setup
-                      </button>
-                    </div>
-                  </div>
-                )}
-              </div>
-            ) : (
-              <>
-                {/* Setup Summary */}
-                <div className="bg-white rounded-xl shadow-sm p-6">
-                  <div className="flex items-center justify-between mb-4">
-                    <h2 className="text-lg font-semibold text-gray-800">Interview Configuration</h2>
-                    <span className="px-3 py-1 bg-green-100 text-green-700 text-sm font-medium rounded-full">Active</span>
-                  </div>
-                  <div className="grid grid-cols-3 gap-4">
-                    <div className="p-4 bg-gray-50 rounded-lg">
-                      <p className="text-sm text-gray-500">Format</p>
-                      <p className="font-medium text-gray-800 capitalize">{passData.interview_setup.interview_format}</p>
-                    </div>
-                    <div className="p-4 bg-gray-50 rounded-lg">
-                      <p className="text-sm text-gray-500">Rounds</p>
-                      <p className="font-medium text-gray-800">{passData.interview_setup.interview_rounds}</p>
-                    </div>
-                    <div className="p-4 bg-gray-50 rounded-lg">
-                      <p className="text-sm text-gray-500">Technical Test</p>
-                      <p className="font-medium text-gray-800">{passData.interview_setup.technical_assessment_required ? 'Required' : 'Not Required'}</p>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Add Time Slots */}
-                <div className="bg-white rounded-xl shadow-sm p-6">
-                  <h2 className="text-lg font-semibold text-gray-800 mb-4">Add Interview Slots</h2>
-                  <p className="text-gray-600 text-sm mb-4">Create time slots for candidates to book their interviews</p>
-                  
-                  {newSlots.length > 0 && (
-                    <div className="space-y-3 mb-4">
-                      {newSlots.map((slot, idx) => (
-                        <div key={idx} className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
-                          <input
-                            type="date"
-                            value={slot.date}
-                            onChange={(e) => updateSlotRow(idx, 'date', e.target.value)}
-                            className="flex-1 p-2 border rounded-lg"
-                            min={new Date().toISOString().split('T')[0]}
-                          />
-                          <input
-                            type="time"
-                            value={slot.start}
-                            onChange={(e) => updateSlotRow(idx, 'start', e.target.value)}
-                            className="w-32 p-2 border rounded-lg"
-                          />
-                          <span className="text-gray-400">to</span>
-                          <input
-                            type="time"
-                            value={slot.end}
-                            onChange={(e) => updateSlotRow(idx, 'end', e.target.value)}
-                            className="w-32 p-2 border rounded-lg"
-                          />
-                          <button
-                            onClick={() => removeSlotRow(idx)}
-                            className="p-2 text-red-500 hover:bg-red-50 rounded-lg"
-                          >
-                            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                            </svg>
-                          </button>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                  
-                  <div className="flex gap-3">
-                    <button
-                      onClick={addSlotRow}
-                      className="px-4 py-2 border-2 border-dashed border-gray-300 text-gray-600 rounded-lg hover:border-blue-400 hover:text-blue-600 flex items-center gap-2"
-                    >
-                      <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-                      </svg>
-                      Add Slot
-                    </button>
-                    {newSlots.length > 0 && (
-                      <button
-                        onClick={createSlots}
-                        className="px-6 py-2 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700"
-                      >
-                        Create {newSlots.length} Slot{newSlots.length > 1 ? 's' : ''}
-                      </button>
-                    )}
-                  </div>
-                </div>
-              </>
-            )}
-          </div>
-        )}
-
-        {activeTab === 'calendar' && (
-          <div className="bg-white rounded-xl shadow-sm p-6">
-            <h2 className="text-lg font-semibold text-gray-800 mb-4">Confirmed Interviews</h2>
-            {passData.confirmed_interviews.length > 0 ? (
-              <div className="space-y-3">
-                {passData.confirmed_interviews.map(interview => (
-                  <div 
-                    key={interview.id} 
-                    className="p-4 rounded-lg border-l-4"
-                    style={{ backgroundColor: entityColors.secondary, borderColor: entityColors.primary }}
-                  >
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="font-semibold text-gray-800">{interview.candidate_name || 'Candidate'}</p>
-                        <p className="text-gray-600">
-                          {new Date(interview.slot_date).toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
-                        </p>
-                        <p className="text-sm text-gray-500">{interview.start_time} - {interview.end_time}</p>
-                      </div>
-                      <div className="text-right">
-                        <span className="px-3 py-1 bg-green-100 text-green-700 text-sm font-medium rounded-full">
-                          Round {interview.round_number}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <div className="text-center py-12 text-gray-500">
-                <div className="text-4xl mb-3">📭</div>
-                <p>No confirmed interviews yet</p>
-                <p className="text-sm mt-1">Candidates will appear here once they confirm their slots</p>
-              </div>
-            )}
-          </div>
-        )}
-
-        {activeTab === 'contact' && (
-          <div className="bg-white rounded-xl shadow-sm p-6">
-            <h2 className="text-lg font-semibold text-gray-800 mb-4">Contact HR</h2>
-            <div className="space-y-4">
-              <a
-                href={`https://wa.me/${passData.hr_whatsapp.replace(/[^0-9]/g, '')}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center gap-4 p-4 rounded-lg bg-green-50 hover:bg-green-100"
-              >
-                <div className="w-12 h-12 bg-green-500 rounded-full flex items-center justify-center text-white text-2xl">💬</div>
-                <div>
-                  <p className="font-medium text-gray-800">WhatsApp</p>
-                  <p className="text-sm text-gray-600">{passData.hr_whatsapp}</p>
-                </div>
-              </a>
-              <a
-                href={`mailto:${passData.hr_email}`}
-                className="flex items-center gap-4 p-4 rounded-lg bg-blue-50 hover:bg-blue-100"
-              >
-                <div className="w-12 h-12 bg-blue-500 rounded-full flex items-center justify-center text-white text-2xl">✉️</div>
-                <div>
-                  <p className="font-medium text-gray-800">Email</p>
-                  <p className="text-sm text-gray-600">{passData.hr_email}</p>
-                </div>
-              </a>
-            </div>
-          </div>
-        )}
-      </main>
+          )}
+        </div>
+      </div>
     </div>
   )
 }
-
-export default ManagerPass
