@@ -261,7 +261,7 @@ export function CandidatePass({ candidateId, token, onBack }: CandidatePassProps
     <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4">
       <div className="w-full max-w-md">
         {/* FIXED SHELL - Pass Card Container */}
-        <div className="bg-white/80 backdrop-blur-md border border-slate-200/60 shadow-[0_8px_30px_rgba(0,0,0,0.06)] rounded-3xl overflow-hidden flex flex-col" style={{ height: '90vh', maxHeight: '780px' }}>
+        <div className="bg-white/80 backdrop-blur-md border border-slate-200/60 shadow-[0_8px_30px_rgba(0,0,0,0.06)] rounded-3xl overflow-hidden flex flex-col" style={{ height: '95vh', maxHeight: '900px' }}>
           
           {/* ===== HEADER (Fixed) ===== */}
           <div className="px-5 pt-5 pb-3 flex-shrink-0 bg-gradient-to-b from-white to-transparent">
@@ -502,119 +502,260 @@ export function CandidatePass({ candidateId, token, onBack }: CandidatePassProps
               </div>
             )}
 
-            {/* DOCUMENTS TAB */}
+            {/* DOCUMENTS/INBOX TAB */}
             {activeTab === 'documents' && (
               <div className="space-y-4">
-                <div className="bg-emerald-50/50 border border-emerald-100/50 p-4 rounded-xl">
-                  <p className="text-xs text-emerald-800 leading-relaxed font-medium">
-                    In case documents are requested from candidates, they can be uploaded here. 
-                    This section is applicable for both sides (HR will upload Job Description, Offer Letter, etc.)
-                  </p>
+                {/* Header */}
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h3 className="text-sm font-semibold text-slate-800">Upload Files</h3>
+                    <p className="text-[10px] text-slate-400">Drag & drop your files here</p>
+                  </div>
+                  <div className="rounded-lg bg-emerald-50 p-2">
+                    <svg className="h-5 w-5 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                    </svg>
+                  </div>
                 </div>
-                
-                <div className="space-y-3">
-                  <p className="text-[9px] uppercase tracking-widest text-slate-400 font-bold">Documents</p>
-                  {['Passport', 'Emirates ID', 'Visa', 'Educational Certificates'].map(doc => (
-                    <div key={doc} className="p-3.5 bg-slate-50 rounded-xl flex items-center justify-between border border-transparent hover:border-slate-200 transition-all shadow-sm">
+
+                {/* Drop Zone */}
+                <div className="relative rounded-xl border-2 border-dashed border-slate-200 bg-slate-50/50 p-6 transition-colors hover:border-emerald-300 hover:bg-emerald-50/30">
+                  <input type="file" className="absolute inset-0 z-50 h-full w-full cursor-pointer opacity-0" multiple />
+                  <div className="space-y-4 text-center">
+                    <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-white border border-slate-100 shadow-sm">
+                      <svg className="h-7 w-7 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 13h6m-3-3v6m5 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                      </svg>
+                    </div>
+                    <div className="space-y-1">
+                      <p className="text-xs font-medium text-slate-700">Drop your files here or browse</p>
+                      <p className="text-[10px] text-slate-400">PDF, DOC, JPG, PNG (Max 10MB)</p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Uploaded Files */}
+                <div className="space-y-2">
+                  {/* Sample uploaded file */}
+                  <div className="rounded-xl bg-white p-3 border border-slate-100 shadow-sm">
+                    <div className="flex items-center justify-between">
                       <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 bg-white rounded-lg flex items-center justify-center text-slate-400 shadow-sm">
-                          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                        <div className="rounded-lg bg-emerald-50 p-2">
+                          <svg className="h-5 w-5 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                           </svg>
                         </div>
-                        <span className="text-xs text-slate-700 font-semibold">{doc}</span>
+                        <div>
+                          <p className="text-xs font-medium text-slate-700">resume.pdf</p>
+                          <p className="text-[10px] text-slate-400">2.4 MB • PDF</p>
+                        </div>
                       </div>
-                      <button className="p-2 text-emerald-600 bg-emerald-50 rounded-lg hover:bg-emerald-100 transition-all active:scale-95 shadow-sm">
-                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                          <path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+                      <div className="flex items-center gap-2">
+                        <svg className="h-4 w-4 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                         </svg>
-                      </button>
+                        <span className="text-[10px] font-medium text-emerald-500">Complete</span>
+                      </div>
                     </div>
-                  ))}
+                  </div>
+
+                  {/* Sample uploading file */}
+                  <div className="rounded-xl bg-white p-3 border border-slate-100 shadow-sm">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <div className="rounded-lg bg-blue-50 p-2">
+                          <svg className="h-5 w-5 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                          </svg>
+                        </div>
+                        <div>
+                          <p className="text-xs font-medium text-slate-700">passport.png</p>
+                          <p className="text-[10px] text-slate-400">1.8 MB • PNG</p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <span className="text-[10px] font-medium text-blue-500">84%</span>
+                        <button className="text-slate-400 transition-colors hover:text-slate-600">
+                          <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                          </svg>
+                        </button>
+                      </div>
+                    </div>
+                    <div className="mt-2 h-1 overflow-hidden rounded-full bg-slate-100">
+                      <div className="h-full w-[84%] rounded-full bg-gradient-to-r from-emerald-400 to-emerald-500"></div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Storage Info */}
+                <div className="flex items-center justify-between rounded-xl bg-slate-50 p-3 border border-slate-100">
+                  <div className="space-y-0.5">
+                    <p className="text-[10px] font-medium text-slate-500">Storage Used</p>
+                    <div className="flex items-center gap-1">
+                      <span className="text-lg font-bold text-slate-800">4.2</span>
+                      <span className="text-[10px] text-slate-400">/ 10 GB</span>
+                    </div>
+                  </div>
+                  <div className="relative h-10 w-10">
+                    <svg className="h-10 w-10 -rotate-90 transform" viewBox="0 0 36 36">
+                      <circle cx="18" cy="18" r="16" fill="none" stroke="currentColor" strokeWidth="2" className="text-slate-200" />
+                      <circle cx="18" cy="18" r="16" fill="none" stroke="currentColor" strokeWidth="2" strokeDasharray="100" strokeDashoffset="58" className="text-emerald-500" />
+                    </svg>
+                    <span className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-[9px] font-bold text-slate-700">42%</span>
+                  </div>
                 </div>
               </div>
             )}
 
-            {/* CALENDAR TAB (Split View) */}
+            {/* CALENDAR TAB (50:50 Split View) */}
             {activeTab === 'calendar' && (
-              <div className="flex flex-col h-full">
-                {/* Left: Mini Calendar */}
-                <div className="mb-3">
-                  <p className="text-[9px] uppercase tracking-widest text-slate-400 mb-2">Calendar</p>
-                  <div className="grid grid-cols-7 gap-1 text-center">
-                    {['S', 'M', 'T', 'W', 'T', 'F', 'S'].map((d, i) => (
+              <div className="grid grid-cols-2 gap-3 h-full">
+                {/* Left: Calendar */}
+                <div className="bg-white rounded-xl p-3 border border-slate-100 shadow-sm">
+                  {/* Month Header */}
+                  <div className="flex items-center justify-between mb-3">
+                    <h4 className="text-sm font-semibold text-slate-800">
+                      {new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
+                    </h4>
+                    <div className="flex gap-1">
+                      <button className="p-1 hover:bg-slate-100 rounded transition-colors">
+                        <svg className="w-4 h-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                        </svg>
+                      </button>
+                      <button className="p-1 hover:bg-slate-100 rounded transition-colors">
+                        <svg className="w-4 h-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                        </svg>
+                      </button>
+                    </div>
+                  </div>
+                  
+                  {/* Calendar Grid */}
+                  <div className="grid grid-cols-7 gap-0.5 text-center">
+                    {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((d, i) => (
                       <div key={i} className="text-[8px] text-slate-400 font-medium py-1">{d}</div>
                     ))}
                     {Array.from({ length: 35 }, (_, i) => {
-                      const day = i - 3
+                      const day = i - new Date(new Date().getFullYear(), new Date().getMonth(), 1).getDay() + 1
+                      const daysInMonth = new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0).getDate()
                       const hasInterview = passData.booked_slot && new Date(passData.booked_slot.slot_date).getDate() === day
                       const hasSlot = passData.interview_slots.some(s => new Date(s.slot_date).getDate() === day)
+                      const isToday = day === new Date().getDate()
                       return (
                         <div 
                           key={i} 
-                          className={`text-[10px] py-1 rounded ${
+                          className={`text-[10px] py-1 rounded-md cursor-pointer transition-colors ${
                             hasInterview ? 'bg-emerald-500 text-white font-bold' :
-                            hasSlot ? 'bg-emerald-100 text-emerald-700' :
-                            day > 0 && day <= 31 ? 'text-slate-600' : 'text-slate-300'
+                            hasSlot ? 'bg-blue-100 text-blue-700 hover:bg-blue-200' :
+                            isToday ? 'bg-slate-100 font-semibold text-slate-800' :
+                            day > 0 && day <= daysInMonth ? 'text-slate-600 hover:bg-slate-50' : 'text-slate-200'
                           }`}
                         >
-                          {day > 0 && day <= 31 ? day : ''}
+                          {day > 0 && day <= daysInMonth ? day : ''}
                         </div>
                       )
                     })}
                   </div>
+
+                  {/* Legend */}
+                  <div className="flex items-center gap-3 mt-3 pt-2 border-t border-slate-50">
+                    <div className="flex items-center gap-1">
+                      <div className="w-2 h-2 rounded-full bg-emerald-500"></div>
+                      <span className="text-[8px] text-slate-400">Interviews</span>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <div className="w-2 h-2 rounded-full bg-blue-400"></div>
+                      <span className="text-[8px] text-slate-400">Available Slots</span>
+                    </div>
+                  </div>
+
+                  {/* Schedule Interview Button */}
+                  <button className="mt-3 w-full py-2 border border-slate-200 text-slate-600 text-[10px] font-semibold rounded-lg hover:bg-slate-50 transition-colors flex items-center justify-center gap-1">
+                    <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                    </svg>
+                    Schedule Interview
+                  </button>
                 </div>
 
                 {/* Right: Interview Details */}
-                <div className="flex-1">
-                  <p className="text-[9px] uppercase tracking-widest text-slate-400 mb-2">Interview Details</p>
+                <div className="bg-white rounded-xl p-3 border border-slate-100 shadow-sm flex flex-col">
+                  <div className="flex items-center gap-2 mb-3">
+                    <svg className="w-4 h-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                    </svg>
+                    <div>
+                      <h4 className="text-xs font-semibold text-slate-800">Select a date</h4>
+                      <p className="text-[9px] text-slate-400">{passData.interview_slots.length} interviews scheduled</p>
+                    </div>
+                  </div>
+
                   {passData.booked_slot ? (
-                    <div className="p-3 bg-emerald-50 rounded-xl border border-emerald-100">
-                      <p className="text-sm font-semibold text-emerald-800">Interview Scheduled</p>
-                      <div className="mt-2 space-y-1 text-xs text-emerald-700">
-                        <p><strong>Date:</strong> {new Date(passData.booked_slot.slot_date).toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' })}</p>
-                        <p><strong>Time:</strong> {passData.booked_slot.start_time.substring(0, 5)} - {passData.booked_slot.end_time.substring(0, 5)}</p>
-                        <p><strong>Mode:</strong> Online</p>
-                        <p><strong>Status:</strong> {passData.booked_slot.candidate_confirmed ? 'Confirmed' : 'Pending Confirmation'}</p>
+                    <div className="flex-1">
+                      <div className="p-3 bg-emerald-50 rounded-lg border border-emerald-100">
+                        <p className="text-xs font-semibold text-emerald-800 mb-2">Interview Confirmed</p>
+                        <div className="space-y-1.5 text-[10px] text-emerald-700">
+                          <div className="flex items-center gap-2">
+                            <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+                            <span>{new Date(passData.booked_slot.slot_date).toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' })}</span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                            <span>{passData.booked_slot.start_time.substring(0, 5)} - {passData.booked_slot.end_time.substring(0, 5)}</span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>
+                            <span>Online Meeting</span>
+                          </div>
+                        </div>
+                        {!passData.booked_slot.candidate_confirmed && (
+                          <button 
+                            onClick={confirmSlot}
+                            disabled={bookingLoading}
+                            className="mt-3 w-full py-2 bg-emerald-600 text-white text-[10px] font-semibold rounded-lg hover:bg-emerald-700 transition-colors disabled:opacity-50"
+                          >
+                            {bookingLoading ? 'Confirming...' : 'Confirm Attendance'}
+                          </button>
+                        )}
                       </div>
-                      {!passData.booked_slot.candidate_confirmed && (
-                        <button 
-                          onClick={confirmSlot}
-                          disabled={bookingLoading}
-                          className="mt-3 w-full py-2 bg-emerald-600 text-white text-xs font-semibold rounded-lg hover:bg-emerald-700 transition-colors disabled:opacity-50"
-                        >
-                          {bookingLoading ? 'Confirming...' : 'Confirm Interview'}
-                        </button>
-                      )}
                     </div>
                   ) : passData.interview_slots.length > 0 ? (
-                    <div className="space-y-2">
-                      <p className="text-xs text-slate-500 mb-2">Select an available slot:</p>
-                      {passData.interview_slots.slice(0, 4).map(slot => (
-                        <button
-                          key={slot.id}
-                          onClick={() => setSelectedSlot(slot.id)}
-                          className={`w-full p-3 rounded-xl border text-left transition-all ${
-                            selectedSlot === slot.id ? 'bg-emerald-50 border-emerald-500' : 'bg-white border-slate-100 hover:border-slate-200'
-                          }`}
-                        >
-                          <p className="text-xs font-medium text-slate-700">
-                            {new Date(slot.slot_date).toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short' })}
-                          </p>
-                          <p className="text-[10px] text-slate-400">{slot.start_time.substring(0, 5)} - {slot.end_time.substring(0, 5)}</p>
-                        </button>
-                      ))}
+                    <div className="flex-1 flex flex-col">
+                      <div className="space-y-1.5 flex-1 overflow-y-auto max-h-40">
+                        {passData.interview_slots.slice(0, 5).map(slot => (
+                          <button
+                            key={slot.id}
+                            onClick={() => setSelectedSlot(slot.id)}
+                            className={`w-full p-2 rounded-lg border text-left transition-all ${
+                              selectedSlot === slot.id ? 'bg-emerald-50 border-emerald-400' : 'bg-slate-50 border-slate-100 hover:border-slate-200'
+                            }`}
+                          >
+                            <p className="text-[10px] font-medium text-slate-700">
+                              {new Date(slot.slot_date).toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short' })}
+                            </p>
+                            <p className="text-[9px] text-slate-400">{slot.start_time.substring(0, 5)} - {slot.end_time.substring(0, 5)}</p>
+                          </button>
+                        ))}
+                      </div>
                       <button 
                         onClick={bookSlot}
                         disabled={!selectedSlot || bookingLoading}
-                        className="w-full mt-2 py-2 bg-slate-800 text-white text-xs font-semibold rounded-xl disabled:opacity-50 hover:bg-slate-900 transition-colors"
+                        className="mt-2 w-full py-2 bg-emerald-600 text-white text-[10px] font-semibold rounded-lg disabled:opacity-50 hover:bg-emerald-700 transition-colors"
                       >
                         {bookingLoading ? 'Booking...' : 'Book Selected Slot'}
                       </button>
                     </div>
                   ) : (
-                    <div className="text-center py-6">
-                      <p className="text-xs text-slate-400">No interview scheduled yet</p>
+                    <div className="flex-1 flex flex-col items-center justify-center text-center py-4">
+                      <div className="w-10 h-10 bg-slate-100 rounded-full flex items-center justify-center mb-2">
+                        <svg className="w-5 h-5 text-slate-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                        </svg>
+                      </div>
+                      <p className="text-[10px] text-slate-500 font-medium">Select a date to view interviews</p>
+                      <p className="text-[9px] text-slate-400">Schedule interviews using the button below</p>
                     </div>
                   )}
                 </div>
@@ -655,26 +796,26 @@ export function CandidatePass({ candidateId, token, onBack }: CandidatePassProps
           <div className="border-t border-slate-100 px-2 py-2 flex-shrink-0 bg-white/80 backdrop-blur-sm">
             <div className="flex">
               {[
-                { id: 'home', label: 'Home', icon: 'M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6' },
-                { id: 'documents', label: 'Docs', icon: 'M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z' },
+                { id: 'home', label: 'Journey', icon: 'M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z' },
+                { id: 'documents', label: 'Inbox', icon: 'M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z' },
                 { id: 'calendar', label: 'Calendar', icon: 'M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z' },
-                { id: 'engage', label: 'Engage', icon: 'M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z' }
+                { id: 'engage', label: 'Contact', icon: 'M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z' }
               ].map(tab => (
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id as ActiveTab)}
                   className={`flex-1 py-2.5 flex flex-col items-center gap-1 relative transition-all duration-200 ${
-                    activeTab === tab.id ? 'text-slate-800' : 'text-slate-400 hover:text-slate-600'
+                    activeTab === tab.id ? 'text-emerald-600' : 'text-slate-400 hover:text-emerald-500'
                   }`}
                 >
-                  <div className={`p-1.5 rounded-lg transition-all duration-200 ${activeTab === tab.id ? 'bg-slate-100' : ''}`}>
+                  <div className={`p-1.5 rounded-lg transition-all duration-200 ${activeTab === tab.id ? 'bg-emerald-50' : ''}`}>
                     <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={activeTab === tab.id ? 2 : 1.5}>
                       <path strokeLinecap="round" strokeLinejoin="round" d={tab.icon} />
                     </svg>
                   </div>
                   <span className={`text-[9px] font-medium ${activeTab === tab.id ? 'font-bold' : ''}`}>{tab.label}</span>
                   {activeTab === tab.id && (
-                    <div className="absolute bottom-0 left-1/3 right-1/3 h-0.5 bg-slate-800 rounded-full"></div>
+                    <div className="absolute bottom-0 left-1/3 right-1/3 h-0.5 bg-emerald-500 rounded-full"></div>
                   )}
                 </button>
               ))}
