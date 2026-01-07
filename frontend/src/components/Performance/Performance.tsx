@@ -437,7 +437,7 @@ export function Performance({ user, fetchWithAuth }: PerformanceProps) {
         <div className="bg-white/80 backdrop-blur-md rounded-3xl shadow-lg shadow-slate-200/50 border border-white/60 p-8 mb-6">
           <div className="flex items-center justify-between mb-6">
             <div>
-              <h1 className="text-2xl font-semibold text-slate-800">Performance Management</h1>
+              <h1 className="text-2xl font-semibold text-slate-800">Growth & Appraisals</h1>
               <p className="text-slate-500 mt-1">Manage review cycles, self-assessments, and team evaluations</p>
             </div>
             {isAdmin && (
