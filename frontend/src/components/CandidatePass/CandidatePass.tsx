@@ -318,17 +318,23 @@ export function CandidatePass({ candidateId, token, onBack }: CandidatePassProps
             </div>
           </div>
 
-          {/* Wallet QR */}
-          <div className="mx-4 mb-4 p-4 bg-slate-50/80 rounded-2xl border border-slate-100 flex items-center gap-4">
-            <div className="w-16 h-16 bg-white rounded-lg border border-slate-200 flex items-center justify-center">
-              <svg className="w-12 h-12 text-slate-300" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M3 3h6v6H3V3zm2 2v2h2V5H5zm8-2h6v6h-6V3zm2 2v2h2V5h-2zM3 13h6v6H3v-6zm2 2v2h2v-2H5zm13-2h1v1h-1v-1zm-3 0h1v1h-1v-1zm3 3h1v1h-1v-1zm-3 0h1v1h-1v-1zm3 3h1v1h-1v-1zm-3 0h1v1h-1v-1z"/>
-              </svg>
-            </div>
-            <div className="flex-1">
-              <p className="text-[10px] uppercase tracking-widest text-slate-400 mb-0.5">Wallet QR</p>
-              <p className="text-sm text-slate-600">Next Action</p>
-              <span className="inline-block mt-1 px-2 py-0.5 bg-emerald-100 text-emerald-700 text-[10px] font-medium rounded-full">Active</span>
+          {/* Next Action Section */}
+          <div className="mx-4 mb-4">
+            <p className="text-[10px] uppercase tracking-widest text-slate-400 mb-2">Next Action</p>
+            <div className="p-4 bg-white rounded-2xl border border-slate-100 shadow-sm flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 rounded-lg bg-slate-50 flex items-center justify-center text-slate-400">
+                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+                  </svg>
+                </div>
+                <div>
+                  <p className="text-sm font-semibold text-slate-700">Complete Profile</p>
+                  <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-medium bg-emerald-50 text-emerald-600 mt-1">
+                    Active
+                  </span>
+                </div>
+              </div>
             </div>
           </div>
 
