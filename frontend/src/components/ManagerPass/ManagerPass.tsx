@@ -4,12 +4,14 @@ import {
   BasePassContainer, 
   ActionRequired,
   JourneyTimeline,
+  ActivityHistory,
   PassTab,
   UNIFIED_STAGES,
   getStageIndex,
   getStageLabel,
   getStatusLabel
 } from '../BasePass'
+import type { ActivityItem } from '../BasePass'
 
 interface ManagerPassData {
   pass_id: string
@@ -35,6 +37,7 @@ interface ManagerPassData {
   unread_messages: number
   hr_whatsapp: string
   hr_email: string
+  activity_history?: ActivityItem[]
 }
 
 interface RecruitmentDocument {
@@ -529,6 +532,14 @@ export function ManagerPass({ recruitmentRequestId, managerId, token, onBack }: 
                   </button>
                 </div>
               </div>
+            )}
+
+            {/* Activity History - Full audit trail for managers */}
+            {passData.activity_history && passData.activity_history.length > 0 && (
+              <ActivityHistory 
+                activities={passData.activity_history} 
+                collapsed={true}
+              />
             )}
           </div>
         )
