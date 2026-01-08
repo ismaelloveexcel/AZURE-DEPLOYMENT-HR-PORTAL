@@ -256,111 +256,102 @@ export function ManagerPass({ recruitmentRequestId, managerId, token, onBack }: 
   const actionRequired = getActionRequired()
 
   const renderHeader = () => (
-    <div className="px-4 pt-4 pb-3 flex-shrink-0">
-      {/* Premium Info Card */}
-      <div className="bg-gradient-to-br from-white via-white to-slate-50 rounded-2xl border border-slate-100 shadow-lg p-4 relative overflow-hidden">
-        {/* Subtle corner accent */}
-        <div 
-          className="absolute top-0 right-0 w-20 h-20 opacity-5 rounded-bl-full"
-          style={{ backgroundColor: entityColor }}
-        />
-        
-        <div className="flex items-start gap-3 relative z-10">
-          {/* Left: Info */}
-          <div className="flex-1 min-w-0">
-            <p 
-              className="text-[10px] font-bold uppercase tracking-wider mb-1"
-              style={{ color: entityColor }}
-            >
-              HIRING MANAGER
-            </p>
-            <p className="text-sm font-medium text-slate-700 mb-0.5">{passData.manager_name}</p>
-            <h2 className="text-lg font-black text-slate-900 leading-tight mb-2">{passData.position_title}</h2>
-            
-            {/* Premium Pass Number Badge */}
-            <div 
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full mb-2"
-              style={{ 
-                background: `linear-gradient(135deg, ${entityColor}12 0%, ${entityColor}08 100%)`,
-                border: `1px solid ${entityColor}20`
-              }}
-            >
-              <div 
-                className="w-1.5 h-1.5 rounded-full animate-pulse"
-                style={{ backgroundColor: entityColor }}
-              />
-              <span className="text-[10px] font-mono font-bold tracking-wide" style={{ color: entityColor }}>
-                {passData.pass_id}
-              </span>
+    <div className="flex-shrink-0 relative">
+      {/* Top Header Bar - Deep Blue */}
+      <div className="bg-[#1800ad] px-4 pt-4 pb-6">
+        <div className="flex items-center justify-between">
+          {/* Left: Pass Type */}
+          <div className="text-white">
+            <p className="text-[10px] font-bold uppercase tracking-wider opacity-70">Hiring Manager</p>
+          </div>
+          
+          {/* Right: Logo */}
+          <img 
+            src="/assets/logo-white.png" 
+            alt="Baynunah" 
+            className="h-5 opacity-90"
+            style={{ filter: 'brightness(0) invert(1)' }}
+          />
+        </div>
+      </div>
+      
+      {/* Info Card - overlapping the header */}
+      <div className="px-4 -mt-3">
+        <div className="bg-white rounded-2xl border border-slate-100 shadow-lg p-4 relative overflow-hidden">
+          <div className="flex items-start gap-3">
+            {/* Left: Info */}
+            <div className="flex-1 min-w-0">
+              {/* Small: Manager name and Pass reference */}
+              <p className="text-[11px] text-slate-500 mb-0.5">{passData.manager_name}</p>
+              <p className="text-[10px] font-mono text-slate-400 mb-2">{passData.pass_id}</p>
+              
+              {/* Large: Position and Department */}
+              <h2 className="text-lg font-black text-slate-900 leading-tight">{passData.position_title}</h2>
+              <p className="text-sm font-medium text-slate-600">{passData.department}</p>
             </div>
             
-            <div className="space-y-0.5 text-[11px] text-slate-500">
-              <p>Dept: <span className="font-medium text-slate-700">{passData.department}</span></p>
-              <p>Rec: <span className="font-medium text-slate-700">{passData.recruitment_request_number || `REC-${recruitmentRequestId}`}</span></p>
+            {/* Right: QR Code */}
+            <div 
+              onClick={() => setShowQrModal(true)}
+              className="flex-shrink-0 relative p-2 bg-white rounded-xl cursor-pointer hover:shadow-lg transition-all duration-300 hover:scale-105 group border border-slate-100"
+            >
+              <QRCodeSVG 
+                value={getPassUrl()} 
+                size={60}
+                level="H"
+                fgColor={entityColor}
+              />
             </div>
           </div>
           
-          {/* Premium QR Code with Corner Accents */}
-          <div 
-            onClick={() => setShowQrModal(true)}
-            className="flex-shrink-0 relative p-3 bg-gradient-to-br from-white to-slate-50 rounded-2xl cursor-pointer hover:shadow-lg transition-all duration-300 hover:scale-105 group"
-            style={{ 
-              boxShadow: `inset 0 2px 4px rgba(255,255,255,0.8), 0 4px 12px rgba(0,0,0,0.08), 0 2px 4px ${entityColor}10`
-            }}
-          >
-            {/* Corner accents */}
-            <div className="absolute top-0 left-0 w-3 h-3 border-t-2 border-l-2 rounded-tl-lg" style={{ borderColor: entityColor }} />
-            <div className="absolute top-0 right-0 w-3 h-3 border-t-2 border-r-2 rounded-tr-lg" style={{ borderColor: entityColor }} />
-            <div className="absolute bottom-0 left-0 w-3 h-3 border-b-2 border-l-2 rounded-bl-lg" style={{ borderColor: entityColor }} />
-            <div className="absolute bottom-0 right-0 w-3 h-3 border-b-2 border-r-2 rounded-br-lg" style={{ borderColor: entityColor }} />
-            
-            <QRCodeSVG 
-              value={getPassUrl()} 
-              size={68}
-              level="H"
-              fgColor={entityColor}
-            />
-            
-            {/* Scan indicator */}
-            <div 
-              className="absolute -bottom-1.5 -right-1.5 w-7 h-7 rounded-full flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform"
-              style={{ 
-                backgroundColor: entityColor,
-                boxShadow: `0 4px 12px ${entityColor}40`
-              }}
-            >
-              <svg className="w-3.5 h-3.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-              </svg>
+          {/* Stage/Status Row */}
+          <div className="flex gap-6 mt-4 pt-3 border-t border-slate-100">
+            <div className="flex items-center gap-2">
+              <div 
+                className="w-2 h-2 rounded-full"
+                style={{ backgroundColor: entityColor }}
+              />
+              <div>
+                <p className="text-[9px] uppercase tracking-wider text-slate-400 font-semibold">Stage</p>
+                <p className="text-xs font-bold text-slate-800">
+                  {getStageLabel(passData.current_stage || 'application', 'manager')}
+                </p>
+              </div>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="w-2 h-2 rounded-full bg-emerald-500" />
+              <div>
+                <p className="text-[9px] uppercase tracking-wider text-slate-400 font-semibold">Status</p>
+                <p className="text-xs font-bold text-slate-800">
+                  {getStatusLabel(passData.current_stage || 'application', passData.status || passData.position_status, 'manager')}
+                </p>
+              </div>
             </div>
           </div>
-        </div>
-        
-        {/* Stage/Status Row - Enhanced */}
-        <div className="flex gap-4 mt-4 pt-3 border-t border-slate-100/80">
-          <div className="flex items-center gap-2">
-            <div 
-              className="w-2.5 h-2.5 rounded-full shadow-sm"
-              style={{ backgroundColor: entityColor }}
-            />
-            <div>
-              <p className="text-[9px] uppercase tracking-wider text-slate-400 font-semibold">Stage</p>
-              <p className="text-xs font-bold text-slate-800">
-                {getStageLabel(passData.current_stage || 'application', 'manager')}
-              </p>
-            </div>
-          </div>
-          <div className="flex items-center gap-2">
-            <div className="w-2.5 h-2.5 rounded-full bg-emerald-500 shadow-sm" />
-            <div>
-              <p className="text-[9px] uppercase tracking-wider text-slate-400 font-semibold">Status</p>
-              <p className="text-xs font-bold text-slate-800">
-                {getStatusLabel(passData.current_stage || 'application', passData.status || passData.position_status, 'manager')}
-              </p>
+          
+          {/* Active Badge - Positioned in card */}
+          <div className="absolute top-3 right-3">
+            <div className="flex items-center gap-1.5 px-2 py-1 bg-emerald-50 rounded-full">
+              <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+              <span className="text-[9px] font-bold text-emerald-600 uppercase">Active</span>
             </div>
           </div>
         </div>
       </div>
+      
+      {/* Bell icon - Floating */}
+      {passData.unread_messages > 0 && (
+        <div className="absolute top-3 right-14">
+          <div className="relative">
+            <svg className="w-5 h-5 text-white/80" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+            </svg>
+            <span className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full text-[8px] font-bold text-white flex items-center justify-center">
+              {passData.unread_messages}
+            </span>
+          </div>
+        </div>
+      )}
     </div>
   )
 
