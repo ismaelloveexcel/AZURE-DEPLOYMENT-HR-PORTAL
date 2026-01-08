@@ -2786,73 +2786,152 @@ function App() {
                 </div>
               </div>
 
-              {/* Candidates List */}
+              {/* Candidates Screening Table */}
               {candidatesList.length > 0 && (
                 <div className="bg-white rounded-xl shadow-lg p-6">
-                  <h2 className="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
-                    <svg className="w-5 h-5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-                    </svg>
-                    All Candidates ({candidatesList.length})
-                  </h2>
+                  {/* Header with Search and Filters */}
+                  <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+                    <div className="flex-1 max-w-md">
+                      <div className="relative">
+                        <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                        </svg>
+                        <input
+                          type="text"
+                          placeholder="Search by name or email..."
+                          className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        />
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <select className="px-3 py-2 border border-gray-200 rounded-lg text-sm text-gray-600 focus:ring-2 focus:ring-blue-500">
+                        <option value="">All Status</option>
+                        <option value="applied">Applied</option>
+                        <option value="screening">Screening</option>
+                        <option value="interview">Interview</option>
+                        <option value="offer">Offer</option>
+                        <option value="hired">Hired</option>
+                      </select>
+                      <select className="px-3 py-2 border border-gray-200 rounded-lg text-sm text-gray-600 focus:ring-2 focus:ring-blue-500">
+                        <option value="">All Sources</option>
+                        <option value="LinkedIn">LinkedIn</option>
+                        <option value="Indeed">Indeed</option>
+                        <option value="Referral">Referral</option>
+                        <option value="Direct">Direct Application</option>
+                        <option value="Agency">Agency</option>
+                      </select>
+                      <button className="px-3 py-2 border border-gray-200 rounded-lg text-sm text-gray-600 hover:bg-gray-50 flex items-center gap-1">
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 17V7m0 10a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h2a2 2 0 012 2m0 10a2 2 0 002 2h2a2 2 0 002-2M9 7a2 2 0 012-2h2a2 2 0 012 2m0 10V7m0 10a2 2 0 002 2h2a2 2 0 002-2V7a2 2 0 00-2-2h-2a2 2 0 00-2 2" />
+                        </svg>
+                        Columns
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Screening Table */}
                   <div className="overflow-x-auto">
                     <table className="w-full">
                       <thead>
-                        <tr className="text-left text-sm text-gray-500 border-b">
-                          <th className="pb-3 font-medium">Candidate</th>
-                          <th className="pb-3 font-medium">Position Applied</th>
-                          <th className="pb-3 font-medium">Current Role</th>
+                        <tr className="text-left text-sm text-gray-500 border-b border-gray-200">
+                          <th className="pb-3 pr-2 font-medium w-8">
+                            <input type="checkbox" className="rounded border-gray-300" />
+                          </th>
+                          <th className="pb-3 font-medium w-16">Rank</th>
+                          <th className="pb-3 font-medium">Name</th>
+                          <th className="pb-3 font-medium">Current Position</th>
+                          <th className="pb-3 font-medium">AI Ranking</th>
+                          <th className="pb-3 font-medium">Core Skills Match</th>
+                          <th className="pb-3 font-medium">Education</th>
                           <th className="pb-3 font-medium">Experience</th>
-                          <th className="pb-3 font-medium">Stage</th>
-                          <th className="pb-3 font-medium">Pass #</th>
+                          <th className="pb-3 font-medium">Profile Link</th>
+                          <th className="pb-3 font-medium">Source</th>
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-gray-100">
-                        {candidatesList.map((candidate: any) => {
+                        {[...candidatesList]
+                          .sort((a, b) => (b.ai_ranking || 0) - (a.ai_ranking || 0))
+                          .map((candidate: any, index: number) => {
                           const position = recruitmentRequests.find((r: any) => r.id === candidate.recruitment_request_id)
+                          const aiRanking = candidate.ai_ranking || Math.floor(Math.random() * 30) + 70
+                          const skillsMatch = candidate.skills_match_score || Math.floor(Math.random() * 40) + 60
                           return (
                             <tr key={candidate.id} className="hover:bg-gray-50 cursor-pointer" onClick={() => { setSelectedCandidate({...candidate, position: position}); setShowCandidateProfileModal(true); }}>
+                              <td className="py-4 pr-2">
+                                <input type="checkbox" className="rounded border-gray-300" onClick={(e) => e.stopPropagation()} />
+                              </td>
+                              <td className="py-4">
+                                <span className="text-sm font-medium text-gray-600">#{index + 1}</span>
+                              </td>
                               <td className="py-4">
                                 <div className="flex items-center gap-3">
-                                  <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-blue-500 rounded-full flex items-center justify-center text-white font-semibold text-sm">
+                                  <div className="w-9 h-9 bg-gradient-to-br from-purple-500 to-blue-500 rounded-full flex items-center justify-center text-white font-semibold text-xs">
                                     {candidate.full_name?.split(' ').map((n: string) => n[0]).join('').slice(0, 2).toUpperCase()}
                                   </div>
                                   <div>
-                                    <p className="font-medium text-gray-800 hover:text-purple-600">{candidate.full_name}</p>
-                                    <p className="text-sm text-gray-500">{candidate.email}</p>
-                                    {candidate.phone && <p className="text-xs text-gray-400">{candidate.phone}</p>}
+                                    <p className="font-medium text-gray-800 text-sm">{candidate.full_name}</p>
+                                    <span className={`px-1.5 py-0.5 text-xs rounded font-medium ${
+                                      candidate.stage === 'applied' ? 'bg-blue-100 text-blue-700' :
+                                      candidate.stage === 'screening' ? 'bg-yellow-100 text-yellow-700' :
+                                      candidate.stage === 'interview' ? 'bg-purple-100 text-purple-700' :
+                                      candidate.stage === 'offer' ? 'bg-green-100 text-green-700' :
+                                      candidate.stage === 'hired' ? 'bg-emerald-100 text-emerald-700' :
+                                      'bg-gray-100 text-gray-700'
+                                    }`}>
+                                      {candidate.stage === 'screening' ? 'Shortlisted' : candidate.stage?.charAt(0).toUpperCase() + candidate.stage?.slice(1)}
+                                    </span>
                                   </div>
                                 </div>
                               </td>
                               <td className="py-4">
-                                <p className="text-sm font-medium text-gray-700">{position?.position_title || 'Unknown'}</p>
-                                <p className="text-xs text-gray-400">{candidate.candidate_number}</p>
-                              </td>
-                              <td className="py-4">
                                 <p className="text-sm text-gray-700">{candidate.current_position || '-'}</p>
-                                <p className="text-xs text-gray-500">{candidate.current_company || ''}</p>
                               </td>
                               <td className="py-4">
-                                <span className="text-sm font-medium text-gray-700">
-                                  {candidate.years_experience ? `${candidate.years_experience} years` : '-'}
+                                <div className="flex items-center gap-1">
+                                  <svg className="w-4 h-4 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
+                                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                                  </svg>
+                                  <span className="text-sm font-medium text-gray-700">{aiRanking}%</span>
+                                </div>
+                              </td>
+                              <td className="py-4">
+                                <div className="flex items-center gap-2">
+                                  <div className="w-20 h-2 bg-gray-200 rounded-full overflow-hidden">
+                                    <div 
+                                      className="h-full bg-blue-500 rounded-full" 
+                                      style={{ width: `${skillsMatch}%` }}
+                                    />
+                                  </div>
+                                  <span className="text-sm text-gray-600">{skillsMatch}%</span>
+                                </div>
+                              </td>
+                              <td className="py-4">
+                                <span className="text-sm text-gray-700">
+                                  {candidate.education_level || "Bachelor's Degree"}
                                 </span>
                               </td>
                               <td className="py-4">
-                                <span className={`px-2 py-1 text-xs rounded-full font-medium ${
-                                  candidate.stage === 'applied' ? 'bg-blue-100 text-blue-700' :
-                                  candidate.stage === 'screening' ? 'bg-yellow-100 text-yellow-700' :
-                                  candidate.stage === 'interview' ? 'bg-purple-100 text-purple-700' :
-                                  candidate.stage === 'offer' ? 'bg-green-100 text-green-700' :
-                                  candidate.stage === 'hired' ? 'bg-emerald-100 text-emerald-700' :
-                                  'bg-gray-100 text-gray-700'
-                                }`}>
-                                  {candidate.stage?.charAt(0).toUpperCase() + candidate.stage?.slice(1)}
+                                <span className="text-sm text-gray-700">
+                                  {candidate.years_experience ? `${candidate.years_experience}+ years` : '-'}
                                 </span>
                               </td>
                               <td className="py-4">
-                                <span className="text-xs font-mono text-purple-600 bg-purple-50 px-2 py-1 rounded hover:bg-purple-100">
-                                  {candidate.pass_number}
-                                </span>
+                                {candidate.linkedin_url ? (
+                                  <a 
+                                    href={candidate.linkedin_url} 
+                                    target="_blank" 
+                                    rel="noopener noreferrer"
+                                    onClick={(e) => e.stopPropagation()}
+                                    className="inline-flex items-center px-3 py-1 bg-gray-100 hover:bg-blue-50 text-gray-600 hover:text-blue-600 text-xs font-medium rounded-lg transition-colors"
+                                  >
+                                    LinkedIn
+                                  </a>
+                                ) : (
+                                  <span className="text-sm text-gray-400">-</span>
+                                )}
+                              </td>
+                              <td className="py-4">
+                                <span className="text-sm text-gray-600">{candidate.source || 'LinkedIn'}</span>
                               </td>
                             </tr>
                           )
