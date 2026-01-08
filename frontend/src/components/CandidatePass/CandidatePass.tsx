@@ -135,7 +135,16 @@ export function CandidatePass({ candidateId, token, onBack }: CandidatePassProps
           candidate_id: passData.candidate_id
         })
       })
-      if (!response.ok) throw new Error('Failed to book slot')
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}))
+        if (response.status === 409) {
+          alert(errorData.detail || 'This slot is no longer available. Please select another time.')
+          await fetchPassData()
+          setSelectedSlot(null)
+          return
+        }
+        throw new Error(errorData.detail || 'Failed to book slot')
+      }
       await fetchPassData()
       setSelectedSlot(null)
     } catch (err) {
@@ -240,9 +249,15 @@ export function CandidatePass({ candidateId, token, onBack }: CandidatePassProps
     <div className="px-4 pt-4 pb-3 flex-shrink-0">
       <p className="text-xs font-semibold text-slate-500 mb-3">Candidate Pass</p>
       
-      {/* Info Card */}
-      <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-4">
-        <div className="flex items-start gap-3">
+      {/* Premium Info Card */}
+      <div className="bg-gradient-to-br from-white via-white to-slate-50 rounded-2xl border border-slate-100 shadow-lg p-4 relative overflow-hidden">
+        {/* Subtle corner accent */}
+        <div 
+          className="absolute top-0 right-0 w-20 h-20 opacity-5 rounded-bl-full"
+          style={{ backgroundColor: entityColor }}
+        />
+        
+        <div className="flex items-start gap-3 relative z-10">
           {/* Left: Info */}
           <div className="flex-1 min-w-0">
             <p 
@@ -254,11 +269,19 @@ export function CandidatePass({ candidateId, token, onBack }: CandidatePassProps
             <p className="text-sm font-medium text-slate-700 mb-0.5">{passData.full_name}</p>
             <h2 className="text-lg font-black text-slate-900 leading-tight mb-2">{passData.position_title}</h2>
             
+            {/* Premium Pass Number Badge */}
             <div 
-              className="inline-block px-2.5 py-1 rounded-md mb-2"
-              style={{ backgroundColor: `${entityColor}15` }}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full mb-2"
+              style={{ 
+                background: `linear-gradient(135deg, ${entityColor}12 0%, ${entityColor}08 100%)`,
+                border: `1px solid ${entityColor}20`
+              }}
             >
-              <span className="text-[10px] font-mono font-bold" style={{ color: entityColor }}>
+              <div 
+                className="w-1.5 h-1.5 rounded-full animate-pulse"
+                style={{ backgroundColor: entityColor }}
+              />
+              <span className="text-[10px] font-mono font-bold tracking-wide" style={{ color: entityColor }}>
                 {passData.candidate_number}
               </span>
             </div>
@@ -269,33 +292,49 @@ export function CandidatePass({ candidateId, token, onBack }: CandidatePassProps
             </div>
           </div>
           
-          {/* Right: QR Code */}
+          {/* Premium QR Code with Corner Accents */}
           <div 
             onClick={() => setShowQrModal(true)}
-            className="flex-shrink-0 w-20 h-20 bg-white rounded-xl border-2 p-1.5 cursor-pointer hover:shadow-md transition-all relative"
-            style={{ borderColor: entityColor }}
+            className="flex-shrink-0 relative p-3 bg-gradient-to-br from-white to-slate-50 rounded-2xl cursor-pointer hover:shadow-lg transition-all duration-300 hover:scale-105 group"
+            style={{ 
+              boxShadow: `inset 0 2px 4px rgba(255,255,255,0.8), 0 4px 12px rgba(0,0,0,0.08), 0 2px 4px ${entityColor}10`
+            }}
           >
+            {/* Corner accents */}
+            <div className="absolute top-0 left-0 w-3 h-3 border-t-2 border-l-2 rounded-tl-lg" style={{ borderColor: entityColor }} />
+            <div className="absolute top-0 right-0 w-3 h-3 border-t-2 border-r-2 rounded-tr-lg" style={{ borderColor: entityColor }} />
+            <div className="absolute bottom-0 left-0 w-3 h-3 border-b-2 border-l-2 rounded-bl-lg" style={{ borderColor: entityColor }} />
+            <div className="absolute bottom-0 right-0 w-3 h-3 border-b-2 border-r-2 rounded-br-lg" style={{ borderColor: entityColor }} />
+            
             <QRCodeSVG 
               value={getProfileUrl()} 
-              size={64}
-              level="M"
+              size={68}
+              level="H"
               fgColor={entityColor}
             />
+            
+            {/* Scan indicator */}
             <div 
-              className="absolute -bottom-1 -right-1 w-6 h-6 rounded-full flex items-center justify-center shadow-md"
-              style={{ backgroundColor: entityColor }}
+              className="absolute -bottom-1.5 -right-1.5 w-7 h-7 rounded-full flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform"
+              style={{ 
+                backgroundColor: entityColor,
+                boxShadow: `0 4px 12px ${entityColor}40`
+              }}
             >
-              <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <svg className="w-3.5 h-3.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
               </svg>
             </div>
           </div>
         </div>
         
-        {/* Stage/Status Row */}
-        <div className="flex gap-3 mt-4 pt-3 border-t border-slate-100">
+        {/* Stage/Status Row - Enhanced */}
+        <div className="flex gap-4 mt-4 pt-3 border-t border-slate-100/80">
           <div className="flex items-center gap-2">
-            <div className="w-2 h-2 rounded-full bg-emerald-500"></div>
+            <div 
+              className="w-2.5 h-2.5 rounded-full shadow-sm"
+              style={{ backgroundColor: entityColor }}
+            />
             <div>
               <p className="text-[9px] uppercase tracking-wider text-slate-400 font-semibold">Stage</p>
               <p className="text-xs font-bold text-slate-800">
@@ -304,7 +343,7 @@ export function CandidatePass({ candidateId, token, onBack }: CandidatePassProps
             </div>
           </div>
           <div className="flex items-center gap-2">
-            <div className="w-2 h-2 rounded-full bg-emerald-500"></div>
+            <div className="w-2.5 h-2.5 rounded-full bg-emerald-500 shadow-sm" />
             <div>
               <p className="text-[9px] uppercase tracking-wider text-slate-400 font-semibold">Status</p>
               <p className="text-xs font-bold text-slate-800">

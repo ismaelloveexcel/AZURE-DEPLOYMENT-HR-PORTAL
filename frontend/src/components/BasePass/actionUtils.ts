@@ -35,7 +35,7 @@ export const UNIFIED_STAGES: Stage[] = [
     icon: 'M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z' 
   },
   { 
-    key: 'decision', 
+    key: 'offer', 
     label: 'Offer',
     candidateLabel: 'Offer',
     managerLabel: 'Decision',
@@ -52,6 +52,12 @@ export const UNIFIED_STAGES: Stage[] = [
 
 export const CANDIDATE_STAGES = UNIFIED_STAGES
 export const MANAGER_STAGES = UNIFIED_STAGES
+
+// Helper function to normalize stage keys (maps legacy 'decision' to 'offer')
+export function normalizeStageKey(stage: string): string {
+  const stageLower = stage.toLowerCase()
+  return stageLower === 'decision' ? 'offer' : stageLower
+}
 
 export const CANDIDATE_STATUSES: Record<string, { key: string; label: string }[]> = {
   application: [
@@ -74,7 +80,7 @@ export const CANDIDATE_STATUSES: Record<string, { key: string; label: string }[]
     { key: 'cancelled', label: 'Interview Cancelled' },
     { key: 'no_show', label: 'Interview No-Show' }
   ],
-  decision: [
+  offer: [
     { key: 'in_preparation', label: 'Offer In Preparation' },
     { key: 'released', label: 'Offer Released' },
     { key: 'accepted', label: 'Offer Accepted' },
@@ -111,7 +117,7 @@ export const MANAGER_STATUSES: Record<string, { key: string; label: string }[]> 
     { key: 'additional_required', label: 'Additional Interview Required' },
     { key: 'cancelled', label: 'Interview Cancelled' }
   ],
-  decision: [
+  offer: [
     { key: 'pending', label: 'Decision Pending' },
     { key: 'approved', label: 'Approved for Offer' },
     { key: 'not_approved', label: 'Not Approved' },
@@ -142,7 +148,7 @@ export function getCandidateActionRequired(
       pending: { label: 'Select Interview Slot', description: 'Choose your preferred time', actionType: 'select_slot' },
       scheduled: { label: 'Confirm Interview', description: 'Confirm your attendance', actionType: 'confirm_interview' }
     },
-    decision: {
+    offer: {
       released: { label: 'Review Offer', description: 'Review your offer letter', actionType: 'review_offer' }
     },
     onboarding: {
@@ -151,10 +157,10 @@ export function getCandidateActionRequired(
     }
   }
 
-  const stageLower = stage.toLowerCase()
+  const normalizedStage = normalizeStageKey(stage)
   const statusLower = status.toLowerCase().replace(/[\s-]/g, '_')
   
-  return actionMap[stageLower]?.[statusLower] || null
+  return actionMap[normalizedStage]?.[statusLower] || null
 }
 
 export function getManagerActionRequired(
@@ -179,29 +185,25 @@ export function getManagerActionRequired(
 }
 
 export function getStageIndex(stages: { key: string }[], currentStage: string): number {
-  const stageLower = currentStage.toLowerCase()
-  const index = stages.findIndex(s => s.key.toLowerCase() === stageLower)
+  const normalizedStage = normalizeStageKey(currentStage)
+  const index = stages.findIndex(s => s.key === normalizedStage)
   if (index >= 0) return index
-  
-  if (stageLower === 'offer') {
-    return stages.findIndex(s => s.key === 'decision')
-  }
-  
   return 0
 }
 
 export function getStageLabel(stage: string, viewType: 'candidate' | 'manager'): string {
-  const stageObj = UNIFIED_STAGES.find(s => s.key === stage.toLowerCase())
+  const normalizedStage = normalizeStageKey(stage)
+  const stageObj = UNIFIED_STAGES.find(s => s.key === normalizedStage)
   if (!stageObj) return stage
   return viewType === 'candidate' ? (stageObj.candidateLabel || stageObj.label) : (stageObj.managerLabel || stageObj.label)
 }
 
 export function getStatusLabel(stage: string, status: string, viewType: 'candidate' | 'manager' = 'candidate'): string {
-  const stageLower = stage.toLowerCase()
+  const normalizedStage = normalizeStageKey(stage)
   const statusLower = status.toLowerCase().replace(/[\s-]/g, '_')
   
   const statuses = viewType === 'candidate' ? CANDIDATE_STATUSES : MANAGER_STATUSES
-  const stageStatuses = statuses[stageLower]
+  const stageStatuses = statuses[normalizedStage]
   
   if (stageStatuses) {
     const found = stageStatuses.find(s => s.key === statusLower)

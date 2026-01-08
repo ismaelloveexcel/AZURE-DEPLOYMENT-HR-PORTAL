@@ -134,16 +134,29 @@ class InterviewService:
     async def book_slot(
         self, session: AsyncSession, slot_id: int, candidate_id: int
     ) -> InterviewSlotResponse:
-        """Book an interview slot for a candidate."""
+        """Book an interview slot for a candidate with collision prevention."""
+        # Use SELECT FOR UPDATE to prevent race conditions
         result = await session.execute(
-            select(InterviewSlot).where(InterviewSlot.id == slot_id)
+            select(InterviewSlot).where(InterviewSlot.id == slot_id).with_for_update()
         )
         slot = result.scalar_one_or_none()
         
         if not slot:
             raise HTTPException(status_code=404, detail="Slot not found")
+        
+        # Double-check availability with atomic validation
         if slot.status != "available":
-            raise HTTPException(status_code=400, detail="Slot is no longer available")
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT, 
+                detail="This slot has already been booked by another candidate. Please select a different time."
+            )
+        
+        # Additional check: ensure slot not already assigned to another candidate
+        if slot.booked_by_candidate_id is not None and slot.booked_by_candidate_id != candidate_id:
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail="This slot is no longer available. Please refresh and select another slot."
+            )
         
         slot.status = "booked"
         slot.booked_by_candidate_id = candidate_id

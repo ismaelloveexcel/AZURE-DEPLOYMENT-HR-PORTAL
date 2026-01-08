@@ -88,6 +88,12 @@ Main tables with migrations managed by Alembic:
 4. Candidate confirms booking
 5. Both parties see confirmed interview in calendar
 
+**Technical Implementation Notes**:
+- **Slot Collision Prevention**: Uses SELECT FOR UPDATE with atomic validation to prevent race conditions when multiple candidates book the same slot simultaneously. Returns HTTP 409 CONFLICT with user-friendly message.
+- **Stage Key Unification**: Frontend uses 'offer' stage key consistently (legacy 'decision' mapped via normalization functions for backward compatibility)
+- **Premium Pass UI**: Glassmorphism header with animated gradient shimmer, 3D card depth with multi-layer shadows, pulse animation on current journey stage, corner-accented QR codes with scan indicators
+- **Entity Theming**: Watergeneration (Blue #00B0F0) with wave pattern, Agriculture (Green #00bf63) with organic curves
+
 **Self-Service Onboarding System**:
 - Employee profile completion with progress tracking
 - Self-service bank details submission requiring HR approval
