@@ -386,46 +386,6 @@ export function ManagerPass({ recruitmentRequestId, managerId, token, onBack }: 
       case 'home':
         return (
           <div className="space-y-4">
-            {/* STATS ROW */}
-            <div className="grid grid-cols-4 gap-2">
-              {[
-                { label: 'Total', value: passData.total_candidates },
-                { label: 'Interview', value: passData.pipeline_stats['interview'] || 0 },
-                { label: 'Scheduled', value: passData.confirmed_interviews.length },
-                { label: 'Offers', value: passData.pipeline_stats['offer'] || 0 }
-              ].map(stat => (
-                <div key={stat.label} className="bg-white rounded-xl p-3 text-center border border-slate-100 shadow-sm">
-                  <p className="text-lg font-bold text-slate-800">{stat.value}</p>
-                  <p className="text-[9px] text-slate-500 uppercase tracking-wider">{stat.label}</p>
-                </div>
-              ))}
-            </div>
-
-            {/* PIPELINE */}
-            <div>
-              <p className="text-[10px] uppercase tracking-widest text-slate-400 font-bold mb-2">Pipeline</p>
-              <div className="space-y-1.5">
-                {['application', 'screening', 'interview', 'offer', 'onboarding'].map(stage => {
-                  // Handle both new 'offer' key and legacy 'decision' key
-                  const stageCount = stage === 'offer' 
-                    ? (passData.pipeline_stats['offer'] || passData.pipeline_stats['decision'] || 0)
-                    : (passData.pipeline_stats[stage] || 0)
-                  
-                  return (
-                    <div key={stage} className="flex items-center justify-between p-3 rounded-xl bg-white border border-slate-100 shadow-sm">
-                      <span className="text-xs text-slate-700 font-medium">{getStageLabel(stage, 'manager')}</span>
-                      <span 
-                        className="text-xs font-bold px-2.5 py-0.5 rounded-full"
-                        style={{ backgroundColor: `${entityColor}15`, color: entityColor }}
-                      >
-                        {stageCount}
-                      </span>
-                    </div>
-                  )
-                })}
-              </div>
-            </div>
-
             {/* INTERVIEW SETUP DISPLAY */}
             {passData.interview_setup && !showInterviewSetup && (
               <div>
