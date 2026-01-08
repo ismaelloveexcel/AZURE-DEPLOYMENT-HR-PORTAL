@@ -6,11 +6,15 @@ export { JourneyTimeline } from './JourneyTimeline'
 export { ActivityHistory } from './ActivityHistory'
 export type { ActivityItem } from './ActivityHistory'
 export { 
+  UNIFIED_STAGES,
   CANDIDATE_STAGES, 
   MANAGER_STAGES,
+  CANDIDATE_STATUSES,
+  MANAGER_STATUSES,
   getCandidateActionRequired,
   getManagerActionRequired,
   getStageIndex,
+  getStageLabel,
   getStatusLabel
 } from './actionUtils'
-export type { ActionConfig } from './actionUtils'
+export type { ActionConfig, Stage } from './actionUtils'

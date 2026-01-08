@@ -8,6 +8,8 @@ export interface PassTab {
 
 export interface BasePassContainerProps {
   entityColor: string
+  entityName?: string
+  passType: 'candidate' | 'manager'
   header: ReactNode
   journey?: ReactNode
   actionRequired?: ReactNode
@@ -19,6 +21,8 @@ export interface BasePassContainerProps {
 
 export function BasePassContainer({
   entityColor,
+  entityName,
+  passType,
   header,
   journey,
   actionRequired,
@@ -28,11 +32,26 @@ export function BasePassContainer({
   onTabChange
 }: BasePassContainerProps) {
   return (
-    <div className="h-screen bg-slate-50 flex items-center justify-center p-2 sm:p-4">
-      <div className="w-full max-w-md h-full max-h-[580px] sm:max-h-[620px]">
-        <div className="bg-white/90 backdrop-blur-md border border-slate-200/60 shadow-[0_8px_30px_rgba(0,0,0,0.06)] rounded-2xl sm:rounded-3xl overflow-hidden flex flex-col h-full">
-          {/* Entity-colored top accent bar */}
-          <div className="h-1 flex-shrink-0" style={{ backgroundColor: entityColor }} />
+    <div className="min-h-screen bg-slate-100 flex items-center justify-center p-2 sm:p-4">
+      <div className="w-full max-w-md h-full min-h-[600px] max-h-[700px] sm:max-h-[750px]">
+        <div className="bg-white border border-slate-200 shadow-xl rounded-2xl sm:rounded-3xl overflow-hidden flex flex-col h-full">
+          {/* Entity-colored header bar */}
+          <div 
+            className="px-4 py-3 flex items-center justify-between flex-shrink-0"
+            style={{ backgroundColor: entityColor }}
+          >
+            <span className="text-white font-bold text-sm tracking-wide">baynunah.</span>
+            <div className="flex items-center gap-3">
+              <button className="text-white/80 hover:text-white transition-colors">
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75v-.7V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0" />
+                </svg>
+              </button>
+              <span className="px-2.5 py-1 bg-white/20 backdrop-blur-sm rounded-full text-white text-xs font-semibold">
+                ACTIVE
+              </span>
+            </div>
+          </div>
           
           {header}
           
@@ -65,17 +84,23 @@ export function BasePassContainer({
                       </svg>
                     </div>
                     <span className={`text-[8px] sm:text-[9px] font-medium ${isActive ? 'font-bold' : ''}`}>{tab.label}</span>
-                    {isActive && (
-                      <div 
-                        className="absolute bottom-0 left-1/4 right-1/4 h-0.5 rounded-full"
-                        style={{ backgroundColor: entityColor }}
-                      />
-                    )}
                   </button>
                 )
               })}
             </div>
           </div>
+
+          {/* Entity footer */}
+          {entityName && (
+            <div 
+              className="px-4 py-2 text-center flex-shrink-0 border-t border-slate-100"
+              style={{ backgroundColor: `${entityColor}08` }}
+            >
+              <span className="text-[10px] text-slate-500 font-medium">
+                Recruitment: <span style={{ color: entityColor }} className="font-semibold">{entityName}</span>
+              </span>
+            </div>
+          )}
         </div>
       </div>
     </div>
