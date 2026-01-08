@@ -26,6 +26,7 @@ export interface StatusConfig {
   label: string
   nextAction: string
   actionOwner: ActionOwner
+  internalOnly?: boolean  // If true, this status is never shown to candidates
 }
 
 export interface Stage {
@@ -114,7 +115,8 @@ export const CANDIDATE_STATUSES: Record<string, StatusConfig[]> = {
     { key: 'assessment_sent', label: 'Assessment Sent', nextAction: 'Complete assessment', actionOwner: 'Candidate' },
     { key: 'assessment_completed', label: 'Assessment Completed', nextAction: 'Review results', actionOwner: 'HR' },
     { key: 'assessment_failed', label: 'Assessment Failed', nextAction: 'Review for rejection', actionOwner: 'HR' },
-    { key: 'assessment_waived', label: 'Assessment Waived', nextAction: 'Proceed to interview', actionOwner: 'HR' }
+    // Note: assessment_waived is INTERNAL ONLY - never shown to candidates
+    { key: 'assessment_waived', label: 'Assessment Waived', nextAction: 'Proceed to interview', actionOwner: 'HR', internalOnly: true }
   ],
   /**
    * STAGE 3 — INTERVIEW
@@ -381,8 +383,29 @@ export function getStatusLabel(stage: string, status: string, viewType: 'candida
   
   if (stageStatuses) {
     const found = stageStatuses.find(s => s.key === normalizedStatus)
-    if (found) return found.label
+    if (found) {
+      // LOCKED: If this is an internal-only status and we're in candidate view, return a generic label
+      if (viewType === 'candidate' && found.internalOnly) {
+        return 'In Progress'  // Generic status shown instead of "Waived"
+      }
+      return found.label
+    }
   }
   
   return status.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())
+}
+
+/**
+ * Check if a status is internal-only and should not be shown to candidates
+ * Used to filter out internal statuses like 'waived' from candidate pass
+ */
+export function isInternalOnlyStatus(stage: string, status: string): boolean {
+  const normalizedStage = normalizeStageKey(stage)
+  const normalizedStatus = normalizeStatusKey(status)
+  
+  const stageStatuses = CANDIDATE_STATUSES[normalizedStage]
+  if (!stageStatuses) return false
+  
+  const found = stageStatuses.find(s => s.key === normalizedStatus)
+  return found?.internalOnly === true
 }

@@ -9,7 +9,6 @@
  * WHO CAN SELECT WHAT (LOCKED):
  * - Technical Assessment: Triggered by Manager (owns role competence)
  * - Soft Skill Assessment: Triggered by HR (owns culture & behavior)
- * - Combined Assessment: HR + Manager (senior/critical roles)
  * 
  * No candidate self-selection. Ever.
  * 
@@ -37,11 +36,12 @@ interface AssessmentConfigProps {
 }
 
 interface AssessmentConfigData {
-  // Type and Trigger
-  assessment_type: 'technical' | 'soft_skill' | 'combined' | null
+  // Type and Trigger - LOCKED: Only technical or soft_skill (no combined)
+  assessment_type: 'technical' | 'soft_skill' | null
   triggered_by: 'manager' | 'hr' | null
   linked_stage: 'screening' | 'interview'
   // Status (LOCKED: required, sent, completed, failed, waived)
+  // Note: 'waived' is internal only - never shown to candidates
   status: 'not_required' | 'required' | 'sent' | 'completed' | 'failed' | 'waived'
   // Details
   assessment_link?: string
@@ -109,10 +109,10 @@ export function AssessmentConfig({
 
   const API_URL = '/api'
   
-  // Manager can only trigger technical, HR can trigger soft_skill or combined
+  // Manager can only trigger technical, HR can trigger soft_skill
+  // Note: Combined option removed per design decision
   const canTriggerTechnical = viewMode === 'manager'
   const canTriggerSoftSkill = viewMode === 'hr'
-  const canTriggerCombined = viewMode === 'hr'  // HR initiates combined, manager confirms
 
   useEffect(() => {
     fetchConfig()
@@ -153,7 +153,7 @@ export function AssessmentConfig({
     }
   }
 
-  const handleAssessmentTypeSelect = async (type: 'technical' | 'soft_skill' | 'combined') => {
+  const handleAssessmentTypeSelect = async (type: 'technical' | 'soft_skill') => {
     if (readonly) return
     setErrorMessage(null)
     
@@ -162,8 +162,8 @@ export function AssessmentConfig({
       setErrorMessage('Only managers can trigger technical assessments')
       return
     }
-    if ((type === 'soft_skill' || type === 'combined') && !canTriggerSoftSkill) {
-      setErrorMessage('Only HR can trigger soft skill or combined assessments')
+    if (type === 'soft_skill' && !canTriggerSoftSkill) {
+      setErrorMessage('Only HR can trigger soft skill assessments')
       return
     }
     
@@ -362,26 +362,6 @@ export function AssessmentConfig({
               </button>
             )}
 
-            {/* Combined Assessment - HR Only */}
-            {canTriggerCombined && (
-              <button
-                onClick={() => handleAssessmentTypeSelect('combined')}
-                disabled={readonly}
-                className="w-full p-4 rounded-xl border-2 border-dashed border-slate-200 hover:border-slate-300 hover:bg-slate-50 transition-colors text-left"
-              >
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-lg flex items-center justify-center bg-purple-50">
-                    <svg className="w-5 h-5 text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
-                    </svg>
-                  </div>
-                  <div>
-                    <p className="text-sm font-semibold text-slate-800">Combined Assessment</p>
-                    <p className="text-[10px] text-slate-500">HR + Manager • For senior/critical roles</p>
-                  </div>
-                </div>
-              </button>
-            )}
           </div>
         ) : (
           /* Assessment Selected - Show Details */
@@ -499,8 +479,8 @@ export function AssessmentConfig({
             </svg>
             <p className="text-[10px] text-slate-500 leading-relaxed">
               <strong>Role-based control:</strong> Manager triggers technical assessments. 
-              HR triggers soft skill assessments. Combined assessments require both. 
-              Candidate sees only "Assessment in Progress" - no type labels exposed.
+              HR triggers soft skill assessments. 
+              Candidate sees only "Assessment in Progress" - no type labels or waived status exposed.
             </p>
           </div>
         </div>

@@ -462,19 +462,20 @@ class Assessment(Base):
 
 
 # Assessment Types - LOCKED DESIGN DECISION
+# Note: Combined option removed per design decision
 ASSESSMENT_TYPES = [
     {"key": "technical", "name": "Technical Assessment", "triggered_by": "manager"},
     {"key": "soft_skill", "name": "Soft Skill Assessment", "triggered_by": "hr"},
-    {"key": "combined", "name": "Combined Assessment", "triggered_by": "hr_manager"},
 ]
 
 # Assessment Statuses - LOCKED DESIGN DECISION (sub-status flags, not stage drivers)
+# Note: 'waived' is internal only - never shown to candidates
 ASSESSMENT_STATUSES = [
     {"key": "required", "name": "Assessment Required"},
     {"key": "sent", "name": "Assessment Sent"},
     {"key": "completed", "name": "Assessment Completed"},
     {"key": "failed", "name": "Assessment Failed"},
-    {"key": "waived", "name": "Assessment Waived"},
+    {"key": "waived", "name": "Assessment Waived"},  # Internal only - not shown to candidate
 ]
 
 # Assessment Results

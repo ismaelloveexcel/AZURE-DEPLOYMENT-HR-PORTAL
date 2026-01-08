@@ -573,7 +573,7 @@ type AssessmentStatus =
   | 'sent'        // Assessment Sent
   | 'completed'   // Assessment Completed
   | 'failed'      // Assessment Failed
-  | 'waived'      // Assessment Waived
+  | 'waived'      // Assessment Waived (INTERNAL ONLY - never shown to candidates)
 ```
 
 ### Assessment Flow
@@ -586,6 +586,8 @@ type AssessmentStatus =
 6. **Review**: Manager (Technical) / HR (Soft) reviews results
 7. **Decision**: Pass → Proceed to interview; Fail → Reject candidate
 
+**Note:** If assessment is waived, candidate sees no notification - this is an internal status only.
+
 ### Backend Model
 
 ```python
@@ -596,7 +598,7 @@ class Assessment(Base):
     candidate_id: int
     recruitment_request_id: int
     
-    # LOCKED: technical, soft_skill, combined
+    # LOCKED: technical, soft_skill (combined removed)
     assessment_type: str
     # LOCKED: manager, hr
     triggered_by: str
@@ -604,6 +606,7 @@ class Assessment(Base):
     linked_stage: str
     
     # LOCKED: required, sent, completed, failed, waived
+    # Note: 'waived' is internal only - never shown to candidates
     status: str
     
     # Results

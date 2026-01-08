@@ -432,7 +432,7 @@ class AssessmentBase(BaseModel):
     """Base schema for candidate assessments."""
     candidate_id: int
     recruitment_request_id: int
-    assessment_type: str = Field(..., description="LOCKED: technical, soft_skill, combined")
+    assessment_type: str = Field(..., description="LOCKED: technical, soft_skill (combined removed)")
     triggered_by: str = Field(..., description="LOCKED: manager, hr")
     linked_stage: str = Field(default="screening", description="Stage when triggered: screening or interview")
     label: str = Field(default="Assessment", max_length=200)
@@ -442,16 +442,16 @@ class AssessmentBase(BaseModel):
 
 
 # Valid assessment statuses - LOCKED: sub-status flags, not stage drivers
+# Note: 'waived' is internal only - never shown to candidates
 ASSESSMENT_STATUSES = ["required", "sent", "completed", "failed", "waived"]
 
-# Valid assessment types - LOCKED
-ASSESSMENT_TYPES = ["technical", "soft_skill", "combined"]
+# Valid assessment types - LOCKED (combined removed)
+ASSESSMENT_TYPES = ["technical", "soft_skill"]
 
-# Who can trigger what - LOCKED
+# Who can trigger what - LOCKED (combined removed)
 ASSESSMENT_TRIGGERS = {
     "technical": "manager",
-    "soft_skill": "hr",
-    "combined": "hr_manager"
+    "soft_skill": "hr"
 }
 
 

@@ -78,7 +78,7 @@ interface InternalData {
   internal_fit_indicator?: 'strong' | 'moderate' | 'weak' | 'pending'
   risk_flags?: string[]
   assessment_required?: boolean
-  assessment_type?: 'technical' | 'soft_skill' | 'combined'
+  assessment_type?: 'technical' | 'soft_skill'
   assessment_rationale?: string
   assessment_status?: string
   assessment_score?: number
@@ -561,7 +561,6 @@ export function ApplicantProfile({
                         <option value="">Select...</option>
                         <option value="technical">Technical (Manager)</option>
                         <option value="soft_skill">Soft Skill (HR)</option>
-                        <option value="combined">Combined (Both)</option>
                       </select>
                     ) : (
                       <p className="text-sm text-slate-700 capitalize">{internalFormData.assessment_type || 'Not set'}</p>
