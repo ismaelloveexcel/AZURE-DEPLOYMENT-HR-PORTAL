@@ -16,6 +16,9 @@ class RecruitmentRequestBase(BaseModel):
     employment_type: str = Field(..., description="Full-time, Part-time, Contract, Internship")
     job_description: Optional[str] = None
     requirements: Optional[str] = None
+    required_skills: Optional[List[str]] = Field(None, description="List of required skills for CV scoring")
+    priority: str = Field(default="normal", description="Priority: low, normal, high, urgent")
+    expected_start_date: Optional[date] = None
     salary_range_min: Optional[float] = Field(None, ge=0)
     salary_range_max: Optional[float] = Field(None, ge=0)
 
@@ -35,6 +38,9 @@ class RecruitmentRequestUpdate(BaseModel):
     employment_type: Optional[str] = None
     job_description: Optional[str] = None
     requirements: Optional[str] = None
+    required_skills: Optional[List[str]] = None
+    priority: Optional[str] = None
+    expected_start_date: Optional[date] = None
     salary_range_min: Optional[float] = Field(None, ge=0)
     salary_range_max: Optional[float] = Field(None, ge=0)
     status: Optional[str] = None
@@ -344,3 +350,61 @@ class EmploymentTypeInfo(BaseModel):
     """Schema for employment type information."""
     key: str
     name: str
+
+
+# Bulk Operations Schemas
+class BulkCandidateStageUpdate(BaseModel):
+    """Schema for bulk updating candidate stages."""
+    candidate_ids: List[int] = Field(..., min_length=1, max_length=100, description="List of candidate IDs")
+    new_stage: str = Field(..., description="New stage: applied, screening, interview, offer, hired, rejected")
+    notes: Optional[str] = Field(None, description="Optional notes for the stage change")
+
+
+class BulkCandidateReject(BaseModel):
+    """Schema for bulk rejecting candidates."""
+    candidate_ids: List[int] = Field(..., min_length=1, max_length=100, description="List of candidate IDs")
+    rejection_reason: str = Field(..., min_length=1, description="Reason for rejection")
+
+
+class BulkOperationResult(BaseModel):
+    """Schema for bulk operation results."""
+    success_count: int
+    failed_count: int
+    failed_ids: List[int]
+    message: str
+
+
+# Enhanced Analytics Schemas
+class RecruitmentMetrics(BaseModel):
+    """Schema for detailed recruitment metrics."""
+    # Overview
+    total_requests: int
+    active_requests: int
+    filled_requests: int
+    cancelled_requests: int
+    
+    # Pipeline metrics
+    total_candidates: int
+    candidates_by_stage: Dict[str, int]
+    candidates_by_source: Dict[str, int]
+    candidates_by_status: Dict[str, int]
+    
+    # Time metrics (in days)
+    avg_time_to_fill: Optional[float] = None
+    avg_time_in_screening: Optional[float] = None
+    avg_time_to_offer: Optional[float] = None
+    
+    # Conversion rates (percentages)
+    application_to_screening_rate: Optional[float] = None
+    screening_to_interview_rate: Optional[float] = None
+    interview_to_offer_rate: Optional[float] = None
+    offer_acceptance_rate: Optional[float] = None
+    
+    # Recent activity
+    recent_hires: int
+    pending_interviews: int
+    pending_offers: int
+    
+    # SLA tracking
+    overdue_requests: int
+    requests_by_priority: Dict[str, int]

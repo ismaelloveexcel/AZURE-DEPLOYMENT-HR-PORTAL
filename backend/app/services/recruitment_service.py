@@ -728,6 +728,229 @@ class RecruitmentService:
         """Get list of employment types."""
         return EMPLOYMENT_TYPES
 
+    # =========================================================================
+    # BULK OPERATIONS
+    # =========================================================================
+
+    async def bulk_update_stage(
+        self,
+        session: AsyncSession,
+        candidate_ids: List[int],
+        new_stage: str,
+        notes: Optional[str] = None
+    ) -> Dict[str, Any]:
+        """Bulk update candidate stages for efficiency."""
+        # Validate stage
+        valid_stages = [s['key'] for s in RECRUITMENT_STAGES]
+        if new_stage not in valid_stages:
+            raise ValueError(f"Invalid stage: {new_stage}")
+
+        success_count = 0
+        failed_ids = []
+
+        for candidate_id in candidate_ids:
+            try:
+                candidate = await self.get_candidate(session, candidate_id)
+                if candidate:
+                    candidate.stage = new_stage
+                    candidate.stage_changed_at = datetime.now()
+                    # Update status based on stage
+                    stage_status_map = {
+                        'applied': 'applied',
+                        'screening': 'screening',
+                        'interview': 'interview',
+                        'offer': 'offer',
+                        'hired': 'hired',
+                        'rejected': 'rejected'
+                    }
+                    candidate.status = stage_status_map.get(new_stage, candidate.status)
+                    if notes:
+                        existing_notes = candidate.recruiter_notes or ""
+                        candidate.recruiter_notes = f"{existing_notes}\n[{datetime.now().strftime('%Y-%m-%d')}] Stage changed to {new_stage}: {notes}".strip()
+                    success_count += 1
+                else:
+                    failed_ids.append(candidate_id)
+            except Exception:
+                failed_ids.append(candidate_id)
+
+        await session.commit()
+
+        return {
+            "success_count": success_count,
+            "failed_count": len(failed_ids),
+            "failed_ids": failed_ids,
+            "message": f"Successfully updated {success_count} candidates to stage '{new_stage}'"
+        }
+
+    async def bulk_reject_candidates(
+        self,
+        session: AsyncSession,
+        candidate_ids: List[int],
+        rejection_reason: str
+    ) -> Dict[str, Any]:
+        """Bulk reject candidates for efficiency."""
+        success_count = 0
+        failed_ids = []
+
+        for candidate_id in candidate_ids:
+            try:
+                candidate = await self.get_candidate(session, candidate_id)
+                if candidate and candidate.stage != 'hired':
+                    candidate.stage = 'rejected'
+                    candidate.status = 'rejected'
+                    candidate.rejection_reason = rejection_reason
+                    candidate.stage_changed_at = datetime.now()
+                    success_count += 1
+                else:
+                    failed_ids.append(candidate_id)
+            except Exception:
+                failed_ids.append(candidate_id)
+
+        await session.commit()
+
+        return {
+            "success_count": success_count,
+            "failed_count": len(failed_ids),
+            "failed_ids": failed_ids,
+            "message": f"Successfully rejected {success_count} candidates"
+        }
+
+    # =========================================================================
+    # ENHANCED ANALYTICS
+    # =========================================================================
+
+    async def get_recruitment_metrics(self, session: AsyncSession) -> Dict[str, Any]:
+        """Get detailed recruitment metrics for dashboard and analytics."""
+        thirty_days_ago = datetime.now() - timedelta(days=30)
+
+        # Request counts
+        total_requests = await session.execute(
+            select(func.count(RecruitmentRequest.id))
+        )
+        active_requests = await session.execute(
+            select(func.count(RecruitmentRequest.id)).where(
+                RecruitmentRequest.status.in_(['pending', 'approved'])
+            )
+        )
+        filled_requests = await session.execute(
+            select(func.count(RecruitmentRequest.id)).where(
+                RecruitmentRequest.status == 'filled'
+            )
+        )
+        cancelled_requests = await session.execute(
+            select(func.count(RecruitmentRequest.id)).where(
+                RecruitmentRequest.status == 'cancelled'
+            )
+        )
+
+        # Total candidates
+        total_candidates = await session.execute(
+            select(func.count(Candidate.id))
+        )
+
+        # Pipeline counts
+        pipeline_counts = await self.get_pipeline_counts(session)
+
+        # By source
+        source_result = await session.execute(
+            select(Candidate.source, func.count(Candidate.id))
+            .where(Candidate.source.isnot(None))
+            .group_by(Candidate.source)
+        )
+        by_source = {row[0]: row[1] for row in source_result.all()}
+
+        # By status
+        status_result = await session.execute(
+            select(Candidate.status, func.count(Candidate.id))
+            .group_by(Candidate.status)
+        )
+        by_status = {row[0]: row[1] for row in status_result.all()}
+
+        # Recent hires
+        recent_hires = await session.execute(
+            select(func.count(Candidate.id)).where(
+                and_(
+                    Candidate.stage == 'hired',
+                    Candidate.stage_changed_at >= thirty_days_ago
+                )
+            )
+        )
+
+        # Pending interviews
+        pending_interviews = await session.execute(
+            select(func.count(Candidate.id)).where(
+                and_(
+                    Candidate.stage == 'interview',
+                    Candidate.status != 'completed'
+                )
+            )
+        )
+
+        # Pending offers
+        pending_offers = await session.execute(
+            select(func.count(Candidate.id)).where(
+                and_(
+                    Candidate.stage == 'offer',
+                    Candidate.status.in_(['offer', 'in_preparation', 'released'])
+                )
+            )
+        )
+
+        # Priority counts
+        priority_result = await session.execute(
+            select(RecruitmentRequest.priority, func.count(RecruitmentRequest.id))
+            .where(RecruitmentRequest.status.in_(['pending', 'approved']))
+            .group_by(RecruitmentRequest.priority)
+        )
+        by_priority = {row[0] or 'normal': row[1] for row in priority_result.all()}
+
+        # Calculate conversion rates
+        total_cand = total_candidates.scalar() or 0
+        screening_count = pipeline_counts.get('screening', 0) + pipeline_counts.get('interview', 0) + pipeline_counts.get('offer', 0) + pipeline_counts.get('hired', 0)
+        interview_count = pipeline_counts.get('interview', 0) + pipeline_counts.get('offer', 0) + pipeline_counts.get('hired', 0)
+        offer_count = pipeline_counts.get('offer', 0) + pipeline_counts.get('hired', 0)
+        hired_count = pipeline_counts.get('hired', 0)
+
+        applied_count = pipeline_counts.get('applied', 0) + screening_count
+
+        app_to_screen_rate = (screening_count / applied_count * 100) if applied_count > 0 else None
+        screen_to_interview_rate = (interview_count / screening_count * 100) if screening_count > 0 else None
+        interview_to_offer_rate = (offer_count / interview_count * 100) if interview_count > 0 else None
+        offer_accept_rate = (hired_count / offer_count * 100) if offer_count > 0 else None
+
+        # Overdue requests (past target hire date)
+        overdue = await session.execute(
+            select(func.count(RecruitmentRequest.id)).where(
+                and_(
+                    RecruitmentRequest.target_hire_date < date.today(),
+                    RecruitmentRequest.status.in_(['pending', 'approved'])
+                )
+            )
+        )
+
+        return {
+            "total_requests": total_requests.scalar() or 0,
+            "active_requests": active_requests.scalar() or 0,
+            "filled_requests": filled_requests.scalar() or 0,
+            "cancelled_requests": cancelled_requests.scalar() or 0,
+            "total_candidates": total_cand,
+            "candidates_by_stage": pipeline_counts,
+            "candidates_by_source": by_source,
+            "candidates_by_status": by_status,
+            "avg_time_to_fill": None,  # Would need historical data
+            "avg_time_in_screening": None,
+            "avg_time_to_offer": None,
+            "application_to_screening_rate": round(app_to_screen_rate, 1) if app_to_screen_rate else None,
+            "screening_to_interview_rate": round(screen_to_interview_rate, 1) if screen_to_interview_rate else None,
+            "interview_to_offer_rate": round(interview_to_offer_rate, 1) if interview_to_offer_rate else None,
+            "offer_acceptance_rate": round(offer_accept_rate, 1) if offer_accept_rate else None,
+            "recent_hires": recent_hires.scalar() or 0,
+            "pending_interviews": pending_interviews.scalar() or 0,
+            "pending_offers": pending_offers.scalar() or 0,
+            "overdue_requests": overdue.scalar() or 0,
+            "requests_by_priority": by_priority
+        }
+
 
 # Singleton instance
 recruitment_service = RecruitmentService()

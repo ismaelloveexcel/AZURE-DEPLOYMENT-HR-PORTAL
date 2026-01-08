@@ -19,8 +19,9 @@ from app.schemas.recruitment import (
     InterviewCreate, InterviewUpdate, InterviewResponse,
     InterviewSlotsProvide, InterviewSlotConfirm,
     EvaluationCreate, EvaluationResponse,
-    ParsedResumeData, RecruitmentStats,
-    StageInfo, InterviewTypeInfo, EmploymentTypeInfo
+    ParsedResumeData, RecruitmentStats, RecruitmentMetrics,
+    StageInfo, InterviewTypeInfo, EmploymentTypeInfo,
+    BulkCandidateStageUpdate, BulkCandidateReject, BulkOperationResult
 )
 from app.services.recruitment_service import recruitment_service
 from app.services.resume_parser import resume_parser_service
@@ -488,7 +489,7 @@ async def upload_candidate_cv(
     
     # Score the CV against job requirements
     job_description = request.job_description or f"Position: {request.position_title}"
-    required_skills = request.required_skills if hasattr(request, 'required_skills') and request.required_skills else []
+    required_skills = getattr(request, 'required_skills', None) or []
     
     scores = await score_candidate_cv(
         candidate_id=candidate_id,
@@ -673,7 +674,7 @@ async def create_candidate_from_resume(
         if request:
             # Automatically score the CV against job requirements
             job_description = request.job_description or f"Position: {request.position_title}"
-            required_skills = request.required_skills if hasattr(request, 'required_skills') and request.required_skills else []
+            required_skills = getattr(request, 'required_skills', None) or []
             
             await score_candidate_cv(
                 candidate_id=candidate.id,
@@ -894,3 +895,90 @@ async def get_evaluation(
     if not evaluation:
         raise HTTPException(status_code=404, detail="Evaluation not found")
     return evaluation
+
+
+# ============================================================================
+# BULK OPERATIONS (EFFICIENCY ENDPOINTS)
+# ============================================================================
+
+@router.post(
+    "/candidates/bulk/stage",
+    response_model=BulkOperationResult,
+    summary="Bulk update candidate stages"
+)
+async def bulk_update_candidate_stage(
+    data: BulkCandidateStageUpdate,
+    role: str = Depends(require_role(["admin", "hr"])),
+    session: AsyncSession = Depends(get_session)
+):
+    """
+    Bulk update multiple candidates to a new stage.
+    
+    Efficiently moves multiple candidates through the pipeline at once,
+    reducing processing time for shortlisting and stage transitions.
+    
+    Maximum 100 candidates per request.
+
+    **Admin and HR only.**
+    """
+    try:
+        result = await recruitment_service.bulk_update_stage(
+            session, data.candidate_ids, data.new_stage, data.notes
+        )
+        return BulkOperationResult(**result)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+
+@router.post(
+    "/candidates/bulk/reject",
+    response_model=BulkOperationResult,
+    summary="Bulk reject candidates"
+)
+async def bulk_reject_candidates(
+    data: BulkCandidateReject,
+    role: str = Depends(require_role(["admin", "hr"])),
+    session: AsyncSession = Depends(get_session)
+):
+    """
+    Bulk reject multiple candidates at once.
+    
+    Efficiently rejects multiple candidates with a single reason,
+    reducing processing time for screening decisions.
+    
+    Maximum 100 candidates per request.
+
+    **Admin and HR only.**
+    """
+    result = await recruitment_service.bulk_reject_candidates(
+        session, data.candidate_ids, data.rejection_reason
+    )
+    return BulkOperationResult(**result)
+
+
+# ============================================================================
+# ENHANCED ANALYTICS
+# ============================================================================
+
+@router.get(
+    "/metrics",
+    response_model=RecruitmentMetrics,
+    summary="Get detailed recruitment metrics"
+)
+async def get_recruitment_metrics(
+    role: str = Depends(require_role(["admin", "hr"])),
+    session: AsyncSession = Depends(get_session)
+):
+    """
+    Get detailed recruitment metrics for dashboard and analytics.
+    
+    Includes:
+    - Request and candidate counts
+    - Pipeline distribution by stage, source, and status
+    - Conversion rates between stages
+    - SLA tracking (overdue requests)
+    - Priority distribution
+
+    **Admin and HR only.**
+    """
+    return await recruitment_service.get_recruitment_metrics(session)

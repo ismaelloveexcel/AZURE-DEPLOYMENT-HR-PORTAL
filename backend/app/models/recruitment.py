@@ -48,6 +48,9 @@ class RecruitmentRequest(Base):
     employment_type: Mapped[str] = mapped_column(String(50), nullable=False)  # Full-time, Contract, Intern
     job_description: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
     requirements: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    required_skills: Mapped[Optional[list]] = mapped_column(JSON, nullable=True)  # List of required skills for CV scoring
+    priority: Mapped[str] = mapped_column(String(20), default="normal", nullable=False)  # low, normal, high, urgent
+    expected_start_date: Mapped[Optional[date]] = mapped_column(Date, nullable=True)
 
     # Salary
     salary_range_min: Mapped[Optional[float]] = mapped_column(DECIMAL(10, 2), nullable=True)
