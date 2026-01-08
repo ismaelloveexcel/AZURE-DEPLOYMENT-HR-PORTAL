@@ -43,39 +43,6 @@ export function BasePassContainer({
             boxShadow: `0 25px 60px -15px rgba(0,0,0,0.15), 0 10px 30px -10px ${entityColor}20, 0 -2px 6px rgba(255,255,255,0.8) inset`
           }}
         >
-          {/* Glassmorphism Header with Animated Gradient */}
-          <div 
-            className="px-4 py-3.5 flex items-center justify-between flex-shrink-0 relative overflow-hidden"
-            style={{ 
-              background: isAgriculture 
-                ? `linear-gradient(135deg, ${entityColor} 0%, #10b981 50%, #059669 100%)`
-                : `linear-gradient(135deg, ${entityColor} 0%, #0ea5e9 50%, #6366f1 100%)`
-            }}
-          >
-            {/* Animated shimmer overlay */}
-            <div 
-              className="absolute inset-0 opacity-30"
-              style={{
-                background: 'linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.4) 50%, transparent 100%)',
-                animation: 'shimmer 3s ease-in-out infinite'
-              }}
-            />
-            {/* Subtle noise texture */}
-            <div className="absolute inset-0 opacity-10" style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg viewBox=\'0 0 256 256\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cfilter id=\'noise\'%3E%3CfeTurbulence type=\'fractalNoise\' baseFrequency=\'0.65\' numOctaves=\'3\' stitchTiles=\'stitch\'/%3E%3C/filter%3E%3Crect width=\'100%25\' height=\'100%25\' filter=\'url(%23noise)\'/%3E%3C/svg%3E")' }} />
-            
-            <span className="text-white font-bold text-sm tracking-wide relative z-10 drop-shadow-sm">baynunah.</span>
-            <div className="flex items-center gap-3 relative z-10">
-              <button className="text-white/80 hover:text-white transition-colors hover:scale-110">
-                <svg className="w-5 h-5 drop-shadow-sm" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75v-.7V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0" />
-                </svg>
-              </button>
-              <span className="px-3 py-1.5 bg-white/25 backdrop-blur-md rounded-full text-white text-[10px] font-bold tracking-wider shadow-lg border border-white/20">
-                ACTIVE
-              </span>
-            </div>
-          </div>
-          
           {header}
           
           <div className="flex-1 overflow-y-auto px-4 sm:px-5 pb-2 scrollbar-thin scrollbar-thumb-slate-200 scrollbar-track-transparent">

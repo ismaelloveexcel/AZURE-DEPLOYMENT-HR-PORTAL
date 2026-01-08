@@ -261,8 +261,8 @@ export function ManagerPass({ recruitmentRequestId, managerId, token, onBack }: 
       <div className="bg-[#1800ad] px-4 pt-4 pb-6">
         <div className="flex items-center justify-between">
           {/* Left: Pass Type */}
-          <div className="text-white">
-            <p className="text-[10px] font-bold uppercase tracking-wider opacity-70">Hiring Manager</p>
+          <div>
+            <p className="text-xs font-bold uppercase tracking-wider text-white">Hiring Manager Pass</p>
           </div>
           
           {/* Right: Logo */}
