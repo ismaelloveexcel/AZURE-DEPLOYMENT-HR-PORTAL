@@ -64,6 +64,10 @@ def _decode_dev_token(token: str, settings: Settings) -> Dict[str, Any]:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid development token")
 
     try:
+        # SECURITY NOTE: Signature verification is intentionally skipped here because
+        # the token has already been validated above via exact string comparison against
+        # the pre-shared dev_static_token. This function is only reachable when
+        # dev_auth_bypass is enabled (development environments only).
         return jwt.decode(token, options={"verify_signature": False})
     except PyJWTError:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Malformed development token")
