@@ -1,6 +1,9 @@
+import os
+from pathlib import Path
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, FileResponse
+from fastapi.staticfiles import StaticFiles
 from slowapi import Limiter
 from slowapi.util import get_remote_address
 from slowapi.errors import RateLimitExceeded
@@ -71,6 +74,22 @@ def create_app() -> FastAPI:
     @app.on_event("shutdown")
     async def on_shutdown():
         logger.info("Application shutdown")
+
+    # Serve static files in production (frontend build)
+    static_dir = Path(__file__).parent.parent / "static"
+    if static_dir.exists():
+        app.mount("/assets", StaticFiles(directory=str(static_dir / "assets")), name="assets")
+        
+        @app.get("/{full_path:path}")
+        async def serve_spa(full_path: str):
+            # Don't intercept API routes
+            if full_path.startswith("api/"):
+                return JSONResponse(status_code=404, content={"detail": "Not found"})
+            # Serve index.html for all other routes (SPA routing)
+            index_file = static_dir / "index.html"
+            if index_file.exists():
+                return FileResponse(str(index_file))
+            return JSONResponse(status_code=404, content={"detail": "Frontend not built"})
 
     return app
 
