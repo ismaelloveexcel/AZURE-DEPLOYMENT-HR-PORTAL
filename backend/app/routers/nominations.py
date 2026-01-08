@@ -1,5 +1,6 @@
 import hashlib
 import hmac
+import json
 import os
 import secrets
 from datetime import datetime, timedelta
@@ -11,6 +12,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.database import get_session
 from app.models import Employee, EoyNomination, ELIGIBLE_JOB_LEVELS
+from app.models.audit_log import AuditLog
+from app.models.notification import Notification
 from app.schemas.nomination import (
     NominationCreate, NominationResponse, NominationUpdate,
     EligibleEmployee, NominationListResponse, NominationStats, EligibleManager,
@@ -374,13 +377,41 @@ async def submit_nomination_secure(
     )
     
     session.add(new_nomination)
-    await session.commit()
-    await session.refresh(new_nomination)
+    await session.flush()  # Flush to get the nomination ID without committing
     
     invalidate_token(request.verification_token)
     
-    if nominator and nominator.line_manager_email:
-        pass
+    # Create audit log for the nomination (same transaction)
+    audit_details = json.dumps({
+        "nominee_id": nominee.id,
+        "nominee_name": nominee.name,
+        "nomination_year": year,
+        "justification_length": len(request.justification)
+    })
+    audit_log = AuditLog(
+        action="EOY_NOMINATION_SUBMITTED",
+        entity="eoy_nominations",
+        entity_id=new_nomination.id,
+        user_id=str(nominator_id),
+        details=audit_details
+    )
+    session.add(audit_log)
+    
+    # Create notification for the manager with link to view/revise (same transaction)
+    nomination_url = f"/nomination-pass?view={new_nomination.id}"
+    notification = Notification(
+        user_id=str(nominator_id),
+        title="EOY Nomination Submitted",
+        message=f"Your nomination of {nominee.name} for Employee of the Year {year} has been submitted successfully. Click to view details.",
+        type="eoy_nomination",
+        link=nomination_url,
+        is_read=False
+    )
+    session.add(notification)
+    
+    # Commit all changes atomically
+    await session.commit()
+    await session.refresh(new_nomination)
     
     return NominationResponse(
         id=new_nomination.id,
@@ -540,11 +571,29 @@ async def review_nomination(
     if not nomination:
         raise HTTPException(status_code=404, detail="Nomination not found")
     
+    old_status = nomination.status
     nomination.status = update.status
     nomination.review_notes = update.review_notes
     nomination.reviewed_by = reviewer_id
     nomination.reviewed_at = datetime.now()
     
+    # Create audit log for the review action (same transaction)
+    audit_details = json.dumps({
+        "nomination_id": nomination_id,
+        "old_status": old_status,
+        "new_status": update.status,
+        "review_notes": update.review_notes
+    })
+    audit_log = AuditLog(
+        action="EOY_NOMINATION_REVIEWED",
+        entity="eoy_nominations",
+        entity_id=nomination_id,
+        user_id=str(reviewer_id),
+        details=audit_details
+    )
+    session.add(audit_log)
+    
+    # Commit all changes atomically
     await session.commit()
     await session.refresh(nomination)
     
