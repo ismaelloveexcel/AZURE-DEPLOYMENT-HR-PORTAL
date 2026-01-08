@@ -2,8 +2,10 @@ from datetime import datetime, timedelta, timezone
 from typing import Any, Dict
 
 import httpx
+import jwt
+from jwt import PyJWKClient, PyJWK
+from jwt.exceptions import PyJWTError
 from fastapi import HTTPException, status
-from jose import JWTError, jwk, jwt
 
 from app.core.config import Settings, get_settings
 from app.core.logging import get_logger

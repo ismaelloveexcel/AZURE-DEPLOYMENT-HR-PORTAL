@@ -19,10 +19,13 @@ depends_on = None
 def column_exists(table_name, column_name):
     """Check if a column exists in a table."""
     bind = op.get_bind()
-    result = bind.execute(sa.text(
-        f"SELECT EXISTS (SELECT 1 FROM information_schema.columns "
-        f"WHERE table_name = '{table_name}' AND column_name = '{column_name}')"
-    ))
+    result = bind.execute(
+        sa.text(
+            "SELECT EXISTS (SELECT 1 FROM information_schema.columns "
+            "WHERE table_name = :table_name AND column_name = :column_name)"
+        ),
+        {"table_name": table_name, "column_name": column_name}
+    )
     return result.scalar()
 
 
