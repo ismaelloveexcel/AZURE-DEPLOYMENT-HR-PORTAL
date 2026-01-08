@@ -52,7 +52,7 @@ Preferred communication style: Simple, everyday language.
 
 ### Database Schema
 
-Eight main tables with migrations managed by Alembic:
+Main tables with migrations managed by Alembic:
 1. `employees` - User accounts and authentication (76 employees seeded)
 2. `renewals` - Contract renewal tracking with audit log
 3. `passes` - Access pass management
@@ -61,6 +61,8 @@ Eight main tables with migrations managed by Alembic:
 6. `employee_bank` - Bank details with self-service workflow (pending_changes, verified_by, verified_at)
 7. `employee_documents` - Document registry with file uploads, OCR data, verification status
 8. `employee_profiles` - Extended profile data (emergency contacts, personal info)
+9. `insurance_census_records` - Medical insurance member data (45+ columns, 530 records)
+10. `insurance_census_import_batches` - Import batch tracking for census data
 
 ### Key Features
 
@@ -102,6 +104,19 @@ Eight main tables with migrations managed by Alembic:
 - Supported types: passport, visa, emirates_id, work_permit, medical_fitness, contract, educational, training, security_clearance
 - OCR integration using Tesseract with EID pattern matching
 - Expiry tracking and verification workflow
+
+**Medical Insurance Census Management**:
+- Editable data grid for managing employee and dependent insurance records
+- 530 records imported from 4 encrypted Excel files (Watergeneration/Agriculture entities, Thiqa/Expats types)
+- 64 records linked to employees via staff_id matching
+- Inline cell editing with batch save/discard functionality
+- Mandatory field validation with visual highlighting (red background for missing required fields)
+- Entity/Insurance Type filtering with search capability
+- Completeness tracking percentage per record
+- Mandatory fields: full_name, dob, gender, relation, staff_id, category, effective_date, nationality, uid_number, emirates_id_number, gdrfa_file_number, passport_number
+- Entity colors: Blue #00B0F0 (Watergeneration), Green #00bf63 (Agriculture)
+- Access: Admin and HR roles only via Quick Access button on home page
+- API: `/api/insurance-census` endpoints with JWT authentication
 
 ### Development Setup
 

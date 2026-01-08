@@ -11,8 +11,13 @@ import pandas as pd
 
 from app.database import get_session
 from app.models import InsuranceCensusRecord, InsuranceCensusImportBatch, Employee, MANDATORY_FIELDS, MANDATORY_FIELDS_FOR_RENEWAL
+from app.auth.dependencies import require_role
 
-router = APIRouter(prefix="/insurance-census", tags=["insurance-census"])
+router = APIRouter(
+    prefix="/insurance-census",
+    tags=["insurance-census"],
+    dependencies=[Depends(require_role(["admin", "hr"]))],
+)
 
 EXCEL_PASSWORD = "0001A"
 
@@ -165,6 +170,7 @@ async def list_census_records(
     }
 
 
+@router.get("/summary")
 @router.get("/stats")
 async def get_census_stats(db: AsyncSession = Depends(get_session)):
     total_query = select(func.count()).select_from(InsuranceCensusRecord)
@@ -197,13 +203,18 @@ async def get_census_stats(db: AsyncSession = Depends(get_session)):
     linked_result = await db.execute(linked_query)
     linked = linked_result.scalar() or 0
     
+    avg_completeness_query = select(func.avg(InsuranceCensusRecord.completeness_pct))
+    avg_result = await db.execute(avg_completeness_query)
+    avg_completeness = avg_result.scalar() or 0
+    
     return {
         "total": total,
         "complete": complete,
         "incomplete": total - complete,
-        "linked_to_employee": linked,
+        "linked": linked,
         "by_entity": by_entity,
         "by_insurance_type": by_type,
+        "avg_completeness": float(avg_completeness),
     }
 
 
@@ -251,6 +262,70 @@ async def update_census_record(
     await db.commit()
     await db.refresh(record)
     return record.to_dict()
+
+
+class BatchUpdateItem(BaseModel):
+    id: int
+    first_name: Optional[str] = None
+    second_name: Optional[str] = None
+    family_name: Optional[str] = None
+    full_name: Optional[str] = None
+    dob: Optional[str] = None
+    gender: Optional[str] = None
+    relation: Optional[str] = None
+    staff_id: Optional[str] = None
+    category: Optional[str] = None
+    nationality: Optional[str] = None
+    effective_date: Optional[str] = None
+    emirates_id_number: Optional[str] = None
+    uid_number: Optional[str] = None
+    gdrfa_file_number: Optional[str] = None
+    passport_number: Optional[str] = None
+    mobile_no: Optional[str] = None
+    sr_no: Optional[str] = None
+
+
+class BatchUpdateRequest(BaseModel):
+    updates: List[BatchUpdateItem]
+
+
+@router.put("/batch-update")
+async def batch_update_census_records(
+    data: BatchUpdateRequest,
+    db: AsyncSession = Depends(get_session),
+    updated_by: str = Query("system"),
+):
+    updated_count = 0
+    
+    for item in data.updates:
+        result = await db.execute(
+            select(InsuranceCensusRecord).where(InsuranceCensusRecord.id == item.id)
+        )
+        record = result.scalar_one_or_none()
+        if not record:
+            continue
+        
+        update_data = item.model_dump(exclude_unset=True, exclude={"id"})
+        for field, value in update_data.items():
+            if value is not None:
+                setattr(record, field, value)
+        
+        record.updated_by = updated_by
+        record.updated_at = datetime.utcnow()
+        record.calculate_completeness()
+        
+        if record.staff_id:
+            emp_result = await db.execute(
+                select(Employee).where(Employee.employee_id == record.staff_id)
+            )
+            emp = emp_result.scalar_one_or_none()
+            if emp:
+                record.employee_id = emp.id
+        
+        updated_count += 1
+    
+    await db.commit()
+    return {"updated": updated_count}
 
 
 @router.post("/import")

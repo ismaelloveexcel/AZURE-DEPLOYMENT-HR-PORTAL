@@ -6,8 +6,9 @@ import { CandidatePass } from './components/CandidatePass'
 import { ManagerPass } from './components/ManagerPass'
 import { Performance } from './components/Performance'
 import { EoyNominations } from './components/EoyNominations'
+import { InsuranceCensus } from './components/InsuranceCensus'
 
-type Section = 'home' | 'employees' | 'onboarding' | 'external' | 'admin' | 'secret-chamber' | 'passes' | 'public-onboarding' | 'recruitment' | 'recruitment-request' | 'recruitment-benefits' | 'templates' | 'template-manager' | 'template-candidate' | 'template-onboarding' | 'template-employee' | 'attendance' | 'compliance-alerts' | 'candidate-pass' | 'manager-pass' | 'performance'
+type Section = 'home' | 'employees' | 'onboarding' | 'external' | 'admin' | 'secret-chamber' | 'passes' | 'public-onboarding' | 'recruitment' | 'recruitment-request' | 'recruitment-benefits' | 'templates' | 'template-manager' | 'template-candidate' | 'template-onboarding' | 'template-employee' | 'attendance' | 'compliance-alerts' | 'candidate-pass' | 'manager-pass' | 'performance' | 'insurance-census'
 
 interface Employee {
   id: number
@@ -4320,6 +4321,16 @@ function App() {
     )
   }
 
+  // Insurance Census Management
+  if (activeSection === 'insurance-census' && user) {
+    return (
+      <InsuranceCensus
+        token={user.token}
+        onBack={() => handleNavigate('admin')}
+      />
+    )
+  }
+
   // Performance Management Section
   if (activeSection === 'performance' && user) {
     return (
@@ -5320,6 +5331,17 @@ function App() {
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
           </svg>
           <span className="text-sm font-medium text-gray-700">Compliance Alerts</span>
+        </button>
+
+        <button
+          onClick={() => handleNavigate('insurance-census')}
+          className="bg-white rounded-xl px-6 py-4 flex items-center gap-3 transition-all duration-300 hover:scale-105 hover:-translate-y-1"
+          style={{ boxShadow: '0 10px 40px -10px rgba(0,0,0,0.15), 0 4px 6px -2px rgba(0,0,0,0.05), inset 0 1px 0 rgba(255,255,255,0.8)' }}
+        >
+          <svg className="w-6 h-6 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
+          </svg>
+          <span className="text-sm font-medium text-gray-700">Insurance Census</span>
         </button>
       </div>
 
