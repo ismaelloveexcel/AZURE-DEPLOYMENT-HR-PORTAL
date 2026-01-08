@@ -60,6 +60,9 @@ def create_app() -> FastAPI:
     # Employee of the Year nominations
     from app.routers import nominations
     app.include_router(nominations.router, prefix=settings.api_prefix)
+    # Insurance Census management
+    from app.routers import insurance_census
+    app.include_router(insurance_census.router, prefix=settings.api_prefix)
 
     @app.on_event("startup")
     async def on_startup():
