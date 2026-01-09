@@ -223,12 +223,19 @@ export function NominationPass() {
     setActiveTab('home')
   }
 
-  const stepLabels = ['Manager', 'Verify', 'Nominee', 'Form', 'Done']
+  const stepLabels = ['Access', 'Selection', 'Verification', 'Nomination', 'Submission']
+  const stepDescriptions = [
+    'Manager enters the nomination portal',
+    'Manager selects their name from the authorized list',
+    'Email verification to confirm identity',
+    'Manager submits the employee nomination',
+    'Confirmation & record locked'
+  ]
   const stepMapping: Record<Step, number> = {
-    'select-manager': 0,
-    'verify': 1,
+    'select-manager': 1,
+    'verify': 2,
     'already-nominated': 4,
-    'select-nominee': 2,
+    'select-nominee': 3,
     'form': 3,
     'success': 4
   }
@@ -332,13 +339,18 @@ export function NominationPass() {
                 const isLast = i === stepLabels.length - 1
                 
                 return (
-                  <div key={label} className={`flex flex-col items-center ${isLast ? '' : 'flex-1'}`}>
+                  <div 
+                    key={label} 
+                    className={`flex flex-col items-center ${isLast ? '' : 'flex-1'} cursor-pointer`}
+                    title={stepDescriptions[i]}
+                  >
                     <div className="flex items-center w-full">
                       <div 
                         className={`w-6 h-6 sm:w-7 sm:h-7 rounded-full flex items-center justify-center text-xs font-semibold shrink-0 ${
                           stepIndex >= i ? 'text-white' : 'bg-gray-200 text-gray-500'
                         }`}
                         style={stepColor ? { backgroundColor: stepColor } : {}}
+                        title={stepDescriptions[i]}
                       >
                         {isCompleted ? (
                           <svg className="w-3 h-3 sm:w-3.5 sm:h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
