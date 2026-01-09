@@ -5449,43 +5449,43 @@ function App() {
       name: 'Manager Portal',
       description: 'Recruitment pipeline, approvals, and team management',
       icon: (
-        <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+        <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 17V7m0 10a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h2a2 2 0 012 2m0 10a2 2 0 002 2h2a2 2 0 002-2M9 7a2 2 0 012-2h2a2 2 0 012 2m0 10V7m0 10a2 2 0 002 2h2a2 2 0 002-2V7a2 2 0 00-2-2h-2a2 2 0 00-2 2" />
         </svg>
       ),
       route: 'recruitment' as Section,
-      color: '#00A0DF'
+      color: '#3B82F6'
     },
     {
       id: 'candidate',
       name: 'Candidate Portal',
       description: 'Application status and assessment tracking',
       icon: (
-        <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
         </svg>
       ),
       route: 'candidate-pass' as Section,
-      color: '#34D399'
+      color: '#14B8A6'
     },
     {
       id: 'onboarding',
       name: 'Onboarding Portal',
       description: 'New joiner tasks and orientation',
       icon: (
-        <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122" />
+        <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
         </svg>
       ),
       route: 'onboarding' as Section,
-      color: '#F59E0B'
+      color: '#F97316'
     },
     {
       id: 'employee',
       name: 'Employee Portal',
       description: 'Leave requests, documents, and HR services',
       icon: (
-        <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
         </svg>
       ),
@@ -5497,7 +5497,7 @@ function App() {
       name: 'Agency Portal',
       description: 'Candidate submission and status monitoring',
       icon: (
-        <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
         </svg>
       ),
@@ -5507,7 +5507,7 @@ function App() {
   ]
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 flex flex-col items-center justify-center p-8">
+    <div className="min-h-screen flex flex-col items-center justify-center p-8" style={{ background: 'linear-gradient(135deg, #f0f4f8 0%, #e2e8f0 50%, #f1f5f9 100%)' }}>
       {loginModal}
       
       {user && (
@@ -5527,64 +5527,62 @@ function App() {
       )}
 
       {/* Header */}
-      <div className="text-center mb-10">
-        <div className="flex items-center justify-center gap-1 mb-2">
-          <span className="text-2xl font-light tracking-wide text-slate-700">baynunah</span>
-          <span className="text-slate-700 text-lg">&#x25E5;</span>
+      <div className="text-center mb-12">
+        <div className="flex items-center justify-center gap-1 mb-1">
+          <span className="text-xl font-normal tracking-wide text-slate-600">baynunah</span>
+          <span className="text-slate-500 text-sm" style={{ transform: 'rotate(-45deg)', display: 'inline-block' }}>&#9654;</span>
         </div>
-        <h1 className="text-4xl font-light tracking-widest text-slate-800">HR PORTAL</h1>
+        <h1 className="text-3xl font-light tracking-[0.3em] text-slate-700 uppercase">HR Portal</h1>
       </div>
 
       {/* Portal Cards Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4 max-w-6xl mb-10">
+      <div className="flex flex-wrap justify-center gap-5 max-w-5xl mb-8">
         {portalCards.map((portal) => (
           <button
             key={portal.id}
             onClick={() => handleNavigate(portal.route)}
-            className="group relative bg-white/70 backdrop-blur-sm rounded-2xl p-6 flex flex-col items-center text-center transition-all duration-300 hover:scale-105 hover:-translate-y-2 border border-white/50"
+            className="group bg-white rounded-2xl p-6 flex flex-col items-center text-center transition-all duration-300 hover:scale-[1.02] hover:-translate-y-1"
             style={{ 
-              boxShadow: '0 8px 32px rgba(0,0,0,0.08), 0 2px 8px rgba(0,0,0,0.04)',
+              width: '180px',
+              boxShadow: '0 4px 20px rgba(0,0,0,0.06), 0 1px 3px rgba(0,0,0,0.04)',
             }}
           >
             <div 
-              className="w-14 h-14 rounded-xl flex items-center justify-center mb-4 transition-transform duration-300 group-hover:scale-110"
-              style={{ backgroundColor: `${portal.color}15`, color: portal.color }}
+              className="w-14 h-14 rounded-2xl flex items-center justify-center mb-4"
+              style={{ backgroundColor: `${portal.color}12`, color: portal.color }}
             >
               {portal.icon}
             </div>
-            <h3 className="font-semibold text-slate-800 mb-1 text-sm">{portal.name}</h3>
-            <p className="text-xs text-slate-500 leading-relaxed">{portal.description}</p>
-            <div 
-              className="absolute bottom-0 left-1/2 -translate-x-1/2 w-12 h-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300"
-              style={{ backgroundColor: portal.color }}
-            />
+            <h3 className="font-medium text-slate-700 mb-2 text-sm">{portal.name}</h3>
+            <p className="text-xs text-slate-400 leading-relaxed">{portal.description}</p>
           </button>
         ))}
       </div>
 
-      {/* Admin Section */}
-      <div className="w-full max-w-4xl">
+      {/* Admin Panel */}
+      <div className="w-full max-w-3xl">
         <button
           onClick={() => handleNavigate('admin')}
-          className="w-full bg-white/70 backdrop-blur-sm rounded-2xl p-4 mb-4 flex items-center justify-between transition-all duration-300 hover:bg-white border border-white/50"
-          style={{ boxShadow: '0 8px 32px rgba(0,0,0,0.08)' }}
+          className="w-full bg-white rounded-2xl p-4 flex items-center justify-between transition-all duration-300 hover:shadow-md"
+          style={{ boxShadow: '0 4px 20px rgba(0,0,0,0.06)' }}
         >
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center">
-              <svg className="w-5 h-5 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+            <div className="w-10 h-10 rounded-xl bg-slate-50 flex items-center justify-center">
+              <svg className="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
               </svg>
             </div>
-            <span className="font-medium text-slate-700">Admin Panel</span>
+            <span className="font-medium text-slate-600">Admin Panel</span>
           </div>
-          <svg className="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg className="w-5 h-5 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
           </svg>
         </button>
 
         {/* Quick Access Buttons - Only visible when logged in as admin/hr */}
         {user && (user.role === 'admin' || user.role === 'hr') && (
-          <div className="flex flex-wrap gap-3 justify-center">
+          <div className="flex flex-wrap gap-3 justify-center mt-4">
             <button
               onClick={() => handleNavigate('attendance')}
               className="bg-white rounded-xl px-4 py-3 flex items-center gap-2 transition-all duration-300 hover:scale-105 border border-gray-100"
