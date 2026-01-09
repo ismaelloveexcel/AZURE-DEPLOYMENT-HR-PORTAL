@@ -759,6 +759,62 @@ export function NominationPass() {
                         style={{ '--tw-ring-color': THEME_COLOR } as any}
                       />
                     </div>
+
+                    <div>
+                      <label className="block text-xs font-medium text-gray-700 mb-1.5 flex items-center gap-1.5">
+                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M18.375 12.739l-7.693 7.693a4.5 4.5 0 01-6.364-6.364l10.94-10.94A3 3 0 1119.5 7.372L8.552 18.32m.009-.01l-.01.01m5.699-9.941l-7.81 7.81a1.5 1.5 0 002.112 2.13" />
+                        </svg>
+                        Supporting Evidence (Optional)
+                      </label>
+                      <p className="text-[10px] text-gray-400 mb-2">Attach up to 3 files (PDF, images) to support your nomination</p>
+                      <input
+                        type="file"
+                        multiple
+                        accept=".pdf,.png,.jpg,.jpeg,.doc,.docx"
+                        onChange={(e) => {
+                          const files = Array.from(e.target.files || []).slice(0, 3)
+                          setForm({ ...form, supportingFiles: files })
+                        }}
+                        className="hidden"
+                        id="supporting-files"
+                      />
+                      <label
+                        htmlFor="supporting-files"
+                        className="flex items-center justify-center gap-2 w-full py-2.5 border-2 border-dashed border-gray-200 rounded-xl cursor-pointer hover:border-gray-300 transition-colors"
+                      >
+                        <svg className="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                        </svg>
+                        <span className="text-xs text-gray-500">
+                          {form.supportingFiles.length > 0 
+                            ? `${form.supportingFiles.length} file(s) selected`
+                            : 'Click to upload files'
+                          }
+                        </span>
+                      </label>
+                      {form.supportingFiles.length > 0 && (
+                        <div className="mt-2 space-y-1">
+                          {form.supportingFiles.map((file, index) => (
+                            <div key={index} className="flex items-center justify-between text-xs bg-gray-50 px-2.5 py-1.5 rounded-lg">
+                              <span className="text-gray-600 truncate max-w-[180px]">{file.name}</span>
+                              <button
+                                type="button"
+                                onClick={() => setForm({
+                                  ...form,
+                                  supportingFiles: form.supportingFiles.filter((_, i) => i !== index)
+                                })}
+                                className="text-red-400 hover:text-red-600 ml-2"
+                              >
+                                <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                  <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                                </svg>
+                              </button>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
                   </div>
                   
                   <div className="flex gap-3 mt-4">
