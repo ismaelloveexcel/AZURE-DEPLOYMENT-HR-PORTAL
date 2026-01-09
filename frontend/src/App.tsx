@@ -452,7 +452,7 @@ function App() {
     setLoading(true)
     setError(null)
     
-    const loginEmployeeId = isAdminLogin ? 'ADMIN001' : employeeId
+    const loginEmployeeId = isAdminLogin ? 'BAYN00008' : employeeId
     
     try {
       const res = await fetch(`${API_BASE}/auth/login`, {
