@@ -329,39 +329,45 @@ export function NominationPass() {
 
             {/* Progress Steps */}
             <div className="flex items-center justify-between mb-5">
-              {stepLabels.map((label, i) => (
-                <div key={label} className="flex flex-col items-center flex-1">
-                  <div className="flex items-center w-full">
-                    {i > 0 && (
+              {stepLabels.map((label, i) => {
+                const isCompleted = stepIndex > i
+                const isCurrent = stepIndex === i
+                const stepColor = isCompleted ? '#22c55e' : (isCurrent ? THEME_COLOR : undefined)
+                
+                return (
+                  <div key={label} className="flex flex-col items-center flex-1">
+                    <div className="flex items-center w-full">
+                      {i > 0 && (
+                        <div 
+                          className={`h-0.5 flex-1 ${stepIndex >= i ? '' : 'bg-gray-200'}`}
+                          style={stepIndex >= i ? { backgroundColor: stepIndex > i ? '#22c55e' : THEME_COLOR } : {}}
+                        />
+                      )}
                       <div 
-                        className={`h-0.5 flex-1 ${stepIndex >= i ? '' : 'bg-gray-200'}`}
-                        style={stepIndex >= i ? { backgroundColor: THEME_COLOR } : {}}
-                      />
-                    )}
-                    <div 
-                      className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-semibold shrink-0 ${
-                        stepIndex >= i ? 'text-white' : 'bg-gray-200 text-gray-500'
-                      }`}
-                      style={stepIndex >= i ? { backgroundColor: THEME_COLOR } : {}}
-                    >
-                      {stepIndex > i ? (
-                        <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
-                          <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                        </svg>
-                      ) : (
-                        <span className="text-[10px]">{i + 1}</span>
+                        className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-semibold shrink-0 ${
+                          stepIndex >= i ? 'text-white' : 'bg-gray-200 text-gray-500'
+                        }`}
+                        style={stepColor ? { backgroundColor: stepColor } : {}}
+                      >
+                        {isCompleted ? (
+                          <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                          </svg>
+                        ) : (
+                          <span className="text-[10px]">{i + 1}</span>
+                        )}
+                      </div>
+                      {i < stepLabels.length - 1 && (
+                        <div 
+                          className={`h-0.5 flex-1 ${stepIndex > i ? '' : 'bg-gray-200'}`}
+                          style={stepIndex > i ? { backgroundColor: '#22c55e' } : {}}
+                        />
                       )}
                     </div>
-                    {i < stepLabels.length - 1 && (
-                      <div 
-                        className={`h-0.5 flex-1 ${stepIndex > i ? '' : 'bg-gray-200'}`}
-                        style={stepIndex > i ? { backgroundColor: THEME_COLOR } : {}}
-                      />
-                    )}
+                    <span className="text-[9px] text-gray-500 mt-1.5 text-center">{label}</span>
                   </div>
-                  <span className="text-[9px] text-gray-500 mt-1.5 text-center">{label}</span>
-                </div>
-              ))}
+                )
+              })}
             </div>
 
             {/* Next Action Card */}
