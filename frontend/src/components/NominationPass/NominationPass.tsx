@@ -264,25 +264,29 @@ export function NominationPass() {
         {/* Pass Card Container */}
         <div className="bg-white rounded-3xl shadow-2xl overflow-hidden">
           {/* Company Logo */}
-          <div className="bg-white px-5 py-3 flex justify-center border-b border-gray-100">
+          <div className="bg-white px-5 py-4 flex justify-center border-b border-gray-100">
             <img 
               src="/baynunah-logo.png" 
               alt="Baynunah" 
-              className="h-8 object-contain"
+              className="h-10 object-contain"
             />
           </div>
           
           {/* Header */}
           <div 
-            className="px-5 py-4 text-white"
+            className="px-5 py-5 text-white"
             style={{ backgroundColor: THEME_COLOR }}
           >
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <span className="text-sm font-semibold tracking-wide uppercase">Nomination Pass</span>
+                <span className="text-base font-semibold tracking-wide uppercase">Nomination Pass</span>
               </div>
-              <div className="flex items-center gap-2">
-                <span className="text-[10px] font-medium opacity-80">EOY {CURRENT_YEAR}</span>
+              <div className="flex items-center">
+                <img 
+                  src="/baynunah-logo.png" 
+                  alt="Baynunah" 
+                  className="h-6 object-contain brightness-0 invert opacity-90"
+                />
               </div>
             </div>
           </div>
@@ -292,15 +296,13 @@ export function NominationPass() {
             {/* Info Section with QR */}
             <div className="flex items-start justify-between mb-4">
               <div className="flex-1">
-                <p className="text-xs text-gray-500 mb-0.5">{selectedManager ? 'Manager' : 'Nominating Manager'}</p>
-                <p className="text-[10px] text-gray-400 mb-1">EOY-{CURRENT_YEAR}</p>
                 <h2 className="text-lg font-bold text-gray-900 leading-tight">Employee of the Year</h2>
-                <p className="text-sm text-gray-600">{selectedManager?.department || 'Select your name'}</p>
+                <p className="text-sm text-gray-600">{selectedManager?.department || 'Year 2025'}</p>
               </div>
               <div className="flex flex-col items-end gap-2">
                 <span 
                   className="px-2 py-0.5 text-[10px] font-semibold rounded text-white"
-                  style={{ backgroundColor: step === 'success' ? '#22c55e' : THEME_COLOR }}
+                  style={{ backgroundColor: '#22c55e' }}
                 >
                   {step === 'success' ? 'SUBMITTED' : 'ACTIVE'}
                 </span>
