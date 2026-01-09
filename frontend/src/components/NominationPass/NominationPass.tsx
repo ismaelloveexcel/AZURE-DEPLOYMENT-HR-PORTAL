@@ -46,7 +46,7 @@ interface ManagerNominationStatus {
 type Step = 'select-manager' | 'verify' | 'already-nominated' | 'select-nominee' | 'form' | 'success'
 
 const API_BASE = '/api'
-const CURRENT_YEAR = new Date().getFullYear()
+const CURRENT_YEAR = 2025  // Nomination for previous year's performance
 const THEME_COLOR = '#1800ad'
 
 export function NominationPass() {
@@ -275,7 +275,7 @@ export function NominationPass() {
 
   return (
     <div className="min-h-screen min-h-dvh bg-gradient-to-br from-slate-100 to-slate-200 flex items-center justify-center p-2 sm:p-4">
-      <div className="w-full max-w-lg h-full max-h-[100dvh] sm:max-h-[95dvh] flex flex-col">
+      <div className="w-full max-w-xl h-full max-h-[100dvh] sm:max-h-[95dvh] flex flex-col">
         {/* Pass Card Container */}
         <div className="bg-white rounded-2xl sm:rounded-3xl shadow-2xl overflow-hidden flex flex-col flex-1 min-h-0">
           {/* Header - Premium Manager Pass Style */}
@@ -289,9 +289,9 @@ export function NominationPass() {
               </div>
               <div className="flex items-center">
                 <img 
-                  src="/assets/baynunah-logo.png" 
+                  src="/assets/baynunah-logo-black.png" 
                   alt="Baynunah" 
-                  className="h-6 sm:h-7 object-contain"
+                  className="h-7 sm:h-8 object-contain"
                   style={{ filter: 'brightness(0) invert(1)' }}
                 />
               </div>
@@ -339,33 +339,37 @@ export function NominationPass() {
               </div>
             </div>
 
-            {/* Progress Steps - Grid for Equal Spacing */}
-            <div className="grid grid-cols-5 gap-0 mb-3 sm:mb-5">
-              {stepLabels.map((label, i) => {
-                const isCompleted = stepIndex > i
-                const isCurrent = stepIndex === i
-                const stepColor = isCompleted ? '#22c55e' : (isCurrent ? THEME_COLOR : undefined)
-                const isLast = i === stepLabels.length - 1
-                
-                return (
-                  <div 
-                    key={label} 
-                    className="flex flex-col items-center relative"
-                    title={stepDescriptions[i]}
-                  >
-                    <div className="flex items-center w-full justify-center">
-                      {i > 0 && (
-                        <div 
-                          className={`h-0.5 flex-1 ${stepIndex > i - 1 ? '' : 'bg-gray-200'}`}
-                          style={stepIndex > i - 1 ? { backgroundColor: '#22c55e' } : {}}
-                        />
-                      )}
+            {/* Progress Steps - Equal Width Grid with Centered Circles */}
+            <div className="relative mb-3 sm:mb-5">
+              {/* Connecting Line Background */}
+              <div className="absolute top-[14px] sm:top-4 left-[10%] right-[10%] h-0.5 bg-gray-200" />
+              <div 
+                className="absolute top-[14px] sm:top-4 left-[10%] h-0.5 transition-all duration-300"
+                style={{ 
+                  width: `${Math.min(stepIndex, stepLabels.length - 1) * 20}%`,
+                  backgroundColor: '#22c55e'
+                }}
+              />
+              
+              {/* Step Circles */}
+              <div className="relative flex justify-between">
+                {stepLabels.map((label, i) => {
+                  const isCompleted = stepIndex > i
+                  const isCurrent = stepIndex === i
+                  const stepColor = isCompleted ? '#22c55e' : (isCurrent ? THEME_COLOR : undefined)
+                  
+                  return (
+                    <div 
+                      key={label} 
+                      className="flex flex-col items-center"
+                      style={{ width: '20%' }}
+                      title={stepDescriptions[i]}
+                    >
                       <div 
-                        className={`w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center text-xs font-semibold shrink-0 ${
+                        className={`w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center text-xs font-semibold ${
                           stepIndex >= i ? 'text-white' : 'bg-gray-200 text-gray-500'
                         }`}
                         style={stepColor ? { backgroundColor: stepColor } : {}}
-                        title={stepDescriptions[i]}
                       >
                         {isCompleted ? (
                           <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
@@ -375,17 +379,11 @@ export function NominationPass() {
                           <span className="text-[10px] sm:text-xs">{i + 1}</span>
                         )}
                       </div>
-                      {!isLast && (
-                        <div 
-                          className={`h-0.5 flex-1 ${stepIndex > i ? '' : 'bg-gray-200'}`}
-                          style={stepIndex > i ? { backgroundColor: '#22c55e' } : {}}
-                        />
-                      )}
+                      <span className="text-[9px] sm:text-[10px] text-gray-500 mt-1.5 sm:mt-2 text-center whitespace-nowrap">{label}</span>
                     </div>
-                    <span className="text-[9px] sm:text-[10px] text-gray-500 mt-1.5 sm:mt-2 text-center">{label}</span>
-                  </div>
-                )
-              })}
+                  )
+                })}
+              </div>
             </div>
 
             {/* Next Action Card */}
