@@ -324,21 +324,16 @@ export function NominationPass() {
             </div>
 
             {/* Progress Steps */}
-            <div className="flex items-center justify-between mb-3 sm:mb-5">
+            <div className="flex items-center mb-3 sm:mb-5 px-2">
               {stepLabels.map((label, i) => {
                 const isCompleted = stepIndex > i
                 const isCurrent = stepIndex === i
                 const stepColor = isCompleted ? '#22c55e' : (isCurrent ? THEME_COLOR : undefined)
+                const isLast = i === stepLabels.length - 1
                 
                 return (
-                  <div key={label} className="flex flex-col items-center flex-1">
+                  <div key={label} className={`flex flex-col items-center ${isLast ? '' : 'flex-1'}`}>
                     <div className="flex items-center w-full">
-                      {i > 0 && (
-                        <div 
-                          className={`h-0.5 flex-1 ${stepIndex >= i ? '' : 'bg-gray-200'}`}
-                          style={stepIndex >= i ? { backgroundColor: stepIndex > i ? '#22c55e' : THEME_COLOR } : {}}
-                        />
-                      )}
                       <div 
                         className={`w-6 h-6 sm:w-7 sm:h-7 rounded-full flex items-center justify-center text-xs font-semibold shrink-0 ${
                           stepIndex >= i ? 'text-white' : 'bg-gray-200 text-gray-500'
@@ -353,9 +348,9 @@ export function NominationPass() {
                           <span className="text-[9px] sm:text-[10px]">{i + 1}</span>
                         )}
                       </div>
-                      {i < stepLabels.length - 1 && (
+                      {!isLast && (
                         <div 
-                          className={`h-0.5 flex-1 ${stepIndex > i ? '' : 'bg-gray-200'}`}
+                          className={`h-0.5 flex-1 mx-1 ${stepIndex > i ? '' : 'bg-gray-200'}`}
                           style={stepIndex > i ? { backgroundColor: '#22c55e' } : {}}
                         />
                       )}
