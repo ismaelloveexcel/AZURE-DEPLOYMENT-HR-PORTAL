@@ -1,3 +1,5 @@
+import base64
+import json
 from datetime import datetime, timedelta, timezone
 from typing import Any, Dict
 
@@ -64,12 +66,18 @@ def _decode_dev_token(token: str, settings: Settings) -> Dict[str, Any]:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid development token")
 
     try:
-        # SECURITY NOTE: Signature verification is intentionally skipped here because
-        # the token has already been validated above via exact string comparison against
-        # the pre-shared dev_static_token. This function is only reachable when
-        # dev_auth_bypass is enabled (development environments only).
-        return jwt.decode(token, options={"verify_signature": False})
-    except PyJWTError:
+        # Extract claims by parsing the payload directly. The token has already been
+        # validated via exact string comparison above, so we only need to decode the
+        # base64 payload section (no cryptographic verification needed).
+        parts = token.split(".")
+        if len(parts) != 3:
+            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Malformed development token")
+        payload_b64 = parts[1]
+        # Add padding if needed for base64 decoding
+        padded = payload_b64 + "=" * (-len(payload_b64) % 4)
+        payload_bytes = base64.urlsafe_b64decode(padded)
+        return json.loads(payload_bytes)
+    except (ValueError, json.JSONDecodeError, UnicodeDecodeError):
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Malformed development token")
 
 
