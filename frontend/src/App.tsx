@@ -5443,8 +5443,71 @@ function App() {
     )
   }
 
+  const portalCards = [
+    {
+      id: 'manager',
+      name: 'Manager Portal',
+      description: 'Recruitment pipeline, approvals, and team management',
+      icon: (
+        <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+        </svg>
+      ),
+      route: 'recruitment' as Section,
+      color: '#00A0DF'
+    },
+    {
+      id: 'candidate',
+      name: 'Candidate Portal',
+      description: 'Application status and assessment tracking',
+      icon: (
+        <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
+        </svg>
+      ),
+      route: 'candidate-pass' as Section,
+      color: '#34D399'
+    },
+    {
+      id: 'onboarding',
+      name: 'Onboarding Portal',
+      description: 'New joiner tasks and orientation',
+      icon: (
+        <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122" />
+        </svg>
+      ),
+      route: 'onboarding' as Section,
+      color: '#F59E0B'
+    },
+    {
+      id: 'employee',
+      name: 'Employee Portal',
+      description: 'Leave requests, documents, and HR services',
+      icon: (
+        <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+        </svg>
+      ),
+      route: 'employees' as Section,
+      color: '#8B5CF6'
+    },
+    {
+      id: 'agency',
+      name: 'Agency Portal',
+      description: 'Candidate submission and status monitoring',
+      icon: (
+        <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+        </svg>
+      ),
+      route: 'external' as Section,
+      color: '#EC4899'
+    }
+  ]
+
   return (
-    <div className="min-h-screen bg-gray-100 flex flex-col items-center justify-center p-8" style={{ transform: 'scale(0.95)', transformOrigin: 'center center' }}>
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 flex flex-col items-center justify-center p-8">
       {loginModal}
       
       {user && (
@@ -5463,138 +5526,146 @@ function App() {
         </div>
       )}
 
-      <div className="text-center mb-12">
-        <img src="/assets/logo.png" alt="Baynunah" className="h-6 mx-auto mb-4" />
-        <h1 className="text-4xl font-light tracking-widest text-gray-800">HR PORTAL</h1>
+      {/* Header */}
+      <div className="text-center mb-10">
+        <div className="flex items-center justify-center gap-1 mb-2">
+          <span className="text-2xl font-light tracking-wide text-slate-700">baynunah</span>
+          <span className="text-slate-700 text-lg">&#x25E5;</span>
+        </div>
+        <h1 className="text-4xl font-light tracking-widest text-slate-800">HR PORTAL</h1>
       </div>
 
-      <div className="grid grid-cols-2 gap-3" style={{ width: '420px' }}>
-        <button
-          onClick={() => handleNavigate('employees')}
-          className="bg-gradient-to-br from-white to-gray-50 rounded-tl-full rounded-tr-md rounded-bl-md rounded-br-md p-8 flex flex-col items-center justify-center aspect-square transition-all duration-300 hover:scale-105 hover:-translate-y-1"
-          style={{ boxShadow: '0 10px 40px -10px rgba(0,0,0,0.15), 0 4px 6px -2px rgba(0,0,0,0.05), inset 0 1px 0 rgba(255,255,255,0.8)' }}
-        >
-          <svg className="w-12 h-12 text-emerald-500 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-          </svg>
-          <span className="text-sm font-medium text-gray-700 uppercase tracking-wide">Employees</span>
-        </button>
+      {/* Portal Cards Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4 max-w-6xl mb-10">
+        {portalCards.map((portal) => (
+          <button
+            key={portal.id}
+            onClick={() => handleNavigate(portal.route)}
+            className="group relative bg-white/70 backdrop-blur-sm rounded-2xl p-6 flex flex-col items-center text-center transition-all duration-300 hover:scale-105 hover:-translate-y-2 border border-white/50"
+            style={{ 
+              boxShadow: '0 8px 32px rgba(0,0,0,0.08), 0 2px 8px rgba(0,0,0,0.04)',
+            }}
+          >
+            <div 
+              className="w-14 h-14 rounded-xl flex items-center justify-center mb-4 transition-transform duration-300 group-hover:scale-110"
+              style={{ backgroundColor: `${portal.color}15`, color: portal.color }}
+            >
+              {portal.icon}
+            </div>
+            <h3 className="font-semibold text-slate-800 mb-1 text-sm">{portal.name}</h3>
+            <p className="text-xs text-slate-500 leading-relaxed">{portal.description}</p>
+            <div 
+              className="absolute bottom-0 left-1/2 -translate-x-1/2 w-12 h-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+              style={{ backgroundColor: portal.color }}
+            />
+          </button>
+        ))}
+      </div>
 
-        <button
-          onClick={() => handleNavigate('onboarding')}
-          className="bg-gradient-to-br from-white to-gray-50 rounded-tr-full rounded-tl-md rounded-bl-md rounded-br-md p-8 flex flex-col items-center justify-center aspect-square transition-all duration-300 hover:scale-105 hover:-translate-y-1"
-          style={{ boxShadow: '0 10px 40px -10px rgba(0,0,0,0.15), 0 4px 6px -2px rgba(0,0,0,0.05), inset 0 1px 0 rgba(255,255,255,0.8)' }}
-        >
-          <svg className="w-12 h-12 text-emerald-500 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
-          </svg>
-          <span className="text-sm font-medium text-gray-700 uppercase tracking-wide">Onboarding</span>
-        </button>
-
-        <button
-          onClick={() => handleNavigate('external')}
-          className="bg-gradient-to-br from-white to-gray-50 rounded-bl-full rounded-tl-md rounded-tr-md rounded-br-md p-8 flex flex-col items-center justify-center aspect-square transition-all duration-300 hover:scale-105 hover:-translate-y-1"
-          style={{ boxShadow: '0 10px 40px -10px rgba(0,0,0,0.15), 0 4px 6px -2px rgba(0,0,0,0.05), inset 0 1px 0 rgba(255,255,255,0.8)' }}
-        >
-          <svg className="w-12 h-12 text-emerald-500 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" />
-          </svg>
-          <span className="text-sm font-medium text-gray-700 uppercase tracking-wide text-center">External<br/>Users</span>
-        </button>
-
+      {/* Admin Section */}
+      <div className="w-full max-w-4xl">
         <button
           onClick={() => handleNavigate('admin')}
-          className="bg-gradient-to-br from-white to-gray-50 rounded-br-full rounded-tl-md rounded-tr-md rounded-bl-md p-8 flex flex-col items-center justify-center aspect-square transition-all duration-300 hover:scale-105 hover:-translate-y-1"
-          style={{ boxShadow: '0 10px 40px -10px rgba(0,0,0,0.15), 0 4px 6px -2px rgba(0,0,0,0.05), inset 0 1px 0 rgba(255,255,255,0.8)' }}
+          className="w-full bg-white/70 backdrop-blur-sm rounded-2xl p-4 mb-4 flex items-center justify-between transition-all duration-300 hover:bg-white border border-white/50"
+          style={{ boxShadow: '0 8px 32px rgba(0,0,0,0.08)' }}
         >
-          <svg className="w-12 h-12 text-emerald-500 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center">
+              <svg className="w-5 h-5 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+              </svg>
+            </div>
+            <span className="font-medium text-slate-700">Admin Panel</span>
+          </div>
+          <svg className="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
           </svg>
-          <span className="text-sm font-medium text-gray-700 uppercase tracking-wide">Admin</span>
         </button>
+
+        {/* Quick Access Buttons - Only visible when logged in as admin/hr */}
+        {user && (user.role === 'admin' || user.role === 'hr') && (
+          <div className="flex flex-wrap gap-3 justify-center">
+            <button
+              onClick={() => handleNavigate('attendance')}
+              className="bg-white rounded-xl px-4 py-3 flex items-center gap-2 transition-all duration-300 hover:scale-105 border border-gray-100"
+              style={{ boxShadow: '0 4px 12px rgba(0,0,0,0.05)' }}
+            >
+              <svg className="w-5 h-5 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              <span className="text-sm font-medium text-gray-700">Attendance</span>
+            </button>
+
+            <button
+              onClick={() => setActiveSection('templates')}
+              className="bg-white rounded-xl px-4 py-3 flex items-center gap-2 transition-all duration-300 hover:scale-105 border border-gray-100"
+              style={{ boxShadow: '0 4px 12px rgba(0,0,0,0.05)' }}
+            >
+              <svg className="w-5 h-5 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z" />
+              </svg>
+              <span className="text-sm font-medium text-gray-700">Templates</span>
+            </button>
+
+            <button
+              onClick={() => setActiveSection('passes')}
+              className="bg-white rounded-xl px-4 py-3 flex items-center gap-2 transition-all duration-300 hover:scale-105 border border-gray-100"
+              style={{ boxShadow: '0 4px 12px rgba(0,0,0,0.05)' }}
+            >
+              <svg className="w-5 h-5 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z" />
+              </svg>
+              <span className="text-sm font-medium text-gray-700">Passes</span>
+            </button>
+
+            <button
+              onClick={() => setActiveSection('recruitment')}
+              className="bg-white rounded-xl px-4 py-3 flex items-center gap-2 transition-all duration-300 hover:scale-105 border border-gray-100"
+              style={{ boxShadow: '0 4px 12px rgba(0,0,0,0.05)' }}
+            >
+              <svg className="w-5 h-5 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+              </svg>
+              <span className="text-sm font-medium text-gray-700">Recruitment</span>
+            </button>
+
+            <button
+              onClick={() => handleNavigate('performance')}
+              className="bg-white rounded-xl px-4 py-3 flex items-center gap-2 transition-all duration-300 hover:scale-105 border border-gray-100"
+              style={{ boxShadow: '0 4px 12px rgba(0,0,0,0.05)' }}
+            >
+              <svg className="w-5 h-5 text-teal-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+              </svg>
+              <span className="text-sm font-medium text-gray-700">Appraisals</span>
+            </button>
+
+            <button
+              onClick={() => handleNavigate('compliance-alerts')}
+              className="bg-white rounded-xl px-4 py-3 flex items-center gap-2 transition-all duration-300 hover:scale-105 border border-gray-100"
+              style={{ boxShadow: '0 4px 12px rgba(0,0,0,0.05)' }}
+            >
+              <svg className="w-5 h-5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+              </svg>
+              <span className="text-sm font-medium text-gray-700">Compliance Alerts</span>
+            </button>
+
+            <button
+              onClick={() => handleNavigate('insurance-census')}
+              className="bg-white rounded-xl px-4 py-3 flex items-center gap-2 transition-all duration-300 hover:scale-105 border border-gray-100"
+              style={{ boxShadow: '0 4px 12px rgba(0,0,0,0.05)' }}
+            >
+              <svg className="w-5 h-5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
+              </svg>
+              <span className="text-sm font-medium text-gray-700">Insurance Census</span>
+            </button>
+          </div>
+        )}
       </div>
 
-      {/* Quick Access Row */}
-      <div className="flex flex-wrap gap-4 mt-8 justify-center">
-        <button
-          onClick={() => handleNavigate('attendance')}
-          className="bg-white rounded-xl px-6 py-4 flex items-center gap-3 transition-all duration-300 hover:scale-105 hover:-translate-y-1"
-          style={{ boxShadow: '0 10px 40px -10px rgba(0,0,0,0.15), 0 4px 6px -2px rgba(0,0,0,0.05), inset 0 1px 0 rgba(255,255,255,0.8)' }}
-        >
-          <svg className="w-6 h-6 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-          </svg>
-          <span className="text-sm font-medium text-gray-700">Attendance</span>
-        </button>
-
-        <button
-          onClick={() => setActiveSection('templates')}
-          className="bg-white rounded-xl px-6 py-4 flex items-center gap-3 transition-all duration-300 hover:scale-105 hover:-translate-y-1"
-          style={{ boxShadow: '0 10px 40px -10px rgba(0,0,0,0.15), 0 4px 6px -2px rgba(0,0,0,0.05), inset 0 1px 0 rgba(255,255,255,0.8)' }}
-        >
-          <svg className="w-6 h-6 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z" />
-          </svg>
-          <span className="text-sm font-medium text-gray-700">Templates</span>
-        </button>
-
-        <button
-          onClick={() => setActiveSection('passes')}
-          className="bg-white rounded-xl px-6 py-4 flex items-center gap-3 transition-all duration-300 hover:scale-105 hover:-translate-y-1"
-          style={{ boxShadow: '0 10px 40px -10px rgba(0,0,0,0.15), 0 4px 6px -2px rgba(0,0,0,0.05), inset 0 1px 0 rgba(255,255,255,0.8)' }}
-        >
-          <svg className="w-6 h-6 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z" />
-          </svg>
-          <span className="text-sm font-medium text-gray-700">Passes</span>
-        </button>
-
-        <button
-          onClick={() => setActiveSection('recruitment')}
-          className="bg-white rounded-xl px-6 py-4 flex items-center gap-3 transition-all duration-300 hover:scale-105 hover:-translate-y-1"
-          style={{ boxShadow: '0 10px 40px -10px rgba(0,0,0,0.15), 0 4px 6px -2px rgba(0,0,0,0.05), inset 0 1px 0 rgba(255,255,255,0.8)' }}
-        >
-          <svg className="w-6 h-6 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-          </svg>
-          <span className="text-sm font-medium text-gray-700">Recruitment</span>
-        </button>
-
-        <button
-          onClick={() => handleNavigate('performance')}
-          className="bg-white rounded-xl px-6 py-4 flex items-center gap-3 transition-all duration-300 hover:scale-105 hover:-translate-y-1"
-          style={{ boxShadow: '0 10px 40px -10px rgba(0,0,0,0.15), 0 4px 6px -2px rgba(0,0,0,0.05), inset 0 1px 0 rgba(255,255,255,0.8)' }}
-        >
-          <svg className="w-6 h-6 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-          </svg>
-          <span className="text-sm font-medium text-gray-700">Appraisals</span>
-        </button>
-
-        <button
-          onClick={() => handleNavigate('compliance-alerts')}
-          className="bg-white rounded-xl px-6 py-4 flex items-center gap-3 transition-all duration-300 hover:scale-105 hover:-translate-y-1"
-          style={{ boxShadow: '0 10px 40px -10px rgba(0,0,0,0.15), 0 4px 6px -2px rgba(0,0,0,0.05), inset 0 1px 0 rgba(255,255,255,0.8)' }}
-        >
-          <svg className="w-6 h-6 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-          </svg>
-          <span className="text-sm font-medium text-gray-700">Compliance Alerts</span>
-        </button>
-
-        <button
-          onClick={() => handleNavigate('insurance-census')}
-          className="bg-white rounded-xl px-6 py-4 flex items-center gap-3 transition-all duration-300 hover:scale-105 hover:-translate-y-1"
-          style={{ boxShadow: '0 10px 40px -10px rgba(0,0,0,0.15), 0 4px 6px -2px rgba(0,0,0,0.05), inset 0 1px 0 rgba(255,255,255,0.8)' }}
-        >
-          <svg className="w-6 h-6 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
-          </svg>
-          <span className="text-sm font-medium text-gray-700">Insurance Census</span>
-        </button>
-      </div>
-
-      <p className="text-gray-400 text-xs mt-12">Conceptualised by Baynunah HR|IS</p>
+      <p className="text-slate-400 text-xs mt-10">Baynunah Watergeneration Technologies SP LLC</p>
     </div>
   )
 }
