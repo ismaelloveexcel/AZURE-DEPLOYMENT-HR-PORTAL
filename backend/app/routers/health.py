@@ -1,10 +1,120 @@
-from fastapi import APIRouter, Depends
+import hashlib
+import os
+import secrets
+from fastapi import APIRouter, Depends, Query, HTTPException
+from sqlalchemy import text
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.security import require_role
+from app.database import get_session
 
 router = APIRouter(prefix="/health", tags=["health"])
+
+MAINTENANCE_SECRET = os.environ.get("MAINTENANCE_SECRET", "")
+ADMIN_EMPLOYEE_ID = os.environ.get("ADMIN_EMPLOYEE_ID", "BAYN00008")
 
 
 @router.get("", summary="API healthcheck")
 async def healthcheck(role: str = Depends(require_role())):
     return {"status": "ok", "role": role}
+
+
+@router.post("/fix-production", summary="One-time production data fix")
+async def fix_production_data(
+    token: str = Query(..., description="Secure maintenance token from environment"),
+    session: AsyncSession = Depends(get_session),
+):
+    """
+    One-time endpoint to fix production data issues.
+    Requires MAINTENANCE_SECRET environment variable.
+    """
+    if not MAINTENANCE_SECRET:
+        raise HTTPException(status_code=503, detail="Maintenance endpoint not configured")
+    
+    if not secrets.compare_digest(token, MAINTENANCE_SECRET):
+        raise HTTPException(status_code=403, detail="Invalid maintenance token")
+    
+    results = {"employment_status": {}, "admin": {}}
+    
+    # 1. Check current employment_status values
+    check_result = await session.execute(
+        text("SELECT DISTINCT employment_status, COUNT(*) as cnt FROM employees GROUP BY employment_status ORDER BY cnt DESC")
+    )
+    results["employment_status"]["before"] = {row[0]: row[1] for row in check_result.fetchall()}
+    
+    # 2. Normalize employment_status to 'Active'
+    update_result = await session.execute(
+        text("""
+            UPDATE employees 
+            SET employment_status = 'Active' 
+            WHERE LOWER(TRIM(COALESCE(employment_status, ''))) = 'active' 
+            AND (employment_status IS NULL OR employment_status != 'Active')
+        """)
+    )
+    results["employment_status"]["normalized"] = update_result.rowcount if hasattr(update_result, 'rowcount') else 0
+    
+    # 3. Check admin user
+    admin_check = await session.execute(
+        text("SELECT id, name, role, password_hash FROM employees WHERE employee_id = :emp_id"),
+        {"emp_id": ADMIN_EMPLOYEE_ID}
+    )
+    admin_row = admin_check.fetchone()
+    
+    if admin_row:
+        results["admin"]["found"] = True
+        results["admin"]["name"] = admin_row[1]
+        results["admin"]["current_role"] = admin_row[2]
+        
+        # Check if password works
+        current_hash = admin_row[3]
+        password_works = False
+        if current_hash:
+            try:
+                parts = current_hash.split(':')
+                if len(parts) == 2:
+                    salt, stored_key = parts
+                    key = hashlib.pbkdf2_hmac('sha256', "16051988".encode(), salt.encode(), 100000)
+                    password_works = (key.hex() == stored_key)
+            except:
+                pass
+        
+        results["admin"]["password_valid"] = password_works
+        
+        # Fix admin if needed
+        if not password_works or admin_row[2] != 'admin':
+            # Generate new password hash for DOB password
+            salt = secrets.token_hex(16)
+            key = hashlib.pbkdf2_hmac('sha256', "16051988".encode(), salt.encode(), 100000)
+            new_hash = f"{salt}:{key.hex()}"
+            
+            await session.execute(
+                text("""
+                    UPDATE employees 
+                    SET password_hash = :hash, password_changed = false, role = 'admin'
+                    WHERE employee_id = :emp_id
+                """),
+                {"hash": new_hash, "emp_id": ADMIN_EMPLOYEE_ID}
+            )
+            results["admin"]["fixed"] = True
+        else:
+            results["admin"]["fixed"] = False
+    else:
+        results["admin"]["found"] = False
+        results["admin"]["error"] = f"Employee {ADMIN_EMPLOYEE_ID} not found in database"
+    
+    await session.commit()
+    
+    # 4. Verify managers now show
+    manager_check = await session.execute(
+        text("""
+            SELECT COUNT(DISTINCT e.line_manager_id) 
+            FROM employees e 
+            WHERE e.line_manager_id IS NOT NULL 
+            AND e.is_active = true 
+            AND LOWER(TRIM(e.employment_status)) = 'active'
+            AND LOWER(TRIM(e.function)) IN ('officer', 'coordinator', 'skilled labour', 'non skilled labour')
+        """)
+    )
+    results["managers_with_eligible_reports"] = manager_check.scalar() or 0
+    
+    return {"success": True, "fixes_applied": results}

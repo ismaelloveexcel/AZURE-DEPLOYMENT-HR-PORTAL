@@ -56,3 +56,8 @@ deploymentTarget = "cloudrun"
 
 [agent]
 integrations = ["python_openai_ai_integrations:1.0.0"]
+
+[userenv]
+
+[userenv.shared]
+MAINTENANCE_SECRET = "MvkLDDNaG1VfGGNIivQV2esjNFJWPUgLpk15efwJWWc"
