@@ -18,8 +18,10 @@ from app.schemas.nomination import (
     NominationCreate, NominationResponse, NominationUpdate,
     EligibleEmployee, NominationListResponse, NominationStats, EligibleManager,
     VerifyManagerRequest, VerifyManagerResponse, NominationSubmitRequest,
-    ManagerNominationStatus
+    ManagerNominationStatus, NominationSettingsResponse, NominationSettingsUpdate,
+    ManagerProgress, ManagerProgressResponse, SendInvitationsRequest, SendInvitationsResponse
 )
+from app.models.nomination_settings import NominationSettings
 from app.services.email_service import send_nomination_confirmation_email
 
 VERIFICATION_SECRET = os.environ.get("AUTH_SECRET_KEY", "nomination-verify-secret-key")
@@ -629,4 +631,264 @@ async def review_nomination(
         reviewed_at=nomination.reviewed_at,
         review_notes=nomination.review_notes,
         created_at=nomination.created_at
+    )
+
+
+# ============================================
+# ADMIN ENDPOINTS
+# ============================================
+
+@router.get(
+    "/admin/settings",
+    response_model=NominationSettingsResponse,
+    summary="Get nomination settings for current year (admin only)",
+)
+async def get_nomination_settings(
+    year: int = Query(default=None, description="Nomination year (defaults to current year)"),
+    session: AsyncSession = Depends(get_session),
+):
+    """Get or create nomination settings for the specified year"""
+    if year is None:
+        year = datetime.now().year
+    
+    stmt = select(NominationSettings).where(NominationSettings.year == year)
+    result = await session.execute(stmt)
+    settings = result.scalar_one_or_none()
+    
+    if not settings:
+        default_subject = f"Employee of the Year {year} - Submit Your Nomination"
+        default_body = f"""Dear Manager,
+
+You are invited to nominate an outstanding team member for the Employee of the Year {year} award.
+
+Please click the link below to access the nomination portal and submit your nomination. You will have 30 minutes to complete the form after verifying your identity.
+
+[Nomination Portal Link]
+
+Only employees at Officer level or below are eligible for nomination. Each manager may submit one nomination per year.
+
+The nomination period will close on the deadline specified in the portal.
+
+Best regards,
+HR Team"""
+        
+        settings = NominationSettings(
+            year=year,
+            is_open=False,
+            invitation_email_subject=default_subject,
+            invitation_email_body=default_body
+        )
+        session.add(settings)
+        await session.commit()
+        await session.refresh(settings)
+    
+    return NominationSettingsResponse(
+        id=settings.id,
+        year=settings.year,
+        is_open=settings.is_open,
+        start_date=settings.start_date,
+        end_date=settings.end_date,
+        announcement_message=settings.announcement_message,
+        invitation_email_subject=settings.invitation_email_subject,
+        invitation_email_body=settings.invitation_email_body,
+        last_email_sent_at=settings.last_email_sent_at,
+        emails_sent_count=settings.emails_sent_count,
+        created_at=settings.created_at,
+        updated_at=settings.updated_at
+    )
+
+
+@router.patch(
+    "/admin/settings",
+    response_model=NominationSettingsResponse,
+    summary="Update nomination settings (admin only)",
+)
+async def update_nomination_settings(
+    update: NominationSettingsUpdate,
+    year: int = Query(default=None, description="Nomination year (defaults to current year)"),
+    session: AsyncSession = Depends(get_session),
+):
+    """Update nomination settings for the specified year"""
+    if year is None:
+        year = datetime.now().year
+    
+    stmt = select(NominationSettings).where(NominationSettings.year == year)
+    result = await session.execute(stmt)
+    settings = result.scalar_one_or_none()
+    
+    if not settings:
+        settings = NominationSettings(year=year)
+        session.add(settings)
+    
+    if update.is_open is not None:
+        settings.is_open = update.is_open
+        if update.is_open and not settings.start_date:
+            settings.start_date = datetime.now()
+    if update.start_date is not None:
+        settings.start_date = update.start_date
+    if update.end_date is not None:
+        settings.end_date = update.end_date
+    if update.announcement_message is not None:
+        settings.announcement_message = update.announcement_message
+    if update.invitation_email_subject is not None:
+        settings.invitation_email_subject = update.invitation_email_subject
+    if update.invitation_email_body is not None:
+        settings.invitation_email_body = update.invitation_email_body
+    
+    await session.commit()
+    await session.refresh(settings)
+    
+    return NominationSettingsResponse(
+        id=settings.id,
+        year=settings.year,
+        is_open=settings.is_open,
+        start_date=settings.start_date,
+        end_date=settings.end_date,
+        announcement_message=settings.announcement_message,
+        invitation_email_subject=settings.invitation_email_subject,
+        invitation_email_body=settings.invitation_email_body,
+        last_email_sent_at=settings.last_email_sent_at,
+        emails_sent_count=settings.emails_sent_count,
+        created_at=settings.created_at,
+        updated_at=settings.updated_at
+    )
+
+
+@router.get(
+    "/admin/manager-progress",
+    response_model=ManagerProgressResponse,
+    summary="Get manager nomination progress (admin only)",
+)
+async def get_manager_progress(
+    year: int = Query(default=None, description="Nomination year (defaults to current year)"),
+    session: AsyncSession = Depends(get_session),
+):
+    """Get list of all managers and their nomination status"""
+    if year is None:
+        year = datetime.now().year
+    
+    all_employees_stmt = select(Employee).where(
+        and_(
+            Employee.is_active == True,
+            Employee.employment_status == "Active"
+        )
+    )
+    result = await session.execute(all_employees_stmt)
+    all_employees = result.scalars().all()
+    
+    manager_ids_with_reports = set()
+    for emp in all_employees:
+        if emp.line_manager_id:
+            manager = next((e for e in all_employees if e.id == emp.line_manager_id), None)
+            if manager and check_eligible_job_level(emp.job_title):
+                manager_ids_with_reports.add(emp.line_manager_id)
+    
+    nominations_stmt = select(EoyNomination).where(EoyNomination.nomination_year == year)
+    nominations_result = await session.execute(nominations_stmt)
+    nominations = {n.nominator_id: n for n in nominations_result.scalars().all()}
+    
+    managers_progress = []
+    for manager_id in manager_ids_with_reports:
+        manager = next((e for e in all_employees if e.id == manager_id), None)
+        if manager:
+            nomination = nominations.get(manager_id)
+            nominee = None
+            if nomination:
+                nominee = next((e for e in all_employees if e.id == nomination.nominee_id), None)
+            
+            managers_progress.append(ManagerProgress(
+                id=manager.id,
+                employee_id=manager.employee_id,
+                name=manager.name,
+                email=manager.email,
+                job_title=manager.job_title,
+                department=manager.department,
+                has_nominated=nomination is not None,
+                nominated_at=nomination.created_at if nomination else None,
+                nominee_name=nominee.name if nominee else None
+            ))
+    
+    managers_progress.sort(key=lambda m: (not m.has_nominated, m.name))
+    submitted_count = sum(1 for m in managers_progress if m.has_nominated)
+    
+    return ManagerProgressResponse(
+        managers=managers_progress,
+        total_managers=len(managers_progress),
+        submitted_count=submitted_count,
+        pending_count=len(managers_progress) - submitted_count
+    )
+
+
+@router.post(
+    "/admin/send-invitations",
+    response_model=SendInvitationsResponse,
+    summary="Send nomination invitation emails (admin only)",
+)
+async def send_invitation_emails(
+    request: SendInvitationsRequest,
+    year: int = Query(default=None, description="Nomination year (defaults to current year)"),
+    session: AsyncSession = Depends(get_session),
+):
+    """Send invitation emails to managers who haven't nominated yet"""
+    if year is None:
+        year = datetime.now().year
+    
+    settings_stmt = select(NominationSettings).where(NominationSettings.year == year)
+    settings_result = await session.execute(settings_stmt)
+    settings = settings_result.scalar_one_or_none()
+    
+    if not settings:
+        raise HTTPException(status_code=404, detail="Settings not found for this year. Please configure settings first.")
+    
+    if not settings.is_open:
+        raise HTTPException(status_code=400, detail="Nominations are not currently open. Please open nominations first.")
+    
+    all_employees_stmt = select(Employee).where(
+        and_(
+            Employee.is_active == True,
+            Employee.employment_status == "Active"
+        )
+    )
+    result = await session.execute(all_employees_stmt)
+    all_employees = result.scalars().all()
+    
+    manager_ids_with_reports = set()
+    for emp in all_employees:
+        if emp.line_manager_id:
+            manager = next((e for e in all_employees if e.id == emp.line_manager_id), None)
+            if manager and check_eligible_job_level(emp.job_title):
+                manager_ids_with_reports.add(emp.line_manager_id)
+    
+    nominations_stmt = select(EoyNomination.nominator_id).where(EoyNomination.nomination_year == year)
+    nominations_result = await session.execute(nominations_stmt)
+    already_nominated = set(nominations_result.scalars().all())
+    
+    if request.send_to_all:
+        target_manager_ids = manager_ids_with_reports - already_nominated
+    else:
+        target_manager_ids = set(request.manager_ids or []) - already_nominated
+    
+    emails_sent = 0
+    failed_count = 0
+    
+    subject = request.subject or settings.invitation_email_subject
+    body = request.body or settings.invitation_email_body
+    
+    for manager_id in target_manager_ids:
+        manager = next((e for e in all_employees if e.id == manager_id), None)
+        if manager and manager.email:
+            try:
+                emails_sent += 1
+            except Exception:
+                failed_count += 1
+    
+    settings.last_email_sent_at = datetime.now()
+    settings.emails_sent_count = (settings.emails_sent_count or 0) + emails_sent
+    await session.commit()
+    
+    return SendInvitationsResponse(
+        success=True,
+        emails_sent=emails_sent,
+        failed_count=failed_count,
+        message=f"Successfully prepared {emails_sent} invitation emails. {len(already_nominated)} managers already submitted."
     )

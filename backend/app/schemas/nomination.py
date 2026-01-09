@@ -87,7 +87,7 @@ class VerifyManagerResponse(BaseModel):
     success: bool
     token: str = Field(..., description="Short-lived verification token for submission")
     manager_name: str
-    expires_in_minutes: int = 15
+    expires_in_minutes: int = 30
 
 
 class NominationSubmitRequest(BaseModel):
@@ -104,3 +104,72 @@ class ManagerNominationStatus(BaseModel):
     has_nominated: bool = Field(..., description="Whether the manager has already submitted a nomination")
     nomination: Optional[NominationResponse] = Field(None, description="The nomination if already submitted")
     can_nominate: bool = Field(..., description="Whether the manager can still submit a nomination")
+
+
+class NominationSettingsBase(BaseModel):
+    """Base schema for nomination settings"""
+    year: int
+    is_open: bool = False
+    start_date: Optional[datetime] = None
+    end_date: Optional[datetime] = None
+    announcement_message: Optional[str] = None
+    invitation_email_subject: Optional[str] = None
+    invitation_email_body: Optional[str] = None
+
+
+class NominationSettingsResponse(NominationSettingsBase):
+    """Response schema for nomination settings"""
+    id: int
+    last_email_sent_at: Optional[datetime] = None
+    emails_sent_count: int = 0
+    created_at: datetime
+    updated_at: datetime
+
+    model_config = {"from_attributes": True}
+
+
+class NominationSettingsUpdate(BaseModel):
+    """Update schema for nomination settings"""
+    is_open: Optional[bool] = None
+    start_date: Optional[datetime] = None
+    end_date: Optional[datetime] = None
+    announcement_message: Optional[str] = None
+    invitation_email_subject: Optional[str] = None
+    invitation_email_body: Optional[str] = None
+
+
+class ManagerProgress(BaseModel):
+    """Manager nomination progress tracking"""
+    id: int
+    employee_id: str
+    name: str
+    email: Optional[str]
+    job_title: Optional[str]
+    department: Optional[str]
+    has_nominated: bool
+    nominated_at: Optional[datetime] = None
+    nominee_name: Optional[str] = None
+
+
+class ManagerProgressResponse(BaseModel):
+    """Response for manager progress list"""
+    managers: List[ManagerProgress]
+    total_managers: int
+    submitted_count: int
+    pending_count: int
+
+
+class SendInvitationsRequest(BaseModel):
+    """Request to send invitation emails"""
+    subject: Optional[str] = None
+    body: Optional[str] = None
+    send_to_all: bool = True
+    manager_ids: Optional[List[int]] = None
+
+
+class SendInvitationsResponse(BaseModel):
+    """Response after sending invitations"""
+    success: bool
+    emails_sent: int
+    failed_count: int
+    message: str
