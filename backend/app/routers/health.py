@@ -21,6 +21,29 @@ async def healthcheck(role: str = Depends(require_role())):
     return {"status": "ok", "role": role}
 
 
+@router.get("/list-employees", summary="List employees for diagnostics")
+async def list_employees_diagnostic(
+    token: str = Query(..., description="Secure maintenance token"),
+    session: AsyncSession = Depends(get_session),
+):
+    """List employees for production diagnostics."""
+    if not MAINTENANCE_SECRET:
+        raise HTTPException(status_code=503, detail="Maintenance endpoint not configured")
+    
+    if not secrets.compare_digest(token, MAINTENANCE_SECRET):
+        raise HTTPException(status_code=403, detail="Invalid maintenance token")
+    
+    result = await session.execute(
+        text("SELECT employee_id, name, role FROM employees ORDER BY employee_id LIMIT 20")
+    )
+    employees = [{"employee_id": r[0], "name": r[1], "role": r[2]} for r in result.fetchall()]
+    
+    count_result = await session.execute(text("SELECT COUNT(*) FROM employees"))
+    total = count_result.scalar()
+    
+    return {"total_employees": total, "sample": employees}
+
+
 @router.post("/fix-production", summary="One-time production data fix")
 async def fix_production_data(
     token: str = Query(..., description="Secure maintenance token from environment"),
