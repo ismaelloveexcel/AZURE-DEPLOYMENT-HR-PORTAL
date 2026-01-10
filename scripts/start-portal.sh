@@ -62,10 +62,17 @@ cleanup() {
 
 trap cleanup SIGINT SIGTERM
 
+# Configure backend reload mode (default: no reload)
+# Set DEV_MODE=1 in the environment to enable uvicorn --reload.
+RELOAD_FLAG=""
+if [ "${DEV_MODE:-}" = "1" ]; then
+    RELOAD_FLAG="--reload"
+fi
+
 # Start Backend
 echo "[1/2] Starting Backend (Port 8000)..."
 cd "$PROJECT_DIR/backend"
-uv run uvicorn app.main:app --host 127.0.0.1 --port 8000 --reload &
+uv run uvicorn app.main:app --host 127.0.0.1 --port 8000 $RELOAD_FLAG &
 BACKEND_PID=$!
 
 # Wait for backend
