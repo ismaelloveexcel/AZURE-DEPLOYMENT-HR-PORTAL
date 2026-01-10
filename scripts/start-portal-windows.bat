@@ -8,7 +8,7 @@ REM Requirements:
 REM   - Python 3.11+ installed
 REM   - Node.js 18+ installed
 REM   - PostgreSQL running
-REM   - Dependencies installed (run once: scripts\install-deps.bat)
+REM   - Dependencies installed (run once: scripts\install-windows.bat)
 REM
 REM ============================================
 
