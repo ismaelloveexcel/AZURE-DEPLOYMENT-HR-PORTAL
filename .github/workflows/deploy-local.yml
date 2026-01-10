@@ -63,10 +63,18 @@ jobs:
         working-directory: frontend
         run: npm run build
       
-      - name: Copy Frontend Build to Backend Static
+      - name: Copy Frontend Build to Backend Static (non-Windows)
+        if: runner.os != 'Windows'
         run: |
           mkdir -p backend/static
           cp -r frontend/dist/* backend/static/
+      
+      - name: Copy Frontend Build to Backend Static (Windows)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force -Path "backend\static" | Out-Null
+          Copy-Item -Path "frontend\dist\*" -Destination "backend\static\" -Recurse -Force
       
       - name: Run Database Migrations
         working-directory: backend
