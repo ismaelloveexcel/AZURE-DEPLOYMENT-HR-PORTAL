@@ -1,0 +1,15 @@
+name: App Health Check
+on:
+  schedule:
+    - cron: "*/15 * * * *" # every 15 minutes
+jobs:
+  health-check:
+    name: Check App Health
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check frontend health
+        run: |
+          curl -f https://<YOUR_STATIC_WEB_APP_URL> || exit 1
+      - name: Check backend health
+        run: |
+          curl -f https://<YOUR_BACKEND_APP_SERVICE_URL>/health || exit 1
