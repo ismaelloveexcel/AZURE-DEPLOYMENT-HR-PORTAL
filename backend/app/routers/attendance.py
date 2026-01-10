@@ -1221,8 +1221,6 @@ async def set_exceptional_overtime(
     if not record.overtime_hours or record.overtime_hours <= 0:
         raise HTTPException(status_code=400, detail="No overtime hours to mark as exceptional")
     
-    now = datetime.now(timezone.utc)
-    
     # Mark as exceptional overtime
     record.exceptional_overtime = request.exceptional_overtime
     record.exceptional_overtime_reason = request.reason
