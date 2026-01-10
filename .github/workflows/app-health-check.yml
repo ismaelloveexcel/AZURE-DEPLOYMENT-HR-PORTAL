@@ -1,11 +1,13 @@
 name: App Health Check
 on:
-  schedule:
-    - cron: "*/15 * * * *" # every 15 minutes
+  workflow_dispatch: # Manual trigger only until URLs are configured
+  # schedule:
+  #   - cron: "*/15 * * * *" # every 15 minutes
 jobs:
   health-check:
     name: Check App Health
     runs-on: ubuntu-latest
+    if: false # Disabled until Azure URLs are configured
     steps:
       - name: Check frontend health
         run: |
