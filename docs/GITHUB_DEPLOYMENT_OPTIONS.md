@@ -365,10 +365,13 @@ jobs:
           npm install
           npm run build
       
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: frontend/dist
+      
       - name: Deploy to Pages
         uses: actions/deploy-pages@v4
-        with:
-          artifact_path: frontend/dist
 ```
 
 ### Considerations
