@@ -8,7 +8,6 @@ This module provides:
 Uses APScheduler for task scheduling.
 Install with: pip install apscheduler
 """
-import asyncio
 import logging
 from datetime import datetime, time
 from typing import Optional
