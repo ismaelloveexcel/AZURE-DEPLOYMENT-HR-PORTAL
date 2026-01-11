@@ -134,10 +134,13 @@ gh pr close 8
 ```
 
 ### Step 4: Delete Stale Branches (Phase 1 - Safe to Delete Now)
-These branches have no active PRs or their PRs have been merged/closed:
+These branches have no active PRs. This includes:
+- Stale branches with no associated PRs
+- Branches from already merged PRs (#1, #4, #6, #7)
+- Branches from closed PRs (#2, #3, #5)
 
 ```bash
-# Phase 1: Delete stale branches with no active PRs
+# Phase 1: Delete stale and completed branches (safe to run immediately)
 for branch in \
   copilot/automate-deployment-on-azure \
   copilot/check-branch-merge-status \
