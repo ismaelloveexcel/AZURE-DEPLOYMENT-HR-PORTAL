@@ -9,12 +9,6 @@
       "allowedRoles": ["authenticated"]
     }
   ],
-  "responseOverrides": {
-    "401": {
-      "redirect": "/.auth/login/github",
-      "statusCode": 302
-    }
-  },
   "platform": {
     "apiRuntime": "python:3.11"
   }
