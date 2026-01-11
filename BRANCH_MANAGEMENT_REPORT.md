@@ -133,9 +133,11 @@ gh pr merge 8 --merge
 gh pr close 8
 ```
 
-### Step 4: Delete All Stale Branches
+### Step 4: Delete Stale Branches (Phase 1 - Safe to Delete Now)
+These branches have no active PRs or their PRs have been merged/closed:
+
 ```bash
-# Bulk delete script
+# Phase 1: Delete stale branches with no active PRs
 for branch in \
   copilot/automate-deployment-on-azure \
   copilot/check-branch-merge-status \
@@ -154,22 +156,39 @@ for branch in \
   copilot/pull-data-from-replit \
   copilot/remove-obsolete-files \
   copilot/remove-unnecessary-pull-requests \
-  copilot/review-attendance-module \
   copilot/review-documentation-feedback \
   copilot/review-hr-app-implementation \
   copilot/review-insurance-census-module \
   copilot/review-pull-requests \
   copilot/transfer-app-to-azure-devops \
-  copilot/sub-pr-9 \
-  copilot/sub-pr-9-again \
-  copilot/sub-pr-9-another-one \
-  copilot/delete-obsolete-branches \
   dependabot/github_actions/astral-sh/setup-uv-7; do
   git push origin --delete "$branch" 2>/dev/null || echo "Branch $branch not found or already deleted"
 done
 ```
 
-### Step 5: Enable Automatic Branch Deletion
+### Step 5: Delete Branches After Merging PR #9 (Phase 2)
+Run this ONLY after PR #9 is merged and child PRs (#10, #11, #12) are closed:
+
+```bash
+# Phase 2: Delete after PR #9 is merged
+for branch in \
+  copilot/review-attendance-module \
+  copilot/sub-pr-9 \
+  copilot/sub-pr-9-again \
+  copilot/sub-pr-9-another-one; do
+  git push origin --delete "$branch" 2>/dev/null || echo "Branch $branch not found or already deleted"
+done
+```
+
+### Step 6: Delete Branches After PR #8 Decision (Phase 3)
+Run this ONLY after you decide on PR #8 (merge or close):
+
+```bash
+# Phase 3: Delete after PR #8 decision
+git push origin --delete copilot/delete-obsolete-branches
+```
+
+### Step 7: Enable Automatic Branch Deletion
 Go to: **Settings → General → Pull Requests**  
 Check: ✅ **Automatically delete head branches**
 
