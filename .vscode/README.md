@@ -51,7 +51,7 @@ Debug configurations accessible via `F5` or Debug panel
 | Name | Type | Description |
 |------|------|-------------|
 | **Backend: FastAPI** | Python | Debug backend on port 8000 |
-| **Backend: FastAPI (5001)** | Python | Debug backend on port 5001 (Replit mode) |
+| **Backend: FastAPI (5001)** | Python | Debug backend on port 5001 (alternative port) |
 | **Backend: Run Alembic Migration** | Python | Debug database migrations |
 | **Frontend: Launch Chrome** | Chrome | Debug React in Chrome browser |
 | **Frontend: Attach to Chrome** | Chrome | Attach to existing Chrome instance |

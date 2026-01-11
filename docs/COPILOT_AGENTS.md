@@ -249,7 +249,7 @@ Each agent has deep knowledge of:
 - Authentication and authorization system
 - Audit trail implementation
 - Code patterns and conventions
-- Deployment on Replit
+- Deployment on Azure
 
 ### HR Assistant Specialization
 - HR workflows and best practices

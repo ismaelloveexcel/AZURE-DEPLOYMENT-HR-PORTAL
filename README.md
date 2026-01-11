@@ -351,58 +351,26 @@ Run the application in a cloud-based development environment under Microsoft inf
 - ✅ 60 hours/month free
 - ✅ No setup on your laptop needed
 
-### Replit Deployment
-
-The app is also configured for **Replit** deployment under your company domain.
-
-**Auto-configured features:**
-- ✅ Frontend runs on port 5000 (external port 80)
-- ✅ Backend runs on port 5001 (external port 3000)
-- ✅ PostgreSQL available via Nix packages
-- ✅ One-click run via Replit workflows
-
-**Setup Steps:**
-
-1. **Import to Replit**: Fork or import this repo to your Replit workspace
-2. **Configure Secrets** (in Replit Secrets tab):
-   ```
-   DATABASE_URL=postgresql+asyncpg://...
-   AUTH_ISSUER=https://login.microsoftonline.com/<tenant-id>/v2.0
-   AUTH_AUDIENCE=api://secure-renewals
-   AUTH_JWKS_URL=https://login.microsoftonline.com/<tenant-id>/discovery/v2.0/keys
-   ALLOWED_ORIGINS=https://your-replit-app.your-company.com
-   ```
-3. **Set Custom Domain**: In Replit → Settings → Custom Domains, add your company domain
-4. **Run**: Click the Run button - frontend and backend start automatically
-
-**Replit-specific URLs:**
-- Frontend: `https://your-app-name.your-company.com`
-- Backend API: `https://your-app-name.your-company.com:3000/api`
-- API Docs: `https://your-app-name.your-company.com:3000/docs`
-
 ### Environment Variables
 
-**Backend Secrets (Replit Secrets or `.env`):**
+**Backend Secrets (`.env` or Azure App Settings):**
 ```env
 DATABASE_URL=postgresql+asyncpg://user:pass@host:5432/dbname
-ALLOWED_ORIGINS=https://your-app.your-company.com
-AUTH_ISSUER=https://login.microsoftonline.com/<tenant>/v2.0
-AUTH_AUDIENCE=api://secure-renewals
-AUTH_JWKS_URL=https://login.microsoftonline.com/<tenant>/discovery/v2.0/keys
+ALLOWED_ORIGINS=https://your-app.azurewebsites.net
+AUTH_SECRET_KEY=your-secure-secret-key
 ```
 
-**Frontend (auto-configured in Replit):**
+**Frontend:**
 ```env
-VITE_API_BASE_URL=https://your-app.your-company.com:3000/api
+VITE_API_BASE_URL=https://your-app.azurewebsites.net/api
 ```
 
 ### Deployment Checklist
 
-- [ ] Import repo to Replit workspace
-- [ ] Configure Replit Secrets with database and auth settings
-- [ ] Set custom company domain in Replit settings
+- [ ] Configure Azure App Service or Static Web Apps
+- [ ] Set environment variables in Azure App Settings
 - [ ] Run database migrations (`cd backend && uv run alembic upgrade head`)
-- [ ] Click Run to start the application
+- [ ] Deploy application
 - [ ] Add admin user (first user with admin role)
 - [ ] Share portal URL with HR team
 

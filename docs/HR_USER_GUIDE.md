@@ -52,7 +52,7 @@ Before using the portal, make sure you have:
 3. Enter your **password**
 4. Click **Login**
 
-> 💡 **Tip:** The portal runs 24/7 on Replit - no need to wait for anyone to start it. Just open the URL and you're ready to go!
+> 💡 **Tip:** The portal runs 24/7 on Azure - no need to wait for anyone to start it. Just open the URL and you're ready to go!
 
 ### Forgot Password?
 

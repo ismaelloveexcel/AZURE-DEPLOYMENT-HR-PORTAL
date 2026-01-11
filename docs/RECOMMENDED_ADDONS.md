@@ -253,65 +253,43 @@ Create `.github/ISSUE_TEMPLATE/` with:
 
 ---
 
-## 5. Replit Deployment (Primary Platform)
+## 5. Azure Deployment (Primary Platform)
 
-> **The app will be published on Replit under your company domain.**
+> **The app is deployed on Azure under your company domain.**
 
-### Replit Benefits for HR Portal
+### Azure Benefits for HR Portal
 
 | Feature | Benefit |
 |---------|---------|
-| **Always-on** | App runs 24/7, no manual restarts |
+| **Always-on** | App runs 24/7 with high availability |
 | **Custom domain** | Use your company domain (e.g., `hr.yourcompany.com`) |
 | **Auto-HTTPS** | SSL certificates auto-managed |
-| **Secrets management** | Secure environment variables |
-| **One-click deploy** | Just click Run |
-| **Built-in database** | PostgreSQL via Nix packages |
-
-### Replit Configuration (Already Configured)
-
-The `.replit` file is pre-configured:
-
-```toml
-modules = ["nodejs-20", "python-3.11"]
-
-[[ports]]
-localPort = 5000
-externalPort = 80  # Frontend
-
-[[ports]]
-localPort = 5001
-externalPort = 3000  # Backend API
-
-[nix]
-packages = ["postgresql"]
-
-[workflows]
-runButton = "Project"  # One-click to start everything
-```
+| **App Settings** | Secure environment variables |
+| **GitHub integration** | Continuous deployment from GitHub |
+| **Managed database** | Azure Database for PostgreSQL |
 
 ### Deployment Steps
 
-1. **Import to Replit** - Fork/import this repository
-2. **Configure Secrets** - Add these in Replit Secrets tab:
+1. **Configure Azure App Service** - Create Web App in Azure Portal
+2. **Configure App Settings** - Add environment variables:
    - `DATABASE_URL` - PostgreSQL connection string
    - `AUTH_SECRET_KEY` - Secret key for JWT tokens
-   - `ALLOWED_ORIGINS` - Your Replit custom domain
-3. **Set Custom Domain** - Replit Settings → Custom Domains
+   - `ALLOWED_ORIGINS` - Your Azure app domain
+3. **Set Custom Domain** - Azure Portal → Custom Domains
 4. **Run Migrations** - `cd backend && uv run alembic upgrade head`
-5. **Click Run** - Frontend and backend start automatically
+5. **Deploy** - Use GitHub Actions or Azure CLI
 
 ### No Manual Intervention After Setup
 
-Once deployed on Replit:
-- ✅ App runs continuously (Always-on)
+Once deployed on Azure:
+- ✅ App runs continuously with auto-scaling
 - ✅ Auto-restarts on crash
 - ✅ HTTPS auto-renewed
-- ✅ Updates via GitHub sync
+- ✅ Updates via GitHub Actions
 
 ---
 
-## 6. Alternative Hosting (If Not Using Replit)
+## 6. Alternative Hosting (If Not Using Azure)
 
 ### Recommended Services (Free Tiers Available)
 
@@ -332,7 +310,7 @@ Once deployed on Replit:
 
 | Task | Automation Benefit | Manual Work Eliminated |
 |------|-------------------|----------------------|
-| ✅ Replit deployment | One-click run, custom domain | No server management |
+| ✅ Azure deployment | GitHub Actions CI/CD | No server management |
 | ✅ GitHub Actions CI/CD | Auto-lint on push | No manual code checks |
 | ✅ Dependabot with auto-merge | Auto-update dependencies | No manual updates |
 | Employee ID login | Simple login, no SSO setup | No token management |
