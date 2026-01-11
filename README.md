@@ -8,6 +8,28 @@
 
 ---
 
+## ⚡ Easiest Deployment (10 minutes)
+
+**Just want to get started quickly?** Use local deployment with SQLite (no database setup needed):
+
+```bash
+# 1. Clone and enter project
+git clone https://github.com/ismaelloveexcel/HR-PORTAL-AZURE.git
+cd HR-PORTAL-AZURE
+
+# 2. Run installer (macOS/Linux)
+chmod +x scripts/install.sh
+./scripts/install.sh
+
+# Windows: Run scripts\install-windows.bat instead
+```
+
+**That's it!** Opens at http://localhost:5000
+
+📖 **[Full Deployment Guide](docs/EASIEST_DEPLOYMENT_GUIDE.md)** - All options including Codespaces
+
+---
+
 ## 📋 Table of Contents
 
 - [Quick Start for HR Users](#-quick-start-for-hr-users)
