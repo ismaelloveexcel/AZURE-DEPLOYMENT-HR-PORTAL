@@ -490,3 +490,111 @@ async def import_data(
         raise HTTPException(status_code=500, detail=f"Import failed: {str(e)}")
     
     return {"success": True, "imported": results, "errors": all_errors[:20]}
+
+
+@router.get("/db", summary="Database connectivity check")
+async def health_check_db(session: AsyncSession = Depends(get_session)):
+    """
+    Check database connectivity and return basic stats.
+    """
+    import logging
+    
+    logger = logging.getLogger(__name__)
+    
+    try:
+        # Test query
+        result = await session.execute(text("SELECT COUNT(*) FROM employees"))
+        employee_count = result.scalar()
+        
+        # Check admin exists
+        admin_result = await session.execute(
+            text("SELECT employee_id, name, role, is_active FROM employees WHERE employee_id = 'BAYN00008'")
+        )
+        admin = admin_result.fetchone()
+        
+        return {
+            "database": "connected",
+            "employee_count": employee_count,
+            "admin_exists": admin is not None,
+            "admin_details": {
+                "employee_id": admin[0],
+                "name": admin[1],
+                "role": admin[2],
+                "is_active": admin[3]
+            } if admin else None
+        }
+    except Exception as e:
+        logger.error(f"Database health check failed: {e}")
+        raise HTTPException(
+            status_code=503,
+            detail=f"Database connection failed: {str(e)}"
+        )
+
+
+@router.post("/reset-admin-password", summary="Reset admin password to default (emergency use)")
+async def reset_admin_password(
+    secret_token: str = Header(..., alias="X-Admin-Secret"),
+    session: AsyncSession = Depends(get_session),
+):
+    """
+    Emergency endpoint to reset BAYN00008 admin password to default (DOB: 16051988).
+    Requires X-Admin-Secret header matching AUTH_SECRET_KEY environment variable.
+    """
+    import logging
+    from app.core.config import get_settings
+    
+    logger = logging.getLogger(__name__)
+    settings = get_settings()
+    
+    # Verify secret token
+    if secret_token != settings.auth_secret_key:
+        logger.warning("Unauthorized admin password reset attempt")
+        raise HTTPException(status_code=403, detail="Invalid secret token")
+    
+    try:
+        # Reset admin password
+        ADMIN_EMPLOYEE_ID = "BAYN00008"
+        ADMIN_PASSWORD_HASH = "3543bc93f69b085852270bb3edfac94a:7e8f4f92a9b90a1260bc005304f5b30f014dd4603056cacb0b6170d05049b832"
+        
+        result = await session.execute(
+            text("""
+                UPDATE employees 
+                SET password_hash = :hash,
+                    password_changed = false,
+                    role = 'admin',
+                    is_active = true,
+                    employment_status = 'Active'
+                WHERE employee_id = :emp_id
+                RETURNING employee_id, name, role, is_active
+            """),
+            {"hash": ADMIN_PASSWORD_HASH, "emp_id": ADMIN_EMPLOYEE_ID}
+        )
+        
+        row = result.fetchone()
+        await session.commit()
+        
+        if row:
+            logger.info(f"Admin password reset successful for {ADMIN_EMPLOYEE_ID}")
+            return {
+                "success": True,
+                "message": f"Password reset for {row[0]} - {row[1]}",
+                "employee_id": row[0],
+                "name": row[1],
+                "role": row[2],
+                "is_active": row[3],
+                "default_password": "16051988"
+            }
+        else:
+            logger.error(f"Admin employee {ADMIN_EMPLOYEE_ID} not found")
+            return {
+                "success": False,
+                "message": f"Employee {ADMIN_EMPLOYEE_ID} not found in database",
+            }
+            
+    except Exception as e:
+        logger.error(f"Admin password reset failed: {e}")
+        await session.rollback()
+        raise HTTPException(
+            status_code=500,
+            detail=f"Password reset failed: {str(e)}"
+        )
