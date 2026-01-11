@@ -26,7 +26,12 @@ jobs:
         id: backend-health
         run: |
           # Try to reach the backend health endpoint
-          BACKEND_URL="${{ secrets.BACKEND_URL || 'https://hr-portal-backend.azurewebsites.net' }}"
+          BACKEND_URL="${{ secrets.BACKEND_URL }}"
+          
+          if [ -z "$BACKEND_URL" ]; then
+            echo "❌ BACKEND_URL secret is not configured. Please set BACKEND_URL in the repository or environment secrets."
+            exit 1
+          fi
           
           echo "Checking backend at $BACKEND_URL/health"
           
@@ -43,7 +48,12 @@ jobs:
       - name: Check frontend health
         id: frontend-health
         run: |
-          FRONTEND_URL="${{ secrets.FRONTEND_URL || 'https://hr-portal.azurewebsites.net' }}"
+          FRONTEND_URL="${{ secrets.FRONTEND_URL }}"
+          
+          if [ -z "$FRONTEND_URL" ]; then
+            echo "::error::FRONTEND_URL secret is not configured. Please set it in the repository or organization secrets."
+            exit 1
+          fi
           
           echo "Checking frontend at $FRONTEND_URL"
           
@@ -311,7 +321,7 @@ jobs:
           echo "Docs endpoint: ${DOCS_TIME}s"
           
           # Check if times are acceptable (under 3 seconds)
-          if (( $(echo "$HEALTH_TIME > 3.0" | bc -l) )); then
+          if awk -v t="$HEALTH_TIME" 'BEGIN { exit (t > 3.0 ? 0 : 1) }'; then
             echo "⚠️ Health endpoint is slow (${HEALTH_TIME}s)"
             echo "slow=true" >> $GITHUB_OUTPUT
           fi

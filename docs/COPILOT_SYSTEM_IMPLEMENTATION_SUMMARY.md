@@ -513,9 +513,9 @@ CONTRIBUTING.md                       [UPDATED]
 **Total Time**: ~1 hour
 
 ### For Developers
-1. Read automation section in [CONTRIBUTING.md](CONTRIBUTING.md) (15 min)
-2. Review [PR template](. github/PULL_REQUEST_TEMPLATE.md) (5 min)
-3. Check [workflow files](.github/workflows/) (15 min)
+1. Read automation section in [CONTRIBUTING.md](../CONTRIBUTING.md) (15 min)
+2. Review [PR template](../.github/PULL_REQUEST_TEMPLATE.md) (5 min)
+3. Check [workflow files](../.github/workflows/) (15 min)
 
 **Total Time**: ~30 min
 
@@ -562,6 +562,8 @@ CONTRIBUTING.md                       [UPDATED]
 2. Enhance workflows based on learnings
 3. Add more security patterns if needed
 4. Expand documentation based on FAQs
+
+**Note**: The "Friday 6 PM - Saturday 12 PM GST" maintenance window refers to the preferred weekend time period for scheduling maintenance tasks (not an 18-hour continuous downtime). Actual maintenance typically takes 2-4 hours within this window.
 
 ---
 

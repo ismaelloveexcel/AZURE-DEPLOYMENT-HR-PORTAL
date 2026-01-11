@@ -48,9 +48,11 @@
 **A**: 
 1. Go to the portal URL provided by your IT team
 2. Enter your employee ID
-3. Enter your initial password (your date of birth in DDMMYYYY format)
+3. Enter the secure temporary password provided by your IT/HR team (sent via secure channel like email or SMS)
 4. You'll be prompted to change your password immediately
-5. Set a strong password and log in
+5. Set a strong, unique password and log in
+
+**Security Note**: Never use easily guessable information like date of birth as a password. Always use strong, randomly generated passwords for initial access.
 
 ### Q: I forgot my password. What do I do?
 **A**: Contact your system administrator or IT support. Password reset functionality may be available in the future, but currently requires admin intervention.

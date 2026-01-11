@@ -17,9 +17,9 @@ This checklist will guide you through setting up and learning the HR Portal. As 
 
 ### Account Setup
 - [ ] Receive portal URL from IT/setup team
-- [ ] Receive your admin credentials (employee ID + initial password)
+- [ ] Receive your admin credentials (employee ID + secure temporary password)
 - [ ] Log in for the first time
-- [ ] Change initial password (DOB format) to secure password
+- [ ] Change temporary password to a strong, unique password
 - [ ] Verify you can access the portal
 - [ ] Bookmark the portal URL in your browser
 
@@ -289,10 +289,10 @@ Learn to handle:
 - Enhancement suggestion
 
 **Save These Contacts**:
-- Technical Support: <!-- Add contact -->
-- System Administrator: <!-- Add contact -->
+- Technical Support: [Add your primary technical support contact - name, email, phone]
+- System Administrator: [Add your system administrator contact - name, email, phone]
 - GitHub Repository: https://github.com/ismaelloveexcel/HR-PORTAL-AZURE
-- Emergency Hotline: <!-- Add if applicable -->
+- Emergency Hotline: [Add your company's 24/7 emergency hotline if available]
 
 **✅ Checkpoint**: You know how to get help when needed
 
