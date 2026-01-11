@@ -3,7 +3,7 @@ import json
 import os
 import secrets
 from typing import List, Dict, Any
-from fastapi import APIRouter, Depends, Query, HTTPException, Body
+from fastapi import APIRouter, Depends, Query, HTTPException, Body, Header
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
 
