@@ -54,10 +54,12 @@ def test_ssl_configuration_in_database():
     database_py = ROOT / "app" / "database.py"
     content = database_py.read_text()
     
-    # Check that SSL detection logic exists
-    assert 'ssl_required = False' in content, "Should initialize ssl_required flag"
-    assert '"sslmode=require" in db_url or "ssl=require" in db_url' in content, \
-        "Should detect SSL in connection string"
+    # Check that the utility function is imported and used
+    assert 'from app.core.db_utils import clean_database_url_for_asyncpg' in content, \
+        "Should import clean_database_url_for_asyncpg utility"
+    
+    assert 'db_url, ssl_required = clean_database_url_for_asyncpg' in content, \
+        "Should use utility function to clean URL and detect SSL"
     
     # Check that SSL connect_args are passed when SSL is required
     assert 'connect_args={"ssl": "require"}' in content, \
@@ -67,10 +69,6 @@ def test_ssl_configuration_in_database():
     assert 'if ssl_required:' in content, \
         "Should conditionally create engine based on SSL requirement"
     
-    # Make sure old logic that just strips SSL is replaced
-    assert 'asyncpg uses connect_args instead' in content, \
-        "Should document that asyncpg uses connect_args for SSL"
-    
     print("✓ SSL configuration in database.py is correct")
 
 
@@ -79,10 +77,12 @@ def test_ssl_configuration_in_alembic():
     env_py = ROOT / "alembic" / "env.py"
     content = env_py.read_text()
     
-    # Check that SSL detection logic exists
-    assert 'ssl_required = False' in content, "Should initialize ssl_required flag"
-    assert '"sslmode=require" in db_url or "ssl=require" in db_url' in content, \
-        "Should detect SSL in connection string"
+    # Check that the utility function is imported and used
+    assert 'from app.core.db_utils import clean_database_url_for_asyncpg' in content, \
+        "Should import clean_database_url_for_asyncpg utility"
+    
+    assert 'db_url, ssl_required = clean_database_url_for_asyncpg' in content, \
+        "Should use utility function to clean URL and detect SSL"
     
     # Check that SSL connect_args are prepared when SSL is required
     assert 'connect_args = {"ssl": "require"}' in content, \
@@ -101,51 +101,52 @@ def test_ssl_configuration_in_alembic():
 
 def test_url_cleaning():
     """Test that SSL parameters are properly removed from URLs."""
-    import re
+    import sys
+    sys.path.insert(0, str(ROOT))
+    from app.core.db_utils import clean_database_url_for_asyncpg
     
     # Test various URL formats including edge cases
     test_cases = [
-        ("postgresql+asyncpg://user:pass@host:5432/db?sslmode=require", 
-         "postgresql+asyncpg://user:pass@host:5432/db"),
-        ("postgresql+asyncpg://user:pass@host:5432/db?ssl=require",
-         "postgresql+asyncpg://user:pass@host:5432/db"),
-        ("postgresql+asyncpg://user:pass@host:5432/db?other=param&sslmode=require",
-         "postgresql+asyncpg://user:pass@host:5432/db?other=param"),
-        ("postgresql+asyncpg://user:pass@host:5432/db?sslmode=require&other=param",
-         "postgresql+asyncpg://user:pass@host:5432/db?other=param"),
-        ("postgresql+asyncpg://user:pass@host:5432/db?p1=v1&ssl=require&p2=v2",
-         "postgresql+asyncpg://user:pass@host:5432/db?p1=v1&p2=v2"),
-        ("postgresql+asyncpg://user:pass@host:5432/db",
-         "postgresql+asyncpg://user:pass@host:5432/db"),
+        ("postgresql://user:pass@host:5432/db?sslmode=require", 
+         "postgresql+asyncpg://user:pass@host:5432/db", True),
+        ("postgresql://user:pass@host:5432/db?ssl=require",
+         "postgresql+asyncpg://user:pass@host:5432/db", True),
+        ("postgresql://user:pass@host:5432/db?other=param&sslmode=require",
+         "postgresql+asyncpg://user:pass@host:5432/db?other=param", True),
+        ("postgresql://user:pass@host:5432/db?sslmode=require&other=param",
+         "postgresql+asyncpg://user:pass@host:5432/db?other=param", True),
+        ("postgresql://user:pass@host:5432/db?p1=v1&ssl=require&p2=v2",
+         "postgresql+asyncpg://user:pass@host:5432/db?p1=v1&p2=v2", True),
+        ("postgresql://user:pass@host:5432/db",
+         "postgresql+asyncpg://user:pass@host:5432/db", False),
     ]
     
-    for original, expected in test_cases:
-        cleaned = original
-        
-        # Apply the cleaning logic from database.py (using regex for robust handling)
-        cleaned = re.sub(r'[?&]sslmode=[^&]*(&|$)', lambda m: '?' if m.group(0)[0] == '?' and m.group(1) else m.group(1), cleaned)
-        cleaned = re.sub(r'[?&]ssl=[^&]*(&|$)', lambda m: '?' if m.group(0)[0] == '?' and m.group(1) else m.group(1), cleaned)
-        cleaned = cleaned.rstrip('?&')
-        
-        assert cleaned == expected, f"URL cleaning failed: {original} -> {cleaned} (expected {expected})"
+    for original, expected_url, expected_ssl in test_cases:
+        cleaned_url, ssl_required = clean_database_url_for_asyncpg(original)
+        assert cleaned_url == expected_url, f"URL cleaning failed: {original} -> {cleaned_url} (expected {expected_url})"
+        assert ssl_required == expected_ssl, f"SSL detection failed: {original} -> {ssl_required} (expected {expected_ssl})"
     
     print("✓ URL cleaning logic is correct")
 
 
 def test_ssl_detection_logic():
     """Test that SSL detection logic works correctly."""
+    import sys
+    sys.path.insert(0, str(ROOT))
+    from app.core.db_utils import clean_database_url_for_asyncpg
+    
     # Test with SSL required
-    test_url_with_ssl = "postgresql+asyncpg://user:pass@host:5432/db?sslmode=require"
-    ssl_detected = "sslmode=require" in test_url_with_ssl or "ssl=require" in test_url_with_ssl
+    test_url_with_ssl = "postgresql://user:pass@host:5432/db?sslmode=require"
+    _, ssl_detected = clean_database_url_for_asyncpg(test_url_with_ssl)
     assert ssl_detected, "SSL should be detected in URL with sslmode=require"
     
-    test_url_with_ssl2 = "postgresql+asyncpg://user:pass@host:5432/db?ssl=require"
-    ssl_detected = "sslmode=require" in test_url_with_ssl2 or "ssl=require" in test_url_with_ssl2
+    test_url_with_ssl2 = "postgresql://user:pass@host:5432/db?ssl=require"
+    _, ssl_detected = clean_database_url_for_asyncpg(test_url_with_ssl2)
     assert ssl_detected, "SSL should be detected in URL with ssl=require"
     
     # Test without SSL
-    test_url_no_ssl = "postgresql+asyncpg://user:pass@host:5432/db"
-    ssl_detected = "sslmode=require" in test_url_no_ssl or "ssl=require" in test_url_no_ssl
+    test_url_no_ssl = "postgresql://user:pass@host:5432/db"
+    _, ssl_detected = clean_database_url_for_asyncpg(test_url_no_ssl)
     assert not ssl_detected, "SSL should not be detected in URL without SSL params"
     
     print("✓ SSL detection logic is correct")

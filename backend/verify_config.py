@@ -51,76 +51,67 @@ def verify_ssl_handling():
     print("SSL Configuration Verification")
     print("=" * 60)
     
-    # Test various database URL formats
-    test_cases = [
-        {
-            "url": "postgresql://user:pass@host:5432/db",
-            "ssl_expected": False,
-            "description": "Local database without SSL"
-        },
-        {
-            "url": "postgresql://user:pass@host:5432/db?sslmode=require",
-            "ssl_expected": True,
-            "description": "Azure PostgreSQL with sslmode=require"
-        },
-        {
-            "url": "postgresql://user:pass@host:5432/db?ssl=require",
-            "ssl_expected": True,
-            "description": "Azure PostgreSQL with ssl=require"
-        },
-        {
-            "url": "postgres://user:pass@host:5432/db?sslmode=require",
-            "ssl_expected": True,
-            "description": "Azure PostgreSQL (postgres:// scheme)"
-        }
-    ]
-    
-    print("\nTesting SSL detection logic:")
-    all_passed = True
-    
-    for test_case in test_cases:
-        original_url = test_case["url"]
-        ssl_expected = test_case["ssl_expected"]
-        description = test_case["description"]
+    try:
+        from app.core.db_utils import clean_database_url_for_asyncpg
         
-        # Apply the URL conversion logic
-        db_url = original_url
-        if db_url.startswith("postgresql://"):
-            db_url = db_url.replace("postgresql://", "postgresql+asyncpg://", 1)
-        elif db_url.startswith("postgres://"):
-            db_url = db_url.replace("postgres://", "postgresql+asyncpg://", 1)
+        # Test various database URL formats
+        test_cases = [
+            {
+                "url": "postgresql://user:pass@host:5432/db",
+                "ssl_expected": False,
+                "description": "Local database without SSL"
+            },
+            {
+                "url": "postgresql://user:pass@host:5432/db?sslmode=require",
+                "ssl_expected": True,
+                "description": "Azure PostgreSQL with sslmode=require"
+            },
+            {
+                "url": "postgresql://user:pass@host:5432/db?ssl=require",
+                "ssl_expected": True,
+                "description": "Azure PostgreSQL with ssl=require"
+            },
+            {
+                "url": "postgres://user:pass@host:5432/db?sslmode=require",
+                "ssl_expected": True,
+                "description": "Azure PostgreSQL (postgres:// scheme)"
+            }
+        ]
         
-        # Check SSL detection
-        ssl_required = "sslmode=require" in db_url or "ssl=require" in db_url
+        print("\nTesting SSL detection logic:")
+        all_passed = True
         
-        # Clean the URL
-        if "?sslmode=" in db_url:
-            db_url = db_url.split("?sslmode=")[0]
-        elif "&sslmode=" in db_url:
-            db_url = db_url.replace("&sslmode=disable", "").replace("&sslmode=require", "")
-        if "?ssl=" in db_url:
-            db_url = db_url.split("?ssl=")[0]
-        elif "&ssl=" in db_url:
-            db_url = db_url.replace("&ssl=disable", "").replace("&ssl=require", "")
+        for test_case in test_cases:
+            original_url = test_case["url"]
+            ssl_expected = test_case["ssl_expected"]
+            description = test_case["description"]
+            
+            # Use the utility function
+            cleaned_url, ssl_required = clean_database_url_for_asyncpg(original_url)
+            
+            status = "✓" if ssl_required == ssl_expected else "❌"
+            all_passed = all_passed and (ssl_required == ssl_expected)
+            
+            print(f"\n  {status} {description}")
+            print(f"     Original: {original_url}")
+            print(f"     Cleaned:  {cleaned_url}")
+            print(f"     SSL:      {'REQUIRED' if ssl_required else 'NOT REQUIRED'} (expected: {'REQUIRED' if ssl_expected else 'NOT REQUIRED'})")
+            if ssl_required:
+                print(f"     Engine:   create_async_engine(..., connect_args={{'ssl': 'require'}})")
+            else:
+                print(f"     Engine:   create_async_engine(...)")
         
-        status = "✓" if ssl_required == ssl_expected else "❌"
-        all_passed = all_passed and (ssl_required == ssl_expected)
-        
-        print(f"\n  {status} {description}")
-        print(f"     Original: {original_url}")
-        print(f"     Cleaned:  {db_url}")
-        print(f"     SSL:      {'REQUIRED' if ssl_required else 'NOT REQUIRED'} (expected: {'REQUIRED' if ssl_expected else 'NOT REQUIRED'})")
-        if ssl_required:
-            print(f"     Engine:   create_async_engine(..., connect_args={{'ssl': 'require'}})")
+        if all_passed:
+            print("\n✓ All SSL detection tests passed")
         else:
-            print(f"     Engine:   create_async_engine(...)")
-    
-    if all_passed:
-        print("\n✓ All SSL detection tests passed")
-    else:
-        print("\n❌ Some SSL detection tests failed")
-    
-    return all_passed
+            print("\n❌ Some SSL detection tests failed")
+        
+        return all_passed
+    except Exception as e:
+        print(f"\n❌ Error testing SSL handling: {e}")
+        import traceback
+        traceback.print_exc()
+        return False
 
 
 def main():
