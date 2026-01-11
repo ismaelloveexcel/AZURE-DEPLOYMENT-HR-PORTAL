@@ -1,4 +1,4 @@
-from datetime import date, datetime, timezone
+from datetime import date, datetime
 from decimal import Decimal
 from typing import List, Optional
 
@@ -9,6 +9,7 @@ from sqlalchemy import and_, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import get_settings
+from app.core.time import get_utc_now, get_uae_today, get_uae_today_from_utc, to_uae
 from app.database import get_session
 from app.models.employee import Employee
 from app.models.attendance import (
@@ -342,7 +343,7 @@ async def get_today_status(
     if not await check_feature_enabled(session, "feature_attendance"):
         raise HTTPException(status_code=403, detail="Attendance feature is disabled")
     
-    today = date.today()
+    today = get_uae_today()
     work_settings = get_employee_work_settings(current_user)
     standard_hours_today = get_standard_hours_for_day(current_user, today)
     
@@ -460,8 +461,9 @@ async def clock_in(
         if not await check_feature_enabled(session, "feature_attendance_wfh"):
             raise HTTPException(status_code=403, detail="WFH feature is disabled")
     
-    today = date.today()
-    now = datetime.now(timezone.utc)
+    now_utc = get_utc_now()
+    uae_now = to_uae(now_utc)
+    today = get_uae_today_from_utc(now_utc)
     
     # Check if already clocked in today
     result = await session.execute(
@@ -477,10 +479,10 @@ async def clock_in(
     if existing and existing.clock_in:
         raise HTTPException(status_code=400, detail="Already clocked in today")
     
-    # Check if late (after 8:15 AM - using UTC for now, assuming UAE timezone UTC+4)
-    # Standard start time is 8:00 AM UAE (04:00 UTC)
-    uae_hour = (now.hour + 4) % 24  # Convert UTC to UAE time
-    uae_minute = now.minute
+    # Check if late (after 8:15 AM UAE time)
+    # Standard start time is 8:00 AM UAE
+    uae_hour = uae_now.hour
+    uae_minute = uae_now.minute
     is_late = uae_hour > 8 or (uae_hour == 8 and uae_minute > GRACE_PERIOD_MINUTES)
     late_minutes = None
     if is_late:
@@ -509,7 +511,7 @@ async def clock_in(
     record = AttendanceRecord(
         employee_id=current_user.id,
         attendance_date=today,
-        clock_in=now,
+        clock_in=now_utc,
         clock_in_latitude=lat,
         clock_in_longitude=lng,
         clock_in_address=addr,
@@ -548,8 +550,9 @@ async def clock_out(
     if not await check_feature_enabled(session, "feature_attendance"):
         raise HTTPException(status_code=403, detail="Attendance feature is disabled")
     
-    today = date.today()
-    now = datetime.now(timezone.utc)
+    now_utc = get_utc_now()
+    uae_now = to_uae(now_utc)
+    today = get_uae_today_from_utc(now_utc)
     
     result = await session.execute(
         select(AttendanceRecord).where(
@@ -570,13 +573,13 @@ async def clock_out(
     # End break if on break (accumulate with previous breaks)
     if record.break_start and not record.break_end:
         previous_break_mins = record.break_duration_minutes or 0
-        this_break_mins = int((now - record.break_start).total_seconds() / 60)
-        record.break_end = now
+        this_break_mins = int((now_utc - record.break_start).total_seconds() / 60)
+        record.break_end = now_utc
         record.break_duration_minutes = previous_break_mins + this_break_mins
     
     # Store GPS coordinates if GPS feature is enabled
     gps_enabled = await check_feature_enabled(session, "feature_attendance_gps")
-    record.clock_out = now
+    record.clock_out = now_utc
     record.clock_out_latitude = request.latitude if gps_enabled else None
     record.clock_out_longitude = request.longitude if gps_enabled else None
     record.clock_out_address = request.address if gps_enabled else None
@@ -626,12 +629,12 @@ async def clock_out(
     # Check early departure based on employee's work schedule
     standard_hours_today = get_standard_hours_for_day(current_user, today)
     expected_end_hour = 8 + standard_hours_today + 1  # 8 AM + work hours + 1 hour break
-    uae_hour = (now.hour + 4) % 24  # Convert UTC to UAE time
+    uae_hour = uae_now.hour
     
     if uae_hour < expected_end_hour:
         record.is_early_departure = True
         # Calculate minutes before expected end time
-        record.early_departure_minutes = (expected_end_hour - uae_hour) * 60 - now.minute
+        record.early_departure_minutes = (expected_end_hour - uae_hour) * 60 - uae_now.minute
     
     await session.commit()
     await session.refresh(record)
@@ -650,8 +653,8 @@ async def start_break(
     if not await check_feature_enabled(session, "feature_attendance"):
         raise HTTPException(status_code=403, detail="Attendance feature is disabled")
     
-    today = date.today()
-    now = datetime.now(timezone.utc)
+    now_utc = get_utc_now()
+    today = get_uae_today_from_utc(now_utc)
     
     result = await session.execute(
         select(AttendanceRecord).where(
@@ -675,7 +678,7 @@ async def start_break(
     # Accumulate break duration from previous breaks
     previous_break_mins = record.break_duration_minutes or 0
     
-    record.break_start = now
+    record.break_start = now_utc
     record.break_end = None
     # Store previous accumulated duration to add to when break ends
     record.break_duration_minutes = previous_break_mins
@@ -697,8 +700,8 @@ async def end_break(
     if not await check_feature_enabled(session, "feature_attendance"):
         raise HTTPException(status_code=403, detail="Attendance feature is disabled")
     
-    today = date.today()
-    now = datetime.now(timezone.utc)
+    now_utc = get_utc_now()
+    today = get_uae_today_from_utc(now_utc)
     
     result = await session.execute(
         select(AttendanceRecord).where(
@@ -717,10 +720,10 @@ async def end_break(
         raise HTTPException(status_code=400, detail="Break already ended")
     
     # Calculate this break's duration and add to accumulated total
-    this_break_mins = int((now - record.break_start).total_seconds() / 60)
+    this_break_mins = int((now_utc - record.break_start).total_seconds() / 60)
     previous_break_mins = record.break_duration_minutes or 0
     
-    record.break_end = now
+    record.break_end = now_utc
     record.break_duration_minutes = previous_break_mins + this_break_mins
     
     await session.commit()
@@ -768,7 +771,7 @@ async def create_manual_entry(
     if existing.scalar_one_or_none():
         raise HTTPException(status_code=400, detail="Attendance record already exists for this date. Use correction endpoint instead.")
     
-    now = datetime.now(timezone.utc)
+    now = get_utc_now()
     
     # Determine work location
     work_location = request.work_location or employee.location
@@ -849,7 +852,7 @@ async def request_correction(
     if record.employee_id != current_user.id and current_user.role not in ["admin", "hr"]:
         raise HTTPException(status_code=403, detail="Access denied")
     
-    now = datetime.now(timezone.utc)
+    now = get_utc_now()
     
     # Store the correction request
     record.is_manual_entry = True
@@ -885,11 +888,11 @@ async def approve_correction(
     session: AsyncSession = Depends(get_session)
 ):
     """Approve or reject an attendance correction request (admin/HR only)."""
-    if current_user.role not in ["admin", "hr"]:
+    if current_user.role not in ["admin", "hr", "manager"]:
         raise HTTPException(status_code=403, detail="Access denied")
     
     result = await session.execute(
-        select(AttendanceRecord, Employee.name).join(
+        select(AttendanceRecord, Employee.name, Employee.line_manager_id).join(
             Employee, AttendanceRecord.employee_id == Employee.id
         ).where(AttendanceRecord.id == record_id)
     )
@@ -903,7 +906,7 @@ async def approve_correction(
     if not record.is_manual_entry or record.correction_approved is not None:
         raise HTTPException(status_code=400, detail="No pending correction for this record")
     
-    now = datetime.now(timezone.utc)
+    now = get_utc_now()
     
     record.correction_approved = request.approved
     record.correction_approved_by = current_user.id
@@ -1008,7 +1011,7 @@ async def get_dashboard(
     if current_user.role not in ["admin", "hr"]:
         raise HTTPException(status_code=403, detail="Access denied")
     
-    today = date.today()
+    today = get_uae_today()
     
     # Total active employees
     total_emp = await session.execute(
@@ -1115,14 +1118,17 @@ async def approve_wfh(
     if not row:
         raise HTTPException(status_code=404, detail="Record not found")
     
-    record, emp_name = row
+    record, emp_name, line_manager_id = row
     
     if record.work_type != "wfh":
         raise HTTPException(status_code=400, detail="Not a WFH record")
+
+    if current_user.role == "manager" and line_manager_id != current_user.id:
+        raise HTTPException(status_code=403, detail="Access denied")
     
     record.wfh_approved = request.approved
     record.wfh_approved_by = current_user.id
-    record.wfh_approved_at = datetime.now(timezone.utc)
+    record.wfh_approved_at = get_utc_now()
     
     if request.notes:
         record.notes = (record.notes or "") + f"\nWFH {'Approved' if request.approved else 'Rejected'}: {request.notes}"
@@ -1171,7 +1177,7 @@ async def approve_overtime(
     
     record.overtime_approved = request.approved
     record.overtime_approved_by = current_user.id
-    record.overtime_approved_at = datetime.now(timezone.utc)
+    record.overtime_approved_at = get_utc_now()
     
     if request.hours and request.approved:
         record.overtime_hours = request.hours
@@ -1203,6 +1209,11 @@ async def set_exceptional_overtime(
     
     This allows HR to override the employee's default overtime policy on a per-day basis.
     """
+    if not await check_feature_enabled(session, "feature_attendance"):
+        raise HTTPException(status_code=403, detail="Attendance feature is disabled")
+    if not await check_feature_enabled(session, "feature_attendance_overtime"):
+        raise HTTPException(status_code=403, detail="Overtime feature is disabled")
+
     if current_user.role not in ["admin", "hr"]:
         raise HTTPException(status_code=403, detail="Access denied")
     
@@ -1466,7 +1477,7 @@ async def get_manager_daily_summary(
         raise HTTPException(status_code=404, detail="Manager not found")
     
     # Default to today
-    today = summary_date or date.today()
+    today = summary_date or get_uae_today()
     
     # Get all employees who report to this manager
     team_result = await session.execute(

@@ -25,6 +25,7 @@ from app.models.timesheet import Timesheet
 from app.models.geofence import Geofence, is_within_geofence
 from app.models.notification import Notification
 from app.services.email_service import get_email_service
+from app.core.time import get_uae_today
 
 logger = logging.getLogger(__name__)
 
@@ -489,7 +490,7 @@ class AttendanceService:
         Should be called at ~9:30 AM.
         Returns count of reminders sent.
         """
-        today = date.today()
+        today = get_uae_today()
         
         # Get all active employees
         emp_result = await self.session.execute(
@@ -537,7 +538,7 @@ class AttendanceService:
         Should be called at ~5:30 PM.
         Returns count of reminders sent.
         """
-        today = date.today()
+        today = get_uae_today()
         
         # Get records with clock_in but no clock_out
         result = await self.session.execute(
@@ -594,7 +595,7 @@ class AttendanceService:
         if not team:
             return False
         
-        today = date.today()
+        today = get_uae_today()
         
         # Build summary table
         rows = []
