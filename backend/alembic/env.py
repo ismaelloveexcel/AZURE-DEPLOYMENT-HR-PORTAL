@@ -28,14 +28,12 @@ if "sslmode=require" in db_url or "ssl=require" in db_url:
     ssl_required = True
 
 # Remove sslmode/ssl parameters from URL (asyncpg uses connect_args instead)
-if "?sslmode=" in db_url:
-    db_url = db_url.split("?sslmode=")[0]
-elif "&sslmode=" in db_url:
-    db_url = db_url.replace("&sslmode=disable", "").replace("&sslmode=require", "")
-if "?ssl=" in db_url:
-    db_url = db_url.split("?ssl=")[0]
-elif "&ssl=" in db_url:
-    db_url = db_url.replace("&ssl=disable", "").replace("&ssl=require", "")
+# Handle both query string formats: ?param and &param
+import re
+db_url = re.sub(r'[?&]sslmode=[^&]*(&|$)', lambda m: '?' if m.group(0)[0] == '?' and m.group(1) else m.group(1), db_url)
+db_url = re.sub(r'[?&]ssl=[^&]*(&|$)', lambda m: '?' if m.group(0)[0] == '?' and m.group(1) else m.group(1), db_url)
+# Clean up any trailing ? or &
+db_url = db_url.rstrip('?&')
 
 config.set_main_option("sqlalchemy.url", db_url)
 target_metadata = Base.metadata

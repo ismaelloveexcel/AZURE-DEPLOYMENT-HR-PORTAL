@@ -101,7 +101,9 @@ def test_ssl_configuration_in_alembic():
 
 def test_url_cleaning():
     """Test that SSL parameters are properly removed from URLs."""
-    # Test various URL formats
+    import re
+    
+    # Test various URL formats including edge cases
     test_cases = [
         ("postgresql+asyncpg://user:pass@host:5432/db?sslmode=require", 
          "postgresql+asyncpg://user:pass@host:5432/db"),
@@ -109,6 +111,10 @@ def test_url_cleaning():
          "postgresql+asyncpg://user:pass@host:5432/db"),
         ("postgresql+asyncpg://user:pass@host:5432/db?other=param&sslmode=require",
          "postgresql+asyncpg://user:pass@host:5432/db?other=param"),
+        ("postgresql+asyncpg://user:pass@host:5432/db?sslmode=require&other=param",
+         "postgresql+asyncpg://user:pass@host:5432/db?other=param"),
+        ("postgresql+asyncpg://user:pass@host:5432/db?p1=v1&ssl=require&p2=v2",
+         "postgresql+asyncpg://user:pass@host:5432/db?p1=v1&p2=v2"),
         ("postgresql+asyncpg://user:pass@host:5432/db",
          "postgresql+asyncpg://user:pass@host:5432/db"),
     ]
@@ -116,15 +122,10 @@ def test_url_cleaning():
     for original, expected in test_cases:
         cleaned = original
         
-        # Apply the cleaning logic from database.py
-        if "?sslmode=" in cleaned:
-            cleaned = cleaned.split("?sslmode=")[0]
-        elif "&sslmode=" in cleaned:
-            cleaned = cleaned.replace("&sslmode=disable", "").replace("&sslmode=require", "")
-        if "?ssl=" in cleaned:
-            cleaned = cleaned.split("?ssl=")[0]
-        elif "&ssl=" in cleaned:
-            cleaned = cleaned.replace("&ssl=disable", "").replace("&ssl=require", "")
+        # Apply the cleaning logic from database.py (using regex for robust handling)
+        cleaned = re.sub(r'[?&]sslmode=[^&]*(&|$)', lambda m: '?' if m.group(0)[0] == '?' and m.group(1) else m.group(1), cleaned)
+        cleaned = re.sub(r'[?&]ssl=[^&]*(&|$)', lambda m: '?' if m.group(0)[0] == '?' and m.group(1) else m.group(1), cleaned)
+        cleaned = cleaned.rstrip('?&')
         
         assert cleaned == expected, f"URL cleaning failed: {original} -> {cleaned} (expected {expected})"
     
