@@ -72,24 +72,12 @@ class Settings(BaseSettings):
         env_file_encoding="utf-8",
         case_sensitive=False,
     )
-
-    @field_validator("allowed_origins", mode="before")
-    @classmethod
-    def split_origins(cls, value):
-        try:
-            if isinstance(value, str):
-                return [origin.strip() for origin in value.split(",") if origin.strip()]
-            if isinstance(value, list):
-                return value
-        except Exception:
-            pass
-        return ["*"]
     
     def get_allowed_origins_list(self) -> List[str]:
-        """Get allowed_origins as a list, regardless of how it was parsed."""
-        if isinstance(self.allowed_origins, str):
-            return [origin.strip() for origin in self.allowed_origins.split(",") if origin.strip()]
-        return self.allowed_origins
+        """Parse allowed_origins string into a list of origins."""
+        if not self.allowed_origins:
+            return ["*"]
+        return [origin.strip() for origin in self.allowed_origins.split(",") if origin.strip()]
 
 
 @lru_cache()
