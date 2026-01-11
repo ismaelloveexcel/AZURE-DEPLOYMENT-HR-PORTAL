@@ -65,11 +65,23 @@ async def login(
         raise
     except Exception as e:
         import logging
-        logging.getLogger(__name__).error(f"Login error: {e}")
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="An error occurred during login. Please try again.",
-        )
+        import traceback
+        logger = logging.getLogger(__name__)
+        logger.error(f"Login error for employee_id={request.employee_id}: {str(e)}")
+        logger.error(f"Login error traceback: {traceback.format_exc()}")
+        
+        # In development, show actual error
+        settings = get_settings()
+        if settings.app_env == "development":
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail=f"Login error: {str(e)}",
+            )
+        else:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="An error occurred during login. Please check server logs or contact support.",
+            )
 
 
 @router.post(
