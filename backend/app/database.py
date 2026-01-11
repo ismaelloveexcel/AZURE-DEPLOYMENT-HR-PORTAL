@@ -11,13 +11,33 @@ if db_url.startswith("postgresql://"):
 elif db_url.startswith("postgres://"):
     db_url = db_url.replace("postgres://", "postgresql+asyncpg://", 1)
 
-# Remove sslmode parameter (not supported by asyncpg directly)
+# Handle SSL for Azure PostgreSQL
+# Check if SSL is required in the connection string
+ssl_required = False
+if "sslmode=require" in db_url or "ssl=require" in db_url:
+    ssl_required = True
+
+# Remove sslmode/ssl parameters from URL (asyncpg uses connect_args instead)
 if "?sslmode=" in db_url:
     db_url = db_url.split("?sslmode=")[0]
 elif "&sslmode=" in db_url:
     db_url = db_url.replace("&sslmode=disable", "").replace("&sslmode=require", "")
+if "?ssl=" in db_url:
+    db_url = db_url.split("?ssl=")[0]
+elif "&ssl=" in db_url:
+    db_url = db_url.replace("&ssl=disable", "").replace("&ssl=require", "")
 
-engine = create_async_engine(db_url, echo=False, future=True)
+# Create engine with SSL support if required
+if ssl_required:
+    engine = create_async_engine(
+        db_url,
+        echo=False,
+        future=True,
+        connect_args={"ssl": "require"}
+    )
+else:
+    engine = create_async_engine(db_url, echo=False, future=True)
+
 AsyncSessionLocal = async_sessionmaker(engine, expire_on_commit=False, class_=AsyncSession)
 
 

@@ -21,11 +21,21 @@ if db_url.startswith("postgresql://"):
 elif db_url.startswith("postgres://"):
     db_url = db_url.replace("postgres://", "postgresql+asyncpg://", 1)
 
-# Remove sslmode parameter (not supported by asyncpg directly)
+# Handle SSL for Azure PostgreSQL
+# Check if SSL is required in the connection string
+ssl_required = False
+if "sslmode=require" in db_url or "ssl=require" in db_url:
+    ssl_required = True
+
+# Remove sslmode/ssl parameters from URL (asyncpg uses connect_args instead)
 if "?sslmode=" in db_url:
     db_url = db_url.split("?sslmode=")[0]
 elif "&sslmode=" in db_url:
     db_url = db_url.replace("&sslmode=disable", "").replace("&sslmode=require", "")
+if "?ssl=" in db_url:
+    db_url = db_url.split("?ssl=")[0]
+elif "&ssl=" in db_url:
+    db_url = db_url.replace("&ssl=disable", "").replace("&ssl=require", "")
 
 config.set_main_option("sqlalchemy.url", db_url)
 target_metadata = Base.metadata
@@ -52,10 +62,19 @@ def do_run_migrations(connection):
 
 
 def run_migrations_online() -> None:
+    # Prepare connect_args for SSL if required
+    connect_args = {}
+    if ssl_required:
+        connect_args = {"ssl": "require"}
+    
+    configuration = config.get_section(config.config_ini_section)
+    configuration["sqlalchemy.url"] = db_url
+    
     connectable = async_engine_from_config(
-        config.get_section(config.config_ini_section),
+        configuration,
         prefix="sqlalchemy.",
         poolclass=pool.NullPool,
+        connect_args=connect_args,
     )
 
     async def run_migrations() -> None:
