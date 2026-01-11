@@ -199,38 +199,7 @@ Use this checklist when deploying the Secure Renewals HR Portal from Visual Stud
   - [ ] Test login
   - [ ] Verify all functionality
 
-### Option 2: Replit
-
-- [ ] **Import to Replit**
-  - [ ] Go to https://replit.com
-  - [ ] Click "Create" → "Import from GitHub"
-  - [ ] Enter: `ismaelloveexcel/Secure-Renewals-2`
-  - [ ] Wait for import
-
-- [ ] **Configure Replit Secrets**
-  - [ ] Click "Secrets" tab (lock icon)
-  - [ ] Add `DATABASE_URL`
-  - [ ] Add `AUTH_SECRET_KEY`
-  - [ ] Add all other environment variables
-  - [ ] Save secrets
-
-- [ ] **Set Custom Domain** (optional)
-  - [ ] Settings → Custom Domains
-  - [ ] Add your company domain
-  - [ ] Follow DNS configuration steps
-
-- [ ] **Deploy**
-  - [ ] Click "Run" button
-  - [ ] Wait for services to start
-  - [ ] Note the deployment URL
-
-- [ ] **Verify Replit Deployment**
-  - [ ] Open app URL
-  - [ ] Frontend: Port 80 (external)
-  - [ ] Backend: Port 3000 (external)
-  - [ ] Test all functionality
-
-### Option 3: Manual Server Deployment
+### Option 2: Manual Server Deployment
 
 - [ ] **Server Prerequisites**
   - [ ] Ubuntu/Debian server with SSH access

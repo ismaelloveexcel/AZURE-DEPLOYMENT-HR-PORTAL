@@ -240,18 +240,7 @@ Use the **"Full Stack: Debug"** compound configuration:
 
 ### Deployment Options
 
-#### 1. Replit (Easiest - Already Configured)
-
-The app is pre-configured for Replit:
-
-1. Import repo to Replit workspace
-2. Configure Secrets in Replit
-3. Click Run button
-4. Done!
-
-See main [README.md](../README.md#deployment) for details.
-
-#### 2. Azure App Service
+#### 1. Azure App Service (Recommended)
 
 Use the provided deployment script:
 
@@ -273,7 +262,7 @@ The script creates:
 - Web App
 - Configures GitHub deployment
 
-#### 3. Docker (Future)
+#### 2. Docker (Future)
 
 Docker support can be added if needed. Basic Dockerfile structure:
 

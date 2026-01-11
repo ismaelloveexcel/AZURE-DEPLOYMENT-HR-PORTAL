@@ -176,7 +176,6 @@ This repository is optimized for GitHub Copilot and Copilot Agents. Follow these
 
 We maintain these key context files for Copilot:
 
-- **`replit.md`** - System architecture and conventions
 - **`README.md`** - Project overview and quick start
 - **`CONTRIBUTING.md`** - This file - setup and guidelines
 - **`docs/`** - Detailed documentation for specific topics
@@ -658,7 +657,6 @@ If you encounter issues not covered here:
 - [docs/HR_USER_GUIDE.md](docs/HR_USER_GUIDE.md) - End-user guide
 - [docs/COPILOT_AGENTS.md](docs/COPILOT_AGENTS.md) - Copilot Agents guide
 - [docs/SYSTEM_HEALTH_CHECK.md](docs/SYSTEM_HEALTH_CHECK.md) - System status
-- [replit.md](replit.md) - System architecture details
 
 ### External Documentation
 
