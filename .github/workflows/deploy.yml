@@ -75,7 +75,7 @@ jobs:
           az webapp config appsettings set --name BaynunahHRPortal --resource-group BaynunahHR --settings \
             ALLOWED_ORIGINS="https://baynunahhrportal.azurewebsites.net" \
             APP_ENV="production" \
-            SCM_DO_BUILD_DURING_DEPLOYMENT="false" \
+            SCM_DO_BUILD_DURING_DEPLOYMENT="true" \
             --output none
           echo "✅ App settings configured (DATABASE_URL and AUTH_SECRET_KEY preserved from Azure)"
 
