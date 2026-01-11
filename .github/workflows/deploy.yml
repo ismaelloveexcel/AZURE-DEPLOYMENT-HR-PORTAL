@@ -147,10 +147,6 @@ jobs:
           echo "  - Migrations require manual intervention"
           echo ""
           
-          # Install uv for running alembic
-          curl -LsSf https://astral.sh/uv/install.sh | sh
-          export PATH="$HOME/.cargo/bin:$PATH"
-          
           # Try to run migrations via SSH (best effort)
           az webapp ssh --name BaynunahHRPortal --resource-group BaynunahHR --timeout 60 << 'EOF' || {
             echo "⚠️  Could not run migrations via SSH"
