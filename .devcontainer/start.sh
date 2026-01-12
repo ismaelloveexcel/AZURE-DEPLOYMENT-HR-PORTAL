@@ -11,11 +11,20 @@ echo "   HR PORTAL - STARTING APPLICATION"
 echo "============================================"
 echo ""
 
-# Find the workspace directory
-WORKSPACE_DIR=$(find /workspaces -maxdepth 1 -type d -name "*" | grep -v "^/workspaces$" | head -1)
-if [ -z "$WORKSPACE_DIR" ]; then
-    WORKSPACE_DIR="/workspaces/HR-PORTAL-AZURE"
+# Find workspace directory using multiple methods
+WORKSPACE_DIR="${CODESPACE_REPO_ROOT:-}"
+if [ -z "$WORKSPACE_DIR" ] || [ ! -d "$WORKSPACE_DIR" ]; then
+    WORKSPACE_DIR=$(find /workspaces -maxdepth 1 -type d -name "*HR-PORTAL*" 2>/dev/null | head -1)
 fi
+if [ -z "$WORKSPACE_DIR" ] || [ ! -d "$WORKSPACE_DIR" ]; then
+    WORKSPACE_DIR=$(find /workspaces -maxdepth 1 -type d ! -name "workspaces" 2>/dev/null | head -1)
+fi
+if [ -z "$WORKSPACE_DIR" ] || [ ! -d "$WORKSPACE_DIR/backend" ]; then
+    echo "ERROR: Could not find workspace directory"
+    exit 1
+fi
+
+echo "   Workspace: $WORKSPACE_DIR"
 
 # Start backend in background
 echo "[1/2] Starting backend server..."
@@ -30,10 +39,10 @@ fi
 nohup uv run uvicorn app.main:app --host 0.0.0.0 --port 8000 > /tmp/backend.log 2>&1 &
 echo "      ✓ Backend starting on port 8000"
 
-# Wait for backend to be ready
+# Wait for backend to be ready using the public health endpoint
 echo "      Waiting for backend..."
 for i in {1..30}; do
-    if curl -s http://localhost:8000/api/health > /dev/null 2>&1; then
+    if curl -s http://localhost:8000/api/health/db > /dev/null 2>&1; then
         echo "      ✓ Backend is ready!"
         break
     fi
