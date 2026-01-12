@@ -34,6 +34,11 @@ else:
 
 AsyncSessionLocal = async_sessionmaker(engine, expire_on_commit=False, class_=AsyncSession)
 
+# Alias for backwards compatibility with attendance scheduler
+# TODO: Update attendance_scheduler.py to use AsyncSessionLocal directly,
+# then remove this alias
+async_session_maker = AsyncSessionLocal
+
 
 async def get_session() -> AsyncSession:
     async with AsyncSessionLocal() as session:
