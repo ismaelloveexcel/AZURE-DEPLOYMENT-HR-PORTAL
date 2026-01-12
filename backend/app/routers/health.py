@@ -21,7 +21,24 @@ SYSTEM_ADMIN_PASSWORD = os.environ.get("ADMIN_PASSWORD", "admin123")
 
 
 def _mask_employee_id(employee_id: str) -> str:
-    """Mask employee ID for logging to prevent clear-text logging of sensitive information."""
+    """
+    Mask employee ID for logging to prevent clear-text logging of sensitive information.
+    
+    This function acts as a sanitizer for PII data, masking the middle characters
+    while preserving the first and last 2 characters for debugging purposes.
+    
+    Args:
+        employee_id: The employee ID to mask (sensitive PII)
+    
+    Returns:
+        Masked employee ID safe for logging (sanitized)
+    
+    Examples:
+        >>> _mask_employee_id("BAYN00008")
+        'BA***08'
+        >>> _mask_employee_id("ADMIN001")
+        'AD***01'
+    """
     if not employee_id or len(employee_id) < 4:
         return "***"
     # Show first 2 and last 2 characters, mask the middle
