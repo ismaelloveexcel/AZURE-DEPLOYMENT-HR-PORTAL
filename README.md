@@ -5,12 +5,33 @@
 [![License](https://img.shields.io/badge/license-ISC-blue.svg)](LICENSE)
 [![Python](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/)
 [![React](https://img.shields.io/badge/react-18.3-blue.svg)](https://react.dev/)
+[![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/ismaelloveexcel/HR-PORTAL-AZURE?quickstart=1)
 
 ---
 
-## ⚡ ONE-CLICK Deployment (Automatic!)
+## ⚡ INSTANT Deployment (2 Minutes!)
 
-**Download the project and double-click to deploy - everything installs automatically!**
+### 🚀 GitHub Codespaces (RECOMMENDED - Microsoft Infrastructure)
+
+**One-click cloud deployment with private URLs:**
+
+[![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/ismaelloveexcel/HR-PORTAL-AZURE?quickstart=1)
+
+1. Click the badge above OR: **Code** → **Codespaces** → **Create codespace on main**
+2. Wait 2-3 minutes for automatic setup
+3. Click the **PORTS** tab → Click globe icon next to **port 5000**
+4. **Done!** Your private HR Portal is running on `xxx.app.github.dev`
+
+✅ **Private URLs** - Only you can access  
+✅ **Microsoft infrastructure** - github.dev domain  
+✅ **60 hours/month FREE**  
+✅ **No setup required**
+
+📖 **[One-Click Deployment Guide](docs/ONE_CLICK_DEPLOYMENT.md)** - Full instructions & troubleshooting
+
+---
+
+### 💻 Local Desktop (Maximum Privacy)
 
 ### Windows:
 1. Download this project (green "Code" button → "Download ZIP")
@@ -28,7 +49,7 @@ chmod +x scripts/one-click-deploy.sh
 
 **That's it!** The script installs Python, Node.js, and everything else automatically.
 
-📖 **[Full Deployment Guide](docs/EASIEST_DEPLOYMENT_GUIDE.md)** - All options including Codespaces
+📖 **[Full Deployment Guide](docs/GITHUB_DEPLOYMENT_OPTIONS.md)** - All options including Azure
 
 ---
 
