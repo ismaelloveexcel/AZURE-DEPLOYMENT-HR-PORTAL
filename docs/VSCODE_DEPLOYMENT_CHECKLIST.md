@@ -386,4 +386,4 @@ F5                       # Debug
 
 ---
 
-**Need Help?** Check the troubleshooting sections in the deployment guides or open an issue on GitHub.
+**Need Help?** Check the troubleshooting sections in the deployment guides, consult the [Azure Deployment Specialist Agent](../.github/agents/azure-deployment-specialist.md), or open an issue on GitHub.

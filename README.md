@@ -145,6 +145,7 @@ The system provides **plain-language guidance** for all technical matters:
 | [HR Assistant](.github/agents/hr-assistant.md) | HR workflows & portal engineering | Planning features, automation ideas, finding HR modules |
 | [Portal Engineer](.github/agents/portal-engineer.md) | Technical implementation | Building features, fixing bugs, optimizing code |
 | [Code Quality Monitor](.github/agents/code-quality-monitor.md) | Security & quality scanning | Checking security, code quality, performance |
+| [Azure Deployment Specialist](.github/agents/azure-deployment-specialist.md) | **NEW!** Azure deployment & troubleshooting | Deploying to Azure, login issues, database problems, Python errors |
 
 ### Quick Start with Agents
 
@@ -160,6 +161,10 @@ Ask: "Create API endpoints for probation tracking"
 # Check code quality
 Open: .github/agents/code-quality-monitor.md
 Ask: "Scan for security vulnerabilities"
+
+# Deploy to Azure or troubleshoot issues
+Open: .github/agents/azure-deployment-specialist.md
+Ask: "Deploy to Azure App Service" or "Fix login errors"
 ```
 
 **📖 Full Documentation**: [Copilot Agents Guide](docs/COPILOT_AGENTS.md) | [Quick Reference](.github/agents/QUICK_REFERENCE.md) | [Deployment Guide](docs/AGENT_DEPLOYMENT_GUIDE.md)

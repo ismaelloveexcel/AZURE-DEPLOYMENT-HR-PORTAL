@@ -34,6 +34,18 @@ Proactive code quality and security scanner.
 - Best practices
 - Issue detection
 
+### 4. [Azure Deployment Specialist](azure-deployment-specialist.md)
+**NEW!** Expert in Azure deployment, repository history, and troubleshooting.
+
+**Use when you need**:
+- Azure deployment through VS Code
+- GitHub Actions deployment setup
+- Login/authentication troubleshooting
+- Database connection issues
+- Python environment problems
+- Complete repository knowledge
+- Emergency recovery procedures
+
 ## 📖 Documentation
 
 - **[Quick Reference](QUICK_REFERENCE.md)** - Fast lookup for common tasks
@@ -86,7 +98,9 @@ Implement (Portal Engineer)
   ↓
 Verify (Code Quality Monitor)
   ↓
-Deploy ✅
+Deploy (Azure Deployment Specialist)
+  ↓
+Live ✅
 ```
 
 ## 🎯 Quick Commands
@@ -99,6 +113,9 @@ Deploy ✅
 | Build component | Portal Engineer | "Create React component for [feature]" |
 | Security scan | Code Monitor | "Scan for security issues" |
 | Check quality | Code Monitor | "Review code quality" |
+| Deploy to Azure | Azure Deployment | "Deploy to Azure App Service" |
+| Fix login issues | Azure Deployment | "Troubleshoot login errors" |
+| Fix database | Azure Deployment | "Debug database connection" |
 
 ## 📊 Agent Specializations
 
@@ -120,6 +137,14 @@ Code Quality Monitor
 ├── Performance Analysis ✅
 ├── Code Quality ✅
 └── Best Practices ✅
+
+Azure Deployment Specialist
+├── Azure App Service ✅
+├── GitHub Actions ✅
+├── VS Code Deployment ✅
+├── Login Troubleshooting ✅
+├── Database Issues ✅
+└── Python Environment ✅
 ```
 
 ## 🛠️ Integration
