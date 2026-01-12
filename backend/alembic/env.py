@@ -16,8 +16,14 @@ config = context.config
 if config.config_file_name is not None:
     fileConfig(config.config_file_name)
 
-# Clean database URL and detect SSL requirement
-db_url, ssl_required = clean_database_url_for_asyncpg(settings.database_url)
+# Handle SQLite vs PostgreSQL
+is_sqlite = settings.database_url.startswith("sqlite://")
+if is_sqlite:
+    db_url = settings.database_url.replace("sqlite://", "sqlite+aiosqlite://", 1)
+    ssl_required = False
+else:
+    # Clean database URL and detect SSL requirement for PostgreSQL
+    db_url, ssl_required = clean_database_url_for_asyncpg(settings.database_url)
 
 config.set_main_option("sqlalchemy.url", db_url)
 target_metadata = Base.metadata
