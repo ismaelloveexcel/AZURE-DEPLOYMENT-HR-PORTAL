@@ -5,41 +5,22 @@
 [![License](https://img.shields.io/badge/license-ISC-blue.svg)](LICENSE)
 [![Python](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/)
 [![React](https://img.shields.io/badge/react-18.3-blue.svg)](https://react.dev/)
-[![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/ismaelloveexcel/HR-PORTAL-AZURE?quickstart=1)
 
 ---
 
 ## ⚡ INSTANT Deployment (2 Minutes!)
 
-### 🚀 GitHub Codespaces (RECOMMENDED - Microsoft Infrastructure)
+### 🏆 Local Desktop (RECOMMENDED - Hidden URL)
 
-**One-click cloud deployment with private URLs:**
+**URL shows `localhost:5000`** - No external service visible to users!
 
-[![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/ismaelloveexcel/HR-PORTAL-AZURE?quickstart=1)
-
-1. Click the badge above OR: **Code** → **Codespaces** → **Create codespace on main**
-2. Wait 2-3 minutes for automatic setup
-3. Click the **PORTS** tab → Click globe icon next to **port 5000**
-4. **Done!** Your private HR Portal is running on `xxx.app.github.dev`
-
-✅ **Private URLs** - Only you can access  
-✅ **Microsoft infrastructure** - github.dev domain  
-✅ **60 hours/month FREE**  
-✅ **No setup required**
-
-📖 **[One-Click Deployment Guide](docs/ONE_CLICK_DEPLOYMENT.md)** - Full instructions & troubleshooting
-
----
-
-### 💻 Local Desktop (Maximum Privacy)
-
-### Windows:
+#### Windows:
 1. Download this project (green "Code" button → "Download ZIP")
 2. Extract the ZIP file
 3. Double-click `scripts\one-click-deploy-windows.bat`
-4. Wait 5-10 minutes - opens automatically at http://localhost:5000
+4. Wait 5-10 minutes - opens automatically at **http://localhost:5000**
 
-### Mac/Linux:
+#### Mac/Linux:
 ```bash
 git clone https://github.com/ismaelloveexcel/HR-PORTAL-AZURE.git
 cd HR-PORTAL-AZURE
@@ -47,9 +28,25 @@ chmod +x scripts/one-click-deploy.sh
 ./scripts/one-click-deploy.sh
 ```
 
-**That's it!** The script installs Python, Node.js, and everything else automatically.
+✅ **URL shows only `localhost`** - Users cannot identify external hosting  
+✅ **100% Private** - Data never leaves your computer  
+✅ **No subscription costs** - Completely free  
+✅ **Works offline** - Once installed
 
-📖 **[Full Deployment Guide](docs/GITHUB_DEPLOYMENT_OPTIONS.md)** - All options including Azure
+---
+
+### ☁️ GitHub Codespaces (Quick Cloud Setup)
+
+**Note:** Codespaces URLs contain `github.dev`. For completely hidden URLs, use Local Desktop above.
+
+[![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/ismaelloveexcel/HR-PORTAL-AZURE?quickstart=1)
+
+1. Click the badge above OR: **Code** → **Codespaces** → **Create codespace on main**
+2. Wait 2-3 minutes for automatic setup
+3. Click the **PORTS** tab → Click globe icon next to **port 5000**
+4. Done! Portal runs at `xxx.app.github.dev`
+
+📖 **[Deployment Guide](docs/ONE_CLICK_DEPLOYMENT.md)** - Full instructions & URL comparison
 
 ---
 

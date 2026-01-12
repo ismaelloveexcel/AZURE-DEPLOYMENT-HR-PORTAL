@@ -1,15 +1,42 @@
-# 🚀 One-Click Deployment Guide
+# 🚀 Immediate Deployment Guide
 
 > **URGENT DEPLOYMENT** - Get your HR Portal running in under 5 minutes!
 
-## Option 1: GitHub Codespaces (RECOMMENDED - Microsoft Infrastructure)
+## 🏆 Option 1: Local Desktop (RECOMMENDED - Completely Hidden URL)
+
+**Why Local Desktop?**
+- ✅ **URL shows `localhost:5000`** - No external service visible
+- ✅ **100% Private** - Data never leaves your computer
+- ✅ **No third-party domains** - Users see only "localhost"
+- ✅ **No subscription costs** - Completely free
+- ✅ **Works offline** - Once installed
+
+### Windows (One-Click)
+```batch
+scripts\one-click-deploy-windows.bat
+```
+
+### macOS/Linux (One-Click)
+```bash
+chmod +x scripts/one-click-deploy.sh
+./scripts/one-click-deploy.sh
+```
+
+Access at: **http://localhost:5000**
+
+Users will only see `localhost` in the URL - no indication of external hosting.
+
+---
+
+## Option 2: GitHub Codespaces (Quick Cloud Setup)
+
+**Note:** Codespaces URLs contain `github.dev` in them. If you need a completely hidden URL, use Local Desktop above.
 
 **Why Codespaces?**
-- ✅ Runs on **Microsoft infrastructure** (github.dev domain)
-- ✅ **Private URLs** - Users cannot tell it's not Microsoft
-- ✅ **No setup required** - Everything installs automatically
+- ✅ **No local setup required** - Everything runs in the cloud
+- ✅ **Private URLs** - Only accessible when logged into GitHub
 - ✅ **Free tier** - 60 hours/month included
-- ✅ **One-click start**
+- ⚠️ **URL contains github.dev** - Not completely hidden
 
 ### Quick Start (2 Minutes)
 
@@ -17,42 +44,14 @@
 2. **Click "Codespaces" tab**
 3. **Click "Create codespace on main"**
 4. **Wait 2-3 minutes** for automatic setup
-5. **Done!** Your private HR Portal is running
+5. **Done!** Your HR Portal is running
 
 ### Access Your Portal
 
 After setup completes:
 1. Click the **PORTS** tab at the bottom of VS Code
 2. Click the **globe icon** next to port **5000**
-3. Your private URL opens (format: `xxxx-5000.app.github.dev`)
-
-**This URL is PRIVATE** - only you can access it while logged into GitHub.
-
-### Share Access (Optional)
-
-To share with colleagues:
-1. In PORTS tab, right-click port 5000
-2. Select **Port Visibility** → **Private to Organization**
-3. Share the URL with authorized team members
-
----
-
-## Option 2: Local Desktop (Maximum Privacy)
-
-Run entirely on your laptop - no internet exposure.
-
-### Windows
-```batch
-scripts\one-click-deploy-windows.bat
-```
-
-### macOS/Linux
-```bash
-chmod +x scripts/one-click-deploy.sh
-./scripts/one-click-deploy.sh
-```
-
-Access at: http://localhost:5000
+3. Your URL opens (format: `xxxx-5000.app.github.dev`)
 
 ---
 
@@ -66,40 +65,45 @@ Access at: http://localhost:5000
 
 ---
 
-## Troubleshooting
+## URL Comparison
 
-### Codespaces won't start?
-- Try creating a new Codespace
-- Check your GitHub free hours (Settings → Billing)
+| Option | URL Shown to Users | External Service Visible? |
+|--------|-------------------|---------------------------|
+| **Local Desktop** | `http://localhost:5000` | ❌ No |
+| **Tailscale + Local** | `http://100.x.x.x:5000` | ❌ No |
+| **GitHub Codespaces** | `xxx.app.github.dev` | ✅ Yes ("github" visible) |
+| **Azure + Custom Domain** | `yourcompany.com` | ❌ No (requires domain) |
 
-### Can't access the portal?
-- Ensure you're logged into GitHub
-- Check PORTS tab for the correct URL
-- Try refreshing the page
-
-### Backend not responding?
-```bash
-# In Codespaces terminal:
-cat /tmp/backend.log
-```
-
-### Frontend not loading?
-```bash
-# In Codespaces terminal:
-cat /tmp/frontend.log
-```
+**For completely hidden URLs**, use **Local Desktop** deployment.
 
 ---
 
-## URL Privacy
+## Troubleshooting
 
-Your Codespaces URL:
-- Uses `github.dev` domain (Microsoft-owned)
-- Is **private by default** - only visible to you
-- Can be made visible to your organization only
-- Never includes words like "replit", "heroku", "vercel"
+### Local Desktop Issues
 
-Example URL: `https://orange-adventure-abc123-5000.app.github.dev`
+**Backend not starting?**
+```bash
+cd backend
+uv run uvicorn app.main:app --host 127.0.0.1 --port 8000
+```
+
+**Frontend not loading?**
+```bash
+cd frontend
+npm run dev
+```
+
+### Codespaces Issues
+
+**Can't access the portal?**
+- Ensure you're logged into GitHub
+- Check PORTS tab for the correct URL
+
+**Backend logs:**
+```bash
+cat /tmp/backend.log
+```
 
 ---
 
@@ -108,4 +112,3 @@ Example URL: `https://orange-adventure-abc123-5000.app.github.dev`
 Need help? Check:
 - [HR User Guide](docs/HR_USER_GUIDE.md)
 - [Deployment Options](docs/GITHUB_DEPLOYMENT_OPTIONS.md)
-- [Troubleshooting](docs/HR_USER_GUIDE.md#troubleshooting)
