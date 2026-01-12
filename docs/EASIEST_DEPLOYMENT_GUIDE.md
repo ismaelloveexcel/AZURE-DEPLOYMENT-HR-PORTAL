@@ -4,6 +4,76 @@
 
 ---
 
+## 🆘 FOR NON-TECHNICAL USERS: Step-by-Step with Pictures
+
+**If you've never done this before, follow these exact steps:**
+
+### Step 1: Download and Install Python (5 minutes)
+
+1. Open your web browser
+2. Go to: **https://www.python.org/downloads/**
+3. Click the big yellow **"Download Python 3.xx"** button
+4. Run the downloaded file
+5. ⚠️ **IMPORTANT**: Check the box that says **"Add Python to PATH"** before clicking Install
+6. Click **Install Now** and wait for it to finish
+
+### Step 2: Download and Install Node.js (5 minutes)
+
+1. Go to: **https://nodejs.org/**
+2. Click the **LTS** button (the one that says "Recommended For Most Users")
+3. Run the downloaded file
+4. Click **Next** through all the screens and **Install**
+5. Wait for it to finish
+
+### Step 3: Download This Project (2 minutes)
+
+1. Go to: **https://github.com/ismaelloveexcel/HR-PORTAL-AZURE**
+2. Click the green **Code** button
+3. Click **Download ZIP**
+4. Find the downloaded ZIP file in your Downloads folder
+5. Right-click and select **Extract All** (Windows) or double-click (Mac)
+6. Move the extracted folder somewhere easy to find (like Desktop)
+
+### Step 4: Run the Installer (5 minutes)
+
+**On Windows:**
+1. Open the extracted folder
+2. Go into the `scripts` folder
+3. Double-click on `install-windows.bat`
+4. A black window will open - let it run (takes about 3-5 minutes)
+5. When it asks questions, type `Y` and press Enter
+
+**On Mac:**
+1. Open **Terminal** (search for "Terminal" in Spotlight)
+2. Type: `cd ` (with a space after cd)
+3. Drag the extracted folder into the Terminal window
+4. Press Enter
+5. Type: `chmod +x scripts/install.sh && ./scripts/install.sh`
+6. Press Enter and follow the prompts
+
+### Step 5: Start the App (30 seconds)
+
+**On Windows:**
+1. Double-click `scripts\start-portal-windows.bat`
+
+**On Mac:**
+1. In Terminal, type: `./scripts/start-portal.sh`
+
+### Step 6: Open in Browser
+
+1. Open your web browser (Chrome, Edge, Safari, etc.)
+2. Go to: **http://localhost:5000**
+3. 🎉 **You should see the HR Portal!**
+
+### If Something Goes Wrong:
+
+- **"Python not found"** → Go back to Step 1, make sure you checked "Add to PATH"
+- **"Node not found"** → Go back to Step 2, reinstall Node.js
+- **Black window closes immediately** → Right-click the .bat file, select "Run as administrator"
+- **Still stuck?** → Take a screenshot of the error and share it
+
+---
+
 ## 📋 Quick Assessment
 
 Based on your requirements:

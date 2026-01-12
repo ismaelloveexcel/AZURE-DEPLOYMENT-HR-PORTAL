@@ -7,10 +7,14 @@ settings = get_settings()
 # Convert standard postgres URL to asyncpg format, or use SQLite for local development
 db_url = settings.database_url
 
+# Track database type for later configuration
+is_sqlite = False
+
 # Support SQLite for easy local development (no PostgreSQL required)
 if db_url.startswith("sqlite://"):
     # Convert to async SQLite format
     db_url = db_url.replace("sqlite://", "sqlite+aiosqlite://", 1)
+    is_sqlite = True
 elif db_url.startswith("postgresql://"):
     db_url = db_url.replace("postgresql://", "postgresql+asyncpg://", 1)
 elif db_url.startswith("postgres://"):
@@ -24,7 +28,7 @@ elif "&sslmode=" in db_url:
 
 # Configure engine with appropriate settings
 connect_args = {}
-if db_url.startswith("sqlite"):
+if is_sqlite:
     # SQLite-specific settings for async
     connect_args = {"check_same_thread": False}
 
