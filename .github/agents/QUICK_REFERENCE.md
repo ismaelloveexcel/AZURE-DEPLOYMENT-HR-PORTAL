@@ -7,6 +7,7 @@ Need help? Choose your agent:
 - **HR tasks** → HR Assistant
 - **Technical implementation** → Portal Engineer  
 - **Code quality/security** → Code Quality Monitor
+- **Azure deployment/troubleshooting** → Azure Deployment Specialist
 
 ## 📋 Common Commands
 
@@ -34,6 +35,16 @@ Need help? Choose your agent:
 "Identify performance bottlenecks"
 ```
 
+### Azure Deployment Specialist
+```
+"Deploy to Azure App Service"
+"Troubleshoot login errors"
+"Fix database connection issues"
+"Debug Python environment problems"
+"Reset admin password"
+"Run database migrations"
+```
+
 ## 🎯 Decision Tree
 
 ```
@@ -51,8 +62,20 @@ Need help? Choose your agent:
 ├─ Concerned about security?
 │  └─→ Code Quality Monitor
 │
-└─ Want to optimize performance?
-   └─→ Code Quality Monitor → Portal Engineer
+├─ Want to optimize performance?
+│  └─→ Code Quality Monitor → Portal Engineer
+│
+├─ Need to deploy to Azure?
+│  └─→ Azure Deployment Specialist
+│
+├─ Having login/auth issues?
+│  └─→ Azure Deployment Specialist
+│
+├─ Database connection problems?
+│  └─→ Azure Deployment Specialist
+│
+└─ Python/backend errors?
+   └─→ Azure Deployment Specialist
 ```
 
 ## 📚 Agent Files
@@ -60,6 +83,7 @@ Need help? Choose your agent:
 - **HR Assistant**: `.github/agents/hr-assistant.md`
 - **Portal Engineer**: `.github/agents/portal-engineer.md`
 - **Code Quality Monitor**: `.github/agents/code-quality-monitor.md`
+- **Azure Deployment Specialist**: `.github/agents/azure-deployment-specialist.md`
 - **Full Guide**: `docs/COPILOT_AGENTS.md`
 - **Configuration**: `.github/agents/config.yml`
 
@@ -80,6 +104,11 @@ Need help? Choose your agent:
    - Security scan
    - Code quality check
    - Performance test
+   
+4. **Deploy** (Azure Deployment Specialist)
+   - Deploy to Azure
+   - Verify health endpoints
+   - Monitor for issues
 
 ### Fixing a Bug
 
@@ -163,18 +192,50 @@ export const ExampleList: React.FC = () => {
 
 ## 🔍 Agent Capabilities Matrix
 
-| Capability | HR Assistant | Portal Engineer | Code Monitor |
-|-----------|-------------|----------------|--------------|
-| HR Workflows | ✅ Primary | ⚡ Support | ❌ No |
-| Feature Planning | ✅ Primary | ⚡ Support | ❌ No |
-| Code Implementation | ⚡ Support | ✅ Primary | ❌ No |
-| Architecture Design | ⚡ Support | ✅ Primary | ❌ No |
-| Security Scanning | ⚡ Support | ⚡ Support | ✅ Primary |
-| Code Quality | ❌ No | ⚡ Support | ✅ Primary |
-| Performance Optimization | ❌ No | ✅ Primary | ✅ Primary |
-| Bug Fixing | ❌ No | ✅ Primary | ⚡ Support |
-| Module Discovery | ✅ Primary | ⚡ Support | ❌ No |
-| Documentation | ✅ Primary | ⚡ Support | ❌ No |
+| Capability | HR Assistant | Portal Engineer | Code Monitor | Azure Deploy |
+|-----------|-------------|----------------|--------------|--------------|
+| HR Workflows | ✅ Primary | ⚡ Support | ❌ No | ❌ No |
+| Feature Planning | ✅ Primary | ⚡ Support | ❌ No | ❌ No |
+| Code Implementation | ⚡ Support | ✅ Primary | ❌ No | ❌ No |
+| Architecture Design | ⚡ Support | ✅ Primary | ❌ No | ❌ No |
+| Security Scanning | ⚡ Support | ⚡ Support | ✅ Primary | ❌ No |
+| Code Quality | ❌ No | ⚡ Support | ✅ Primary | ❌ No |
+| Performance Optimization | ❌ No | ✅ Primary | ✅ Primary | ❌ No |
+| Bug Fixing | ❌ No | ✅ Primary | ⚡ Support | ❌ No |
+| Module Discovery | ✅ Primary | ⚡ Support | ❌ No | ❌ No |
+| Documentation | ✅ Primary | ⚡ Support | ❌ No | ❌ No |
+| Azure Deployment | ❌ No | ⚡ Support | ❌ No | ✅ Primary |
+| Login Troubleshooting | ❌ No | ⚡ Support | ❌ No | ✅ Primary |
+| Database Issues | ❌ No | ⚡ Support | ❌ No | ✅ Primary |
+| Python Environment | ❌ No | ⚡ Support | ❌ No | ✅ Primary |
+
+## 🚀 Deployment Workflow
+
+### Deploying to Azure
+
+1. **Prepare** (Portal Engineer)
+   - Ensure all code is committed
+   - Build frontend: `npm run build`
+   
+2. **Deploy** (Azure Deployment Specialist)
+   - Push to `main` branch OR
+   - Run GitHub Action manually OR
+   - Use VS Code task "Deploy to Azure"
+
+3. **Verify** (Azure Deployment Specialist)
+   - Check `/api/health` endpoint
+   - Check `/api/health/db` for database status
+   - Test login with admin credentials
+
+### Troubleshooting Deployment Issues
+
+| Issue | Quick Fix |
+|-------|-----------|
+| Login fails | `curl -X POST /api/health/reset-admin-password -H "X-Admin-Secret: KEY"` |
+| Database down | Check `DATABASE_URL` in Azure App Settings |
+| Python errors | Check startup logs: `az webapp log tail` |
+| CORS errors | Update `ALLOWED_ORIGINS` in App Settings |
+| Frontend missing | Verify `backend/static/index.html` exists |
 
 ## 🎓 Learning Resources
 
@@ -263,6 +324,7 @@ Good agent usage shows:
 - [HR Assistant Agent](.github/agents/hr-assistant.md)
 - [Portal Engineer Agent](.github/agents/portal-engineer.md)
 - [Code Quality Monitor](.github/agents/code-quality-monitor.md)
+- [Azure Deployment Specialist](.github/agents/azure-deployment-specialist.md)
 - [Agent Configuration](.github/agents/config.yml)
 
 ---

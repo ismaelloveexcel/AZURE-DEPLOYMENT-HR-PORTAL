@@ -22,6 +22,18 @@
       }
     },
     {
+      "label": "Install All Dependencies",
+      "dependsOn": [
+        "Install Backend Dependencies",
+        "Install Frontend Dependencies"
+      ],
+      "dependsOrder": "parallel",
+      "group": "none",
+      "presentation": {
+        "reveal": "always"
+      }
+    },
+    {
       "label": "Run Backend (Development)",
       "type": "shell",
       "command": "cd backend && uv run uvicorn app.main:app --reload --host 0.0.0.0 --port 8000",
@@ -157,9 +169,73 @@
       }
     },
     {
+      "label": "Azure: Build and Deploy Full Stack",
+      "dependsOn": [
+        "Build Frontend"
+      ],
+      "type": "shell",
+      "command": "echo '✅ Frontend built to backend/static/' && echo '📦 Creating deployment package...' && cd backend && zip -r ../deploy.zip . -x '*.pyc' -x '*__pycache__*' -x '*.git*' -x '*.env*' -x '*.example' -x '*.md' && echo '✅ Package created: deploy.zip' && echo '' && echo '🚀 Next steps:' && echo '  1. Push to main branch to trigger GitHub Actions deployment' && echo '  2. Or run: az webapp deployment source config-zip --name BaynunahHRPortal --resource-group BaynunahHR --src ../deploy.zip'",
+      "group": "none",
+      "presentation": {
+        "reveal": "always",
+        "panel": "new"
+      }
+    },
+    {
+      "label": "Azure: Check Health Endpoints",
+      "type": "shell",
+      "command": "echo '🔍 Checking health endpoints...' && echo '' && echo '=== API Health ===' && curl -s https://baynunahhrportal.azurewebsites.net/api/health 2>/dev/null || echo 'Not accessible (may need auth)' && echo '' && echo '=== Database Health ===' && curl -s https://baynunahhrportal.azurewebsites.net/api/health/db 2>/dev/null || echo 'Not accessible' && echo '' && echo '✅ Health check complete'",
+      "group": "none",
+      "presentation": {
+        "reveal": "always",
+        "panel": "new"
+      }
+    },
+    {
+      "label": "Azure: View Logs",
+      "type": "shell",
+      "command": "az webapp log tail --name BaynunahHRPortal --resource-group BaynunahHR",
+      "group": "none",
+      "isBackground": true,
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated"
+      }
+    },
+    {
+      "label": "Azure: SSH into App Service",
+      "type": "shell",
+      "command": "az webapp ssh --name BaynunahHRPortal --resource-group BaynunahHR",
+      "group": "none",
+      "presentation": {
+        "reveal": "always",
+        "panel": "new"
+      }
+    },
+    {
+      "label": "Azure: Restart App Service",
+      "type": "shell",
+      "command": "echo '🔄 Restarting Azure App Service...' && az webapp restart --name BaynunahHRPortal --resource-group BaynunahHR && echo '✅ App Service restarted'",
+      "group": "none",
+      "presentation": {
+        "reveal": "always",
+        "panel": "new"
+      }
+    },
+    {
       "label": "Clean Build Artifacts",
       "type": "shell",
       "command": "rm -rf frontend/dist backend/static backend/__pycache__ backend/**/__pycache__",
+      "group": "none",
+      "presentation": {
+        "reveal": "always",
+        "panel": "new"
+      }
+    },
+    {
+      "label": "Verify Backend Environment",
+      "type": "shell",
+      "command": "cd backend && echo '🔍 Checking backend environment...' && echo '' && echo '=== Python Version ===' && python3 --version && echo '' && echo '=== UV Version ===' && uv --version 2>/dev/null || echo 'UV not installed' && echo '' && echo '=== .env File ===' && if [ -f .env ]; then echo '✅ .env exists'; else echo '❌ .env not found - copy from .env.example'; fi && echo '' && echo '=== Dependencies ===' && uv sync --dry-run 2>/dev/null || echo 'Run: cd backend && uv sync'",
       "group": "none",
       "presentation": {
         "reveal": "always",
