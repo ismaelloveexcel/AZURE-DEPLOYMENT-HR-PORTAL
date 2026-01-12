@@ -11,14 +11,16 @@ This document describes the new emergency admin recovery features added to the H
 **Location:** `backend/app/routers/auth.py`
 
 **Changes:**
-- Login errors now log the employee_id attempting to login
+- Login errors now log the employee_id attempting to login (masked for security)
 - Full traceback is logged for debugging
 - In development mode, actual error is returned to client
 - In production mode, generic error with support instructions
 
+**Security:** Employee IDs are masked in logs (e.g., `BA***08`) to prevent clear-text logging of sensitive information (PII).
+
 **Example log output:**
 ```
-ERROR Login error for employee_id=BAYN00008: Database connection failed
+ERROR Login error for employee_id=BA***08: Database connection failed
 ERROR Login error traceback: Traceback (most recent call last)...
 ```
 

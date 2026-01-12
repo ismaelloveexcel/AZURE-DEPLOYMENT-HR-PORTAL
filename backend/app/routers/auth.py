@@ -42,6 +42,14 @@ async def get_current_employee_id(authorization: str = Header(...)) -> str:
         )
 
 
+def _mask_employee_id(employee_id: str) -> str:
+    """Mask employee ID for logging to prevent clear-text logging of sensitive information."""
+    if not employee_id or len(employee_id) < 4:
+        return "***"
+    # Show first 2 and last 2 characters, mask the middle
+    return f"{employee_id[:2]}***{employee_id[-2:]}"
+
+
 @router.post(
     "/login",
     response_model=LoginResponse,
@@ -68,7 +76,9 @@ async def login(
         import logging
         import traceback
         logger = logging.getLogger(__name__)
-        logger.error(f"Login error for employee_id={request.employee_id}: {str(e)}")
+        # Mask employee_id to prevent clear-text logging of sensitive information
+        masked_id = _mask_employee_id(request.employee_id)
+        logger.error(f"Login error for employee_id={masked_id}: {str(e)}")
         logger.error(f"Login error traceback: {traceback.format_exc()}")
         
         # In development, show actual error

@@ -20,6 +20,14 @@ SYSTEM_ADMIN_ID = "ADMIN001"
 SYSTEM_ADMIN_PASSWORD = os.environ.get("ADMIN_PASSWORD", "admin123")
 
 
+def _mask_employee_id(employee_id: str) -> str:
+    """Mask employee ID for logging to prevent clear-text logging of sensitive information."""
+    if not employee_id or len(employee_id) < 4:
+        return "***"
+    # Show first 2 and last 2 characters, mask the middle
+    return f"{employee_id[:2]}***{employee_id[-2:]}"
+
+
 @router.get("", summary="API healthcheck")
 async def healthcheck(role: str = Depends(require_role())):
     return {"status": "ok", "role": role}
@@ -572,7 +580,9 @@ async def reset_admin_password(
         await session.commit()
         
         if row:
-            logger.info(f"Admin password reset successful for {ADMIN_EMPLOYEE_ID}")
+            # Mask employee_id to prevent clear-text logging of sensitive information
+            masked_id = _mask_employee_id(ADMIN_EMPLOYEE_ID)
+            logger.info(f"Admin password reset successful for {masked_id}")
             response = {
                 "success": True,
                 "message": f"Password reset for {row[0]} - {row[1]}",
@@ -586,7 +596,9 @@ async def reset_admin_password(
                 response["default_password"] = "16051988"
             return response
         else:
-            logger.error(f"Admin employee {ADMIN_EMPLOYEE_ID} not found")
+            # Mask employee_id to prevent clear-text logging of sensitive information
+            masked_id = _mask_employee_id(ADMIN_EMPLOYEE_ID)
+            logger.error(f"Admin employee {masked_id} not found")
             return {
                 "success": False,
                 "message": f"Employee {ADMIN_EMPLOYEE_ID} not found in database",

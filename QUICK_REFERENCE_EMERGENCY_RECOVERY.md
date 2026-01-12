@@ -137,17 +137,19 @@ python tests/demo_emergency_recovery.py
 ### Success Patterns
 ```
 INFO Startup migrations completed successfully
-INFO Admin password reset successful for BAYN00008
+INFO Admin password reset successful for BA***08
 ```
 
 ### Failure Patterns
 ```
-ERROR Login error for employee_id=BAYN00008: <error>
+ERROR Login error for employee_id=BA***08: <error>
 ERROR Login error traceback: <full trace>
 ERROR Startup migrations failed: <error>
 ERROR Startup migration traceback: <full trace>
 WARNING Unauthorized admin password reset attempt
 ```
+
+**Note:** Employee IDs are masked in logs (e.g., `BA***08`) to protect sensitive information.
 
 ## 🎯 Environment Variables
 
