@@ -211,4 +211,490 @@ This project has specialized agents for different tasks:
 
 ---
 
+## Security Patterns
+
+### Input Sanitization (Required for All User Input)
+
+Always use `sanitize_text()` for any user-provided text to prevent XSS attacks:
+
+```python
+from app.core.security import sanitize_text
+from pydantic import field_validator
+
+class EmployeeCreate(BaseModel):
+    name: str
+    department: Optional[str] = None
+    
+    @field_validator("name")
+    @classmethod
+    def sanitize_name(cls, value: str) -> str:
+        return sanitize_text(value)  # HTML escapes dangerous characters
+    
+    @field_validator("department")
+    @classmethod
+    def sanitize_department(cls, value: Optional[str]) -> Optional[str]:
+        return sanitize_text(value) if value else None
+```
+
+### SQL Injection Prevention
+
+**Always use parameterized queries.** Never use string interpolation for SQL:
+
+```python
+# ❌ NEVER do this - SQL injection vulnerability
+async def get_employee_bad(self, db: AsyncSession, employee_id: str):
+    result = await db.execute(text(f"SELECT * FROM employees WHERE employee_id = '{employee_id}'"))
+    return result.scalar_one_or_none()
+
+# ✅ ALWAYS do this - parameterized query
+async def get_employee_safe(self, db: AsyncSession, employee_id: str):
+    result = await db.execute(
+        select(Employee).where(Employee.employee_id == employee_id)
+    )
+    return result.scalar_one_or_none()
+
+# ✅ If using raw SQL, use named parameters
+async def get_employee_raw_safe(self, db: AsyncSession, employee_id: str):
+    result = await db.execute(
+        text("SELECT * FROM employees WHERE employee_id = :emp_id"),
+        {"emp_id": employee_id}
+    )
+    return result.fetchone()
+```
+
+### JWT Authentication Flow
+
+The authentication system uses Employee ID + password with JWT tokens:
+
+```python
+# 1. Login generates JWT token
+# See: backend/app/routers/auth.py
+@router.post("/login")
+async def login(request: LoginRequest, session: AsyncSession = Depends(get_session)):
+    return await employee_service.login(session, request)
+
+# 2. Protected endpoints use require_role() dependency
+# See: backend/app/core/security.py
+@router.get("/employees")
+async def list_employees(
+    role: str = Depends(require_role(["admin", "hr"])),
+    session: AsyncSession = Depends(get_session)
+):
+    # role is validated before this code runs
+    return await employee_service.list_employees(session)
+
+# 3. JWT payload structure
+payload = {
+    "sub": employee.employee_id,  # Subject (employee ID)
+    "name": employee.name,
+    "role": employee.role,        # "admin", "hr", or "viewer"
+    "exp": expire,                # Expiration datetime
+    "iat": datetime.now(timezone.utc),
+}
+```
+
+---
+
+## Troubleshooting Guide
+
+### Common Login Issues
+
+**Error: "An error occurred during login"**
+
+This generic error appears when an unexpected exception occurs. Check:
+
+1. **Database connection**: Verify DATABASE_URL is correct
+   ```bash
+   # Check health endpoint
+   curl https://your-app.azurewebsites.net/api/health/db
+   ```
+
+2. **Admin password reset**: If admin password is corrupted
+   ```bash
+   curl -X POST https://your-app.azurewebsites.net/api/health/reset-admin-password \
+     -H "X-Admin-Secret: YOUR_AUTH_SECRET_KEY"
+   ```
+
+3. **SSL connection**: Azure PostgreSQL requires SSL
+   - Ensure DATABASE_URL includes `sslmode=require`
+   - The `db_utils.py` handles SSL parameter extraction automatically
+
+### Async/Sync Mismatch Errors
+
+**Error: "async_generator object has no attribute 'execute'"**
+
+This happens when mixing async/sync code incorrectly:
+
+```python
+# ❌ WRONG - Missing await
+def get_employee_sync(self, db: AsyncSession, employee_id: str):
+    result = db.execute(select(Employee))  # Missing await!
+    return result.scalar_one_or_none()
+
+# ✅ CORRECT - All async operations awaited
+async def get_employee_async(self, db: AsyncSession, employee_id: str):
+    result = await db.execute(select(Employee))
+    return result.scalar_one_or_none()
+```
+
+**Error: "cannot schedule new futures after shutdown"**
+
+This occurs when the event loop closes before async tasks complete:
+
+```python
+# ❌ WRONG - Event loop closes before task completes
+async def bad_pattern():
+    asyncio.create_task(some_long_task())  # Fire and forget - may not complete
+    return {"status": "ok"}
+
+# ✅ CORRECT - Await the task or use background tasks properly
+async def good_pattern():
+    await some_long_task()  # Wait for completion
+    return {"status": "ok"}
+
+# ✅ For background tasks, use FastAPI's BackgroundTasks
+@router.post("/send-email")
+async def send_email(background_tasks: BackgroundTasks):
+    background_tasks.add_task(send_email_async)
+    return {"status": "queued"}
+```
+
+### Database Connection Issues
+
+**Error: "connection refused" or "timeout"**
+
+1. Check DATABASE_URL format:
+   ```
+   postgresql+asyncpg://user:password@host:5432/dbname?sslmode=require
+   ```
+
+2. For Azure PostgreSQL, ensure:
+   - Firewall rules allow your IP/Azure services
+   - SSL is enabled (handled automatically by `db_utils.py`)
+   - Connection string uses `postgresql+asyncpg://` prefix
+
+**Error: "column does not exist"**
+
+Run migrations:
+```bash
+cd backend
+uv run alembic upgrade head
+```
+
+If migrations fail, check `alembic/versions/` for conflicting migrations.
+
+### Migration Conflicts
+
+When multiple developers create migrations simultaneously:
+
+```bash
+# 1. Check current migration state
+uv run alembic current
+
+# 2. If you see multiple heads, merge them
+uv run alembic merge heads -m "merge_migrations"
+
+# 3. Apply the merged migration
+uv run alembic upgrade head
+```
+
+---
+
+## Complete Feature Implementation Example
+
+### Employee Notes Module
+
+This example shows how to implement a complete feature following the 3-layer architecture.
+
+#### 1. Model (backend/app/models/employee_note.py)
+
+```python
+from datetime import datetime
+from sqlalchemy import Column, Integer, String, Text, DateTime, ForeignKey
+from sqlalchemy.orm import relationship
+from app.models.renewal import Base
+
+class EmployeeNote(Base):
+    __tablename__ = "employee_notes"
+    
+    id = Column(Integer, primary_key=True, index=True)
+    employee_id = Column(String(20), ForeignKey("employees.employee_id"), nullable=False, index=True)
+    content = Column(Text, nullable=False)
+    note_type = Column(String(50), default="general")  # general, performance, disciplinary
+    created_by = Column(String(20), nullable=False)  # Employee ID of author
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    
+    # Relationship to employee
+    employee = relationship("Employee", back_populates="notes")
+```
+
+#### 2. Schema (backend/app/schemas/employee_note.py)
+
+```python
+from datetime import datetime
+from typing import Optional
+from pydantic import BaseModel, field_validator
+from app.core.security import sanitize_text
+
+class EmployeeNoteBase(BaseModel):
+    content: str
+    note_type: str = "general"
+    
+    @field_validator("content")
+    @classmethod
+    def sanitize_content(cls, value: str) -> str:
+        return sanitize_text(value)
+    
+    @field_validator("note_type")
+    @classmethod
+    def validate_note_type(cls, value: str) -> str:
+        allowed = {"general", "performance", "disciplinary"}
+        if value not in allowed:
+            raise ValueError(f"note_type must be one of: {allowed}")
+        return value
+
+class EmployeeNoteCreate(EmployeeNoteBase):
+    employee_id: str
+
+class EmployeeNoteResponse(EmployeeNoteBase):
+    id: int
+    employee_id: str
+    created_by: str
+    created_at: datetime
+    updated_at: datetime
+    
+    class Config:
+        from_attributes = True
+```
+
+#### 3. Repository (backend/app/repositories/employee_notes.py)
+
+```python
+from typing import Sequence
+from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
+from app.models.employee_note import EmployeeNote
+
+class EmployeeNoteRepository:
+    async def create(
+        self, db: AsyncSession, employee_id: str, content: str, 
+        note_type: str, created_by: str
+    ) -> EmployeeNote:
+        note = EmployeeNote(
+            employee_id=employee_id,
+            content=content,
+            note_type=note_type,
+            created_by=created_by
+        )
+        db.add(note)
+        await db.flush()
+        await db.refresh(note)
+        return note
+    
+    async def list_by_employee(
+        self, db: AsyncSession, employee_id: str
+    ) -> Sequence[EmployeeNote]:
+        result = await db.execute(
+            select(EmployeeNote)
+            .where(EmployeeNote.employee_id == employee_id)
+            .order_by(EmployeeNote.created_at.desc())
+        )
+        return result.scalars().all()
+    
+    async def get_by_id(self, db: AsyncSession, note_id: int) -> EmployeeNote | None:
+        result = await db.execute(
+            select(EmployeeNote).where(EmployeeNote.id == note_id)
+        )
+        return result.scalar_one_or_none()
+    
+    async def delete(self, db: AsyncSession, note_id: int) -> bool:
+        note = await self.get_by_id(db, note_id)
+        if note:
+            await db.delete(note)
+            return True
+        return False
+```
+
+#### 4. Service (backend/app/services/employee_notes.py)
+
+```python
+from typing import List
+from fastapi import HTTPException, status
+from sqlalchemy.ext.asyncio import AsyncSession
+from app.repositories.employee_notes import EmployeeNoteRepository
+from app.schemas.employee_note import EmployeeNoteCreate, EmployeeNoteResponse
+
+class EmployeeNoteService:
+    def __init__(self):
+        self._repo = EmployeeNoteRepository()
+    
+    async def create_note(
+        self, db: AsyncSession, data: EmployeeNoteCreate, created_by: str
+    ) -> EmployeeNoteResponse:
+        note = await self._repo.create(
+            db, data.employee_id, data.content, data.note_type, created_by
+        )
+        await db.commit()
+        return EmployeeNoteResponse.model_validate(note)
+    
+    async def get_employee_notes(
+        self, db: AsyncSession, employee_id: str
+    ) -> List[EmployeeNoteResponse]:
+        notes = await self._repo.list_by_employee(db, employee_id)
+        return [EmployeeNoteResponse.model_validate(n) for n in notes]
+    
+    async def delete_note(
+        self, db: AsyncSession, note_id: int, user_role: str
+    ) -> bool:
+        if user_role not in ["admin", "hr"]:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Only admin/HR can delete notes"
+            )
+        deleted = await self._repo.delete(db, note_id)
+        if not deleted:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Note not found"
+            )
+        await db.commit()
+        return True
+
+employee_note_service = EmployeeNoteService()
+```
+
+#### 5. Router (backend/app/routers/employee_notes.py)
+
+```python
+from typing import List
+from fastapi import APIRouter, Depends
+from sqlalchemy.ext.asyncio import AsyncSession
+from app.core.security import require_role
+from app.database import get_session
+from app.schemas.employee_note import EmployeeNoteCreate, EmployeeNoteResponse
+from app.services.employee_notes import employee_note_service
+
+router = APIRouter(prefix="/employee-notes", tags=["employee-notes"])
+
+@router.post("", response_model=EmployeeNoteResponse)
+async def create_note(
+    data: EmployeeNoteCreate,
+    role: str = Depends(require_role(["admin", "hr"])),
+    db: AsyncSession = Depends(get_session),
+):
+    """Create a new note for an employee. Requires admin or HR role."""
+    # Use employee_id from the token in a real implementation
+    return await employee_note_service.create_note(db, data, created_by="SYSTEM")
+
+@router.get("/{employee_id}", response_model=List[EmployeeNoteResponse])
+async def get_notes(
+    employee_id: str,
+    role: str = Depends(require_role(["admin", "hr"])),
+    db: AsyncSession = Depends(get_session),
+):
+    """Get all notes for an employee. Requires admin or HR role."""
+    return await employee_note_service.get_employee_notes(db, employee_id)
+
+@router.delete("/{note_id}")
+async def delete_note(
+    note_id: int,
+    role: str = Depends(require_role(["admin", "hr"])),
+    db: AsyncSession = Depends(get_session),
+):
+    """Delete a note. Requires admin or HR role."""
+    await employee_note_service.delete_note(db, note_id, role)
+    return {"success": True, "message": "Note deleted"}
+```
+
+#### 6. Register Router (backend/app/main.py)
+
+```python
+from app.routers import employee_notes
+
+# Add to router registration section
+app.include_router(employee_notes.router, prefix="/api")
+```
+
+#### 7. Generate Migration
+
+```bash
+cd backend
+uv run alembic revision --autogenerate -m "add_employee_notes_table"
+uv run alembic upgrade head
+```
+
+#### 8. Frontend Integration (frontend/src/App.tsx)
+
+```typescript
+// Add to API calls section
+const fetchEmployeeNotes = async (employeeId: string) => {
+  const response = await fetch(`/api/employee-notes/${employeeId}`, {
+    headers: { Authorization: `Bearer ${token}` }
+  });
+  return response.json();
+};
+
+const createEmployeeNote = async (data: { employee_id: string; content: string; note_type: string }) => {
+  const response = await fetch('/api/employee-notes', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`
+    },
+    body: JSON.stringify(data)
+  });
+  return response.json();
+};
+```
+
+---
+
+## Development Tools Reference
+
+### VS Code Tasks (.vscode/tasks.json)
+
+- **Start Full Application**: `Ctrl+Shift+B` - Runs both frontend and backend
+- **Start Backend Only**: Runs FastAPI server on port 8000
+- **Start Frontend Only**: Runs Vite dev server on port 5173
+- **Run Migrations**: Executes `alembic upgrade head`
+
+### VS Code Debug Configurations (.vscode/launch.json)
+
+- **Python: FastAPI**: Debug backend with breakpoints
+- **Chrome: Frontend**: Debug React app in Chrome
+- **Full Stack**: Debug both simultaneously
+
+### GitHub Workflows (.github/workflows/)
+
+| Workflow | Purpose | Trigger |
+|----------|---------|---------|
+| `ci.yml` | Run tests and linting | Push to main, PRs |
+| `deploy.yml` | Deploy to Azure | Push to main (after CI) |
+| `pr-quality-check.yml` | PR validation | Pull requests |
+| `post-deployment-health.yml` | Verify deployment | After deploy |
+
+### Useful Commands
+
+```bash
+# Backend
+cd backend
+uv sync                                    # Install dependencies
+uv run uvicorn app.main:app --reload      # Start dev server
+uv run alembic upgrade head                # Apply migrations
+uv run alembic revision --autogenerate -m "description"  # Create migration
+
+# Frontend
+cd frontend
+npm install                                # Install dependencies
+npm run dev                                # Start dev server
+npm run build                              # Production build
+
+# Combined
+./scripts/start-portal.sh                  # Start both (macOS/Linux)
+scripts\start-portal-windows.bat          # Start both (Windows)
+```
+
+---
+
 **For full documentation:** See [README.md](../README.md) | [CONTRIBUTING.md](../CONTRIBUTING.md) | [docs/](../docs/)
