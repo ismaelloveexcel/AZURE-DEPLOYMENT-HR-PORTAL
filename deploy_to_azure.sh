@@ -57,11 +57,11 @@ az webapp config appsettings set \
 
 # 7. Set startup command for FastAPI (CRITICAL: requires explicit bind)
 # Note: When using GitHub source deployment, the app is in the backend folder
-# The startup command must navigate to the backend folder first
+# Oryx builds and installs requirements during deployment
 az webapp config set \
   --resource-group $RESOURCE_GROUP \
   --name $WEBAPP_NAME \
-  --startup-file "cd /home/site/wwwroot/backend && pip install -r requirements.txt && gunicorn app.main:app -k uvicorn.workers.UvicornWorker --bind=0.0.0.0:8000 --workers=2"
+  --startup-file "cd /home/site/wwwroot/backend && gunicorn app.main:app -k uvicorn.workers.UvicornWorker --bind=0.0.0.0:8000 --workers=2"
 
 # 8. Restart App (DO NOT SKIP - applies settings)
 az webapp restart \
@@ -70,7 +70,7 @@ az webapp restart \
 
 # 9. (Optional) SSH into the app and run Alembic migrations
 # az webapp ssh --resource-group $RESOURCE_GROUP --name $WEBAPP_NAME
-# cd /home/site/wwwroot
+# cd /home/site/wwwroot/backend
 # python -m alembic upgrade head
 # exit
 
