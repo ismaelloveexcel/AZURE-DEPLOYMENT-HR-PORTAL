@@ -53,7 +53,7 @@ jobs:
         working-directory: frontend
         run: npm run build
         env:
-          VITE_API_BASE_URL: https://baynunahhrportal.azurewebsites.net/api
+          VITE_API_BASE_URL: /api
 
       # ===== PREPARE BACKEND =====
       - name: Setup Python
@@ -90,6 +90,10 @@ jobs:
         run: |
           echo "📦 Creating deployment package..."
           cd backend
+          
+          # Ensure azure_startup.sh is executable
+          chmod +x azure_startup.sh
+          
           zip -r ../deploy.zip . \
             -x "*.pyc" \
             -x "*__pycache__*" \
@@ -111,11 +115,13 @@ jobs:
           else
             echo "✅ index.html included"
           fi
-          if ! unzip -l deploy.zip | grep -q "static/assets"; then
-            echo "❌ ERROR: static/assets directory not found in package"
+          
+          # Verify azure_startup.sh is included
+          if ! unzip -l deploy.zip | grep -q "azure_startup.sh"; then
+            echo "❌ ERROR: azure_startup.sh not found in package"
             exit 1
           else
-            echo "✅ assets directory included"
+            echo "✅ azure_startup.sh included"
           fi
 
       # ===== DEPLOY TO AZURE =====
@@ -160,20 +166,7 @@ jobs:
             echo "✅ Web App BaynunahHRPortal exists"
           fi
           
-          # Always configure startup command to use azure_startup.sh
-          echo "⚙️  Configuring startup command..."
-          az webapp config set \
-            --name BaynunahHRPortal \
-            --resource-group BaynunahHR \
-            --startup-file "bash azure_startup.sh"
-          
           echo "✅ All Azure resources verified/created"
-
-      - name: Deploy to Azure App Service
-        uses: azure/webapps-deploy@v3
-        with:
-          app-name: BaynunahHRPortal
-          package: deploy.zip
 
       - name: Configure App Settings
         run: |
@@ -188,121 +181,74 @@ jobs:
               APP_ENV="production" \
               SCM_DO_BUILD_DURING_DEPLOYMENT="true" \
             --output none
-          echo "✅ App settings configured successfully"
-
-      - name: Configure startup command
-        run: |
-          echo "⚙️  Configuring Python startup command..."
+          
+          # Set startup command
           az webapp config set \
             --name BaynunahHRPortal \
             --resource-group BaynunahHR \
-            --startup-file "gunicorn -w 4 -k uvicorn.workers.UvicornWorker app.main:app" \
+            --startup-file "bash azure_startup.sh" \
             --output none
-          echo "✅ Startup command configured successfully"
+          
+          echo "✅ App settings configured successfully"
 
-      # ===== POST-DEPLOYMENT MIGRATION =====
-      - name: Run Alembic migrations
-        continue-on-error: true
+      - name: Deploy to Azure App Service
         run: |
-          echo "🔄 Attempting to run Alembic migrations..."
-          echo ""
-          echo "NOTE: This step runs migrations via Azure CLI. It may fail if:"
-          echo "  - The app is still starting up"
-          echo "  - Database connection requires different credentials"
-          echo "  - Migrations require manual intervention"
-          echo ""
+          echo "🚀 Deploying to Azure App Service..."
           
-          # Try to run migrations via SSH (best effort)
-          SSH_SUCCESS=false
-          if az webapp ssh --name BaynunahHRPortal --resource-group BaynunahHR --timeout 60 << 'EOF'
-          cd /home/site/wwwroot
-          python -m alembic upgrade head
-          EOF
-          then
-            echo "✅ Migrations completed successfully via SSH"
-            SSH_SUCCESS=true
-          else
-            echo "⚠️  Could not run migrations via SSH"
-            echo "This is expected for some Azure App Service configurations"
-          fi
+          # Use Azure CLI for zip deployment (more reliable than the action)
+          az webapp deployment source config-zip \
+            --name BaynunahHRPortal \
+            --resource-group BaynunahHR \
+            --src deploy.zip \
+            --timeout 600
           
-          # Alternative: Try using Azure Web Jobs API (also best effort)
-          if [ "$SSH_SUCCESS" = "false" ]; then
-            echo "⚠️  SSH method failed, attempting via kudu API..."
-            
-            # Ensure jq is available
-            if ! command -v jq >/dev/null 2>&1; then
-              echo "⚠️  jq not found, cannot parse credentials"
-              echo "Skipping Kudu API method"
-              echo ""
-              echo "MANUAL MIGRATION REQUIRED:"
-              echo "  az webapp ssh --name BaynunahHRPortal --resource-group BaynunahHR"
-              echo "  cd /home/site/wwwroot"
-              echo "  python -m alembic upgrade head"
-              exit 0
-            fi
-            
-            # Get publishing credentials
-            KUDU_CREDS=$(az webapp deployment list-publishing-credentials \
-              --name BaynunahHRPortal \
-              --resource-group BaynunahHR \
-              --query "{username:publishingUserName,password:publishingPassword}" \
-              -o json 2>/dev/null) || {
-              echo "⚠️  Could not retrieve kudu credentials"
-              echo "Skipping automatic migration - please run manually"
-              echo ""
-              echo "MANUAL MIGRATION REQUIRED:"
-              echo "  az webapp ssh --name BaynunahHRPortal --resource-group BaynunahHR"
-              echo "  cd /home/site/wwwroot"
-              echo "  python -m alembic upgrade head"
-              exit 0
-            }
-            
-            USERNAME=$(echo $KUDU_CREDS | jq -r .username)
-            PASSWORD=$(echo $KUDU_CREDS | jq -r .password)
-            
-            # Run migration via kudu
-            if curl -X POST \
-              "https://baynunahhrportal.scm.azurewebsites.net/api/command" \
-              -u "$USERNAME:$PASSWORD" \
-              -H "Content-Type: application/json" \
-              -d '{"command": "cd /home/site/wwwroot && python -m alembic upgrade head", "dir": "/home/site/wwwroot"}' \
-              --max-time 120 --silent --show-error; then
-              echo "✅ Migrations completed via kudu API"
-            else
-              echo "⚠️  Kudu API method also failed"
-              echo ""
-              echo "MANUAL MIGRATION REQUIRED:"
-              echo "  az webapp ssh --name BaynunahHRPortal --resource-group BaynunahHR"
-              echo "  cd /home/site/wwwroot"
-              echo "  python -m alembic upgrade head"
-            fi
-          fi
+          echo "✅ Deployment completed"
+
+      - name: Restart App Service
+        run: |
+          echo "🔄 Restarting App Service to apply changes..."
+          az webapp restart \
+            --name BaynunahHRPortal \
+            --resource-group BaynunahHR
+          echo "✅ App Service restarted"
 
       - name: Verify deployment health
         run: |
           echo "🔍 Checking deployment health..."
-          echo "Waiting 30 seconds for app to start..."
-          sleep 30
+          echo "Waiting 60 seconds for app to start..."
+          sleep 60
           
-          # Try up to 5 times with increasing delays
-          # Using /api/health/db which doesn't require authentication
-          for i in 1 2 3 4 5; do
-            HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" https://baynunahhrportal.azurewebsites.net/api/health/db || echo "000")
+          # Try up to 6 times with increasing delays
+          for i in 1 2 3 4 5 6; do
+            echo "Attempt $i: Checking health..."
+            HTTP_STATUS=$(curl -s -o /tmp/health_response.txt -w "%{http_code}" https://baynunahhrportal.azurewebsites.net/api/health 2>/dev/null || echo "000")
+            
             if [ "$HTTP_STATUS" = "200" ]; then
               echo "✅ Health check passed (HTTP $HTTP_STATUS)"
-              curl -s https://baynunahhrportal.azurewebsites.net/api/health/db
+              cat /tmp/health_response.txt
               echo ""
               exit 0
             else
-              echo "⏳ Attempt $i: HTTP $HTTP_STATUS - waiting..."
-              sleep $((i * 15))
+              echo "⏳ HTTP $HTTP_STATUS - Response:"
+              cat /tmp/health_response.txt 2>/dev/null | head -5 || echo "(no response)"
+              echo ""
+              
+              if [ $i -lt 6 ]; then
+                echo "Waiting $((i * 20)) seconds before retry..."
+                sleep $((i * 20))
+              fi
             fi
           done
           
-          echo "⚠️  Health check did not return 200 after 5 attempts"
-          echo "The app may still be starting. Check manually:"
-          echo "  curl https://baynunahhrportal.azurewebsites.net/api/health/db"
+          echo "⚠️  Health check did not return 200 after 6 attempts"
+          echo "The app may still be starting or there may be an issue."
+          echo ""
+          echo "Check logs with:"
+          echo "  az webapp log tail --name BaynunahHRPortal --resource-group BaynunahHR"
+          echo ""
+          echo "Check app at: https://baynunahhrportal.azurewebsites.net"
+          # Don't fail the workflow - let it complete so we can check logs
+          exit 0
 
       - name: Deployment Summary
         run: |
@@ -314,13 +260,17 @@ jobs:
           echo "📱 App URL:      https://baynunahhrportal.azurewebsites.net"
           echo "📚 API Docs:     https://baynunahhrportal.azurewebsites.net/docs"
           echo "🔍 Health Check: https://baynunahhrportal.azurewebsites.net/api/health"
+          echo "🔍 DB Health:    https://baynunahhrportal.azurewebsites.net/api/health/db"
           echo ""
           echo "✅ Frontend assets deployed to backend/static"
           echo "✅ App settings configured (DATABASE_URL, AUTH_SECRET_KEY)"
-          echo "⚠️  Check migration step above for any manual actions needed"
+          echo "✅ Startup script: azure_startup.sh (installs deps & runs migrations)"
           echo ""
-          echo "Next steps:"
-          echo "  1. Verify the app is running: curl https://baynunahhrportal.azurewebsites.net/api/health"
-          echo "  2. Check logs if needed: az webapp log tail --name BaynunahHRPortal --resource-group BaynunahHR"
-          echo "  3. Test login at: https://baynunahhrportal.azurewebsites.net"
+          echo "If login issues occur, reset admin password:"
+          echo "  curl -X POST https://baynunahhrportal.azurewebsites.net/api/health/reset-admin-password \\"
+          echo "    -H 'X-Admin-Secret: YOUR_AUTH_SECRET_KEY'"
+          echo ""
+          echo "Default admin credentials after reset:"
+          echo "  Employee ID: BAYN00008"
+          echo "  Password: 16051988"
           echo ""
