@@ -295,7 +295,7 @@
     {
       "label": "Azure: Create Deployment Package",
       "type": "shell",
-      "command": "cd backend && zip -r ../deploy.zip . -x '*.pyc' -x '*__pycache__*' -x '*.git*' -x '*.env*' -x '*.example' -x '*.md'",
+      "command": "cd backend && zip -r ../deploy.zip . -x '*.pyc' -x '*__pycache__*' -x '*.git*' -x '*.env*' -x '*.md'",
       "group": "none",
       "presentation": {
         "reveal": "always",
