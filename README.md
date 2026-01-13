@@ -167,58 +167,36 @@ Open: .github/agents/azure-deployment-specialist.md
 Ask: "Deploy to Azure App Service" or "Fix login errors"
 ```
 
-**📖 Full Documentation**: [Copilot Agents Guide](docs/COPILOT_AGENTS.md) | [Quick Reference](.github/agents/QUICK_REFERENCE.md) | [Deployment Guide](docs/AGENT_DEPLOYMENT_GUIDE.md)
+**📖 Full Documentation**: See agents in [.github/agents/](.github/agents/)
 
 ---
 
 ## 📚 Documentation
 
+### Deployment Guides
+
 | Document | Description | Audience |
 |----------|-------------|----------|
-| [Azure Deployment Reference Guide](docs/AZURE_DEPLOYMENT_REFERENCE_GUIDE.md) | **NEW!** Comprehensive reference for all Azure GitHub Actions and deployment patterns | DevOps/Developers |
+| [Azure Deployment Reference Guide](docs/AZURE_DEPLOYMENT_REFERENCE_GUIDE.md) | Comprehensive reference for all Azure GitHub Actions and deployment patterns | DevOps/Developers |
 | [GitHub Deployment Options](docs/GITHUB_DEPLOYMENT_OPTIONS.md) | Complete guide for local laptop, GitHub Codespaces, and self-hosted deployment options | HR Users/Developers |
+| [GitHub Deployment Setup](docs/GITHUB_DEPLOYMENT_SETUP.md) | Step-by-step deployment setup instructions | Developers |
 | [VSCode Deployment Guide](docs/VSCODE_DEPLOYMENT_GUIDE.md) | Complete guide for development and deployment in Visual Studio Code | Developers |
-| [Contributing Guide](CONTRIBUTING.md) | Setup instructions, Copilot best practices, **automated review system**, troubleshooting | Contributors/Developers |
-| **[Copilot Agent System Guide](docs/COPILOT_AGENT_SYSTEM_GUIDE.md)** | **NEW!** Plain-language guide to automated reviews, maintenance, and monitoring for non-technical admins | **HR Admins** |
-| **[HR Portal FAQ](docs/HR_PORTAL_FAQ.md)** | **NEW!** Comprehensive FAQ covering portal usage, automation, compliance, and troubleshooting | **HR Admins/All Users** |
-| **[HR Admin Onboarding](docs/HR_ADMIN_ONBOARDING.md)** | **NEW!** Complete onboarding checklist for solo HR operators | **HR Admins** |
-| **[Quick Reference Card](docs/QUICK_REFERENCE_CARD.md)** | **NEW!** At-a-glance guide: traffic lights, workflows, emergency contacts | **HR Admins** |
-| **[Rollback & Recovery Guide](docs/ROLLBACK_RECOVERY_GUIDE.md)** | **NEW!** Emergency procedures for deployment failures and system recovery | **HR Admins/DevOps** |
-| [HR User Guide](docs/HR_USER_GUIDE.md) | How to use the portal | HR Users |
-| [HR Templates Reference](docs/HR_TEMPLATES_REFERENCE.md) | Performance Evaluation & Employee of the Year templates | HR Users/Managers |
-| [App Analysis Report](docs/APP_ANALYSIS_REPORT.md) | Comprehensive codebase analysis and issue remediation | Admins/Developers |
-| [Process Simplification (UAE)](docs/PROCESS_SIMPLIFICATION_UAE.md) | Automated workflows for solo HR/multi-entity operations | HR Leadership |
-| [Copilot Agents Guide](docs/COPILOT_AGENTS.md) | AI agents for development assistance | Developers |
-| [Agent Deployment Guide](docs/AGENT_DEPLOYMENT_GUIDE.md) | How to deploy and use agents | Developers |
-| [System Health Check](docs/SYSTEM_HEALTH_CHECK.md) | Application assessment & roadmap | Admins/Developers |
-| [Recommended Add-ons](docs/RECOMMENDED_ADDONS.md) | Integration options | Developers |
-| [HR Implementation Plan](docs/HR_IMPLEMENTATION_PLAN.md) | Migration, admin hardening, and HR ops structure | HR Leadership/Admins |
-| [HR Apps Integration Guide](docs/HR_APPS_INTEGRATION_GUIDE.md) | Complete guide to GitHub HR apps & integration strategies | HR Leadership/Developers |
-| [Employee Management Quick Start](docs/EMPLOYEE_MANAGEMENT_QUICK_START.md) | Add employee management features to your existing app | Developers |
-| [Employee Migration Apps Guide](docs/EMPLOYEE_MIGRATION_APPS_GUIDE.md) | GitHub apps for layered employee migration strategy | HR Leadership/Developers |
-| [Frappe HRMS Implementation Plan](docs/FRAPPE_HRMS_IMPLEMENTATION_PLAN.md) | 6-week plan to integrate Frappe HRMS (if needed later) | HR Leadership/Developers |
-| [Recruitment Systems Research](docs/RECRUITMENT_SYSTEMS_RESEARCH.md) | Comprehensive analysis of open-source ATS options & custom build recommendation | HR Leadership/Developers |
-| [Recruitment Implementation Architecture](docs/RECRUITMENT_IMPLEMENTATION_ARCHITECTURE.md) | Technical architecture for custom lightweight ATS with pass integration | Developers |
-| [Recruitment Quick Reference](docs/RECRUITMENT_QUICK_REFERENCE.md) | Executive summary and quick decision guide for recruitment system | HR Leadership |
-| [AI CV Parsing Solutions](docs/AI_CV_PARSING_SOLUTIONS.md) | AI-powered resume parsing with pyresparser for automatic candidate data extraction | Developers/HR |
-| [Recruitment Full Implementation Guide](docs/RECRUITMENT_FULL_IMPLEMENTATION_GUIDE.md) | Complete ready-to-implement code for recruitment system (solo HR, UAE startup) | Developers |
-| [Recruitment Deployment Checklist](docs/RECRUITMENT_DEPLOYMENT_CHECKLIST.md) | Step-by-step deployment checklist and verification guide | Developers/DevOps |
+| [VSCode Deployment Checklist](docs/VSCODE_DEPLOYMENT_CHECKLIST.md) | Deployment checklist for VSCode | Developers |
+| [VSCode Quick Start](docs/VSCODE_QUICK_START.md) | Quick start guide for VSCode | Developers |
+| [Easiest Deployment Guide](docs/EASIEST_DEPLOYMENT_GUIDE.md) | Simplified deployment instructions | All Users |
+| [One-Click Deployment](docs/ONE_CLICK_DEPLOYMENT.md) | Quick deployment guide | All Users |
+| [Workflow Deployment Fixes](docs/WORKFLOW_DEPLOYMENT_FIXES.md) | Common deployment issues and fixes | DevOps |
+| [Rollback & Recovery Guide](docs/ROLLBACK_RECOVERY_GUIDE.md) | Emergency procedures for deployment failures and system recovery | HR Admins/DevOps |
 
-### 📋 Recruitment Documentation Review
-
-> Comprehensive review of recruitment system documentation
+### User Guides
 
 | Document | Description | Audience |
 |----------|-------------|----------|
-| [📊 Quick Reference](docs/RECRUITMENT_DOCS_QUICK_REFERENCE.md) | **START HERE!** TL;DR summary, top actions, quick fixes | Everyone |
-| [📝 Full Review](docs/RECRUITMENT_DOCUMENTATION_REVIEW.md) | Complete 900+ line review with ratings and recommendations | Leadership/Developers |
-| [📅 Action Plan](docs/RECRUITMENT_DOCUMENTATION_ACTION_PLAN.md) | 4-week implementation plan with timeline and resources | Project Managers |
-
-**Key Findings:**
-- Grade: 7/10 - Good strategic planning, needs operational depth
-- 6 documents reviewed, 7 critical documents missing
-- Top priority: Create recruitment system overview and workflow diagrams
-- Timeline: 2-3 days for critical gaps, 4 weeks for complete documentation
+| [HR User Guide](docs/HR_USER_GUIDE.md) | How to use the portal | HR Users |
+| [HR Portal FAQ](docs/HR_PORTAL_FAQ.md) | Comprehensive FAQ covering portal usage, automation, compliance, and troubleshooting | HR Admins/All Users |
+| [HR Admin Onboarding](docs/HR_ADMIN_ONBOARDING.md) | Complete onboarding checklist for solo HR operators | HR Admins |
+| [Quick Reference Card](docs/QUICK_REFERENCE_CARD.md) | At-a-glance guide: traffic lights, workflows, emergency contacts | HR Admins |
+| [Contributing Guide](CONTRIBUTING.md) | Setup instructions, Copilot best practices, troubleshooting | Contributors/Developers |
 
 ---
 

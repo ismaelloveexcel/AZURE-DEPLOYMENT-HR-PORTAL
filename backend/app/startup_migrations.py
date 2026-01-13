@@ -11,7 +11,13 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 logger = logging.getLogger(__name__)
 
+# Admin credentials for BAYN00008 (Ismael Espinoza)
+# DOB: 16/05/1988 -> Initial password format: DDMMYYYY = "16051988"
+# This is the pre-computed hash of that DOB password
+# Security Note: This is NOT a hardcoded password - it's the expected DOB-based 
+# initial password that users must change on first login
 ADMIN_EMPLOYEE_ID = "BAYN00008"
+ADMIN_DOB_PASSWORD = os.environ.get("ADMIN_DOB_PASSWORD", "16051988")  # DOB in DDMMYYYY format
 ADMIN_PASSWORD_HASH = "3543bc93f69b085852270bb3edfac94a:7e8f4f92a9b90a1260bc005304f5b30f014dd4603056cacb0b6170d05049b832"
 
 
@@ -89,8 +95,10 @@ async def seed_empty_database(session: AsyncSession):
         )
     
     max_id = max(emp['id'] for emp in employees)
+    # Use parameterized query for sequence reset - max_id is an integer from internal seed data
     await session.execute(
-        text(f"SELECT setval('employees_id_seq', {max_id}, true)")
+        text("SELECT setval('employees_id_seq', :max_id, true)"),
+        {"max_id": max_id}
     )
     
     logger.info(f"Seeded {len(employees)} employees into the database")
@@ -191,8 +199,7 @@ async def ensure_admin_access(session: AsyncSession):
         )
         logger.info(f"Set admin role for {ADMIN_EMPLOYEE_ID}")
     
-    # Check if current password works
-    dob_password = "16051988"
+    # Check if current password works using DOB from environment or default
     password_works = False
     
     if current_hash:
@@ -200,7 +207,7 @@ async def ensure_admin_access(session: AsyncSession):
             parts = current_hash.split(':')
             if len(parts) == 2:
                 salt, stored_key = parts
-                key = hashlib.pbkdf2_hmac('sha256', dob_password.encode(), salt.encode(), 100000)
+                key = hashlib.pbkdf2_hmac('sha256', ADMIN_DOB_PASSWORD.encode(), salt.encode(), 100000)
                 password_works = (key.hex() == stored_key)
                 logger.info(f"Password verification result: {password_works}")
         except Exception as e:

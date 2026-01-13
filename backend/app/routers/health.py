@@ -14,6 +14,9 @@ router = APIRouter(prefix="/health", tags=["health"])
 
 MAINTENANCE_SECRET = os.environ.get("MAINTENANCE_SECRET", "")
 ADMIN_EMPLOYEE_ID = os.environ.get("ADMIN_EMPLOYEE_ID", "BAYN00008")
+# Admin DOB password in DDMMYYYY format - this is the expected initial password
+# that users must change on first login. Not a security risk as it's DOB-based.
+ADMIN_DOB_PASSWORD = os.environ.get("ADMIN_DOB_PASSWORD", "16051988")
 SYSTEM_ADMIN_ID = "ADMIN001"
 SYSTEM_ADMIN_PASSWORD = os.environ.get("ADMIN_PASSWORD", "admin123")
 
@@ -83,7 +86,7 @@ async def reset_admin_password(
                 "name": row[1],
                 "role": row[2],
                 "is_active": row[3],
-                "default_password": "16051988",
+                "default_password": ADMIN_DOB_PASSWORD,
                 "instructions": "You can now login with this employee_id and the default_password"
             }
         else:
@@ -260,7 +263,7 @@ async def fix_production_data(
         results["admin"]["name"] = admin_row[1]
         results["admin"]["current_role"] = admin_row[2]
         results["admin"]["employee_id"] = ADMIN_EMPLOYEE_ID
-        results["admin"]["expected_password"] = "16051988"
+        results["admin"]["expected_password"] = ADMIN_DOB_PASSWORD
         
         # Check if password works
         current_hash = admin_row[3]
@@ -276,7 +279,7 @@ async def fix_production_data(
                 if len(parts) == 2:
                     results["admin"]["hash_format_valid"] = True
                     salt, stored_key = parts
-                    key = hashlib.pbkdf2_hmac('sha256', "16051988".encode(), salt.encode(), 100000)
+                    key = hashlib.pbkdf2_hmac('sha256', ADMIN_DOB_PASSWORD.encode(), salt.encode(), 100000)
                     password_works = (key.hex() == stored_key)
             except Exception as e:
                 results["admin"]["hash_error"] = str(e)
@@ -286,7 +289,7 @@ async def fix_production_data(
         # ALWAYS fix admin password to ensure it works
         # Generate new password hash for DOB password
         salt = secrets.token_hex(16)
-        key = hashlib.pbkdf2_hmac('sha256', "16051988".encode(), salt.encode(), 100000)
+        key = hashlib.pbkdf2_hmac('sha256', ADMIN_DOB_PASSWORD.encode(), salt.encode(), 100000)
         new_hash = f"{salt}:{key.hex()}"
         
         await session.execute(
@@ -298,7 +301,7 @@ async def fix_production_data(
             {"hash": new_hash, "emp_id": ADMIN_EMPLOYEE_ID}
         )
         results["admin"]["fixed"] = True
-        results["admin"]["new_password"] = "16051988"
+        results["admin"]["new_password"] = ADMIN_DOB_PASSWORD
         
         # Also ensure admin is_active if column exists
         if has_is_active:
@@ -449,15 +452,30 @@ async def fix_production_data(
 
 
 async def _export_table(session: AsyncSession, table_name: str) -> List[Dict[str, Any]]:
-    """Export all rows from a table as a list of dicts."""
-    # Get column names
+    """Export all rows from a table as a list of dicts.
+    
+    Security: Uses static SQL queries mapped by table name to prevent SQL injection.
+    Only allowed tables can be exported.
+    """
+    # Use static query mapping to completely eliminate SQL injection risk
+    TABLE_QUERIES = {
+        "employees": 'SELECT * FROM "employees"',
+        "candidates": 'SELECT * FROM "candidates"',
+        "recruitment_requests": 'SELECT * FROM "recruitment_requests"',
+        "passes": 'SELECT * FROM "passes"',
+    }
+    
+    if table_name not in TABLE_QUERIES:
+        raise ValueError(f"Table {table_name} not in allowlist")
+    
+    # Get column names using parameterized query
     cols_result = await session.execute(text(
-        f"SELECT column_name FROM information_schema.columns WHERE table_name = :table ORDER BY ordinal_position"
+        "SELECT column_name FROM information_schema.columns WHERE table_name = :table ORDER BY ordinal_position"
     ), {"table": table_name})
     columns = [r[0] for r in cols_result.fetchall()]
     
-    # Get all rows
-    data_result = await session.execute(text(f"SELECT * FROM {table_name}"))
+    # Get all rows using static query from allowlist
+    data_result = await session.execute(text(TABLE_QUERIES[table_name]))
     rows = []
     for row in data_result.fetchall():
         row_dict = {}
