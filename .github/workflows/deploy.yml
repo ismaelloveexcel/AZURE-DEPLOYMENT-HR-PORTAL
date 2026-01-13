@@ -180,6 +180,7 @@ jobs:
               ALLOWED_ORIGINS="https://baynunahhrportal.azurewebsites.net" \
               APP_ENV="production" \
               SCM_DO_BUILD_DURING_DEPLOYMENT="true" \
+              PYTHONUNBUFFERED="1" \
             --output none
           
           # Set startup command
