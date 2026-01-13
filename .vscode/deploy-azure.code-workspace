@@ -4,7 +4,6 @@
   ],
   "settings": {
     "azureAppService.showExplorer": true,
-    "azureAppService.defaultWebAppToDeploy": "/subscriptions/*/resourceGroups/BaynunahHR/providers/Microsoft.Web/sites/BaynunahHRPortal",
     "azureFunctions.showExplorer": false,
     "azureStaticWebApps.showExplorer": false,
     "python.defaultInterpreterPath": "${workspaceFolder}/backend/.venv/bin/python",
