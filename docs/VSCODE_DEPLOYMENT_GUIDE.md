@@ -59,8 +59,8 @@ The workspace includes a recommended extensions list. When you open the project,
 
 ```bash
 # Clone the repository
-git clone https://github.com/ismaelloveexcel/Secure-Renewals-2.git
-cd Secure-Renewals-2
+git clone https://github.com/ismaelloveexcel/AZURE-DEPLOYMENT-HR-PORTAL.git
+cd AZURE-DEPLOYMENT-HR-PORTAL
 
 # Open in VSCode
 code .

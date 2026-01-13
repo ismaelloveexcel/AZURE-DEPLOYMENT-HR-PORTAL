@@ -38,8 +38,8 @@ This runs the entire application on your laptop. Only accessible from your compu
 
 ```bash
 # 1. Clone the repository
-git clone https://github.com/ismaelloveexcel/Secure-Renewals-2.git
-cd Secure-Renewals-2
+git clone https://github.com/ismaelloveexcel/AZURE-DEPLOYMENT-HR-PORTAL.git
+cd AZURE-DEPLOYMENT-HR-PORTAL
 
 # 2. Setup backend
 cd backend
@@ -243,7 +243,7 @@ mkdir actions-runner; cd actions-runner
 # Download the runner (follow GitHub's provided URL)
 Invoke-WebRequest -Uri https://github.com/actions/runner/releases/download/v2.x.x/actions-runner-win-x64-2.x.x.zip -OutFile actions-runner.zip
 Expand-Archive -Path actions-runner.zip
-./config.cmd --url https://github.com/ismaelloveexcel/Secure-Renewals-2 --token YOUR_TOKEN
+./config.cmd --url https://github.com/ismaelloveexcel/AZURE-DEPLOYMENT-HR-PORTAL --token YOUR_TOKEN
 ./run.cmd
 ```
 
