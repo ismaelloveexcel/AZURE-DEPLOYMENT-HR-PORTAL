@@ -1,7 +1,7 @@
 """Fix production data: normalize employment_status and ensure admin access
 
 Revision ID: 0019_fix_prod_data
-Revises: 20260108_0018_add_nominator_unique_constraint
+Revises: 20260109_0019
 Create Date: 2026-01-09
 """
 from alembic import op
@@ -9,8 +9,8 @@ import sqlalchemy as sa
 import hashlib
 import secrets
 
-revision = '20260109_0019'
-down_revision = '20260108_0018'
+revision = '20260109_0019b'
+down_revision = '20260109_0019'
 branch_labels = None
 depends_on = None
 

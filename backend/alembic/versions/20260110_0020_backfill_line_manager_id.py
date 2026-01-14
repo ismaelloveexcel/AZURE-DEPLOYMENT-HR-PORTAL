@@ -1,7 +1,7 @@
 """Backfill line_manager_id from line_manager_name
 
 Revision ID: 20260110_0020
-Revises: 20260109_0019
+Revises: 20260109_0022
 Create Date: 2026-01-10
 
 This migration links employees to their line managers by matching the
@@ -13,7 +13,7 @@ from alembic import op
 import sqlalchemy as sa
 
 revision = '20260110_0020'
-down_revision = '20260109_0019'
+down_revision = '20260109_0022'
 branch_labels = None
 depends_on = None
 

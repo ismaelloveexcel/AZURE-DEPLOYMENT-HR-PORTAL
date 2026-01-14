@@ -1,7 +1,7 @@
 """Add food allowance, exceptional overtime, and paid overtime calculation fields
 
 Revision ID: 20260109_0020
-Revises: 20260109_0019
+Revises: 20260109_0019b
 Create Date: 2026-01-09
 
 This migration adds:
@@ -15,7 +15,7 @@ import sqlalchemy as sa
 
 # revision identifiers, used by Alembic.
 revision = '20260109_0020'
-down_revision = '20260109_0019'
+down_revision = '20260109_0019b'
 branch_labels = None
 depends_on = None
 
