@@ -56,12 +56,12 @@ az webapp config appsettings set \
   APP_ENV="production"
 
 # 7. Set startup command for FastAPI (CRITICAL: requires explicit bind)
-# Note: app/main.py at root re-exports FastAPI app from backend
+# Note: we point Gunicorn directly to backend.app.main:app to avoid import ambiguity
 # Oryx builds and installs requirements during deployment
 az webapp config set \
   --resource-group $RESOURCE_GROUP \
   --name $WEBAPP_NAME \
-  --startup-file "gunicorn app.main:app -k uvicorn.workers.UvicornWorker --bind=0.0.0.0:8000 --workers=2"
+  --startup-file "gunicorn backend.app.main:app -k uvicorn.workers.UvicornWorker --bind=0.0.0.0:8000 --workers=2"
 
 # 8. Restart App (DO NOT SKIP - applies settings)
 az webapp restart \
