@@ -5,6 +5,16 @@
 
 ---
 
+## 📝 2-Minute Fix (Bullet List)
+
+- Go to **GitHub Repo → Settings → Secrets and variables → Actions → New repository secret**
+- Create **`AZURE_CREDENTIALS`** using `az ad sp create-for-rbac --name github-actions-baynunah-hr --role contributor --scopes /subscriptions/{subscription-id}/resourceGroups/BaynunahHR --json-auth` (paste full JSON output)
+- Create **`DATABASE_URL`** using `postgresql+asyncpg://uutfqkhm:{PASSWORD}@baynunahhrportal-server.postgres.database.azure.com:5432/hrportal?sslmode=require` (reset password in Azure Portal if unknown)
+- Create **`AUTH_SECRET_KEY`** using `openssl rand -hex 32`
+- Re-run **Actions → Deploy to Azure → Run workflow** (deployment will proceed once the three secrets exist)
+
+---
+
 ## ✅ What's Working
 
 ### Repository is FULLY ALIGNED with Azure Requirements
