@@ -489,8 +489,10 @@ Based on your requirements:
 | **Replit** | Hidden costs, obvious domain (replit.dev) |
 | **Vercel** | Obvious domain (vercel.app), public-facing |
 | **Netlify** | Obvious domain (netlify.app), public-facing |
-| **Azure App Service** | Complex setup for non-technical users |
+| **Azure App Service** | Complex setup for non-technical users (see note below) |
 | **Heroku** | Obvious domain (herokuapp.com), paid |
+
+> **Note on Azure App Service:** While marked as complex above, this repository now includes pre-configured Azure deployment files (`requirements.txt` and `app/main.py` at root level) that meet Azure Oryx build requirements. See [Azure Deployment Reference Guide](AZURE_DEPLOYMENT_REFERENCE_GUIDE.md) for full documentation.
 
 ---
 
