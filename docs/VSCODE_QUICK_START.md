@@ -6,8 +6,8 @@ Get up and running with Secure Renewals HR Portal in Visual Studio Code in 5 min
 
 ```bash
 # 1. Clone and open
-git clone https://github.com/ismaelloveexcel/Secure-Renewals-2.git
-cd Secure-Renewals-2
+git clone https://github.com/ismaelloveexcel/AZURE-DEPLOYMENT-HR-PORTAL.git
+cd AZURE-DEPLOYMENT-HR-PORTAL
 code .
 
 # 2. Install extensions when prompted (click "Install All")

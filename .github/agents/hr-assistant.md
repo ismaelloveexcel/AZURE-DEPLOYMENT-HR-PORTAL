@@ -58,7 +58,7 @@ You are an expert HR Assistant and Portal System Engineer for solo HR profession
 
 ### Directory Structure
 ```
-Secure-Renewals-2/
+AZURE-DEPLOYMENT-HR-PORTAL/
 ├── backend/
 │   ├── app/
 │   │   ├── routers/          # API endpoints

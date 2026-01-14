@@ -33,8 +33,8 @@ Before you begin, ensure you have the following installed:
 
 1. **Clone the repository:**
    ```bash
-   git clone https://github.com/ismaelloveexcel/Secure-Renewals-2.git
-   cd Secure-Renewals-2
+   git clone https://github.com/ismaelloveexcel/AZURE-DEPLOYMENT-HR-PORTAL.git
+   cd AZURE-DEPLOYMENT-HR-PORTAL
    ```
 
 2. **Set up the backend:**
@@ -808,7 +808,7 @@ Cannot find module or its corresponding type declarations
 If you encounter issues not covered here:
 
 1. Check the [documentation](docs/)
-2. Review existing [GitHub Issues](https://github.com/ismaelloveexcel/Secure-Renewals-2/issues)
+2. Review existing [GitHub Issues](https://github.com/ismaelloveexcel/AZURE-DEPLOYMENT-HR-PORTAL/issues)
 3. Use GitHub Copilot Agents for guidance
 4. Open a new issue with:
    - Clear description of the problem

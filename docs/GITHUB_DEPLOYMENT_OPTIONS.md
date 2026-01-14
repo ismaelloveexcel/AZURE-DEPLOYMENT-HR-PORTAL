@@ -38,8 +38,8 @@ This runs the entire application on your laptop. Only accessible from your compu
 
 ```bash
 # 1. Clone the repository
-git clone https://github.com/ismaelloveexcel/Secure-Renewals-2.git
-cd Secure-Renewals-2
+git clone https://github.com/ismaelloveexcel/AZURE-DEPLOYMENT-HR-PORTAL.git
+cd AZURE-DEPLOYMENT-HR-PORTAL
 
 # 2. Setup backend
 cd backend
@@ -243,7 +243,7 @@ mkdir actions-runner; cd actions-runner
 # Download the runner (follow GitHub's provided URL)
 Invoke-WebRequest -Uri https://github.com/actions/runner/releases/download/v2.x.x/actions-runner-win-x64-2.x.x.zip -OutFile actions-runner.zip
 Expand-Archive -Path actions-runner.zip
-./config.cmd --url https://github.com/ismaelloveexcel/Secure-Renewals-2 --token YOUR_TOKEN
+./config.cmd --url https://github.com/ismaelloveexcel/AZURE-DEPLOYMENT-HR-PORTAL --token YOUR_TOKEN
 ./run.cmd
 ```
 
@@ -489,8 +489,10 @@ Based on your requirements:
 | **Replit** | Hidden costs, obvious domain (replit.dev) |
 | **Vercel** | Obvious domain (vercel.app), public-facing |
 | **Netlify** | Obvious domain (netlify.app), public-facing |
-| **Azure App Service** | Complex setup for non-technical users |
+| **Azure App Service** | Complex setup for non-technical users (see note below) |
 | **Heroku** | Obvious domain (herokuapp.com), paid |
+
+> **Note on Azure App Service:** While marked as complex above, this repository now includes pre-configured Azure deployment files (`requirements.txt` and `app/main.py` at root level) that meet Azure Oryx build requirements. See [Azure Deployment Reference Guide](AZURE_DEPLOYMENT_REFERENCE_GUIDE.md) for full documentation.
 
 ---
 

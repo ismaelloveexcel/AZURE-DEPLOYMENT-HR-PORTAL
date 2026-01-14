@@ -32,6 +32,88 @@ Microsoft Azure provides a comprehensive set of GitHub Actions to enable CI/CD w
 
 ---
 
+## HR Portal Repository Structure for Azure Deployment
+
+Azure App Service uses the **Oryx build system** which expects a specific file structure at the repository root. This HR Portal repository includes the following root-level files specifically for Azure deployment:
+
+### Required Root-Level Files
+
+```
+AZURE-DEPLOYMENT-HR-PORTAL/
+├── requirements.txt          # ✅ Azure Oryx expects this at root
+├── app/                      # ✅ Azure expects app entry point here
+│   ├── __init__.py
+│   └── main.py               # Re-exports FastAPI app from backend
+├── backend/                  # Actual application code
+│   ├── app/
+│   │   └── main.py           # Real FastAPI application
+│   ├── requirements.txt      # Backend-specific dependencies
+│   └── ...
+└── frontend/
+    └── ...
+```
+
+### Why This Structure Exists
+
+1. **`/requirements.txt`** (root level)
+   - Azure Oryx automatically detects Python projects by looking for `requirements.txt` at the repository root
+   - This is a copy of `backend/requirements.txt` to satisfy Oryx build requirements
+   - Contains all dependencies: `fastapi`, `uvicorn[standard]`, `gunicorn`, `sqlalchemy`, etc.
+
+2. **`/app/main.py`** (root level)
+   - Azure's default startup command looks for `app.main:app`
+   - This entry point re-exports the FastAPI app from `backend/app/main.py`
+   - Enables simpler startup command without path navigation:
+   
+   ```bash
+   # Simple startup command (uses root app/main.py)
+   gunicorn app.main:app -k uvicorn.workers.UvicornWorker --bind=0.0.0.0:8000 --workers=2
+   ```
+
+3. **`/backend/app/main.py`** (actual application)
+   - Contains the real FastAPI application code
+   - All business logic, routers, and database connections
+   - This is where development work happens
+
+### How the Re-Export Works
+
+The root-level `app/main.py` adds the `backend/` directory to Python's path and imports the app:
+
+```python
+import sys
+from pathlib import Path
+
+# Add backend to Python path
+backend_path = Path(__file__).parent.parent / "backend"
+sys.path.insert(0, str(backend_path))
+
+# Import and re-export the FastAPI app
+from app.main import app
+
+__all__ = ["app"]
+```
+
+### Critical Startup Settings
+
+For Azure App Service deployments, these settings are **required**:
+
+| Setting | Value | Purpose |
+|---------|-------|---------|
+| `SCM_DO_BUILD_DURING_DEPLOYMENT` | `true` | Triggers Oryx build to install dependencies |
+| `PYTHONUNBUFFERED` | `1` | Ensures proper logging and prevents buffering issues |
+| Startup Command | `gunicorn app.main:app -k uvicorn.workers.UvicornWorker --bind=0.0.0.0:8000 --workers=2` | Explicit binding prevents 502 errors |
+
+### Deployment Methods
+
+This repository supports two deployment approaches:
+
+1. **GitHub Actions (deploy.yml)** - Uses zip deployment with `backend/azure_startup.sh`
+2. **Manual CLI (deploy_to_azure.sh)** - Uses GitHub source deployment with root-level `app/main.py`
+
+Both methods work correctly with this dual-location structure.
+
+---
+
 ## Key Azure GitHub Actions
 
 ### 1. Authentication

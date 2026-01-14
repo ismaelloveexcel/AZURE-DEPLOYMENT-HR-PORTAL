@@ -218,7 +218,7 @@ Ask: "Deploy to Azure App Service" or "Fix login errors"
 ## 📁 Project Structure
 
 ```
-Secure-Renewals-2/
+AZURE-DEPLOYMENT-HR-PORTAL/
 ├── backend/              # FastAPI Python API
 │   ├── app/              # Application code
 │   │   ├── routers/      # API endpoints

@@ -53,6 +53,6 @@ async def init_db():
 asyncio.run(init_db())
 " || echo "Database init skipped (may already exist)"
 
-# Start the application
-echo "Starting uvicorn server on port 8000..."
-exec python -m uvicorn app.main:app --host 0.0.0.0 --port 8000
+# Start the application with gunicorn (recommended for Azure App Service)
+echo "Starting gunicorn server on port 8000..."
+exec gunicorn app.main:app -k uvicorn.workers.UvicornWorker --bind=0.0.0.0:8000 --workers=2

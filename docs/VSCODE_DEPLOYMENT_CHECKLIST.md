@@ -16,8 +16,8 @@ Use this checklist when deploying the Secure Renewals HR Portal from Visual Stud
 
 - [ ] **Clone Repository**
   ```bash
-  git clone https://github.com/ismaelloveexcel/Secure-Renewals-2.git
-  cd Secure-Renewals-2
+  git clone https://github.com/ismaelloveexcel/AZURE-DEPLOYMENT-HR-PORTAL.git
+  cd AZURE-DEPLOYMENT-HR-PORTAL
   ```
 
 - [ ] **Open in VSCode**
