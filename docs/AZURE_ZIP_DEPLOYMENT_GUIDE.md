@@ -16,10 +16,11 @@ This guide shows how to bundle the repository into a ZIP file and push it direct
 
 ## Prepare the ZIP Package
 
-1. From the repository root, create a clean archive (exclude Git metadata):
+1. From the repository root, create a clean archive (exclude build and cache files):
    ```bash
-   cd /home/runner/work/AZURE-DEPLOYMENT-HR-PORTAL/AZURE-DEPLOYMENT-HR-PORTAL
-   zip -r hr-portal.zip . -x "*.git*" "*/node_modules/*" "frontend/dist/*"
+   cd /path/to/AZURE-DEPLOYMENT-HR-PORTAL
+   zip -r hr-portal.zip . \
+     -x "*.git*" "*/node_modules/*" "frontend/dist/*" "__pycache__/*" "*.pyc" ".pytest_cache/*" ".env*" "*/.venv/*"
    ```
 2. Ensure the archive contains these root items (required by Azure Oryx):
    - `requirements.txt` (root-level copy for Azure detection)
