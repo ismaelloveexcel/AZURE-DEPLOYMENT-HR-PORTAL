@@ -135,35 +135,35 @@ jobs:
           echo "🔍 Checking if Azure resources exist..."
           
           # Check if resource group exists
-          if ! az group show --name BaynunahHR --query name -o tsv 2>/dev/null; then
-            echo "📦 Creating resource group BaynunahHR..."
-            az group create --name BaynunahHR --location eastus
+          if ! az group show --name baynunah-hr-rg --query name -o tsv 2>/dev/null; then
+            echo "📦 Creating resource group baynunah-hr-rg..."
+            az group create --name baynunah-hr-rg --location westeurope
           else
-            echo "✅ Resource group BaynunahHR exists"
+            echo "✅ Resource group baynunah-hr-rg exists"
           fi
           
           # Check if App Service plan exists
-          if ! az appservice plan show --name BaynunahHRPlan --resource-group BaynunahHR --query name -o tsv 2>/dev/null; then
-            echo "📦 Creating App Service plan BaynunahHRPlan..."
+          if ! az appservice plan show --name baynunah-hr-plan --resource-group baynunah-hr-rg --query name -o tsv 2>/dev/null; then
+            echo "📦 Creating App Service plan baynunah-hr-plan..."
             az appservice plan create \
-              --name BaynunahHRPlan \
-              --resource-group BaynunahHR \
+              --name baynunah-hr-plan \
+              --resource-group baynunah-hr-rg \
               --sku B1 \
               --is-linux
           else
-            echo "✅ App Service plan BaynunahHRPlan exists"
+            echo "✅ App Service plan baynunah-hr-plan exists"
           fi
           
           # Check if Web App exists
-          if ! az webapp show --name BaynunahHRPortal --resource-group BaynunahHR --query name -o tsv 2>/dev/null; then
-            echo "📦 Creating Web App BaynunahHRPortal..."
+          if ! az webapp show --name baynunah-hr-portal --resource-group baynunah-hr-rg --query name -o tsv 2>/dev/null; then
+            echo "📦 Creating Web App baynunah-hr-portal..."
             az webapp create \
-              --name BaynunahHRPortal \
-              --resource-group BaynunahHR \
-              --plan BaynunahHRPlan \
+              --name baynunah-hr-portal \
+              --resource-group baynunah-hr-rg \
+              --plan baynunah-hr-plan \
               --runtime "PYTHON:3.11"
           else
-            echo "✅ Web App BaynunahHRPortal exists"
+            echo "✅ Web App baynunah-hr-portal exists"
           fi
           
           echo "✅ All Azure resources verified/created"
@@ -172,12 +172,12 @@ jobs:
         run: |
           echo "⚙️  Configuring Azure App Service settings..."
           az webapp config appsettings set \
-            --name BaynunahHRPortal \
-            --resource-group BaynunahHR \
+            --name baynunah-hr-portal \
+            --resource-group baynunah-hr-rg \
             --settings \
               DATABASE_URL="${{ secrets.DATABASE_URL }}" \
               AUTH_SECRET_KEY="${{ secrets.AUTH_SECRET_KEY }}" \
-              ALLOWED_ORIGINS="https://baynunahhrportal.azurewebsites.net" \
+              ALLOWED_ORIGINS="https://baynunah-hr-portal.azurewebsites.net" \
               APP_ENV="production" \
               SCM_DO_BUILD_DURING_DEPLOYMENT="true" \
               PYTHONUNBUFFERED="1" \
@@ -185,8 +185,8 @@ jobs:
           
           # Set startup command
           az webapp config set \
-            --name BaynunahHRPortal \
-            --resource-group BaynunahHR \
+            --name baynunah-hr-portal \
+            --resource-group baynunah-hr-rg \
             --startup-file "bash azure_startup.sh" \
             --output none
           
@@ -198,8 +198,8 @@ jobs:
           
           # Use Azure CLI for zip deployment (more reliable than the action)
           az webapp deployment source config-zip \
-            --name BaynunahHRPortal \
-            --resource-group BaynunahHR \
+            --name baynunah-hr-portal \
+            --resource-group baynunah-hr-rg \
             --src deploy.zip \
             --timeout 600
           
@@ -209,8 +209,8 @@ jobs:
         run: |
           echo "🔄 Restarting App Service to apply changes..."
           az webapp restart \
-            --name BaynunahHRPortal \
-            --resource-group BaynunahHR
+            --name baynunah-hr-portal \
+            --resource-group baynunah-hr-rg
           echo "✅ App Service restarted"
 
       - name: Verify deployment health
@@ -222,7 +222,7 @@ jobs:
           # Try up to 6 times with increasing delays
           for i in 1 2 3 4 5 6; do
             echo "Attempt $i: Checking health..."
-            HTTP_STATUS=$(curl -s -o /tmp/health_response.txt -w "%{http_code}" https://baynunahhrportal.azurewebsites.net/api/health 2>/dev/null || echo "000")
+            HTTP_STATUS=$(curl -s -o /tmp/health_response.txt -w "%{http_code}" https://baynunah-hr-portal.azurewebsites.net/api/health 2>/dev/null || echo "000")
             
             if [ "$HTTP_STATUS" = "200" ]; then
               echo "✅ Health check passed (HTTP $HTTP_STATUS)"
@@ -245,9 +245,9 @@ jobs:
           echo "The app may still be starting or there may be an issue."
           echo ""
           echo "Check logs with:"
-          echo "  az webapp log tail --name BaynunahHRPortal --resource-group BaynunahHR"
+          echo "  az webapp log tail --name baynunah-hr-portal --resource-group baynunah-hr-rg"
           echo ""
-          echo "Check app at: https://baynunahhrportal.azurewebsites.net"
+          echo "Check app at: https://baynunah-hr-portal.azurewebsites.net"
           # Don't fail the workflow - let it complete so we can check logs
           exit 0
 
@@ -258,17 +258,17 @@ jobs:
           echo "   DEPLOYMENT COMPLETE!"
           echo "================================================"
           echo ""
-          echo "📱 App URL:      https://baynunahhrportal.azurewebsites.net"
-          echo "📚 API Docs:     https://baynunahhrportal.azurewebsites.net/docs"
-          echo "🔍 Health Check: https://baynunahhrportal.azurewebsites.net/api/health"
-          echo "🔍 DB Health:    https://baynunahhrportal.azurewebsites.net/api/health/db"
+          echo "📱 App URL:      https://baynunah-hr-portal.azurewebsites.net"
+          echo "📚 API Docs:     https://baynunah-hr-portal.azurewebsites.net/docs"
+          echo "🔍 Health Check: https://baynunah-hr-portal.azurewebsites.net/api/health"
+          echo "🔍 DB Health:    https://baynunah-hr-portal.azurewebsites.net/api/health/db"
           echo ""
           echo "✅ Frontend assets deployed to backend/static"
           echo "✅ App settings configured (DATABASE_URL, AUTH_SECRET_KEY)"
           echo "✅ Startup script: azure_startup.sh (installs deps & runs migrations)"
           echo ""
           echo "If login issues occur, reset admin password:"
-          echo "  curl -X POST https://baynunahhrportal.azurewebsites.net/api/health/reset-admin-password \\"
+          echo "  curl -X POST https://baynunah-hr-portal.azurewebsites.net/api/health/reset-admin-password \\"
           echo "    -H 'X-Admin-Secret: YOUR_AUTH_SECRET_KEY'"
           echo ""
           echo "Default admin credentials after reset:"
