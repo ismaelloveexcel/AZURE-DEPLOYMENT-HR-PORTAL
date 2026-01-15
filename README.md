@@ -169,6 +169,20 @@ Ask: "Deploy to Azure App Service" or "Fix login errors"
 
 **📖 Full Documentation**: See agents in [.github/agents/](.github/agents/)
 
+### 🤖 Copilot Coding Agent Instructions
+
+**New contributor?** Check out our comprehensive guide for Copilot coding agents:
+
+📋 **[Copilot Instructions](.github/copilot-instructions.md)** - Essential guide for AI-assisted development including:
+- Project goals and tech stack overview
+- Local development setup with secrets management
+- PR expectations and code quality standards
+- Deployment workflows and branch policies
+- Security best practices and what to avoid
+- Definition of done checklist
+
+This guide helps Copilot (and human developers!) understand the project structure, deployment patterns, and contribution standards.
+
 ---
 
 ## 📚 Documentation
