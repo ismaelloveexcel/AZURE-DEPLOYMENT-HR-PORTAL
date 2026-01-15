@@ -194,6 +194,7 @@ This guide helps Copilot (and human developers!) understand the project structur
 | [Azure Deployment Reference Guide](docs/AZURE_DEPLOYMENT_REFERENCE_GUIDE.md) | Comprehensive reference for all Azure GitHub Actions and deployment patterns | DevOps/Developers |
 | [GitHub Deployment Options](docs/GITHUB_DEPLOYMENT_OPTIONS.md) | Complete guide for local laptop, GitHub Codespaces, and self-hosted deployment options | HR Users/Developers |
 | [GitHub Deployment Setup](docs/GITHUB_DEPLOYMENT_SETUP.md) | Step-by-step deployment setup instructions | Developers |
+| [Secrets Reference Guide](docs/SECRETS_REFERENCE.md) | Complete reference for all GitHub secrets used in workflows | Developers/DevOps |
 | [VSCode Deployment Guide](docs/VSCODE_DEPLOYMENT_GUIDE.md) | Complete guide for development and deployment in Visual Studio Code | Developers |
 | [VSCode Deployment Checklist](docs/VSCODE_DEPLOYMENT_CHECKLIST.md) | Deployment checklist for VSCode | Developers |
 | [VSCode Quick Start](docs/VSCODE_QUICK_START.md) | Quick start guide for VSCode | Developers |

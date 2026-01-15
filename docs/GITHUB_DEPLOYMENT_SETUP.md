@@ -58,14 +58,28 @@ Go to your GitHub repository:
 2. Click **New repository secret**
 3. Add each of the following secrets:
 
-### Required Secrets:
+### Required Secrets (for Deployment):
 
-| Secret Name         | Value                                                                                                                            | Where to Get It                  |
-| ------------------- | -------------------------------------------------------------------------------------------------------------------------------- | -------------------------------- |
-| `AZURE_CREDENTIALS` | JSON from Step 1                                                                                                                 | Service principal output         |
-| `DATABASE_URL`      | `postgresql+asyncpg://uutfqjkrhm:eC71&&jm5#V7oGO#@baynunahhrportal-server.postgres.database.azure.com:5432/hrportal?ssl=require` | PostgreSQL connection string     |
-| `AUTH_SECRET_KEY`   | Random 32-byte hex string                                                                                                        | Generate: `openssl rand -hex 32` |
-| `OPENAI_API_KEY`    | `sk-proj-l4rHktOS7teKxUpq...`                                                                                                    | Your OpenAI API key              |
+| Secret Name         | Value                                                                                                                            | Where to Get It                  | Required For                     |
+| ------------------- | -------------------------------------------------------------------------------------------------------------------------------- | -------------------------------- | -------------------------------- |
+| `AZURE_CREDENTIALS` | JSON from Step 1                                                                                                                 | Service principal output         | `deploy.yml` workflow            |
+| `DATABASE_URL`      | `postgresql+asyncpg://username:password@baynunahhrportal-server.postgres.database.azure.com:5432/hrportal?sslmode=require`     | PostgreSQL connection string     | `deploy.yml` workflow            |
+| `AUTH_SECRET_KEY`   | Random 32-byte hex string                                                                                                        | Generate: `openssl rand -hex 32` | `deploy.yml` workflow            |
+
+**⚠️ Important:** Never commit actual secret values to the repository. The example `DATABASE_URL` above shows the format - replace with your actual credentials.
+
+### Optional Secrets (for Additional Features):
+
+| Secret Name         | Value                                                  | Where to Get It                       | Required For                                    |
+| ------------------- | ------------------------------------------------------ | ------------------------------------- | ----------------------------------------------- |
+| `BACKEND_URL`       | `https://baynunah-hr-portal.azurewebsites.net/api`    | Your deployed backend URL             | `post-deployment-health.yml` (health checks)    |
+| `FRONTEND_URL`      | `https://baynunah-hr-portal.azurewebsites.net`        | Your deployed frontend URL            | `post-deployment-health.yml` (health checks)    |
+| `PGHOST`            | `baynunahhrportal-server.postgres.database.azure.com` | PostgreSQL server hostname            | `backup-db.yml` (database backups)              |
+| `PGUSER`            | `username`                                             | PostgreSQL username                   | `backup-db.yml` (database backups)              |
+| `PGPASSWORD`        | Your PostgreSQL password                               | PostgreSQL password                   | `backup-db.yml` (database backups)              |
+| `PGDATABASE`        | `hrportal`                                             | Database name                         | `backup-db.yml` (database backups)              |
+
+📖 **For detailed information about each secret, see:** [Secrets Reference Guide](SECRETS_REFERENCE.md)
 
 ---
 
