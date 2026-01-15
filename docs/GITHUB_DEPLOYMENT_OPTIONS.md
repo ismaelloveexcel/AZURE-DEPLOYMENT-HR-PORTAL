@@ -409,6 +409,18 @@ jobs:
         uses: actions/deploy-pages@v4
 ```
 
+### After the Pages build and deployment run
+
+When GitHub Pages is enabled with **GitHub Actions** as the source, GitHub creates the
+`pages build and deployment` workflow (runs like **#3**). Each run:
+
+1. Builds the static site (for example, via the workflow’s `npm run build` step).
+2. Uploads the Pages artifact for deployment.
+3. Deploys the artifact to the GitHub Pages environment.
+
+Once the run completes, the Pages URL shown in **Settings → Pages** updates within a minute or
+two. Only static files are published—no backend services are deployed.
+
 ### Considerations
 - ⚠️ **No backend support** - API calls will fail
 - ⚠️ Public domain (github.io)
