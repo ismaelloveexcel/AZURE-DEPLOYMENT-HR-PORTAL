@@ -186,6 +186,7 @@ Ask: "Deploy to Azure App Service" or "Fix login errors"
 | [Easiest Deployment Guide](docs/EASIEST_DEPLOYMENT_GUIDE.md) | Simplified deployment instructions | All Users |
 | [One-Click Deployment](docs/ONE_CLICK_DEPLOYMENT.md) | Quick deployment guide | All Users |
 | [Workflow Deployment Fixes](docs/WORKFLOW_DEPLOYMENT_FIXES.md) | Common deployment issues and fixes | DevOps |
+| [Azure ZIP Deployment Guide](docs/AZURE_ZIP_DEPLOYMENT_GUIDE.md) | Manual deploy by uploading a ZIP package to Azure App Service (CLI or Portal) | DevOps/Developers |
 | [Rollback & Recovery Guide](docs/ROLLBACK_RECOVERY_GUIDE.md) | Emergency procedures for deployment failures and system recovery | HR Admins/DevOps |
 
 ### User Guides
