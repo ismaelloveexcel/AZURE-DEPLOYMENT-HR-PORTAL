@@ -1,15 +1,282 @@
-# Copilot Coding Agent Instructions for Secure Renewals HR Portal
+# Copilot Coding Agent Instructions
 
-## Project Overview
+## Goal & Purpose
 
-**Full-stack HR portal** for employee contract renewals, onboarding, compliance, and recruitment targeting UAE-based startups with solo HR operations.
+This repository contains the **Secure Renewals HR Portal** - a full-stack web application for managing employee contract renewals, onboarding, compliance tracking, and recruitment. Designed for UAE-based startups with solo HR operations, it provides:
 
-- **Backend:** Python 3.11+, FastAPI, SQLAlchemy (async), Alembic, asyncpg
-- **Frontend:** React 18, TypeScript, Vite, TailwindCSS, single `App.tsx` monolith (5632 lines)
-- **Database:** PostgreSQL with async support via `AsyncSessionLocal`
-- **Auth:** Employee ID + password (JWT). Initial password = DOB in DDMMYYYY format. Roles: admin, hr, viewer
+- Employee contract renewal management
+- Role-based access control (admin, hr, viewer)
+- UAE compliance tracking (visa, Emirates ID, medical fitness, ILOE)
+- Onboarding workflows with token-based public access
+- Recruitment pipeline management
+- Audit trails for all actions
 
-## Architecture Patterns
+**Primary deployment target:** Azure App Service with PostgreSQL database
+
+## Tech Stack
+
+### Infrastructure & Deployment
+- **Cloud Platform:** Azure App Service (Linux, Python 3.11 runtime)
+- **Database:** Azure PostgreSQL (with SSL, async connections via asyncpg)
+- **Infrastructure as Code:** Azure CLI scripts (`deploy_to_azure.sh`) - *no Bicep/Terraform currently*
+- **CI/CD:** GitHub Actions
+  - `.github/workflows/ci.yml` - Lint checks (Python syntax, npm build)
+  - `.github/workflows/deploy.yml` - Automated Azure deployment
+  - `.github/workflows/pr-quality-check.yml` - PR validation with security checks
+  - `.github/workflows/post-deployment-health.yml` - Post-deploy verification
+- **Secrets Management:** GitHub repository secrets + Azure App Service configuration
+
+### Application Stack
+- **Backend:** Python 3.11+, FastAPI, SQLAlchemy (async), Alembic, asyncpg, Pydantic
+- **Frontend:** React 18, TypeScript, Vite, TailwindCSS
+- **Package Management:** `uv` (backend), `npm` (frontend)
+- **Database Migrations:** Alembic with async support
+- **Auth:** JWT (Employee ID + password)
+
+## Local Run & Test
+
+### Environment Setup
+
+1. **Prerequisites:**
+   - Python 3.11+ (with `uv` package manager)
+   - Node.js 18+
+   - PostgreSQL (or use SQLite for local dev)
+
+2. **Backend Setup:**
+   ```bash
+   cd backend
+   cp .env.example .env
+   # Edit .env with your database URL and AUTH_SECRET_KEY
+   uv sync                          # Install dependencies
+   uv run alembic upgrade head      # Run migrations
+   uv run uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
+   ```
+
+3. **Frontend Setup:**
+   ```bash
+   cd frontend
+   npm install
+   npm run dev                      # Starts on port 5173
+   ```
+
+4. **VS Code Quick Start:**
+   - Press `Ctrl+Shift+B` → "Start Full Application" (runs both backend + frontend)
+   - See `.vscode/tasks.json` for all available tasks
+
+### Secrets & Environment Variables
+
+**Backend (`.env` or Azure App Settings):**
+- `DATABASE_URL` - PostgreSQL connection string (use `postgresql+asyncpg://` prefix for async)
+- `AUTH_SECRET_KEY` - JWT signing key (generate with `python -c "import secrets; print(secrets.token_urlsafe(32))"`)
+- `ALLOWED_ORIGINS` - CORS origins (comma-separated)
+- Optional: `SMTP_*` settings for email notifications
+
+**Frontend (`.env`):**
+- `VITE_API_BASE_URL` - Backend API URL (e.g., `http://localhost:8000/api`)
+
+**Key Vault / GitHub Secrets:**
+- Store `DATABASE_URL`, `AUTH_SECRET_KEY`, `AZURE_CREDENTIALS` in GitHub repository secrets
+- Azure deployment reads from GitHub secrets and sets as App Service configuration
+
+### Build, Test & Lint Commands
+
+**Backend:**
+```bash
+cd backend
+uv sync                                              # Install deps
+uv run python -m py_compile app/**/*.py             # Syntax check
+uv run alembic check                                # Verify migrations
+uv run alembic revision --autogenerate -m "desc"    # Create migration
+```
+
+**Frontend:**
+```bash
+cd frontend
+npm install                                         # Install deps
+npm run build                                       # Production build
+npm run preview                                     # Preview build
+```
+
+**Combined:**
+```bash
+./scripts/start-portal.sh                           # Start both (macOS/Linux)
+scripts\start-portal-windows.bat                    # Start both (Windows)
+```
+
+**Note:** No formal test suite currently. Manual testing via:
+- Swagger UI: `http://localhost:8000/docs`
+- Frontend: `http://localhost:5173`
+
+### Sample .env File
+
+See `backend/.env.example` for complete template. Minimal working config:
+```env
+DATABASE_URL=postgresql+asyncpg://user:pass@localhost:5432/hr_portal
+AUTH_SECRET_KEY=your-secret-key-change-in-production
+ALLOWED_ORIGINS=http://localhost:5173,http://localhost:5000
+```
+
+## PR Expectations
+
+### Small, Focused Changes
+- Keep PRs small and focused on a single feature/fix
+- Split large features into multiple PRs when possible
+- Use draft PRs for work-in-progress
+
+### Required Checks
+- [ ] Python syntax validation passes (`ci.yml`)
+- [ ] No security anti-patterns (string concatenation in SQL, hardcoded secrets, eval/exec)
+- [ ] Frontend builds without errors (`npm run build`)
+- [ ] Manual testing completed (document in PR description)
+- [ ] No accidental commits (check `.gitignore` for build artifacts, `node_modules`, etc.)
+
+### Add/Adjust Tests
+- Currently no automated test suite - manual testing required
+- Document test evidence in PR (screenshots, API responses, Swagger UI tests)
+- For new features: Test via `/docs` (Swagger UI) and document results
+
+### Update Docs & Config When Behavior Changes
+- Update `README.md` if setup/deployment steps change
+- Update `.github/copilot-instructions.md` if architecture/patterns change
+- Update `backend/.env.example` if new environment variables added
+- Update `docs/` if user-facing features change
+- Update database migrations: `uv run alembic revision --autogenerate -m "description"`
+
+### PR Description Requirements
+Use the template in `.github/PULL_REQUEST_TEMPLATE.md`:
+- What changed and why
+- Testing evidence (screenshots, API responses, manual test steps)
+- Deployment impact (migration required? config changes?)
+- Security considerations
+
+## Deployment & Branches
+
+### Branch Policy
+- **main** - Production branch, protected
+  - Requires PR with review
+  - CI must pass before merge
+  - Triggers automatic Azure deployment via `.github/workflows/deploy.yml`
+- **Feature branches** - `feature/description`, `fix/description`, `copilot/description`
+  - Created from `main`
+  - Merged back to `main` via PR
+
+### Release Flow
+1. Create feature branch from `main`
+2. Develop & test locally
+3. Open PR to `main`
+4. CI runs automatically (`ci.yml`, `pr-quality-check.yml`)
+5. Review & approval
+6. Merge to `main`
+7. Automatic deployment to Azure (`deploy.yml`)
+8. Post-deployment health check (`post-deployment-health.yml`)
+
+### CI Workflows to Be Aware Of
+
+| Workflow | Trigger | Purpose |
+|----------|---------|---------|
+| `ci.yml` | Push to main, PRs | Python syntax, npm build |
+| `pr-quality-check.yml` | PRs | Security checks, auto-labeling, code quality |
+| `deploy.yml` | Push to main, manual | Build frontend, deploy to Azure App Service |
+| `post-deployment-health.yml` | After deploy | Health checks, admin account validation |
+| `automated-maintenance.yml` | Monthly | Dependency audits, stale branch cleanup |
+
+### Infrastructure Change Review
+
+**Azure deployment script (`deploy_to_azure.sh`):**
+- Manual execution required for initial setup
+- Creates resource group, App Service plan, web app, PostgreSQL
+- Sets required app settings and environment variables
+
+**GitHub Actions deployment (`.github/workflows/deploy.yml`):**
+- Automated on push to `main`
+- Builds frontend → copies to `backend/static/`
+- Deploys to Azure App Service using `AZURE_CREDENTIALS` secret
+- Runs database migrations automatically
+- Requires secrets: `AZURE_CREDENTIALS`, `DATABASE_URL`, `AUTH_SECRET_KEY`
+
+**Plan/Apply Expectations:**
+- No formal infrastructure as code (Bicep/Terraform) - uses Azure CLI scripts
+- Infrastructure changes require manual Azure CLI script updates
+- Test infrastructure changes in separate resource group first
+- Document resource group, plan, and app names in PR
+
+## What to Avoid
+
+### No Secrets in Code or Logs
+- ❌ Never commit `.env` files
+- ❌ Never hardcode API keys, passwords, connection strings
+- ❌ Never log sensitive data (passwords, tokens, personal info)
+- ✅ Use environment variables for all secrets
+- ✅ Store secrets in GitHub repository secrets
+- ✅ Use `sanitize_text()` for user input (prevents XSS)
+- ✅ Check `.gitignore` before committing
+
+### No Force Pushes to Protected Branches
+- ❌ Never `git push --force` to `main`
+- ❌ Never rewrite history on shared branches
+- ✅ Use `git revert` for fixing merged commits
+- ✅ Create new commits to fix issues
+
+### No Touching Production Infrastructure Without Approval
+- ❌ Never manually modify Azure resources in production
+- ❌ Never delete production databases or storage
+- ❌ Never change production environment variables without coordination
+- ✅ Test infrastructure changes in dev/staging first
+- ✅ Document all infrastructure changes in PR
+- ✅ Get approval before applying infrastructure changes
+- ✅ Use Azure CLI scripts for reproducible changes
+
+### Additional Anti-Patterns
+- ❌ Don't use string formatting in SQL queries (SQL injection risk)
+- ❌ Don't use `eval()` or `exec()` with user input
+- ❌ Don't commit `node_modules/`, `__pycache__/`, `.pyc` files
+- ❌ Don't mix sync/async database operations
+- ❌ Don't expose sensitive routes without authentication
+
+## Definition of Done
+
+A PR is ready to merge when:
+
+- [x] **Lint/Tests Pass**
+  - Python syntax validation passes
+  - No security anti-patterns detected
+  - Frontend builds successfully
+  - Manual testing completed and documented
+
+- [x] **CI Green**
+  - All GitHub Actions workflows pass
+  - No failing checks in PR
+
+- [x] **Docs Updated**
+  - README.md reflects any setup/deployment changes
+  - `.env.example` includes new environment variables
+  - API changes documented in Swagger docstrings
+  - User-facing changes documented in `docs/`
+
+- [x] **PR Includes What/Why and Test Evidence**
+  - Clear description of changes and rationale
+  - Screenshots or API response examples
+  - Manual test steps documented
+  - Migration instructions if database changes
+  - Deployment impact noted (config changes, secrets needed)
+
+- [x] **Security Considerations Addressed**
+  - Input sanitization in place (use `sanitize_text()`)
+  - No SQL injection vulnerabilities
+  - No hardcoded secrets
+  - Authentication/authorization properly enforced
+
+- [x] **Ready for Production**
+  - Works in both development and production environments
+  - No breaking changes without migration path
+  - Backward compatible or migration documented
+  - Monitoring/logging adequate for troubleshooting
+
+---
+
+## Additional Context
+
+### Architecture Patterns
 
 ### Backend: 3-Layer Separation of Concerns
 All features follow this pattern (see `backend/app/routers/employees.py` as canonical example):
