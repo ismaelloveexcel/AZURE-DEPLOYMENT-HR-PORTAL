@@ -184,7 +184,8 @@ jobs:
             --name baynunah-hr-portal \
             --resource-group baynunah-hr-rg \
             --settings \
-              DATABASE_URL="${{ secrets.DATABASE_URL }}" \
+              DATABASE_URL="${{ secrets.DATABAfalse" \
+              ENABLE_ORYX_BUILD="falsURL }}" \
               AUTH_SECRET_KEY="${{ secrets.AUTH_SECRET_KEY }}" \
               ALLOWED_ORIGINS="https://baynunah-hr-portal.azurewebsites.net" \
               APP_ENV="production" \
