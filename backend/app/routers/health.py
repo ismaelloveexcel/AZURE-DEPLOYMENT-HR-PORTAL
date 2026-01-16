@@ -21,6 +21,16 @@ SYSTEM_ADMIN_ID = "ADMIN001"
 SYSTEM_ADMIN_PASSWORD = os.environ.get("ADMIN_PASSWORD", "admin123")
 
 
+@router.get("/ping", summary="Simple health ping (no auth)")
+async def ping():
+    """
+    Ultra-simple health check for Azure startup probe.
+    No authentication, no database, just returns OK immediately.
+    Used by Azure to verify the app is running.
+    """
+    return {"status": "ok", "message": "pong"}
+
+
 @router.get("", summary="API healthcheck")
 async def healthcheck(role: str = Depends(require_role())):
     return {"status": "ok", "role": role}

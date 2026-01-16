@@ -213,6 +213,13 @@ jobs:
             --startup-file "bash azure_startup.sh" \
             --output none
 
+          # Configure health check path (uses unauthenticated /api/health/ping)
+          az webapp config set \
+            --name baynunah-hr-portal \
+            --resource-group baynunah-hr-rg \
+            --generic-configurations '{"healthCheckPath": "/api/health/ping"}' \
+            --output none
+
           echo "✅ App settings configured successfully"
 
       - name: Deploy to Azure App Service
@@ -258,13 +265,19 @@ jobs:
 
           # Try up to 6 times with increasing delays
           for i in 1 2 3 4 5 6; do
-            echo "Attempt $i: Checking health..."
-            HTTP_STATUS=$(curl -s -o /tmp/health_response.txt -w "%{http_code}" https://baynunah-hr-portal.azurewebsites.net/api/health/db 2>/dev/null || echo "000")
+            echo "Attempt $i: Checking health ping (no auth)..."
+            HTTP_STATUS=$(curl -s -o /tmp/health_response.txt -w "%{http_code}" https://baynunah-hr-portal.azurewebsites.net/api/health/ping 2>/dev/null || echo "000")
             
             if [ "$HTTP_STATUS" = "200" ]; then
-              echo "✅ Health check passed (HTTP $HTTP_STATUS)"
+              echo "✅ Health ping passed (HTTP $HTTP_STATUS)"
               cat /tmp/health_response.txt
               echo ""
+              
+              # Also check DB health (optional, informational)
+              echo "Checking database health..."
+              DB_STATUS=$(curl -s -o /tmp/db_response.txt -w "%{http_code}" https://baynunah-hr-portal.azurewebsites.net/api/health/db 2>/dev/null || echo "000")
+              echo "Database health: HTTP $DB_STATUS"
+              cat /tmp/db_response.txt 2>/dev/null | head -10 || echo "(no response)"
               exit 0
             else
               echo "⏳ HTTP $HTTP_STATUS - Response:"
