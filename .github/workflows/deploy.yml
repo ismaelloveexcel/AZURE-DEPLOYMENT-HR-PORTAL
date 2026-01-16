@@ -211,11 +211,25 @@ jobs:
         run: |
           echo "🚀 Deploying to Azure App Service..."
 
-          # Use Azure CLI for zip deployment (more reliable than the action)
-          az webapp deployment source config-zip \
+          # Use az webapp deploy which respects no-build settings
+          # First, ensure build is disabled at the SCM level
+          az webapp config appsettings set \
             --name baynunah-hr-portal \
             --resource-group baynunah-hr-rg \
-            --src deploy.zip \
+            --settings \
+              WEBSITE_RUN_FROM_PACKAGE="0" \
+              SCM_DO_BUILD_DURING_DEPLOYMENT="false" \
+              ENABLE_ORYX_BUILD="false" \
+            --output none
+
+          # Deploy using the newer az webapp deploy command with --type zip
+          az webapp deploy \
+            --name baynunah-hr-portal \
+            --resource-group baynunah-hr-rg \
+            --src-path deploy.zip \
+            --type zip \
+            --clean true \
+            --restart true \
             --timeout 1200
 
           echo "✅ Deployment completed"
