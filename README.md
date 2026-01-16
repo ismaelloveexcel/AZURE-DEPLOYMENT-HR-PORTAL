@@ -8,6 +8,21 @@
 
 ---
 
+## 🚨 Deployment Currently Failing? 
+
+### 👉 **[START HERE - Click for Fix](START_HERE.md)** 👈
+
+**Quick Fix (5 minutes):** Your workflow is configured for OIDC but Azure federated credential isn't set up yet. One Azure CLI command will fix it.
+
+**Files available:**
+- 🎯 [`START_HERE.md`](START_HERE.md) - Navigation and quick fix
+- 📖 [`WHAT_IS_HAPPENING.md`](WHAT_IS_HAPPENING.md) - Plain English explanation  
+- 📊 [`VISUAL_GUIDE.md`](VISUAL_GUIDE.md) - Diagrams and visual explanation
+- ⭐ [`DEPLOYMENT_FIX_SUMMARY.md`](DEPLOYMENT_FIX_SUMMARY.md) - Copy-paste script (FASTEST)
+- 📝 [`DEPLOYMENT_FIX_INSTRUCTIONS.md`](DEPLOYMENT_FIX_INSTRUCTIONS.md) - Detailed steps
+
+---
+
 ## ⚡ INSTANT Deployment (2 Minutes!)
 
 ### 🏆 Local Desktop (RECOMMENDED - Hidden URL)
