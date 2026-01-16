@@ -201,7 +201,7 @@ jobs:
             --name baynunah-hr-portal \
             --resource-group baynunah-hr-rg \
             --src deploy.zip \
-            --timeout 600
+            --timeout 1200
           
           echo "✅ Deployment completed"
 
