@@ -10,15 +10,35 @@
 
 ## 🚨 Deployment Currently Failing? 
 
-### 👉 **[START HERE - Click for Fix](START_HERE.md)** 👈
+### 🎯 **ONE-COMMAND FIX - Automated OIDC Setup** 
 
-**Quick Fix (5 minutes):** Your workflow is configured for OIDC but Azure federated credential isn't set up yet. One Azure CLI command will fix it.
+**New!** Run our automated script to configure Azure OIDC in **2 minutes**:
 
-**Files available:**
+```bash
+# Linux/macOS
+./setup-oidc.sh
+
+# Windows PowerShell
+.\setup-oidc.ps1
+```
+
+**What it does:**
+- ✅ Creates Azure AD application automatically
+- ✅ Sets up federated credential for GitHub Actions
+- ✅ Assigns permissions to resource group
+- ✅ Displays GitHub secrets to copy
+
+📖 **[Read the Setup Guide](OIDC_SETUP_README.md)** - Includes explanation of token expiration
+
+---
+
+### 📚 Alternative: Manual Setup
+
+If you prefer step-by-step manual commands:
 - 🎯 [`START_HERE.md`](START_HERE.md) - Navigation and quick fix
 - 📖 [`WHAT_IS_HAPPENING.md`](WHAT_IS_HAPPENING.md) - Plain English explanation  
 - 📊 [`VISUAL_GUIDE.md`](VISUAL_GUIDE.md) - Diagrams and visual explanation
-- ⭐ [`DEPLOYMENT_FIX_SUMMARY.md`](DEPLOYMENT_FIX_SUMMARY.md) - Copy-paste script (FASTEST)
+- ⭐ [`DEPLOYMENT_FIX_SUMMARY.md`](DEPLOYMENT_FIX_SUMMARY.md) - Copy-paste script
 - 📝 [`DEPLOYMENT_FIX_INSTRUCTIONS.md`](DEPLOYMENT_FIX_INSTRUCTIONS.md) - Detailed steps
 
 ---
