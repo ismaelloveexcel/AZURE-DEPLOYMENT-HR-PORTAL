@@ -10,9 +10,20 @@
 
 ## 🚨 Deployment Currently Failing? 
 
+### ⚡ **ULTRA-SIMPLE 3-STEP FIX (No Reading Required!)** 
+
+**Just copy/paste 3 commands. Script does EVERYTHING automatically.**
+
+👉 **[CLICK HERE FOR COPY-PASTE INSTRUCTIONS](ULTRA_SIMPLE_SETUP.md)** 👈
+
+**Total time:** 5 minutes (mostly waiting)  
+**Your time:** 1 minute (copy/paste)
+
+---
+
 ### 🎯 **ONE-COMMAND FIX - Automated OIDC Setup** 
 
-**New!** Run our automated script to configure Azure OIDC in **2 minutes**:
+Run our automated script to configure Azure OIDC in **2 minutes**:
 
 ```bash
 # Linux/macOS
@@ -28,7 +39,7 @@
 - ✅ Assigns permissions to resource group
 - ✅ Displays GitHub secrets to copy
 
-📖 **[Read the Setup Guide](OIDC_SETUP_README.md)** - Includes explanation of token expiration
+📖 **[Detailed Setup Guide](OIDC_SETUP_README.md)** - Includes explanation of token expiration
 
 ---
 
