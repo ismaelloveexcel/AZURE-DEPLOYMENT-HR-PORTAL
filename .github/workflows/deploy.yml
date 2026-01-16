@@ -83,6 +83,13 @@ jobs:
             exit 1
           fi
 
+          # Verify JS bundles exist (critical for frontend to work)
+          if [ ! -d "backend/static/assets" ] || [ -z "$(ls -A backend/static/assets/*.js 2>/dev/null)" ]; then
+            echo "❌ ERROR: No JavaScript bundles found in backend/static/assets/"
+            echo "Frontend build failed to generate JS files"
+            exit 1
+          fi
+
           echo "✅ Frontend built successfully to backend/static"
           echo "Contents:"
           ls -lh backend/static/
@@ -196,7 +203,7 @@ jobs:
               SCM_DO_BUILD_DURING_DEPLOYMENT="false" \
               ENABLE_ORYX_BUILD="false" \
               PYTHONUNBUFFERED="1" \
-              WEBSITES_CONTAINER_START_TIME_LIMIT="600" \
+              WEBSITES_CONTAINER_START_TIME_LIMIT="1800" \
             --output none
 
           # Set startup command
