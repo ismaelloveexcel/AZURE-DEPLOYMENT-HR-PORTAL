@@ -1,62 +1,58 @@
 #!/bin/bash
 # Azure App Service startup script for HR Portal
-set -e
+# CRITICAL: This script MUST end with 'exec' to keep the process running
 
 echo "=== HR Portal Azure Startup ==="
+echo "Timestamp: $(date)"
+echo "PORT from Azure: ${PORT}"
+echo "Working directory: $(pwd)"
 
-# Navigate to the app directory (files are in wwwroot, not wwwroot/backend)
-cd /home/site/wwwroot
+# Navigate to the app directory
+cd /home/site/wwwroot || { echo "ERROR: Cannot cd to /home/site/wwwroot"; exit 1; }
+echo "Changed to: $(pwd)"
+echo "Directory contents:"
+ls -la
 
-# Find Python - Azure App Service uses /opt/python or antenv
-PYTHON_PATH=""
-if [ -f "antenv/bin/python" ]; then
-    PYTHON_PATH="antenv/bin/python"
-    source antenv/bin/activate
-elif [ -d "/opt/python" ]; then
-    # Find the Python version installed
-    PYTHON_VERSION=$(ls /opt/python/ | head -1)
-    PYTHON_PATH="/opt/python/${PYTHON_VERSION}/bin/python3"
-else
-    PYTHON_PATH="python3"
-fi
+# Setup Python virtual environment
+echo ""
+echo "=== Setting up Python environment ==="
 
-echo "Using Python: $PYTHON_PATH"
-
-# Create virtual environment if it doesn't exist
+# Use system Python to create venv if needed
 if [ ! -d "antenv" ]; then
     echo "Creating virtual environment..."
-    $PYTHON_PATH -m venv antenv
+    python3 -m venv antenv || python -m venv antenv
 fi
 
-# Always activate the virtual environment
+# Activate virtual environment
 source antenv/bin/activate
-echo "Virtual environment activated"
+echo "Python path: $(which python)"
+echo "Python version: $(python --version)"
 
-# Install dependencies
-echo "Installing Python dependencies..."
-pip install --upgrade pip
-pip install -r requirements.txt
+# Install dependencies (REQUIRED since Oryx build is disabled)
+echo ""
+echo "=== Installing dependencies ==="
+pip install --upgrade pip --quiet
+pip install -r requirements.txt --quiet
+echo "Dependencies installed"
 
-# Run database migrations with Alembic
-echo "Running database migrations..."
-python -m alembic upgrade head || echo "Alembic migrations skipped (may need manual run)"
+# Run database migrations (non-fatal - app can still start)
+echo ""
+echo "=== Running database migrations ==="
+python -m alembic upgrade head || echo "WARNING: Alembic migrations skipped"
 
-# Initialize database tables (create if not exist - fallback)
-echo "Initializing database tables..."
-python -c "
-import asyncio
-from app.database import engine
-from app.models import Base
+# Verify the app module can be imported
+echo ""
+echo "=== Verifying app module ==="
+python -c "from app.main import app; print('App module imported successfully')" || {
+    echo "ERROR: Cannot import app.main - check for syntax errors"
+    exit 1
+}
 
-async def init_db():
-    async with engine.begin() as conn:
-        await conn.run_sync(Base.metadata.create_all)
-    print('Database tables created/verified successfully')
-
-asyncio.run(init_db())
-" || echo "Database init skipped (may already exist)"
-
-# Start the application with gunicorn (recommended for Azure App Service)
-# CRITICAL: Use ${PORT} - Azure dynamically assigns this port
-echo "PORT from Azure: ${PORT:-not set, defaulting to 8000}"
-exec gunicorn app.main:app -k uvicorn.workers.UvicornWorker --bind=0.0.0.0:${PORT:-8000} --workers=2
+# CRITICAL: Start the application with exec
+# - exec replaces this shell process with uvicorn (required for Azure)
+# - 0.0.0.0 allows external connections
+# - ${PORT} is assigned by Azure (usually 8000)
+echo ""
+echo "=== Starting FastAPI application ==="
+echo "Binding to 0.0.0.0:${PORT}"
+exec uvicorn app.main:app --host 0.0.0.0 --port "${PORT}"
