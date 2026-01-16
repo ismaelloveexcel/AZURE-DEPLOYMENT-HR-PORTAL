@@ -8,6 +8,16 @@
 
 ---
 
+## 🚨 Deployment Currently Failing? READ THIS FIRST
+
+**If GitHub Actions deployment is failing**, see:
+- 📖 **[WHAT_IS_HAPPENING.md](WHAT_IS_HAPPENING.md)** - Plain English explanation
+- 🔧 **[DEPLOYMENT_FIX_INSTRUCTIONS.md](DEPLOYMENT_FIX_INSTRUCTIONS.md)** - Step-by-step fix (5 minutes)
+
+**TL;DR:** Your workflow is configured for OIDC but Azure federated credential isn't set up yet. One Azure CLI command will fix it.
+
+---
+
 ## ⚡ INSTANT Deployment (2 Minutes!)
 
 ### 🏆 Local Desktop (RECOMMENDED - Hidden URL)
