@@ -57,5 +57,6 @@ asyncio.run(init_db())
 " || echo "Database init skipped (may already exist)"
 
 # Start the application with gunicorn (recommended for Azure App Service)
-echo "Starting gunicorn server on port 8000..."
-exec gunicorn app.main:app -k uvicorn.workers.UvicornWorker --bind=0.0.0.0:8000 --workers=2
+# CRITICAL: Use ${PORT} - Azure dynamically assigns this port
+echo "PORT from Azure: ${PORT:-not set, defaulting to 8000}"
+exec gunicorn app.main:app -k uvicorn.workers.UvicornWorker --bind=0.0.0.0:${PORT:-8000} --workers=2
