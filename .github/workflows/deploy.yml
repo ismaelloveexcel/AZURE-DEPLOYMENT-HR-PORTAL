@@ -196,6 +196,7 @@ jobs:
               SCM_DO_BUILD_DURING_DEPLOYMENT="false" \
               ENABLE_ORYX_BUILD="false" \
               PYTHONUNBUFFERED="1" \
+              WEBSITES_CONTAINER_START_TIME_LIMIT="600" \
             --output none
 
           # Set startup command
@@ -251,7 +252,7 @@ jobs:
           # Try up to 6 times with increasing delays
           for i in 1 2 3 4 5 6; do
             echo "Attempt $i: Checking health..."
-            HTTP_STATUS=$(curl -s -o /tmp/health_response.txt -w "%{http_code}" https://baynunah-hr-portal.azurewebsites.net/api/health 2>/dev/null || echo "000")
+            HTTP_STATUS=$(curl -s -o /tmp/health_response.txt -w "%{http_code}" https://baynunah-hr-portal.azurewebsites.net/api/health/db 2>/dev/null || echo "000")
             
             if [ "$HTTP_STATUS" = "200" ]; then
               echo "✅ Health check passed (HTTP $HTTP_STATUS)"
