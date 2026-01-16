@@ -22,7 +22,26 @@ This guide shows you how to set up automated deployment from GitHub to Azure usi
 
 ---
 
-## Step 1: Get Azure Service Principal
+## 🔐 Recommended: Use OIDC Authentication
+
+**We now support OIDC (OpenID Connect) for secure, password-less authentication!**
+
+✅ **No client secrets to manage or rotate**  
+✅ **Enhanced security with short-lived tokens**  
+✅ **Better audit trail in Azure AD**
+
+👉 **[Follow the OIDC Setup Guide](AZURE_OIDC_SETUP.md)** for step-by-step instructions.
+
+---
+
+## Alternative: Service Principal with Secret (Legacy)
+
+> ⚠️ **Deprecated:** This method uses long-lived secrets that require rotation. We recommend using OIDC instead.
+
+<details>
+<summary>Click to expand legacy setup instructions</summary>
+
+### Step 1: Get Azure Service Principal
 
 Create a service principal with contributor access to your App Service:
 
@@ -48,6 +67,10 @@ Output will look like:
 }
 ```
 
+**Note:** With OIDC (recommended), you don't need the `clientSecret` anymore.
+
+</details>
+
 ---
 
 ## Step 2: Add GitHub Secrets
@@ -58,6 +81,21 @@ Go to your GitHub repository:
 2. Click **New repository secret**
 3. Add each of the following secrets:
 
+### For OIDC Authentication (Recommended):
+
+| Secret Name              | Value                                                                                                                            | Where to Get It                                      | Required For                     |
+| ------------------------ | -------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------- | -------------------------------- |
+| `AZURE_CLIENT_ID`        | Application (client) ID                                                                                                         | Azure AD app registration                             | `deploy.yml` workflow            |
+| `AZURE_TENANT_ID`        | Directory (tenant) ID                                                                                                           | Run: `az account show --query tenantId -o tsv`       | `deploy.yml` workflow            |
+| `AZURE_SUBSCRIPTION_ID`  | Subscription ID                                                                                                                  | Run: `az account show --query id -o tsv`            | `deploy.yml` workflow            |
+| `DATABASE_URL`           | `postgresql+asyncpg://username:password@baynunahhrportal-server.postgres.database.azure.com:5432/hrportal?sslmode=require`     | PostgreSQL connection string                          | `deploy.yml` workflow            |
+| `AUTH_SECRET_KEY`        | Random 32-byte hex string                                                                                                        | Generate: `python -c "import secrets; print(secrets.token_urlsafe(32))"` | `deploy.yml` workflow            |
+
+**See:** [OIDC Setup Guide](AZURE_OIDC_SETUP.md) for detailed OIDC configuration.
+
+<details>
+<summary>For Legacy Service Principal Authentication (Deprecated)</summary>
+
 ### Required Secrets (for Deployment):
 
 | Secret Name         | Value                                                                                                                            | Where to Get It                  | Required For                     |
@@ -65,6 +103,8 @@ Go to your GitHub repository:
 | `AZURE_CREDENTIALS` | JSON from Step 1                                                                                                                 | Service principal output         | `deploy.yml` workflow            |
 | `DATABASE_URL`      | `postgresql+asyncpg://username:password@baynunahhrportal-server.postgres.database.azure.com:5432/hrportal?sslmode=require`     | PostgreSQL connection string     | `deploy.yml` workflow            |
 | `AUTH_SECRET_KEY`   | Random 32-byte hex string                                                                                                        | Generate: `openssl rand -hex 32` | `deploy.yml` workflow            |
+
+</details>
 
 **⚠️ Important:** Never commit actual secret values to the repository. The example `DATABASE_URL` above shows the format - replace with your actual credentials.
 
