@@ -6,8 +6,8 @@ on:
   workflow_dispatch: # Allow manual triggering
 
 permissions:
-  id-token: write   # Required for OIDC authentication with Azure
-  contents: read    # Required to checkout code
+  id-token: write # Required for OIDC authentication with Azure
+  contents: read # Required to checkout code
 
 jobs:
   build-and-deploy:
@@ -22,7 +22,7 @@ jobs:
       - name: Validate required secrets
         run: |
           echo "🔍 Validating required secrets..."
-          
+
           # Validate Azure OIDC secrets (no client-secret needed)
           if [ -z "${{ secrets.AZURE_CLIENT_ID }}" ] || \
              [ -z "${{ secrets.AZURE_TENANT_ID }}" ] || \
@@ -31,19 +31,19 @@ jobs:
             echo "Required secrets: AZURE_CLIENT_ID, AZURE_TENANT_ID, AZURE_SUBSCRIPTION_ID"
             exit 1
           fi
-          
+
           if [ -z "${{ secrets.DATABASE_URL }}" ]; then
             echo "❌ ERROR: DATABASE_URL secret is not set"
             echo "Please configure DATABASE_URL in repository secrets"
             exit 1
           fi
-          
+
           if [ -z "${{ secrets.AUTH_SECRET_KEY }}" ]; then
             echo "❌ ERROR: AUTH_SECRET_KEY secret is not set"
             echo "Please configure AUTH_SECRET_KEY in repository secrets"
             exit 1
           fi
-          
+
           echo "✅ All required secrets are present"
 
       # ===== BUILD FRONTEND =====
@@ -76,17 +76,17 @@ jobs:
             echo "Frontend build did not output to the expected location"
             exit 1
           fi
-          
+
           if [ ! -f "backend/static/index.html" ]; then
             echo "❌ ERROR: backend/static/index.html not found"
             echo "Frontend build appears incomplete"
             exit 1
           fi
-          
+
           echo "✅ Frontend built successfully to backend/static"
           echo "Contents:"
           ls -lh backend/static/
-          
+
           # Show bundle sizes
           if [ -d "backend/static/assets" ]; then
             echo "Asset files:"
@@ -97,10 +97,10 @@ jobs:
         run: |
           echo "📦 Creating deployment package..."
           cd backend
-          
+
           # Ensure azure_startup.sh is executable
           chmod +x azure_startup.sh
-          
+
           zip -r ../deploy.zip . \
             -x "*.pyc" \
             -x "*__pycache__*" \
@@ -113,7 +113,7 @@ jobs:
             -x "*.tmp"
           cd ..
           echo "✅ Package created: $(du -h deploy.zip | cut -f1)"
-          
+
           # Verify static files are in the package
           echo "Verifying static files in package..."
           if ! unzip -l deploy.zip | grep -q "static/index.html"; then
@@ -122,7 +122,7 @@ jobs:
           else
             echo "✅ index.html included"
           fi
-          
+
           # Verify azure_startup.sh is included
           if ! unzip -l deploy.zip | grep -q "azure_startup.sh"; then
             echo "❌ ERROR: azure_startup.sh not found in package"
@@ -142,7 +142,7 @@ jobs:
       - name: Ensure Azure Resources Exist
         run: |
           echo "🔍 Checking if Azure resources exist..."
-          
+
           # Check if resource group exists
           if ! az group show --name baynunah-hr-rg --query name -o tsv 2>/dev/null; then
             echo "📦 Creating resource group baynunah-hr-rg..."
@@ -150,7 +150,7 @@ jobs:
           else
             echo "✅ Resource group baynunah-hr-rg exists"
           fi
-          
+
           # Check if App Service plan exists
           if ! az appservice plan show --name baynunah-hr-plan --resource-group baynunah-hr-rg --query name -o tsv 2>/dev/null; then
             echo "📦 Creating App Service plan baynunah-hr-plan..."
@@ -162,7 +162,7 @@ jobs:
           else
             echo "✅ App Service plan baynunah-hr-plan exists"
           fi
-          
+
           # Check if Web App exists
           if ! az webapp show --name baynunah-hr-portal --resource-group baynunah-hr-rg --query name -o tsv 2>/dev/null; then
             echo "📦 Creating Web App baynunah-hr-portal..."
@@ -174,7 +174,7 @@ jobs:
           else
             echo "✅ Web App baynunah-hr-portal exists"
           fi
-          
+
           echo "✅ All Azure resources verified/created"
 
       - name: Configure App Settings
@@ -184,35 +184,35 @@ jobs:
             --name baynunah-hr-portal \
             --resource-group baynunah-hr-rg \
             --settings \
-              DATABASE_URL="${{ secrets.DATABAfalse" \
-              ENABLE_ORYX_BUILD="falsURL }}" \
+              DATABASE_URL="${{ secrets.DATABASE_URL }}" \
               AUTH_SECRET_KEY="${{ secrets.AUTH_SECRET_KEY }}" \
               ALLOWED_ORIGINS="https://baynunah-hr-portal.azurewebsites.net" \
               APP_ENV="production" \
-              SCM_DO_BUILD_DURING_DEPLOYMENT="true" \
+              SCM_DO_BUILD_DURING_DEPLOYMENT="false" \
+              ENABLE_ORYX_BUILD="false" \
               PYTHONUNBUFFERED="1" \
             --output none
-          
+
           # Set startup command
           az webapp config set \
             --name baynunah-hr-portal \
             --resource-group baynunah-hr-rg \
             --startup-file "bash azure_startup.sh" \
             --output none
-          
+
           echo "✅ App settings configured successfully"
 
       - name: Deploy to Azure App Service
         run: |
           echo "🚀 Deploying to Azure App Service..."
-          
+
           # Use Azure CLI for zip deployment (more reliable than the action)
           az webapp deployment source config-zip \
             --name baynunah-hr-portal \
             --resource-group baynunah-hr-rg \
             --src deploy.zip \
             --timeout 1200
-          
+
           echo "✅ Deployment completed"
 
       - name: Restart App Service
@@ -228,7 +228,7 @@ jobs:
           echo "🔍 Checking deployment health..."
           echo "Waiting 60 seconds for app to start..."
           sleep 60
-          
+
           # Try up to 6 times with increasing delays
           for i in 1 2 3 4 5 6; do
             echo "Attempt $i: Checking health..."
@@ -250,7 +250,7 @@ jobs:
               fi
             fi
           done
-          
+
           echo "⚠️  Health check did not return 200 after 6 attempts"
           echo "The app may still be starting or there may be an issue."
           echo ""
