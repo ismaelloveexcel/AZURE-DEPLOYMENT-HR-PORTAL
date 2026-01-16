@@ -26,8 +26,11 @@ echo "Using Python: $PYTHON_PATH"
 if [ ! -d "antenv" ]; then
     echo "Creating virtual environment..."
     $PYTHON_PATH -m venv antenv
-    source antenv/bin/activate
 fi
+
+# Always activate the virtual environment
+source antenv/bin/activate
+echo "Virtual environment activated"
 
 # Install dependencies
 echo "Installing Python dependencies..."

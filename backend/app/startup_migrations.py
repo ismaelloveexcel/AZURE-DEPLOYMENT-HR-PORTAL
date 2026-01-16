@@ -106,22 +106,28 @@ async def seed_empty_database(session: AsyncSession):
 
 async def seed_nomination_settings(session: AsyncSession):
     """Seed default nomination settings if not present."""
-    result = await session.execute(text("SELECT COUNT(*) FROM nomination_settings WHERE year = 2026"))
-    count = result.scalar() or 0
-    
-    if count > 0:
+    try:
+        result = await session.execute(text("SELECT COUNT(*) FROM nomination_settings WHERE year = 2026"))
+        count = result.scalar() or 0
+        
+        if count > 0:
+            return
+    except Exception as e:
+        # Table might not exist yet (migration not run)
+        logger.warning(f"nomination_settings table not accessible: {e}")
         return
     
     logger.info("Seeding nomination settings for 2026...")
-    await session.execute(
-        text("""
-            INSERT INTO nomination_settings (
-                year, is_open, start_date, end_date,
-                invitation_email_subject, invitation_email_body, emails_sent_count
-            ) VALUES (
-                2026, true, NOW(), NOW() + INTERVAL '30 days',
-                'Employee of the Year 2026 - Submit Your Nomination',
-                'Dear Manager,
+    try:
+        await session.execute(
+            text("""
+                INSERT INTO nomination_settings (
+                    year, is_open, start_date, end_date,
+                    invitation_email_subject, invitation_email_body, emails_sent_count
+                ) VALUES (
+                    2026, true, NOW(), NOW() + INTERVAL '30 days',
+                    'Employee of the Year 2026 - Submit Your Nomination',
+                    'Dear Manager,
 
 You are invited to nominate an outstanding team member for the Employee of the Year 2026 award.
 
@@ -133,11 +139,13 @@ Important notes:
 
 Best regards,
 HR Team',
-                0
-            ) ON CONFLICT (year) DO NOTHING
-        """)
-    )
-    logger.info("Seeded nomination settings for 2026")
+                    0
+                ) ON CONFLICT (year) DO NOTHING
+            """)
+        )
+        logger.info("Seeded nomination settings for 2026")
+    except Exception as e:
+        logger.warning(f"Could not seed nomination settings: {e}")
 
 
 async def normalize_employment_status(session: AsyncSession):
