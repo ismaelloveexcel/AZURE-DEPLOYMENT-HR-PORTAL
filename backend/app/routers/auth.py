@@ -22,7 +22,7 @@ logger = logging.getLogger(__name__)
 
 
 def _hash_employee_id(employee_id: str) -> str:
-    """Uses SHA-256 to create a non-reversible hash for safe logging."""
+    """Creates a SHA-256 hash for logging without exposing sensitive employee IDs."""
     return hashlib.sha256(employee_id.encode("utf-8")).hexdigest()
 
 

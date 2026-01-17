@@ -84,6 +84,8 @@ curl -X POST "https://BaynunahHRPortal.azurewebsites.net/api/health/reset-admin-
   -H "X-Admin-Secret: <AUTH_SECRET_KEY>"
 ```
 
+Replace `<AUTH_SECRET_KEY>` with the value from your App Service Configuration.
+
 3. **Verify app settings** (`DATABASE_URL`, `AUTH_SECRET_KEY`) and restart the app:
 
 ```bash
