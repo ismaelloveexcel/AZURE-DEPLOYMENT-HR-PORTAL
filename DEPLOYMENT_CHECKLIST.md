@@ -27,11 +27,23 @@ Configure these in: **Settings → Secrets and variables → Actions**
 
 #### Required Secrets
 
-- [ ] **AZURE_CREDENTIALS**
-  - Purpose: Azure authentication
-  - How: Run `az ad sp create-for-rbac` (see guide)
-  - Format: JSON output from Azure CLI
-  - Time: 5 minutes
+- [ ] **AZURE_CLIENT_ID**
+  - Purpose: Azure OIDC authentication (client ID)
+  - How: `az ad app list --display-name "GitHub Actions - HR Portal" --query "[0].appId" -o tsv`
+  - Format: GUID
+  - Time: 2 minutes
+
+- [ ] **AZURE_TENANT_ID**
+  - Purpose: Azure OIDC authentication (tenant ID)
+  - How: `az account show --query tenantId -o tsv`
+  - Format: GUID
+  - Time: 1 minute
+
+- [ ] **AZURE_SUBSCRIPTION_ID**
+  - Purpose: Azure OIDC authentication (subscription ID)
+  - How: `az account show --query id -o tsv`
+  - Format: GUID
+  - Time: 1 minute
 
 - [ ] **DATABASE_URL**
   - Purpose: PostgreSQL connection
@@ -45,7 +57,14 @@ Configure these in: **Settings → Secrets and variables → Actions**
   - Format: 64-character hex string
   - Time: 1 minute
 
-**Status:** ❌ 0 of 3 configured (blocks deployment)
+**Optional (Recommended):**
+
+- [ ] **ALLOWED_ORIGINS**
+  - Purpose: CORS allow-list (frontend URLs)
+  - Format: Comma-separated URLs
+  - Example: `https://baynunah-hr-portal.azurewebsites.net`
+
+**Status:** ❌ 0 of 5 required secrets configured (blocks deployment)
 
 ---
 
@@ -78,8 +97,8 @@ Check these exist in Azure Portal:
 
 ### Before Triggering Deployment
 
-- [ ] All 3 GitHub secrets configured
-- [ ] PostgreSQL password confirmed/reset
+- [ ] All required GitHub secrets configured
+- [ ] PostgreSQL password set via `POSTGRES_PASSWORD` secret
 - [ ] Reviewed deployment workflow in `.github/workflows/deploy.yml`
 - [ ] Confirmed resource group name: `BaynunahHR`
 - [ ] Confirmed app name: `BaynunahHRPortal`
@@ -168,7 +187,7 @@ Choose one method:
 ### If Deployment Fails
 
 - [ ] Check GitHub Actions logs for errors
-- [ ] Verify all 3 secrets are correctly configured
+- [ ] Verify all required secrets are correctly configured
 - [ ] Confirm PostgreSQL password is correct
 - [ ] Check Azure Portal for resource status
 - [ ] Review `az webapp log tail` output

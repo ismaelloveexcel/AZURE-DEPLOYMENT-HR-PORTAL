@@ -43,4 +43,4 @@ CREATE INDEX IF NOT EXISTS idx_candidates_position_id ON candidates(recruitment_
 """
 
 # To apply these indexes, run:
-# psql -h baynunahhrportal-server.postgres.database.azure.com -U uutfqjkrhm -d hrportal < indexes.sql
+# psql -h baynunahhrportal-server.postgres.database.azure.com -U uutfqkhm -d hrportal < indexes.sql

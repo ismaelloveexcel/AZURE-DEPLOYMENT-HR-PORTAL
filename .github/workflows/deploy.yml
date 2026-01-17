@@ -13,6 +13,10 @@ jobs:
   build-and-deploy:
     name: Build and Deploy HR Portal
     runs-on: ubuntu-latest
+    env:
+      RESOURCE_GROUP: baynunah-hr-rg
+      WEBAPP_NAME: baynunah-hr-portal
+      WEBAPP_URL: https://baynunah-hr-portal.azurewebsites.net
 
     steps:
       - name: Checkout code
@@ -42,6 +46,10 @@ jobs:
             echo "❌ ERROR: AUTH_SECRET_KEY secret is not set"
             echo "Please configure AUTH_SECRET_KEY in repository secrets"
             exit 1
+          fi
+
+          if [ -z "${{ secrets.ALLOWED_ORIGINS }}" ]; then
+            echo "⚠️  ALLOWED_ORIGINS secret is not set; defaulting to $WEBAPP_URL"
           fi
 
           echo "✅ All required secrets are present"
@@ -142,33 +150,28 @@ jobs:
       - name: Login to Azure
         uses: azure/login@v2
         with:
-          # Using service principal with client secret (OIDC not configured in Azure)
-          creds: |
-            {
-              "clientId": "${{ secrets.AZURE_CLIENT_ID }}",
-              "clientSecret": "${{ secrets.AZURE_CLIENT_SECRET }}",
-              "subscriptionId": "${{ secrets.AZURE_SUBSCRIPTION_ID }}",
-              "tenantId": "${{ secrets.AZURE_TENANT_ID }}"
-            }
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
       - name: Ensure Azure Resources Exist
         run: |
           echo "🔍 Checking if Azure resources exist..."
 
           # Check if resource group exists
-          if ! az group show --name baynunah-hr-rg --query name -o tsv 2>/dev/null; then
-            echo "📦 Creating resource group baynunah-hr-rg..."
-            az group create --name baynunah-hr-rg --location westeurope
+          if ! az group show --name "$RESOURCE_GROUP" --query name -o tsv 2>/dev/null; then
+            echo "📦 Creating resource group $RESOURCE_GROUP..."
+            az group create --name "$RESOURCE_GROUP" --location westeurope
           else
-            echo "✅ Resource group baynunah-hr-rg exists"
+            echo "✅ Resource group $RESOURCE_GROUP exists"
           fi
 
           # Check if App Service plan exists
-          if ! az appservice plan show --name baynunah-hr-plan --resource-group baynunah-hr-rg --query name -o tsv 2>/dev/null; then
+          if ! az appservice plan show --name baynunah-hr-plan --resource-group "$RESOURCE_GROUP" --query name -o tsv 2>/dev/null; then
             echo "📦 Creating App Service plan baynunah-hr-plan..."
             az appservice plan create \
               --name baynunah-hr-plan \
-              --resource-group baynunah-hr-rg \
+              --resource-group "$RESOURCE_GROUP" \
               --sku B1 \
               --is-linux
           else
@@ -176,15 +179,15 @@ jobs:
           fi
 
           # Check if Web App exists
-          if ! az webapp show --name baynunah-hr-portal --resource-group baynunah-hr-rg --query name -o tsv 2>/dev/null; then
-            echo "📦 Creating Web App baynunah-hr-portal..."
+          if ! az webapp show --name "$WEBAPP_NAME" --resource-group "$RESOURCE_GROUP" --query name -o tsv 2>/dev/null; then
+            echo "📦 Creating Web App $WEBAPP_NAME..."
             az webapp create \
-              --name baynunah-hr-portal \
-              --resource-group baynunah-hr-rg \
+              --name "$WEBAPP_NAME" \
+              --resource-group "$RESOURCE_GROUP" \
               --plan baynunah-hr-plan \
               --runtime "PYTHON:3.11"
           else
-            echo "✅ Web App baynunah-hr-portal exists"
+            echo "✅ Web App $WEBAPP_NAME exists"
           fi
 
           echo "✅ All Azure resources verified/created"
@@ -192,13 +195,18 @@ jobs:
       - name: Configure App Settings
         run: |
           echo "⚙️  Configuring Azure App Service settings..."
+          ALLOWED_ORIGINS_VALUE="${{ secrets.ALLOWED_ORIGINS }}"
+          if [ -z "$ALLOWED_ORIGINS_VALUE" ]; then
+            ALLOWED_ORIGINS_VALUE="$WEBAPP_URL"
+          fi
+
           az webapp config appsettings set \
-            --name baynunah-hr-portal \
-            --resource-group baynunah-hr-rg \
+            --name "$WEBAPP_NAME" \
+            --resource-group "$RESOURCE_GROUP" \
             --settings \
               DATABASE_URL="${{ secrets.DATABASE_URL }}" \
               AUTH_SECRET_KEY="${{ secrets.AUTH_SECRET_KEY }}" \
-              ALLOWED_ORIGINS="https://baynunah-hr-portal.azurewebsites.net" \
+              ALLOWED_ORIGINS="$ALLOWED_ORIGINS_VALUE" \
               APP_ENV="production" \
               SCM_DO_BUILD_DURING_DEPLOYMENT="false" \
               ENABLE_ORYX_BUILD="false" \
@@ -208,15 +216,15 @@ jobs:
 
           # Set startup command
           az webapp config set \
-            --name baynunah-hr-portal \
-            --resource-group baynunah-hr-rg \
+            --name "$WEBAPP_NAME" \
+            --resource-group "$RESOURCE_GROUP" \
             --startup-file "bash azure_startup.sh" \
             --output none
 
           # Configure health check path (uses unauthenticated /api/health/ping)
           az webapp config set \
-            --name baynunah-hr-portal \
-            --resource-group baynunah-hr-rg \
+            --name "$WEBAPP_NAME" \
+            --resource-group "$RESOURCE_GROUP" \
             --generic-configurations '{"healthCheckPath": "/api/health/ping"}' \
             --output none
 
@@ -229,8 +237,8 @@ jobs:
           # Use az webapp deploy which respects no-build settings
           # First, ensure build is disabled at the SCM level
           az webapp config appsettings set \
-            --name baynunah-hr-portal \
-            --resource-group baynunah-hr-rg \
+            --name "$WEBAPP_NAME" \
+            --resource-group "$RESOURCE_GROUP" \
             --settings \
               WEBSITE_RUN_FROM_PACKAGE="0" \
               SCM_DO_BUILD_DURING_DEPLOYMENT="false" \
@@ -239,8 +247,8 @@ jobs:
 
           # Deploy using the newer az webapp deploy command with --type zip
           az webapp deploy \
-            --name baynunah-hr-portal \
-            --resource-group baynunah-hr-rg \
+            --name "$WEBAPP_NAME" \
+            --resource-group "$RESOURCE_GROUP" \
             --src-path deploy.zip \
             --type zip \
             --clean true \
@@ -253,8 +261,8 @@ jobs:
         run: |
           echo "🔄 Restarting App Service to apply changes..."
           az webapp restart \
-            --name baynunah-hr-portal \
-            --resource-group baynunah-hr-rg
+            --name "$WEBAPP_NAME" \
+            --resource-group "$RESOURCE_GROUP"
           echo "✅ App Service restarted"
 
       - name: Verify deployment health
@@ -266,7 +274,7 @@ jobs:
           # Try up to 6 times with increasing delays
           for i in 1 2 3 4 5 6; do
             echo "Attempt $i: Checking health ping (no auth)..."
-            HTTP_STATUS=$(curl -s -o /tmp/health_response.txt -w "%{http_code}" https://baynunah-hr-portal.azurewebsites.net/api/health/ping 2>/dev/null || echo "000")
+            HTTP_STATUS=$(curl -s -o /tmp/health_response.txt -w "%{http_code}" "$WEBAPP_URL/api/health/ping" 2>/dev/null || echo "000")
             
             if [ "$HTTP_STATUS" = "200" ]; then
               echo "✅ Health ping passed (HTTP $HTTP_STATUS)"
@@ -275,7 +283,7 @@ jobs:
               
               # Also check DB health (optional, informational)
               echo "Checking database health..."
-              DB_STATUS=$(curl -s -o /tmp/db_response.txt -w "%{http_code}" https://baynunah-hr-portal.azurewebsites.net/api/health/db 2>/dev/null || echo "000")
+              DB_STATUS=$(curl -s -o /tmp/db_response.txt -w "%{http_code}" "$WEBAPP_URL/api/health/db" 2>/dev/null || echo "000")
               echo "Database health: HTTP $DB_STATUS"
               cat /tmp/db_response.txt 2>/dev/null | head -10 || echo "(no response)"
               exit 0
@@ -295,9 +303,9 @@ jobs:
           echo "The app may still be starting or there may be an issue."
           echo ""
           echo "Check logs with:"
-          echo "  az webapp log tail --name baynunah-hr-portal --resource-group baynunah-hr-rg"
+          echo "  az webapp log tail --name $WEBAPP_NAME --resource-group $RESOURCE_GROUP"
           echo ""
-          echo "Check app at: https://baynunah-hr-portal.azurewebsites.net"
+          echo "Check app at: $WEBAPP_URL"
           # Don't fail the workflow - let it complete so we can check logs
           exit 0
 
@@ -308,17 +316,17 @@ jobs:
           echo "   DEPLOYMENT COMPLETE!"
           echo "================================================"
           echo ""
-          echo "📱 App URL:      https://baynunah-hr-portal.azurewebsites.net"
-          echo "📚 API Docs:     https://baynunah-hr-portal.azurewebsites.net/docs"
-          echo "🔍 Health Check: https://baynunah-hr-portal.azurewebsites.net/api/health"
-          echo "🔍 DB Health:    https://baynunah-hr-portal.azurewebsites.net/api/health/db"
+          echo "📱 App URL:      $WEBAPP_URL"
+          echo "📚 API Docs:     $WEBAPP_URL/docs"
+          echo "🔍 Health Check: $WEBAPP_URL/api/health"
+          echo "🔍 DB Health:    $WEBAPP_URL/api/health/db"
           echo ""
           echo "✅ Frontend assets deployed to backend/static"
           echo "✅ App settings configured (DATABASE_URL, AUTH_SECRET_KEY)"
           echo "✅ Startup script: azure_startup.sh (installs deps & runs migrations)"
           echo ""
           echo "If login issues occur, reset admin password:"
-          echo "  curl -X POST https://baynunah-hr-portal.azurewebsites.net/api/health/reset-admin-password \\"
+          echo "  curl -X POST $WEBAPP_URL/api/health/reset-admin-password \\"
           echo "    -H 'X-Admin-Secret: YOUR_AUTH_SECRET_KEY'"
           echo ""
           echo "Default admin credentials after reset:"

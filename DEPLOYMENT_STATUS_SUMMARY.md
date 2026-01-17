@@ -103,8 +103,11 @@ All required secrets are now configured. You can deploy using any of these metho
 
 ### Method 2: Automated Script
 ```bash
+export POSTGRES_PASSWORD="YOUR_SECURE_PASSWORD"
+export AUTO_APPROVE=true
+export RESET_POSTGRES_PASSWORD=true
 cd scripts
-./deploy_automated.sh 'postgresql_password'
+./deploy_automated.sh
 ```
 
 ### Method 3: Manual Azure CLI

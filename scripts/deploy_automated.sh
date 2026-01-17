@@ -1,6 +1,6 @@
 #!/bin/bash
 # Master Automated Deployment Script for HR Portal
-# Requires: Azure CLI logged in, PostgreSQL password
+# Requires: Azure CLI logged in, POSTGRES_PASSWORD env var or first argument
 
 set -e  # Exit on error
 
@@ -8,9 +8,15 @@ set -e  # Exit on error
 APP_SERVICE_NAME="BaynunahHRPortal"
 RESOURCE_GROUP="BaynunahHR"
 POSTGRES_SERVER="baynunahhrportal-server"
+POSTGRES_ADMIN_USER="${POSTGRES_ADMIN_USER:-uutfqkhm}"
 VNET_NAME="BaynunahHRPortalVnet"
 SUBNET_NAME="AppServiceSubnet"
 DB_NAME="hrportal"
+AUTO_APPROVE="${AUTO_APPROVE:-false}"
+RESET_POSTGRES_PASSWORD="${RESET_POSTGRES_PASSWORD:-false}"
+MIGRATION_COMMAND="cd /home/site/wwwroot && python -m alembic upgrade head"
+MIGRATION_MAX_ATTEMPTS="${MIGRATION_MAX_ATTEMPTS:-2}"
+MIGRATION_RETRY_DELAY="${MIGRATION_RETRY_DELAY:-15}"
 
 echo "╔════════════════════════════════════════════════════════════════╗"
 echo "║         HR Portal - Automated Azure Deployment                ║"
@@ -18,30 +24,26 @@ echo "╚═══════════════════════�
 echo ""
 
 # Check if password provided
-if [ -z "$1" ]; then
-  echo "❌ Error: PostgreSQL password required"
-  echo ""
-  echo "Usage: ./deploy_automated.sh 'postgres_password'"
-  echo ""
-  echo "Get password from Azure Portal:"
-  echo "  Portal → baynunahhrportal-server → Settings → Reset password"
-  echo "  Admin username: uutfqkhm"
+POSTGRES_PASSWORD="${POSTGRES_PASSWORD:-$1}"
+if [ -z "$POSTGRES_PASSWORD" ]; then
+  echo "❌ Error: PostgreSQL password required (set POSTGRES_PASSWORD or pass as argument)"
   exit 1
 fi
-
-POSTGRES_PASSWORD="$1"
 AUTH_SECRET=$(openssl rand -hex 32)
 
 echo "📋 Deployment Configuration:"
 echo "   Resource Group: $RESOURCE_GROUP"
 echo "   App Service: $APP_SERVICE_NAME"
 echo "   PostgreSQL: $POSTGRES_SERVER"
+echo "   Admin User: $POSTGRES_ADMIN_USER"
 echo "   Database: $DB_NAME"
 echo ""
-read -p "Continue? (y/n) " -n 1 -r
-echo ""
-if [[ ! $REPLY =~ ^[Yy]$ ]]; then
-  exit 0
+if [[ "$AUTO_APPROVE" != "true" && "$CI" != "true" ]]; then
+  read -p "Continue? (y/n) " -n 1 -r
+  echo ""
+  if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+    exit 0
+  fi
 fi
 
 # Step 1: Configure VNet Integration
@@ -88,7 +90,19 @@ echo "   ✅ VNet Integration configured"
 
 # Step 2: Create Database
 echo ""
-echo "🗄️  Step 2/7: Creating PostgreSQL database..."
+echo "🗄️  Step 2/7: Ensuring PostgreSQL access..."
+if [[ "$RESET_POSTGRES_PASSWORD" == "true" ]]; then
+  az postgres flexible-server update \
+    --server-name $POSTGRES_SERVER \
+    --resource-group $RESOURCE_GROUP \
+    --admin-password "$POSTGRES_PASSWORD" \
+    --output none
+  echo "   ✅ Admin password updated"
+else
+  echo "   ⏭️  Skipping admin password update (RESET_POSTGRES_PASSWORD=false)"
+fi
+
+echo "   Creating PostgreSQL database..."
 DB_EXISTS=$(az postgres flexible-server db show \
   --server-name $POSTGRES_SERVER \
   --resource-group $RESOURCE_GROUP \
@@ -135,12 +149,12 @@ az webapp config appsettings set \
   --name $APP_SERVICE_NAME \
   --resource-group $RESOURCE_GROUP \
   --settings \
-    DATABASE_URL="postgresql+asyncpg://uutfqjkrhm:$POSTGRES_PASSWORD@$POSTGRES_SERVER.postgres.database.azure.com:5432/$DB_NAME?ssl=require" \
+    DATABASE_URL="postgresql+asyncpg://$POSTGRES_ADMIN_USER:$POSTGRES_PASSWORD@$POSTGRES_SERVER.postgres.database.azure.com:5432/$DB_NAME?ssl=require" \
     AUTH_SECRET_KEY="$AUTH_SECRET" \
     ALLOWED_ORIGINS="https://$APP_SERVICE_NAME.azurewebsites.net" \
     APP_ENV="production" \
     PASSWORD_MIN_LENGTH="8" \
-    SESSION_TIMEOUT_MINUTES="480" \
+    SESSION_TIMEOUT_HOURS="8" \
   --output none
 echo "   ✅ Environment variables configured"
 
@@ -177,13 +191,22 @@ echo "🔄 Step 7/7: Running database migrations..."
 echo "   Waiting for app to start..."
 sleep 15
 
-# Try to run migrations via SSH
+# Run migrations via SSH
 echo "   Connecting via SSH to run migrations..."
-az webapp ssh --name $APP_SERVICE_NAME --resource-group $RESOURCE_GROUP --command "cd /home/site/wwwroot && python -m alembic upgrade head" 2>/dev/null || {
-  echo "   ⚠️  Automatic migration failed. Run manually:"
-  echo "      az webapp ssh --name $APP_SERVICE_NAME --resource-group $RESOURCE_GROUP"
-  echo "      cd /home/site/wwwroot && python -m alembic upgrade head"
-}
+attempt=1
+while true; do
+  if az webapp ssh --name $APP_SERVICE_NAME --resource-group $RESOURCE_GROUP --command "$MIGRATION_COMMAND" 2>/dev/null; then
+    break
+  fi
+  if [ "$attempt" -ge "$MIGRATION_MAX_ATTEMPTS" ]; then
+    echo "   ❌ Automatic migration failed. Check logs and retry."
+    echo "   Logs: az webapp log tail --name $APP_SERVICE_NAME --resource-group $RESOURCE_GROUP"
+    exit 1
+  fi
+  attempt=$((attempt + 1))
+  echo "   ⚠️  Migration attempt failed. Retrying in ${MIGRATION_RETRY_DELAY}s..."
+  sleep "$MIGRATION_RETRY_DELAY"
+done
 
 echo ""
 echo "╔════════════════════════════════════════════════════════════════╗"

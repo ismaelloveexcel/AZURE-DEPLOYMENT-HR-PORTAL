@@ -1,9 +1,11 @@
 from typing import Any
+import logging
 
 from fastapi import APIRouter, Depends, Header, HTTPException, status
 import jwt
 from jwt.exceptions import PyJWTError
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.exc import SQLAlchemyError
 import hashlib
 
 from app.core.config import get_settings
@@ -16,6 +18,17 @@ from app.schemas.employee import (
 from app.services.employees import employee_service, create_access_token
 
 router = APIRouter(prefix="/auth", tags=["authentication"])
+logger = logging.getLogger(__name__)
+
+
+def _hash_employee_id(employee_id: str) -> str:
+    """Creates a SHA-256 hash for logging without exposing sensitive employee IDs."""
+    return hashlib.sha256(employee_id.encode("utf-8")).hexdigest()
+
+
+def _log_login_error(employee_id: str, error_type: str, label: str) -> None:
+    employee_id_hash = _hash_employee_id(employee_id)
+    logger.error(f"{label} for employee_id_hash={employee_id_hash}: {error_type}")
 
 
 async def get_current_employee_id(authorization: str = Header(...)) -> str:
@@ -64,15 +77,16 @@ async def login(
         return await employee_service.login(session, request)
     except HTTPException:
         raise
+    except SQLAlchemyError as e:
+        _log_login_error(request.employee_id, type(e).__name__, "Login database error")
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="Login unavailable. Database connection failed.",
+        )
     except Exception as e:
-        import logging
-        logger = logging.getLogger(__name__)
         # Log error type and a hashed employee_id for debugging (avoid logging sensitive data)
         error_type = type(e).__name__
-        employee_id_hash = hashlib.sha256(request.employee_id.encode("utf-8")).hexdigest()
-        logger.error(
-            f"Login error for employee_id_hash={employee_id_hash}: {error_type}"
-        )
+        _log_login_error(request.employee_id, error_type, "Login error")
         # Note: Traceback intentionally not logged to avoid potential sensitive data exposure
         
         # In development, show error type only (not the full message)
@@ -110,5 +124,3 @@ async def change_password(
     """
     success = await employee_service.change_password(session, employee_id, request)
     return {"success": success, "message": "Password changed successfully"}
-
-

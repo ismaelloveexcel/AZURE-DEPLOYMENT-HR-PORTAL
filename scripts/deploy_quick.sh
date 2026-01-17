@@ -45,7 +45,7 @@ az webapp config appsettings set \
     ALLOWED_ORIGINS="https://$APP_SERVICE_NAME.azurewebsites.net" \
     APP_ENV="production" \
     PASSWORD_MIN_LENGTH="8" \
-    SESSION_TIMEOUT_MINUTES="480"
+    SESSION_TIMEOUT_HOURS="8"
 
 echo ""
 echo "Step 4: Creating deployment package..."
