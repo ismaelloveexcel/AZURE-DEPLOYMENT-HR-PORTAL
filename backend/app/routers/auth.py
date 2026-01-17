@@ -22,7 +22,13 @@ logger = logging.getLogger(__name__)
 
 
 def _hash_employee_id(employee_id: str) -> str:
+    """Hash employee IDs for privacy-safe logging."""
     return hashlib.sha256(employee_id.encode("utf-8")).hexdigest()
+
+
+def _log_login_error(employee_id: str, error_type: str, label: str) -> None:
+    employee_id_hash = _hash_employee_id(employee_id)
+    logger.error(f"{label} for employee_id_hash={employee_id_hash}: {error_type}")
 
 
 async def get_current_employee_id(authorization: str = Header(...)) -> str:
@@ -72,10 +78,7 @@ async def login(
     except HTTPException:
         raise
     except SQLAlchemyError as e:
-        employee_id_hash = _hash_employee_id(request.employee_id)
-        logger.error(
-            f"Login database error for employee_id_hash={employee_id_hash}: {type(e).__name__}"
-        )
+        _log_login_error(request.employee_id, type(e).__name__, "Login database error")
         raise HTTPException(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
             detail="Login unavailable. Database connection failed.",
@@ -83,10 +86,7 @@ async def login(
     except Exception as e:
         # Log error type and a hashed employee_id for debugging (avoid logging sensitive data)
         error_type = type(e).__name__
-        employee_id_hash = _hash_employee_id(request.employee_id)
-        logger.error(
-            f"Login error for employee_id_hash={employee_id_hash}: {error_type}"
-        )
+        _log_login_error(request.employee_id, error_type, "Login error")
         # Note: Traceback intentionally not logged to avoid potential sensitive data exposure
         
         # In development, show error type only (not the full message)
