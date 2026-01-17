@@ -21,6 +21,10 @@ router = APIRouter(prefix="/auth", tags=["authentication"])
 logger = logging.getLogger(__name__)
 
 
+def _hash_employee_id(employee_id: str) -> str:
+    return hashlib.sha256(employee_id.encode("utf-8")).hexdigest()
+
+
 async def get_current_employee_id(authorization: str = Header(...)) -> str:
     """Extract employee ID from JWT token."""
     try:
@@ -68,7 +72,7 @@ async def login(
     except HTTPException:
         raise
     except SQLAlchemyError as e:
-        employee_id_hash = hashlib.sha256(request.employee_id.encode("utf-8")).hexdigest()
+        employee_id_hash = _hash_employee_id(request.employee_id)
         logger.error(
             f"Login database error for employee_id_hash={employee_id_hash}: {type(e).__name__}"
         )
@@ -79,7 +83,7 @@ async def login(
     except Exception as e:
         # Log error type and a hashed employee_id for debugging (avoid logging sensitive data)
         error_type = type(e).__name__
-        employee_id_hash = hashlib.sha256(request.employee_id.encode("utf-8")).hexdigest()
+        employee_id_hash = _hash_employee_id(request.employee_id)
         logger.error(
             f"Login error for employee_id_hash={employee_id_hash}: {error_type}"
         )
