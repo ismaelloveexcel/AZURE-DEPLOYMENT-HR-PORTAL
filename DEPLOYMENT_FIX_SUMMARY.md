@@ -14,7 +14,7 @@ All GitHub Actions deployments failing with OIDC authentication error.
 
 ## Accelerators (Fast Checks)
 - Confirm GitHub secrets: `AZURE_CLIENT_ID`, `AZURE_TENANT_ID`, `AZURE_SUBSCRIPTION_ID`, `DATABASE_URL`, `AUTH_SECRET_KEY` (and optional `ALLOWED_ORIGINS`).
-- Verify app settings match secrets: `az webapp config appsettings list --name baynunah-hr-portal --resource-group baynunah-hr-rg`.
+- Verify app settings match secrets: `az webapp config appsettings list --name <WEBAPP_NAME> --resource-group <RESOURCE_GROUP>` (see `deploy.yml` env).
 - Hit health endpoints before troubleshooting login: `/api/health/ping` and `/api/health/db`.
 
 ## Solution

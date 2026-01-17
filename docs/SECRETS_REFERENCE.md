@@ -80,7 +80,7 @@ az ad sp create-for-rbac \
 
 **⚠️ Security Note:** Prefer OIDC. Only use this if your workflow uses the `creds:` input for `azure/login@v2` or OIDC cannot be enabled. Never commit this JSON to the repository.
 
-**Workflow Note:** `deploy.yml` uses `azure/login@v2` with OIDC; the `creds:` input is for legacy service principal flows.
+**Workflow Note:** `deploy.yml` uses `azure/login@v2` with OIDC; the `creds:` input on that action is only for legacy service principal flows.
 
 ---
 

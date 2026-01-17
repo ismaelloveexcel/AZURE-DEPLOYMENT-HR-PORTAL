@@ -49,7 +49,7 @@ jobs:
           fi
 
           if [ -z "${{ secrets.ALLOWED_ORIGINS }}" ]; then
-            echo "⚠️  ALLOWED_ORIGINS secret is not set; defaulting to Azure web app URL"
+            echo "⚠️  ALLOWED_ORIGINS secret is not set; defaulting to $WEBAPP_URL"
           fi
 
           echo "✅ All required secrets are present"
