@@ -15,7 +15,7 @@ DB_NAME="hrportal"
 AUTO_APPROVE="${AUTO_APPROVE:-false}"
 RESET_POSTGRES_PASSWORD="${RESET_POSTGRES_PASSWORD:-false}"
 MIGRATION_COMMAND="cd /home/site/wwwroot && python -m alembic upgrade head"
-MIGRATION_RETRY_COUNT="${MIGRATION_RETRY_COUNT:-2}"
+MIGRATION_MAX_ATTEMPTS="${MIGRATION_MAX_ATTEMPTS:-2}"
 MIGRATION_RETRY_DELAY="${MIGRATION_RETRY_DELAY:-15}"
 
 echo "╔════════════════════════════════════════════════════════════════╗"
@@ -198,7 +198,7 @@ while true; do
   if az webapp ssh --name $APP_SERVICE_NAME --resource-group $RESOURCE_GROUP --command "$MIGRATION_COMMAND" 2>/dev/null; then
     break
   fi
-  if [ "$attempt" -ge "$MIGRATION_RETRY_COUNT" ]; then
+  if [ "$attempt" -ge "$MIGRATION_MAX_ATTEMPTS" ]; then
     echo "   ❌ Automatic migration failed. Check logs and retry."
     echo "   Logs: az webapp log tail --name $APP_SERVICE_NAME --resource-group $RESOURCE_GROUP"
     exit 1
