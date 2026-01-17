@@ -342,7 +342,9 @@ If GitHub Actions doesn't work, the repository includes alternative scripts:
 #### Method 1: Automated Script
 ```bash
 cd scripts
-./deploy_automated.sh 'postgresql_password'
+export POSTGRES_PASSWORD="YOUR_SECURE_PASSWORD"
+export AUTO_APPROVE=true
+./deploy_automated.sh
 ```
 
 #### Method 2: Azure CLI Script

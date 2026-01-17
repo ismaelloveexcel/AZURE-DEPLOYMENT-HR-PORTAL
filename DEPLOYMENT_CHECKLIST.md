@@ -98,7 +98,7 @@ Check these exist in Azure Portal:
 ### Before Triggering Deployment
 
 - [ ] All required GitHub secrets configured
-- [ ] PostgreSQL password confirmed/reset
+- [ ] PostgreSQL password set via `POSTGRES_PASSWORD` secret
 - [ ] Reviewed deployment workflow in `.github/workflows/deploy.yml`
 - [ ] Confirmed resource group name: `BaynunahHR`
 - [ ] Confirmed app name: `BaynunahHRPortal`
