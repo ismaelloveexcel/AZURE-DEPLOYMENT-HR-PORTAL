@@ -13,7 +13,8 @@ VNET_NAME="BaynunahHRPortalVnet"
 SUBNET_NAME="AppServiceSubnet"
 DB_NAME="hrportal"
 AUTO_APPROVE="${AUTO_APPROVE:-false}"
-RESET_POSTGRES_PASSWORD="${RESET_POSTGRES_PASSWORD:-true}"
+RESET_POSTGRES_PASSWORD="${RESET_POSTGRES_PASSWORD:-false}"
+MIGRATION_COMMAND="cd /home/site/wwwroot && python -m alembic upgrade head"
 
 echo "╔════════════════════════════════════════════════════════════════╗"
 echo "║         HR Portal - Automated Azure Deployment                ║"
@@ -190,10 +191,10 @@ sleep 15
 
 # Run migrations via SSH
 echo "   Connecting via SSH to run migrations..."
-if ! az webapp ssh --name $APP_SERVICE_NAME --resource-group $RESOURCE_GROUP --command "cd /home/site/wwwroot && python -m alembic upgrade head" 2>/dev/null; then
+if ! az webapp ssh --name $APP_SERVICE_NAME --resource-group $RESOURCE_GROUP --command "$MIGRATION_COMMAND" 2>/dev/null; then
   echo "   ⚠️  Migration attempt failed. Retrying in 15 seconds..."
   sleep 15
-  az webapp ssh --name $APP_SERVICE_NAME --resource-group $RESOURCE_GROUP --command "cd /home/site/wwwroot && python -m alembic upgrade head" 2>/dev/null || {
+  az webapp ssh --name $APP_SERVICE_NAME --resource-group $RESOURCE_GROUP --command "$MIGRATION_COMMAND" 2>/dev/null || {
     echo "   ❌ Automatic migration failed. Check logs and retry."
     echo "   Logs: az webapp log tail --name $APP_SERVICE_NAME --resource-group $RESOURCE_GROUP"
     exit 1

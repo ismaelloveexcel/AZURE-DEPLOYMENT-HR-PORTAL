@@ -344,6 +344,7 @@ If GitHub Actions doesn't work, the repository includes alternative scripts:
 cd scripts
 export POSTGRES_PASSWORD="YOUR_SECURE_PASSWORD"
 export AUTO_APPROVE=true
+export RESET_POSTGRES_PASSWORD=true
 ./deploy_automated.sh
 ```
 

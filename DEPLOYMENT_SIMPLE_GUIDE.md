@@ -9,6 +9,7 @@ Choose a secure password and export it (the script updates the server password a
 ```bash
 export POSTGRES_PASSWORD="YOUR_SECURE_PASSWORD"
 export AUTO_APPROVE=true
+export RESET_POSTGRES_PASSWORD=true
 ```
 
 If your admin username differs, also set:
