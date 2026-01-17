@@ -1,4 +1,5 @@
 from typing import Any
+import logging
 
 from fastapi import APIRouter, Depends, Header, HTTPException, status
 import jwt
@@ -17,6 +18,7 @@ from app.schemas.employee import (
 from app.services.employees import employee_service, create_access_token
 
 router = APIRouter(prefix="/auth", tags=["authentication"])
+logger = logging.getLogger(__name__)
 
 
 async def get_current_employee_id(authorization: str = Header(...)) -> str:
@@ -66,8 +68,6 @@ async def login(
     except HTTPException:
         raise
     except SQLAlchemyError as e:
-        import logging
-        logger = logging.getLogger(__name__)
         employee_id_hash = hashlib.sha256(request.employee_id.encode("utf-8")).hexdigest()
         logger.error(
             f"Login database error for employee_id_hash={employee_id_hash}: {type(e).__name__}"
@@ -77,8 +77,6 @@ async def login(
             detail="Login unavailable. Database connection failed.",
         )
     except Exception as e:
-        import logging
-        logger = logging.getLogger(__name__)
         # Log error type and a hashed employee_id for debugging (avoid logging sensitive data)
         error_type = type(e).__name__
         employee_id_hash = hashlib.sha256(request.employee_id.encode("utf-8")).hexdigest()
@@ -122,4 +120,3 @@ async def change_password(
     """
     success = await employee_service.change_password(session, employee_id, request)
     return {"success": success, "message": "Password changed successfully"}
-
