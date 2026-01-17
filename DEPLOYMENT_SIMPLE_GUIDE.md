@@ -17,6 +17,12 @@ If your admin username differs, also set:
 export POSTGRES_ADMIN_USER="YOUR_ADMIN_USER"
 ```
 
+To keep the existing admin password, set:
+
+```bash
+export RESET_POSTGRES_PASSWORD=false
+```
+
 ## Step 2: Run Automated Deployment (5 minutes)
 
 Open your terminal in this project directory and run:

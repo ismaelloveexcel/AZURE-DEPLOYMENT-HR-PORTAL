@@ -8,11 +8,12 @@ set -e  # Exit on error
 APP_SERVICE_NAME="BaynunahHRPortal"
 RESOURCE_GROUP="BaynunahHR"
 POSTGRES_SERVER="baynunahhrportal-server"
-POSTGRES_ADMIN_USER="${POSTGRES_ADMIN_USER:-uutfqjkrhm}"
+POSTGRES_ADMIN_USER="${POSTGRES_ADMIN_USER:-uutfqkhm}"
 VNET_NAME="BaynunahHRPortalVnet"
 SUBNET_NAME="AppServiceSubnet"
 DB_NAME="hrportal"
 AUTO_APPROVE="${AUTO_APPROVE:-false}"
+RESET_POSTGRES_PASSWORD="${RESET_POSTGRES_PASSWORD:-true}"
 
 echo "╔════════════════════════════════════════════════════════════════╗"
 echo "║         HR Portal - Automated Azure Deployment                ║"
@@ -87,12 +88,16 @@ echo "   ✅ VNet Integration configured"
 # Step 2: Create Database
 echo ""
 echo "🗄️  Step 2/7: Ensuring PostgreSQL access..."
-az postgres flexible-server update \
-  --server-name $POSTGRES_SERVER \
-  --resource-group $RESOURCE_GROUP \
-  --admin-password "$POSTGRES_PASSWORD" \
-  --output none
-echo "   ✅ Admin password updated"
+if [[ "$RESET_POSTGRES_PASSWORD" == "true" ]]; then
+  az postgres flexible-server update \
+    --server-name $POSTGRES_SERVER \
+    --resource-group $RESOURCE_GROUP \
+    --admin-password "$POSTGRES_PASSWORD" \
+    --output none
+  echo "   ✅ Admin password updated"
+else
+  echo "   ⏭️  Skipping admin password update (RESET_POSTGRES_PASSWORD=false)"
+fi
 
 echo "   Creating PostgreSQL database..."
 DB_EXISTS=$(az postgres flexible-server db show \
@@ -186,9 +191,13 @@ sleep 15
 # Run migrations via SSH
 echo "   Connecting via SSH to run migrations..."
 if ! az webapp ssh --name $APP_SERVICE_NAME --resource-group $RESOURCE_GROUP --command "cd /home/site/wwwroot && python -m alembic upgrade head" 2>/dev/null; then
-  echo "   ❌ Automatic migration failed. Check logs and retry."
-  echo "   Logs: az webapp log tail --name $APP_SERVICE_NAME --resource-group $RESOURCE_GROUP"
-  exit 1
+  echo "   ⚠️  Migration attempt failed. Retrying in 15 seconds..."
+  sleep 15
+  az webapp ssh --name $APP_SERVICE_NAME --resource-group $RESOURCE_GROUP --command "cd /home/site/wwwroot && python -m alembic upgrade head" 2>/dev/null || {
+    echo "   ❌ Automatic migration failed. Check logs and retry."
+    echo "   Logs: az webapp log tail --name $APP_SERVICE_NAME --resource-group $RESOURCE_GROUP"
+    exit 1
+  }
 fi
 
 echo ""
