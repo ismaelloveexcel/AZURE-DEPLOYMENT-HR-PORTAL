@@ -198,12 +198,12 @@ while true; do
   if az webapp ssh --name $APP_SERVICE_NAME --resource-group $RESOURCE_GROUP --command "$MIGRATION_COMMAND" 2>/dev/null; then
     break
   fi
-  if [ "$attempt" -ge "$MIGRATION_RETRY_COUNT" ]; then
+  attempt=$((attempt + 1))
+  if [ "$attempt" -gt "$MIGRATION_RETRY_COUNT" ]; then
     echo "   ❌ Automatic migration failed. Check logs and retry."
     echo "   Logs: az webapp log tail --name $APP_SERVICE_NAME --resource-group $RESOURCE_GROUP"
     exit 1
   fi
-  attempt=$((attempt + 1))
   echo "   ⚠️  Migration attempt failed. Retrying in ${MIGRATION_RETRY_DELAY}s..."
   sleep "$MIGRATION_RETRY_DELAY"
 done
