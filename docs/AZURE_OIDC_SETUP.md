@@ -142,6 +142,7 @@ Go to your GitHub repository:
 | ------------------------ | ------------------------------- | --------------------------------------------------- |
 | `DATABASE_URL`           | PostgreSQL connection string    | Your Azure PostgreSQL connection string             |
 | `AUTH_SECRET_KEY`        | Random secret key               | Generate: `python -c "import secrets; print(secrets.token_urlsafe(32))"` |
+| `ALLOWED_ORIGINS`        | Comma-separated frontend URLs   | Include your App Service URL + any custom domains   |
 
 **⚠️ IMPORTANT:** With OIDC, you do **NOT** need `AZURE_CLIENT_SECRET` anymore!
 

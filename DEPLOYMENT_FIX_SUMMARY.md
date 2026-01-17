@@ -7,6 +7,16 @@ All GitHub Actions deployments failing with OIDC authentication error.
 - GitHub workflow configured for OIDC authentication ✅
 - Azure AD federated credential NOT configured ❌
 
+## Deployment/Login Causes (Observed)
+- Missing or mismatched OIDC federated credential → Azure login step fails.
+- Incorrect or missing `DATABASE_URL` / `AUTH_SECRET_KEY` → app boots but login fails or admin reset endpoint breaks.
+- `ALLOWED_ORIGINS` missing the frontend URL → browser blocks auth calls with CORS errors.
+
+## Accelerators (Fast Checks)
+- Confirm GitHub secrets: `AZURE_CLIENT_ID`, `AZURE_TENANT_ID`, `AZURE_SUBSCRIPTION_ID`, `DATABASE_URL`, `AUTH_SECRET_KEY` (and optional `ALLOWED_ORIGINS`).
+- Verify app settings match secrets: `az webapp config appsettings list --name baynunah-hr-portal --resource-group baynunah-hr-rg`.
+- Hit health endpoints before troubleshooting login: `/api/health/ping` and `/api/health/db`.
+
 ## Solution
 Configure Azure federated credential by running ONE Azure CLI command.
 

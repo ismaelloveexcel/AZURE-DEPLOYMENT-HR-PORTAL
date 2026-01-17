@@ -14,9 +14,48 @@ This document provides a comprehensive reference for all GitHub secrets used acr
 
 These secrets **must** be configured for the deployment workflow (`deploy.yml`) to succeed:
 
-### 1. AZURE_CREDENTIALS
+### 1. AZURE_CLIENT_ID
 
-**Purpose:** Authenticates GitHub Actions with Azure for deployment  
+**Purpose:** OIDC authentication client ID for Azure login  
+**Format:** GUID  
+**Workflow:** `deploy.yml`
+
+**How to Get:**
+```bash
+az ad app list --display-name "GitHub Actions - HR Portal" --query "[0].appId" -o tsv
+```
+
+---
+
+### 2. AZURE_TENANT_ID
+
+**Purpose:** Azure AD tenant ID for OIDC login  
+**Format:** GUID  
+**Workflow:** `deploy.yml`
+
+**How to Get:**
+```bash
+az account show --query tenantId -o tsv
+```
+
+---
+
+### 3. AZURE_SUBSCRIPTION_ID
+
+**Purpose:** Azure subscription for OIDC login  
+**Format:** GUID  
+**Workflow:** `deploy.yml`
+
+**How to Get:**
+```bash
+az account show --query id -o tsv
+```
+
+---
+
+### Legacy Alternative: AZURE_CREDENTIALS (Optional)
+
+**Purpose:** Service principal JSON for Azure login (legacy, if not using OIDC)  
 **Format:** JSON object  
 **Workflow:** `deploy.yml`
 
@@ -39,11 +78,11 @@ az ad sp create-for-rbac \
 }
 ```
 
-**⚠️ Security Note:** Never commit this JSON to the repository. Add it only as a GitHub secret.
+**⚠️ Security Note:** Prefer OIDC. Never commit this JSON to the repository. Add it only as a GitHub secret if required.
 
 ---
 
-### 2. DATABASE_URL
+### 4. DATABASE_URL
 
 **Purpose:** PostgreSQL database connection string  
 **Format:** Connection URI with `postgresql+asyncpg://` prefix  
@@ -73,7 +112,7 @@ postgresql+asyncpg://hruser:mySecureP@ss@baynunah-hr-server.postgres.database.az
 
 ---
 
-### 3. AUTH_SECRET_KEY
+### 5. AUTH_SECRET_KEY
 
 **Purpose:** JWT token signing key for authentication  
 **Format:** Random 32-byte hex string (64 characters)  
@@ -93,6 +132,21 @@ a1b2c3d4e5f6789012345678901234567890abcdef1234567890abcdef123456
 - Generate a unique key for production
 - Never reuse keys across environments
 - Store securely - losing this key invalidates all user sessions
+
+---
+
+### 6. ALLOWED_ORIGINS
+
+**Purpose:** CORS allow-list for the frontend  
+**Format:** Comma-separated URLs  
+**Workflow:** `deploy.yml` (app setting)
+
+**Example:**
+```
+https://baynunah-hr-portal.azurewebsites.net,https://hr.example.com
+```
+
+**Note:** If unset, the deployment workflow defaults to the Azure web app URL.
 
 ---
 
@@ -272,8 +326,10 @@ After adding secrets, you can verify they're configured:
 ### When to Rotate
 
 - **AUTH_SECRET_KEY:** Every 90 days or after suspected compromise
-- **AZURE_CREDENTIALS:** Every 180 days or when team members leave
+- **AZURE_CLIENT_ID / AZURE_TENANT_ID / AZURE_SUBSCRIPTION_ID:** When Azure app/tenant changes
+- **AZURE_CREDENTIALS (legacy):** Every 180 days or when team members leave
 - **DATABASE_URL:** When database password is reset
+- **ALLOWED_ORIGINS:** When frontend domains change
 - **Backup credentials:** Every 90 days
 
 ### How to Rotate
@@ -290,17 +346,21 @@ After adding secrets, you can verify they're configured:
 
 ## Summary Table
 
-| Secret              | Required? | Used By                       | Frequency |
-| ------------------- | --------- | ----------------------------- | --------- |
-| `AZURE_CREDENTIALS` | ✅ Yes    | `deploy.yml`                  | Every deployment |
-| `DATABASE_URL`      | ✅ Yes    | `deploy.yml`                  | Every deployment |
-| `AUTH_SECRET_KEY`   | ✅ Yes    | `deploy.yml`                  | Every deployment |
-| `BACKEND_URL`       | ⚠️ Optional | `post-deployment-health.yml` | After deployment |
-| `FRONTEND_URL`      | ⚠️ Optional | `post-deployment-health.yml` | After deployment |
-| `PGHOST`            | ⚠️ Optional | `backup-db.yml`              | Daily at 2am UTC |
-| `PGUSER`            | ⚠️ Optional | `backup-db.yml`              | Daily at 2am UTC |
-| `PGPASSWORD`        | ⚠️ Optional | `backup-db.yml`              | Daily at 2am UTC |
-| `PGDATABASE`        | ⚠️ Optional | `backup-db.yml`              | Daily at 2am UTC |
+| Secret                    | Required? | Used By                       | Frequency |
+| ------------------------- | --------- | ----------------------------- | --------- |
+| `AZURE_CLIENT_ID`         | ✅ Yes    | `deploy.yml`                  | Every deployment |
+| `AZURE_TENANT_ID`         | ✅ Yes    | `deploy.yml`                  | Every deployment |
+| `AZURE_SUBSCRIPTION_ID`   | ✅ Yes    | `deploy.yml`                  | Every deployment |
+| `AZURE_CREDENTIALS`       | ⚠️ Legacy | `deploy.yml`                  | Only if using service principal JSON |
+| `DATABASE_URL`            | ✅ Yes    | `deploy.yml`                  | Every deployment |
+| `AUTH_SECRET_KEY`         | ✅ Yes    | `deploy.yml`                  | Every deployment |
+| `ALLOWED_ORIGINS`         | ⚠️ Optional | `deploy.yml`                | When domains change |
+| `BACKEND_URL`             | ⚠️ Optional | `post-deployment-health.yml` | After deployment |
+| `FRONTEND_URL`            | ⚠️ Optional | `post-deployment-health.yml` | After deployment |
+| `PGHOST`                  | ⚠️ Optional | `backup-db.yml`              | Daily at 2am UTC |
+| `PGUSER`                  | ⚠️ Optional | `backup-db.yml`              | Daily at 2am UTC |
+| `PGPASSWORD`              | ⚠️ Optional | `backup-db.yml`              | Daily at 2am UTC |
+| `PGDATABASE`              | ⚠️ Optional | `backup-db.yml`              | Daily at 2am UTC |
 
 ---
 
