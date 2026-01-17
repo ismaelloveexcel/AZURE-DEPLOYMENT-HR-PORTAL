@@ -15,6 +15,8 @@ DB_NAME="hrportal"
 AUTO_APPROVE="${AUTO_APPROVE:-false}"
 RESET_POSTGRES_PASSWORD="${RESET_POSTGRES_PASSWORD:-false}"
 MIGRATION_COMMAND="cd /home/site/wwwroot && python -m alembic upgrade head"
+MIGRATION_RETRY_COUNT="${MIGRATION_RETRY_COUNT:-1}"
+MIGRATION_RETRY_DELAY="${MIGRATION_RETRY_DELAY:-15}"
 
 echo "╔════════════════════════════════════════════════════════════════╗"
 echo "║         HR Portal - Automated Azure Deployment                ║"
@@ -191,15 +193,20 @@ sleep 15
 
 # Run migrations via SSH
 echo "   Connecting via SSH to run migrations..."
-if ! az webapp ssh --name $APP_SERVICE_NAME --resource-group $RESOURCE_GROUP --command "$MIGRATION_COMMAND" 2>/dev/null; then
-  echo "   ⚠️  Migration attempt failed. Retrying in 15 seconds..."
-  sleep 15
-  az webapp ssh --name $APP_SERVICE_NAME --resource-group $RESOURCE_GROUP --command "$MIGRATION_COMMAND" 2>/dev/null || {
+attempt=0
+while true; do
+  if az webapp ssh --name $APP_SERVICE_NAME --resource-group $RESOURCE_GROUP --command "$MIGRATION_COMMAND" 2>/dev/null; then
+    break
+  fi
+  if [ "$attempt" -ge "$MIGRATION_RETRY_COUNT" ]; then
     echo "   ❌ Automatic migration failed. Check logs and retry."
     echo "   Logs: az webapp log tail --name $APP_SERVICE_NAME --resource-group $RESOURCE_GROUP"
     exit 1
-  }
-fi
+  fi
+  attempt=$((attempt + 1))
+  echo "   ⚠️  Migration attempt failed. Retrying in ${MIGRATION_RETRY_DELAY}s..."
+  sleep "$MIGRATION_RETRY_DELAY"
+done
 
 echo ""
 echo "╔════════════════════════════════════════════════════════════════╗"
