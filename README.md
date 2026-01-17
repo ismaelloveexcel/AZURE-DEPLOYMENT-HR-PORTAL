@@ -487,7 +487,7 @@ Use these emergency endpoints when:
 # Authentication settings
 AUTH_SECRET_KEY=<your-secret-key-for-jwt>
 PASSWORD_MIN_LENGTH=8
-SESSION_TIMEOUT_MINUTES=480
+SESSION_TIMEOUT_HOURS=8
 ```
 
 ### Development Mode

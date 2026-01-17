@@ -69,6 +69,27 @@ az webapp restart --name BaynunahHRPortal --resource-group BaynunahHR
 
 If migrations fail, check logs and rerun the script after the app restarts.
 
+### If login shows "An error occurred during login"
+
+1. **Check database health:**
+
+```bash
+curl "https://BaynunahHRPortal.azurewebsites.net/api/health/db"
+```
+
+2. **If the admin account is missing or inactive, reset it:**
+
+```bash
+curl -X POST "https://BaynunahHRPortal.azurewebsites.net/api/health/reset-admin-password" \
+  -H "X-Admin-Secret: <AUTH_SECRET_KEY>"
+```
+
+3. **Verify app settings** (`DATABASE_URL`, `AUTH_SECRET_KEY`) and restart the app:
+
+```bash
+az webapp restart --name BaynunahHRPortal --resource-group BaynunahHR
+```
+
 ## Need Help?
 
 If something fails, check the error message and:

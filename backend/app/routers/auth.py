@@ -4,6 +4,7 @@ from fastapi import APIRouter, Depends, Header, HTTPException, status
 import jwt
 from jwt.exceptions import PyJWTError
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.exc import SQLAlchemyError
 import hashlib
 
 from app.core.config import get_settings
@@ -64,6 +65,17 @@ async def login(
         return await employee_service.login(session, request)
     except HTTPException:
         raise
+    except SQLAlchemyError as e:
+        import logging
+        logger = logging.getLogger(__name__)
+        employee_id_hash = hashlib.sha256(request.employee_id.encode("utf-8")).hexdigest()
+        logger.error(
+            f"Login database error for employee_id_hash={employee_id_hash}: {type(e).__name__}"
+        )
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="Login unavailable. Database connection failed.",
+        )
     except Exception as e:
         import logging
         logger = logging.getLogger(__name__)
@@ -110,5 +122,4 @@ async def change_password(
     """
     success = await employee_service.change_password(session, employee_id, request)
     return {"success": success, "message": "Password changed successfully"}
-
 
