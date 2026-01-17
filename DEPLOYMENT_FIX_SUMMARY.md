@@ -9,7 +9,7 @@ All GitHub Actions deployments failing with OIDC authentication error.
 
 ## Deployment/Login Causes (Observed)
 - Missing or mismatched OIDC federated credential → Azure login step fails.
-- Incorrect or missing `DATABASE_URL` / `AUTH_SECRET_KEY` → app boots but login fails or admin reset endpoint breaks.
+- Incorrect or missing `DATABASE_URL` / `AUTH_SECRET_KEY` → login fails and admin reset endpoint returns 500/401 errors.
 - `ALLOWED_ORIGINS` missing the frontend URL → browser blocks auth calls with CORS errors.
 
 ## Accelerators (Fast Checks)
