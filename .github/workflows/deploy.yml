@@ -191,9 +191,11 @@ jobs:
       - name: Configure App Settings
         run: |
           echo "⚙️  Configuring Azure App Service settings..."
+          WEBAPP_NAME="baynunah-hr-portal"
+          WEBAPP_URL="https://${WEBAPP_NAME}.azurewebsites.net"
           ALLOWED_ORIGINS_VALUE="${{ secrets.ALLOWED_ORIGINS }}"
           if [ -z "$ALLOWED_ORIGINS_VALUE" ]; then
-            ALLOWED_ORIGINS_VALUE="https://baynunah-hr-portal.azurewebsites.net"
+            ALLOWED_ORIGINS_VALUE="$WEBAPP_URL"
           fi
 
           az webapp config appsettings set \

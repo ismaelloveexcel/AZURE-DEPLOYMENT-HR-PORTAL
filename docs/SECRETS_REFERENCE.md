@@ -78,7 +78,7 @@ az ad sp create-for-rbac \
 }
 ```
 
-**⚠️ Security Note:** Prefer OIDC. Never commit this JSON to the repository. Add it only as a GitHub secret if required.
+**⚠️ Security Note:** Prefer OIDC. Only use this if your workflow uses the `creds:` input for `azure/login@v2` or OIDC cannot be enabled. Never commit this JSON to the repository.
 
 ---
 

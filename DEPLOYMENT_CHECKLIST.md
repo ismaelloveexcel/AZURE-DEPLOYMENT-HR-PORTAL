@@ -64,7 +64,7 @@ Configure these in: **Settings → Secrets and variables → Actions**
   - Format: Comma-separated URLs
   - Example: `https://baynunah-hr-portal.azurewebsites.net`
 
-**Status:** ❌ 0 of 5 configured (blocks deployment)
+**Status:** ❌ 0 of 5 required secrets configured (blocks deployment)
 
 ---
 
