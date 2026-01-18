@@ -4,7 +4,7 @@ import { defineConfig } from "vite";
 export default defineConfig({
   plugins: [react()],
   build: {
-    outDir: "../backend/static",
+    outDir: "dist",
     emptyOutDir: true,
     rollupOptions: {
       output: {
