@@ -15,22 +15,15 @@ jobs:
         with:
           node-version: "18"
 
-      - name: Install & Build
-        working-directory: frontend
-        env:
-          VITE_API_BASE_URL: https://hrportal-backend-new.azurewebsites.net/api
-        run: |
-          npm ci
-          npm run build
-
-      - name: Copy staticwebapp.config.json
-        run: |
-          if [ -f staticwebapp.config.json ]; then cp staticwebapp.config.json frontend/dist/; fi
+      - name: Stage staticwebapp.config.json
+        run: cp staticwebapp.config.json frontend/
 
       - name: Deploy to Static Web Apps
         uses: Azure/static-web-apps-deploy@v1
         with:
           azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_TOKEN }}
           action: "upload"
-          app_location: "frontend/dist"
-          skip_app_build: true
+          app_location: "frontend"
+          output_location: "dist"
+        env:
+          VITE_API_BASE_URL: https://hrportal-backend-new.azurewebsites.net/api

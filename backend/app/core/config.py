@@ -17,7 +17,10 @@ class Settings(BaseSettings):
     # Store as plain string to avoid pydantic_settings JSON parsing issues
     # Use get_allowed_origins_list() to get the parsed list
     allowed_origins: str = Field(
-        default="http://localhost:5000,http://0.0.0.0:5000",
+        default=(
+            "https://hrportal-frontend-new.azurestaticapps.net,"
+            "http://localhost:5173,http://localhost:5000"
+        ),
         description="Comma-separated list of allowed CORS origins",
     )
     

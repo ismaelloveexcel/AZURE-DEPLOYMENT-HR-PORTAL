@@ -1,0 +1,56 @@
+name: Preflight – Azure Deploy Readiness
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  preflight:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Folder structure
+        run: |
+          set -e
+          echo "== Folders =="
+          test -d backend && echo "✅ backend/ found" || (echo "❌ backend/ missing"; exit 1)
+          test -d frontend && echo "✅ frontend/ found" || (echo "❌ frontend/ missing"; exit 1)
+
+      - name: Backend entrypoint & health
+        run: |
+          set -e
+          test -f backend/app/main.py || (echo "❌ backend/app/main.py missing"; exit 1)
+          grep -q "FastAPI" backend/app/main.py && echo "✅ FastAPI in main.py" || (echo "❌ FastAPI not detected"; exit 1)
+          if grep -R "def healthz" -n backend/app >/dev/null; then echo "✅ /healthz present"; else echo "❌ /healthz missing"; fi
+          if grep -R "def readyz" -n backend/app >/dev/null; then echo "✅ /readyz present"; else echo "❌ /readyz missing"; fi
+
+      - name: Backend dependencies
+        run: |
+          if [ -f backend/requirements.txt ]; then
+            echo "✅ requirements.txt present"
+          elif [ -f backend/pyproject.toml ]; then
+            echo "✅ pyproject.toml present"
+          else
+            echo "❌ Neither requirements.txt nor pyproject.toml found"
+            exit 1
+          fi
+
+      - name: Frontend build check
+        run: |
+          set -e
+          test -f frontend/package.json || (echo "❌ frontend/package.json missing"; exit 1)
+          jq -r '.scripts.build' frontend/package.json | grep -E '.' && echo "✅ npm run build script exists" || (echo "❌ build script missing"; exit 1)
+
+      - name: SPA routing config
+        run: |
+          if [ -f staticwebapp.config.json ]; then
+            echo "✅ staticwebapp.config.json present"
+            grep -q '"rewrite": "/index.html"' staticwebapp.config.json && echo "✅ navigationFallback rewrite OK" || echo "❌ navigationFallback missing or incorrect"
+          else
+            echo "ℹ️ staticwebapp.config.json not found"
+          fi
+
+      - name: Summarize
+        run: echo "Preflight completed – review ✅/❌ above."
