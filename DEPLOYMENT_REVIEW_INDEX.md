@@ -2,7 +2,7 @@
 
 **Review Date:** January 14, 2026  
 **Repository:** ismaelloveexcel/AZURE-DEPLOYMENT-HR-PORTAL  
-**Status:** 🟡 Ready to Deploy (Missing Secrets)
+**Status:** 🟡 Action Required (OIDC federation missing)
 
 ---
 
@@ -31,7 +31,7 @@ Complete technical analysis including:
 
 One-page executive summary with:
 - What's working (repository fully aligned ✅)
-- What's blocking (3 missing secrets ❌)
+- What's blocking (OIDC federation + secrets verification ❌)
 - 15-minute quick fix guide
 - Target Azure resources
 - Deploy commands
@@ -66,13 +66,13 @@ All files are properly aligned with Azure requirements:
 - ✅ GitHub workflow complete
 - ✅ Documentation comprehensive
 
-### What's Blocking: 3 Missing Secrets ❌
+### What's Blocking: OIDC Federation + Secrets Verification ❌
 
-Configure these in GitHub → Settings → Secrets:
+Configure these in GitHub → Settings → Secrets, then configure Azure workload identity federation:
 
-1. **AZURE_CREDENTIALS** (5 min)
-   - Run: `az ad sp create-for-rbac --name "github-actions-baynunah-hr" --role contributor --scopes /subscriptions/{id}/resourceGroups/BaynunahHR --json-auth`
-   - Copy entire JSON output
+1. **AZURE_CLIENT_ID / AZURE_TENANT_ID / AZURE_SUBSCRIPTION_ID** (5 min)
+   - Use existing App Registration values
+   - Required for `azure/login@v2` OIDC auth
 
 2. **DATABASE_URL** (3 min)
    - Format: `postgresql+asyncpg://uutfqkhm:{password}@baynunahhrportal-server.postgres.database.azure.com:5432/hrportal?sslmode=require`
@@ -82,9 +82,13 @@ Configure these in GitHub → Settings → Secrets:
    - Run: `openssl rand -hex 32`
    - Copy output
 
+4. **Configure OIDC Federation** (5 min)
+   - Azure Portal → App registrations → Federated credentials
+   - Subject: `repo:ismaelloveexcel/AZURE-DEPLOYMENT-HR-PORTAL:ref:refs/heads/main`
+
 **Total time:** ~15 minutes
 
-### After Configuring Secrets
+### After Configuring OIDC and Secrets
 
 1. Go to: **Actions** → **Deploy to Azure** → **Run workflow**
 2. Wait: 5-10 minutes
@@ -113,13 +117,13 @@ Configure these in GitHub → Settings → Secrets:
 
 ### Path 1: Quick Deploy (⏱️ 30 min total)
 1. Read: [DEPLOYMENT_STATUS_SUMMARY.md](./DEPLOYMENT_STATUS_SUMMARY.md) (5 min)
-2. Configure: 3 GitHub secrets (15 min)
+2. Configure: OIDC federation + secrets (15 min)
 3. Deploy: Run GitHub Actions workflow (5 min)
 4. Verify: Check health endpoints (5 min)
 
 ### Path 2: Detailed Understanding (⏱️ 1 hour)
 1. Read: [AZURE_DEPLOYMENT_REVIEW.md](./AZURE_DEPLOYMENT_REVIEW.md) (30 min)
-2. Configure: 3 GitHub secrets using detailed guide (15 min)
+2. Configure: OIDC federation + secrets using detailed guide (15 min)
 3. Deploy: Using checklist [DEPLOYMENT_CHECKLIST.md](./DEPLOYMENT_CHECKLIST.md) (15 min)
 
 ### Path 3: Team Deployment (⏱️ 2 hours)
@@ -170,9 +174,9 @@ Then login with: BAYN00008 / 16051988
 ## ✨ Key Takeaways
 
 1. **Repository Status:** Fully aligned with Azure requirements ✅
-2. **Deployment Blocker:** 3 missing GitHub secrets (15-minute fix) ❌
+2. **Deployment Blocker:** OIDC federation + secret verification ❌
 3. **Confidence Level:** HIGH - All technical requirements met 🟢
-4. **Next Action:** Configure secrets using guide in main report
+4. **Next Action:** Configure OIDC federation and secrets using guide in main report
 
 ---
 

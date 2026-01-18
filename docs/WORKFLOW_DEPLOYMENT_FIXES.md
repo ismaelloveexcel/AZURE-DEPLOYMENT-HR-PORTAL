@@ -38,22 +38,26 @@ This document summarizes the fixes applied to address backend deployment failure
 - name: Validate required secrets
   run: |
     echo "🔍 Validating required secrets..."
-    
-    if [ -z "${{ secrets.AZURE_CREDENTIALS }}" ]; then
-      echo "❌ ERROR: AZURE_CREDENTIALS secret is not set"
+
+    # Azure OIDC secrets (no client-secret needed)
+    if [ -z "${{ secrets.AZURE_CLIENT_ID }}" ] || \
+       [ -z "${{ secrets.AZURE_TENANT_ID }}" ] || \
+       [ -z "${{ secrets.AZURE_SUBSCRIPTION_ID }}" ]; then
+      echo "❌ ERROR: One or more Azure OIDC authentication secrets are missing"
+      echo "Required secrets: AZURE_CLIENT_ID, AZURE_TENANT_ID, AZURE_SUBSCRIPTION_ID"
       exit 1
     fi
-    
+
     if [ -z "${{ secrets.DATABASE_URL }}" ]; then
       echo "❌ ERROR: DATABASE_URL secret is not set"
       exit 1
     fi
-    
+
     if [ -z "${{ secrets.AUTH_SECRET_KEY }}" ]; then
       echo "❌ ERROR: AUTH_SECRET_KEY secret is not set"
       exit 1
     fi
-    
+
     echo "✅ All required secrets are present"
 ```
 
@@ -191,9 +195,13 @@ Ensure these secrets are configured in your repository:
 
 | Secret Name | Description | Example |
 |-------------|-------------|---------|
-| `AZURE_CREDENTIALS` | Service principal JSON for Azure authentication | `{"clientId": "...", ...}` |
+| `AZURE_CLIENT_ID` | Azure service principal client ID (OIDC) | `xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx` |
+| `AZURE_TENANT_ID` | Azure AD tenant ID (OIDC) | `xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx` |
+| `AZURE_SUBSCRIPTION_ID` | Azure subscription ID (OIDC) | `xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx` |
 | `DATABASE_URL` | PostgreSQL connection string | `postgresql+asyncpg://user:pass@host:5432/db` |
 | `AUTH_SECRET_KEY` | Secret key for JWT signing | Generate: `openssl rand -hex 32` |
+
+**Legacy Option:** `AZURE_CREDENTIALS` (service principal JSON) if you cannot use OIDC.
 
 **How to add secrets:**
 1. Go to GitHub repository → Settings → Secrets and variables → Actions
