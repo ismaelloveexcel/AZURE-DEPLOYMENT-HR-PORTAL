@@ -1,0 +1,41 @@
+name: Deploy Backend App Service
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "backend/**"
+      - "infra/**"
+      - "azure.yaml"
+      - ".github/workflows/backend-appservice.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Validate publish profile secret
+        run: |
+          if [ -z "${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE_BACKEND }}" ]; then
+            echo "Missing AZURE_WEBAPP_PUBLISH_PROFILE_BACKEND secret. Add the publish profile for hrportal-backend-new."
+            exit 1
+          fi
+
+      - name: Deploy to Azure App Service (hrportal-backend-new)
+        uses: azure/webapps-deploy@v2
+        with:
+          app-name: hrportal-backend-new
+          publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE_BACKEND }}
+          package: backend
+
+      - name: Smoke test health endpoint
+        run: |
+          set +e
+          curl -f https://hrportal-backend-new.azurewebsites.net/api/health/ping || exit 0
