@@ -1,17 +1,18 @@
 # Azure Deployment Status - Quick Summary
 
-**Date:** January 15, 2026  
-**Status:** 🟢 Ready to Deploy
+**Date:** January 18, 2026  
+**Status:** 🟡 Action Required (OIDC federation not configured)
 
 ---
 
-## 📝 2-Minute Fix (Bullet List)
+## 📝 Quick Fix (Bullet List)
 
 - Go to **GitHub Repo → Settings → Secrets and variables → Actions → New repository secret**
-- Create **`AZURE_CREDENTIALS`** using `az ad sp create-for-rbac --name github-actions-baynunah-hr --role contributor --scopes /subscriptions/{subscription-id}/resourceGroups/BaynunahHR --json-auth` (replace `{subscription-id}` with your subscription ID, then paste the full JSON output)
+- Verify **`AZURE_CLIENT_ID`**, **`AZURE_TENANT_ID`**, **`AZURE_SUBSCRIPTION_ID`** are set (OIDC auth for `deploy.yml`)
+- Configure Azure **federated credentials** for the repo/branch (`repo:ismaelloveexcel/AZURE-DEPLOYMENT-HR-PORTAL:ref:refs/heads/main`)
 - Create **`DATABASE_URL`** using `postgresql+asyncpg://uutfqkhm:{PASSWORD}@baynunahhrportal-server.postgres.database.azure.com:5432/hrportal?sslmode=require` (username is `uutfqkhm` for this environment—replace if different; reset password in Azure Portal if unknown)
 - Create **`AUTH_SECRET_KEY`** using `openssl rand -hex 32`
-- Re-run **Actions → Deploy to Azure → Run workflow** (deployment will proceed once the three secrets exist)
+- Re-run **Actions → Deploy to Azure → Run workflow** (deployment proceeds once OIDC is configured)
 
 ---
 
@@ -39,15 +40,22 @@
 
 ---
 
-## ✅ GitHub Secrets Configured
+## ⚠️ GitHub Secrets Status
 
-The required GitHub secrets have been configured for deployment:
+The required GitHub secrets need verification for the current OIDC-based workflow:
+
+**Authentication Method:** Federated Identity (OIDC)  
+**Required Azure Configuration:** Workload identity federation for GitHub Actions
 
 | Secret | Purpose | Status |
 |--------|---------|--------|
-| `AZURE_CREDENTIALS` | Azure authentication | ✅ Configured |
-| `DATABASE_URL` | PostgreSQL connection | ✅ Configured |
-| `AUTH_SECRET_KEY` | JWT signing | ✅ Configured |
+| `AZURE_CLIENT_ID` | Azure service principal client ID | ⚠️ Verify |
+| `AZURE_TENANT_ID` | Azure AD tenant ID | ⚠️ Verify |
+| `AZURE_SUBSCRIPTION_ID` | Azure subscription ID | ⚠️ Verify |
+| `DATABASE_URL` | PostgreSQL connection | ⚠️ Verify |
+| `AUTH_SECRET_KEY` | JWT signing | ⚠️ Verify |
+
+**Note:** `AZURE_CLIENT_SECRET` is not required when OIDC is configured.
 
 ### Optional Secrets for Additional Features
 
@@ -92,9 +100,9 @@ For detailed analysis, see:
 
 ---
 
-## 🚀 Ready to Deploy!
+## 🚀 Ready to Deploy After OIDC Setup
 
-All required secrets are now configured. You can deploy using any of these methods:
+Once OIDC federation and secrets are verified, you can deploy using any of these methods:
 
 ### Method 1: GitHub Actions (Recommended)
 1. Go to: Actions → Deploy to Azure
@@ -119,6 +127,6 @@ bash deploy_to_azure.sh
 
 ## ✨ Conclusion
 
-Your repository is **ready for Azure deployment**! All required secrets are configured and files are properly aligned. You can proceed with deployment using GitHub Actions or the automated scripts.
+Your repository is **aligned for Azure deployment**, but the Azure OIDC federated credential must be configured and secrets verified. After that, deploy using GitHub Actions or the automated scripts.
 
-**Deployment Status:** 🟢 READY - All requirements met
+**Deployment Status:** 🟡 PENDING - Configure OIDC federation and verify secrets
