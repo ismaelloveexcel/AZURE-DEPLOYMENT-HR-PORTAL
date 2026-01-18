@@ -39,12 +39,17 @@ param authSecretKey string
 @description('DATABASE_URL connection string for backend App Service.')
 param databaseUrl string
 
-@secure()
 @description('Minimum credential length enforced by the backend.')
-param minCredentialLength string
+param minCredentialLength int
 
 @description('Session timeout in minutes for authenticated sessions.')
-param sessionTimeoutMinutes string
+param sessionTimeoutMinutes int
+
+@description('Allow all Azure services (0.0.0.0) to reach the database in addition to the App Service outbound IPs.')
+param allowAzureServices bool = true
+
+@description('Optional list of IP addresses to allow (set allowAzureServices to false to restrict only to these).')
+param allowedIpAddresses array = []
 
 var linuxFxVersion = 'PYTHON|3.11'
 var backendStartupCommand = 'sh -c "alembic upgrade head && uvicorn app.main:app --host 0.0.0.0 --port 8000"'
@@ -102,8 +107,8 @@ resource webAppSettings 'Microsoft.Web/sites/config@2023-01-01' = {
     APPLICATIONINSIGHTS_INSTRUMENTATIONKEY: appInsights.properties.InstrumentationKey
     AUTH_SECRET_KEY: authSecretKey
     DATABASE_URL: databaseUrl
-    PASSWORD_MIN_LENGTH: minCredentialLength
-    SESSION_TIMEOUT_MINUTES: sessionTimeoutMinutes
+    PASSWORD_MIN_LENGTH: string(minCredentialLength)
+    SESSION_TIMEOUT_MINUTES: string(sessionTimeoutMinutes)
     WEBSITES_PORT: '8000'
     SCM_DO_BUILD_DURING_DEPLOYMENT: 'true'
     ENABLE_ORYX_BUILD: 'true'
@@ -111,7 +116,7 @@ resource webAppSettings 'Microsoft.Web/sites/config@2023-01-01' = {
   }
 }
 
-resource postgres 'Microsoft.DBforPostgreSQL/flexibleServers@2023-12-01-preview' = {
+resource postgres 'Microsoft.DBforPostgreSQL/flexibleServers@2023-06-01' = {
   name: postgresServerName
   location: location
   sku: {
@@ -139,18 +144,27 @@ resource postgres 'Microsoft.DBforPostgreSQL/flexibleServers@2023-12-01-preview'
   }
 }
 
-resource postgresDb 'Microsoft.DBforPostgreSQL/flexibleServers/databases@2023-12-01-preview' = {
+resource postgresDb 'Microsoft.DBforPostgreSQL/flexibleServers/databases@2023-06-01' = {
   name: postgresDbName
   parent: postgres
   properties: {}
 }
 
-resource postgresFirewall 'Microsoft.DBforPostgreSQL/flexibleServers/firewallRules@2023-12-01-preview' = {
-  name: 'AllowAllAzureServicesAndInternet'
+resource postgresFirewall 'Microsoft.DBforPostgreSQL/flexibleServers/firewallRules@2023-06-01' = [for (ip, index) in allowedIpAddresses: {
+  name: 'AllowAppService-${index}'
+  parent: postgres
+  properties: {
+    startIpAddress: ip
+    endIpAddress: ip
+  }
+}]
+
+resource postgresFirewallAzure 'Microsoft.DBforPostgreSQL/flexibleServers/firewallRules@2023-06-01' = if (allowAzureServices) {
+  name: 'AllowAzureServices'
   parent: postgres
   properties: {
     startIpAddress: '0.0.0.0'
-    endIpAddress: '255.255.255.255'
+    endIpAddress: '0.0.0.0'
   }
 }
 

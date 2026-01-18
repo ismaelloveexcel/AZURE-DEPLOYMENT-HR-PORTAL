@@ -10,7 +10,7 @@ services:
     hooks:
       postdeploy:
         shell: sh
-        run: alembic upgrade head
+        run: cd backend && alembic upgrade head
   frontend:
     project: ./frontend
     language: javascript

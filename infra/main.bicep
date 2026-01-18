@@ -43,10 +43,16 @@ param authSecretKey string
 param databaseUrl string
 
 @description('Minimum credential length enforced by the backend.')
-param minCredentialLength string = '8'
+param minCredentialLength int = 8
 
 @description('Session timeout in minutes for authenticated sessions.')
-param sessionTimeoutMinutes string = '480'
+param sessionTimeoutMinutes int = 480
+
+@description('Allow all Azure services (0.0.0.0) to reach the database in addition to any explicit IP rules.')
+param allowAzureServices bool = true
+
+@description('Optional list of IP addresses to allow to the database.')
+param allowedIpAddresses array = []
 
 resource rg 'Microsoft.Resources/resourceGroups@2022-09-01' = {
   name: resourceGroupName
@@ -71,6 +77,8 @@ module stack './resources.bicep' = {
     databaseUrl: databaseUrl
     minCredentialLength: minCredentialLength
     sessionTimeoutMinutes: sessionTimeoutMinutes
+    allowAzureServices: allowAzureServices
+    allowedIpAddresses: allowedIpAddresses
   }
 }
 
