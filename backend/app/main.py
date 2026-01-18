@@ -11,6 +11,7 @@ from slowapi.errors import RateLimitExceeded
 
 from app.core.config import get_settings
 from app.core.logging import configure_logging, get_logger
+from app.health import router as base_health_router
 from app.routers import admin, attendance, auth, employees, health, onboarding, passes, renewals
 
 configure_logging()
@@ -64,6 +65,7 @@ def create_app() -> FastAPI:
         allow_headers=["Content-Type", "Authorization"]
     )
 
+    app.include_router(base_health_router)
     app.include_router(health.router, prefix=settings.api_prefix)
     app.include_router(auth.router, prefix=settings.api_prefix)
     app.include_router(employees.router, prefix=settings.api_prefix)
