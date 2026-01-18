@@ -68,7 +68,7 @@ All files are properly aligned with Azure requirements:
 
 ### What's Blocking: ✅ Nothing (prerequisites completed)
 
-- OIDC federation configured for `repo:ismaelloveexcel/AZURE-DEPLOYMENT-HR-PORTAL:ref:refs/heads/main)`
+- OIDC federation configured for `repo:ismaelloveexcel/AZURE-DEPLOYMENT-HR-PORTAL:ref:refs/heads/main`
 - Required secrets present: `AZURE_CLIENT_ID`, `AZURE_TENANT_ID`, `AZURE_SUBSCRIPTION_ID`, `DATABASE_URL`, `AUTH_SECRET_KEY`
 - Deployment can be triggered immediately via GitHub Actions or scripts
 
