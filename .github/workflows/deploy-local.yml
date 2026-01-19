@@ -62,19 +62,11 @@ jobs:
       - name: Build Frontend
         working-directory: frontend
         run: npm run build
+        env:
+          VITE_API_BASE_URL: http://localhost:8000/api
       
-      - name: Copy Frontend Build to Backend Static (non-Windows)
-        if: runner.os != 'Windows'
-        run: |
-          mkdir -p backend/static
-          cp -r frontend/dist/* backend/static/
-      
-      - name: Copy Frontend Build to Backend Static (Windows)
-        if: runner.os == 'Windows'
-        shell: pwsh
-        run: |
-          New-Item -ItemType Directory -Force -Path "backend\static" | Out-Null
-          Copy-Item -Path "frontend\dist\*" -Destination "backend\static\" -Recurse -Force
+      # Note: For local development, frontend runs on its own dev server (npm run dev)
+      # No need to copy to backend/static for split hosting architecture
       
       - name: Run Database Migrations
         working-directory: backend
