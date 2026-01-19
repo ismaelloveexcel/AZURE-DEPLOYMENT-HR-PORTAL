@@ -1,4 +1,12 @@
 {
+  "name": "secure-renewals-hr-portal",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "install:frontend": "cd frontend && npm install",
+    "build": "cd frontend && npm run build",
+    "build:azure": "cd frontend && npm run build"
+  },
   "devDependencies": {
     "@tailwindcss/postcss": "^4.1.18"
   },
