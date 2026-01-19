@@ -626,4 +626,4 @@ ISC License - See [LICENSE](LICENSE) for details.
   Built with ❤️ for HR teams
 </p>
 
-(trigger deployment automation)
+<!-- trigger deployment automation -->
