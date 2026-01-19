@@ -15,7 +15,10 @@ mkdir -p "${PACKAGE_DIR}"
 echo "⚛️  Building frontend..."
 pushd "${ROOT_DIR}/frontend" >/dev/null
 npm ci --silent
-npm run build
+if ! npm run build; then
+  echo "❌ Frontend build failed"
+  exit 1
+fi
 popd >/dev/null
 
 echo "🔄 Syncing frontend build into backend/static..."
@@ -43,7 +46,13 @@ zip -r "${BACKEND_ZIP}" . \
   -x "*.md" \
   -x "*test*.py" \
   -x "*.bak" \
-  -x "*.tmp"
+  -x "*.tmp" \
+  -x "node_modules/*" \
+  -x "dist/*" \
+  -x ".vscode/*" \
+  -x ".pytest_cache/*" \
+  -x "*.log" \
+  -x ".DS_Store"
 popd >/dev/null
 
 echo "🗂️  Adding infrastructure (Bicep) definitions..."
@@ -54,6 +63,31 @@ if [ ! -f "${ROOT_DIR}/infra/main.bicep" ] || [ ! -f "${ROOT_DIR}/infra/resource
 fi
 cp "${ROOT_DIR}/infra/main.bicep" "${ROOT_DIR}/infra/resources.bicep" "${PACKAGE_DIR}/infra/"
 cp "${ROOT_DIR}/azure.yaml" "${PACKAGE_DIR}/"
+cat > "${PACKAGE_DIR}/infra/parameters.example.json" <<'EOF'
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "location": { "value": "uaenorth" },
+    "resourceGroupName": { "value": "rg-hr-portal" },
+    "appServicePlanName": { "value": "hrportal-plan" },
+    "backendAppName": { "value": "hrportal-backend" },
+    "staticWebAppName": { "value": "hrportal-frontend" },
+    "staticWebAppLocation": { "value": "eastus2" },
+    "postgresServerName": { "value": "hrportal-db" },
+    "postgresAdminUsername": { "value": "hradmin" },
+    "postgresAdminPassword": { "value": "<replace-with-secure-password>" },
+    "postgresDbName": { "value": "hrportal" },
+    "appInsightsName": { "value": "hrportal-ai" },
+    "authSecretKey": { "value": "<replace-with-auth-secret>" },
+    "databaseUrl": { "value": "postgresql+asyncpg://hradmin:<password>@hrportal-db.postgres.database.azure.com:5432/hrportal?sslmode=require" },
+    "minCredentialLength": { "value": 8 },
+    "sessionTimeoutMinutes": { "value": 480 },
+    "allowAzureServices": { "value": true },
+    "allowedIpAddresses": { "value": [] }
+  }
+}
+EOF
 
 cat > "${PACKAGE_DIR}/README.md" <<'EOF'
 # Azure Deployment Package
@@ -64,7 +98,7 @@ Contents:
 - azure.yaml — Azure Developer CLI manifest referencing the Bicep templates
 
 How to use:
-1) Provision infra (resource group, App Service plan, Web App, PostgreSQL) with the entrypoint template infra/main.bicep (which references infra/resources.bicep). Use a parameters file to avoid exposing secrets:
+1) Provision infra (resource group, App Service plan, Web App, PostgreSQL) with the entrypoint template infra/main.bicep (which references infra/resources.bicep). Use a parameters file to avoid exposing secrets (see infra/parameters.example.json):
    az deployment sub create --location <location> --template-file infra/main.bicep --parameters @infra/parameters.json
 2) Deploy the application:
    az webapp deploy --resource-group <rg> --name <app-service-name> --src-path deploy.zip --type zip --restart true
