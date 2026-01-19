@@ -81,7 +81,7 @@ jobs:
 
       - name: Deploy to Azure App Service (OIDC)
         if: steps.auth.outputs.method == 'oidc'
-        # OIDC path relies on azure/login context, so no publish-profile is provided; resource-group-name is required.
+        # OIDC path uses the azure/login-authenticated context instead of a publish profile; resource-group-name is required.
         uses: azure/webapps-deploy@v2
         with:
           app-name: ${{ env.BACKEND_APP_NAME }}
