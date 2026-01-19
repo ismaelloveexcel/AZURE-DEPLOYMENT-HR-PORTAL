@@ -158,11 +158,21 @@ jobs:
         run: |
           echo "🚀 Deploying infrastructure with Bicep..."
 
-          # Generate secure passwords for PostgreSQL
-          POSTGRES_PASSWORD=$(openssl rand -base64 32 | tr -dc 'a-zA-Z0-9' | head -c 24)
+          # Use existing DATABASE_URL secret if available, otherwise generate new password
+          if [ -n "${{ secrets.DATABASE_URL }}" ]; then
+            echo "Using existing DATABASE_URL from secrets"
+            DATABASE_URL="${{ secrets.DATABASE_URL }}"
+            # Extract password from existing URL for Bicep deployment
+            POSTGRES_PASSWORD=$(echo "$DATABASE_URL" | sed -n 's/.*:\/\/[^:]*:\([^@]*\)@.*/\1/p')
+          else
+            echo "Generating new PostgreSQL password"
+            POSTGRES_PASSWORD=$(openssl rand -base64 32 | tr -dc 'a-zA-Z0-9' | head -c 24)
+            DATABASE_URL="postgresql+asyncpg://hradmin:${POSTGRES_PASSWORD}@${POSTGRES_SERVER_NAME}.postgres.database.azure.com:5432/${POSTGRES_DB_NAME}?sslmode=require"
+          fi
 
-          # Build the DATABASE_URL
-          DATABASE_URL="postgresql+asyncpg://hradmin:${POSTGRES_PASSWORD}@${POSTGRES_SERVER_NAME}.postgres.database.azure.com:5432/${POSTGRES_DB_NAME}?sslmode=require"
+          # Mask secrets in logs
+          echo "::add-mask::$POSTGRES_PASSWORD"
+          echo "::add-mask::$DATABASE_URL"
 
           # Deploy Bicep template
           DEPLOYMENT_OUTPUT=$(az deployment sub create \
@@ -209,8 +219,18 @@ jobs:
         run: |
           echo "🚀 Deploying infrastructure with Azure CLI..."
 
-          # Generate secure passwords
-          POSTGRES_PASSWORD=$(openssl rand -base64 32 | tr -dc 'a-zA-Z0-9' | head -c 24)
+          # Use existing DATABASE_URL secret if available, otherwise generate new password
+          if [ -n "${{ secrets.DATABASE_URL }}" ]; then
+            echo "Using existing DATABASE_URL from secrets"
+            DATABASE_URL="${{ secrets.DATABASE_URL }}"
+            POSTGRES_PASSWORD=$(echo "$DATABASE_URL" | sed -n 's/.*:\/\/[^:]*:\([^@]*\)@.*/\1/p')
+          else
+            echo "Generating new PostgreSQL password"
+            POSTGRES_PASSWORD=$(openssl rand -base64 32 | tr -dc 'a-zA-Z0-9' | head -c 24)
+          fi
+
+          # Mask secrets in logs
+          echo "::add-mask::$POSTGRES_PASSWORD"
 
           # Create App Service Plan
           echo "Creating App Service Plan..."
@@ -490,7 +510,7 @@ jobs:
           for i in $(seq 1 $MAX_ATTEMPTS); do
             echo "Attempt $i/$MAX_ATTEMPTS..."
 
-            HTTP_STATUS=$(curl -s -o /tmp/health.txt -w "%{http_code}" "$BACKEND_URL/api/health/ping" 2>/dev/null || echo "000")
+            HTTP_STATUS=$(curl -s --connect-timeout 10 --max-time 30 -o /tmp/health.txt -w "%{http_code}" "$BACKEND_URL/api/health/ping" 2>/dev/null || echo "000")
 
             if [ "$HTTP_STATUS" = "200" ]; then
               echo "✅ Health ping passed (HTTP $HTTP_STATUS)"
@@ -515,7 +535,7 @@ jobs:
           BACKEND_URL="${{ needs.deploy-backend.outputs.backend_url }}"
           echo "Checking database connection..."
 
-          DB_STATUS=$(curl -s -o /tmp/db.txt -w "%{http_code}" "$BACKEND_URL/api/health/db" 2>/dev/null || echo "000")
+          DB_STATUS=$(curl -s --connect-timeout 10 --max-time 30 -o /tmp/db.txt -w "%{http_code}" "$BACKEND_URL/api/health/db" 2>/dev/null || echo "000")
           echo "Database health: HTTP $DB_STATUS"
           cat /tmp/db.txt 2>/dev/null | head -20 || echo "(no response)"
 
@@ -524,7 +544,7 @@ jobs:
           BACKEND_URL="${{ needs.deploy-backend.outputs.backend_url }}"
           echo "Checking frontend serving..."
 
-          FRONTEND_STATUS=$(curl -s -o /tmp/frontend.txt -w "%{http_code}" "$BACKEND_URL" 2>/dev/null || echo "000")
+          FRONTEND_STATUS=$(curl -s --connect-timeout 10 --max-time 30 -o /tmp/frontend.txt -w "%{http_code}" "$BACKEND_URL" 2>/dev/null || echo "000")
           echo "Frontend status: HTTP $FRONTEND_STATUS"
 
           if [ "$FRONTEND_STATUS" = "200" ]; then
@@ -541,7 +561,7 @@ jobs:
           BACKEND_URL="${{ needs.deploy-backend.outputs.backend_url }}"
           echo "Checking API documentation..."
 
-          DOCS_STATUS=$(curl -s -o /dev/null -w "%{http_code}" "$BACKEND_URL/docs" 2>/dev/null || echo "000")
+          DOCS_STATUS=$(curl -s --connect-timeout 10 --max-time 30 -o /dev/null -w "%{http_code}" "$BACKEND_URL/docs" 2>/dev/null || echo "000")
           echo "API Docs status: HTTP $DOCS_STATUS"
 
           if [ "$DOCS_STATUS" = "200" ]; then
