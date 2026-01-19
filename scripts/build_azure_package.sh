@@ -68,7 +68,7 @@ cat > "${PACKAGE_DIR}/infra/parameters.example.json" <<'EOF'
   "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#",
   "contentVersion": "1.0.0.0",
   "parameters": {
-    "location": { "value": "uaenorth" },
+    "location": { "value": "eastus2" },
     "resourceGroupName": { "value": "rg-hr-portal" },
     "appServicePlanName": { "value": "hrportal-plan" },
     "backendAppName": { "value": "hrportal-backend" },
@@ -80,7 +80,7 @@ cat > "${PACKAGE_DIR}/infra/parameters.example.json" <<'EOF'
     "postgresDbName": { "value": "hrportal" },
     "appInsightsName": { "value": "hrportal-ai" },
     "authSecretKey": { "value": "<replace-with-auth-secret>" },
-    "databaseUrl": { "value": "postgresql+asyncpg://hradmin:<password>@hrportal-db.postgres.database.azure.com:5432/hrportal?sslmode=require" },
+    "databaseUrl": { "value": "postgresql+asyncpg://hradmin:<replace-with-secure-password>@hrportal-db.postgres.database.azure.com:5432/hrportal?sslmode=require" },
     "minCredentialLength": { "value": 8 },
     "sessionTimeoutMinutes": { "value": 480 },
     "allowAzureServices": { "value": true },
