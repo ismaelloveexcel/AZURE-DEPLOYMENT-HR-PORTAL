@@ -6,6 +6,18 @@ This guide shows how to bundle the repository into a ZIP file and push it direct
 
 ---
 
+## New: one-command package generator
+
+Run the helper script to produce a ready-to-deploy bundle that already contains the built frontend and infrastructure (Bicep) templates:
+
+```bash
+./scripts/build_azure_package.sh
+```
+
+It outputs `artifacts/azure-deployment-package/` and `artifacts/azure-deployment-package.zip`, which you can deploy with `az webapp deploy --type zip` after setting your app settings.
+
+---
+
 ## When to Use ZIP Deployment
 
 - You want a **one-time** or **manual** deployment without setting up GitHub Actions.
