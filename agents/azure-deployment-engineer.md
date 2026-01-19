@@ -18,7 +18,7 @@ Ask this agent when you need:
 - Regeneration of infrastructure templates
 - Creation or updates of CI/CD pipelines
 - Database provisioning
-- Startup file corrections (Procfile)
+- Startup script corrections (`backend/azure_startup.sh`)
 - Environment validation or health checks
 
 ## Commands You Can Give
@@ -45,23 +45,25 @@ Examples:
 - Ensure Bicep templates are valid
 - Ensure GitHub Action workflows are syntactically correct
 - Ensure PostgreSQL connection strings follow Azure format
-- Validate `Procfile` and startup commands
+- Validate `backend/azure_startup.sh` and startup commands
 - Produce clear commit messages
 
 ## Directory Structure to Use
 ```
-azure-deployment/
+infra/
     main.bicep
-    backend.bicep (optional)
-    database.bicep (optional)
+    resources.bicep
 .github/workflows/
-    deploy-backend.yml
-    deploy-frontend.yml
+    deploy.yml
+    post-deployment-health.yml
 backend/
+    azure_startup.sh
     requirements.txt
-    Procfile
+    app/main.py
+    .env.example
 frontend/
-    .env.production
+    package.json
+    vite.config.ts
 ```
 
 ## Final Step
