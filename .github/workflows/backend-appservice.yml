@@ -62,6 +62,12 @@ jobs:
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
+      - name: Validate Azure access (OIDC)
+        if: steps.auth.outputs.method == 'oidc'
+        run: |
+          az account show
+          az group show --name "${BACKEND_RESOURCE_GROUP}" --query name -o tsv
+
       - name: Deploy to Azure App Service (publish profile)
         if: steps.auth.outputs.method == 'publish_profile'
         uses: azure/webapps-deploy@v2
