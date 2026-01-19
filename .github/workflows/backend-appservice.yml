@@ -17,7 +17,7 @@ jobs:
     runs-on: ubuntu-latest
     environment: production
     env:
-      RESOURCE_GROUP: ${{ vars.AZURE_BACKEND_RESOURCE_GROUP || 'rg-hr-portal-new' }}
+      RESOURCE_GROUP: ${{ vars.AZURE_BACKEND_RESOURCE_GROUP }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -44,6 +44,10 @@ jobs:
           if [ -n "${{ secrets.AZURE_CLIENT_ID }}" ] && \
              [ -n "${{ secrets.AZURE_TENANT_ID }}" ] && \
              [ -n "${{ secrets.AZURE_SUBSCRIPTION_ID }}" ]; then
+            if [ -z "${RESOURCE_GROUP}" ]; then
+              echo "AZURE_BACKEND_RESOURCE_GROUP repository variable is not set. Set it to your backend resource group name (e.g., rg-hr-portal-new)."
+              exit 1
+            fi
             echo "Publish profile not found; falling back to OIDC credentials."
             echo "method=oidc" >> "$GITHUB_OUTPUT"
             exit 0

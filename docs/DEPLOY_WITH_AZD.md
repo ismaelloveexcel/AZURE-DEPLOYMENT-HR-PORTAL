@@ -50,6 +50,7 @@ What azd creates (names are fixed unless you override parameters):
 If you want automated deploys from `main`, add the required secrets to the repository:
 - Either `AZURE_WEBAPP_PUBLISH_PROFILE_BACKEND` (publish profile for `hrportal-backend-new`) **or** OIDC credentials (`AZURE_CLIENT_ID`, `AZURE_TENANT_ID`, `AZURE_SUBSCRIPTION_ID`) for the backend deploy workflow
 - `AZURE_STATIC_WEB_APPS_TOKEN` (deployment token for `hrportal-frontend-new`)
+- Repository variable `AZURE_BACKEND_RESOURCE_GROUP` set to your backend resource group (default from azd is `rg-hr-portal-new`) when using the OIDC path
 
 The workflows in `.github/workflows/backend-appservice.yml` and `.github/workflows/frontend-staticwebapp.yml` will deploy on each push to `main`.
 
