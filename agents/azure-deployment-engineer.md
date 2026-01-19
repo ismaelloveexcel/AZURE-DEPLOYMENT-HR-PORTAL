@@ -1,4 +1,3 @@
-
 # Azure Deployment Engineer — Copilot Agent
 
 ## Purpose
@@ -18,7 +17,7 @@ Ask this agent when you need:
 - Regeneration of infrastructure templates
 - Creation or updates of CI/CD pipelines
 - Database provisioning
-- Startup script corrections (`backend/azure_startup.sh`)
+- Startup file corrections (Procfile)
 - Environment validation or health checks
 
 ## Commands You Can Give
@@ -45,25 +44,23 @@ Examples:
 - Ensure Bicep templates are valid
 - Ensure GitHub Action workflows are syntactically correct
 - Ensure PostgreSQL connection strings follow Azure format
-- Validate `backend/azure_startup.sh` and startup commands
+- Validate `Procfile` and startup commands
 - Produce clear commit messages
 
 ## Directory Structure to Use
 ```
-infra/
+azure-deployment/
     main.bicep
-    resources.bicep
+    backend.bicep (optional)
+    database.bicep (optional)
 .github/workflows/
-    deploy.yml
-    post-deployment-health.yml
+    deploy-backend.yml
+    deploy-frontend.yml
 backend/
-    azure_startup.sh
     requirements.txt
-    app/main.py
-    .env.example
+    Procfile
 frontend/
-    package.json
-    vite.config.ts
+    .env.production
 ```
 
 ## Final Step
