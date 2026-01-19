@@ -67,7 +67,7 @@ jobs:
         run: |
           az account show
           az group show --name "${BACKEND_RESOURCE_GROUP}" --query name -o tsv || {
-            echo "Azure credentials do not have access to resource group ${BACKEND_RESOURCE_GROUP}."
+            echo "Azure credentials do not have access to resource group ${BACKEND_RESOURCE_GROUP}. Ensure the principal has Contributor or Web Plan Contributor permissions."
             exit 1
           }
 
