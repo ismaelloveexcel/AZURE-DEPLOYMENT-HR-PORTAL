@@ -1,64 +1,67 @@
-name: Deploy to Azure
+name: Deploy HR Portal (Backend + Frontend)
 
 on:
   push:
-    branches: [main]
-  workflow_dispatch: # Allow manual triggering
+    branches:
+      - main
 
 permissions:
-  id-token: write # Required for OIDC authentication with Azure
-  contents: read # Required to checkout code
+  id-token: write      # Required for OIDC
+  contents: read
+
+env:
+  BACKEND_APP: hrportal-backend-new
+  FRONTEND_APP: hrportal-frontend-new
+  RESOURCE_GROUP: baynunah-hr-portal-rg
+  PYTHON_VERSION: "3.11"
+  NODE_VERSION: "18"
 
 jobs:
-  build-and-deploy:
-    name: Build and Deploy HR Portal
+  backend-build-deploy:
+    name: Deploy Backend (FastAPI → App Service)
     runs-on: ubuntu-latest
-    env:
-      RESOURCE_GROUP: baynunah-hr-rg
-      WEBAPP_NAME: baynunah-hr-portal
-      WEBAPP_URL: https://baynunah-hr-portal.azurewebsites.net
 
     steps:
-      - name: Checkout code
+      - name: Checkout repository
         uses: actions/checkout@v4
 
-      # ===== VALIDATE REQUIRED SECRETS =====
-      - name: Validate required secrets
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install backend dependencies
+        working-directory: backend
         run: |
-          echo "🔍 Validating required secrets..."
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
 
-          # Validate Azure OIDC secrets (no client-secret needed)
-          if [ -z "${{ secrets.AZURE_CLIENT_ID }}" ] || \
-             [ -z "${{ secrets.AZURE_TENANT_ID }}" ] || \
-             [ -z "${{ secrets.AZURE_SUBSCRIPTION_ID }}" ]; then
-            echo "❌ ERROR: One or more Azure OIDC authentication secrets are missing"
-            echo "Required secrets: AZURE_CLIENT_ID, AZURE_TENANT_ID, AZURE_SUBSCRIPTION_ID"
-            exit 1
-          fi
+      - name: Azure Login (OIDC)
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
-          if [ -z "${{ secrets.DATABASE_URL }}" ]; then
-            echo "❌ ERROR: DATABASE_URL secret is not set"
-            echo "Please configure DATABASE_URL in repository secrets"
-            exit 1
-          fi
+      - name: Deploy Backend to Azure App Service
+        uses: azure/webapps-deploy@v3
+        with:
+          app-name: ${{ env.BACKEND_APP }}
+          package: backend
 
-          if [ -z "${{ secrets.AUTH_SECRET_KEY }}" ]; then
-            echo "❌ ERROR: AUTH_SECRET_KEY secret is not set"
-            echo "Please configure AUTH_SECRET_KEY in repository secrets"
-            exit 1
-          fi
+  frontend-build-deploy:
+    name: Deploy Frontend (React → Static Web Apps)
+    runs-on: ubuntu-latest
+    needs: backend-build-deploy
 
-          if [ -z "${{ secrets.ALLOWED_ORIGINS }}" ]; then
-            echo "⚠️  ALLOWED_ORIGINS secret is not set; defaulting to $WEBAPP_URL"
-          fi
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-          echo "✅ All required secrets are present"
-
-      # ===== BUILD FRONTEND =====
-      - name: Setup Node.js
+      - name: Set up Node
         uses: actions/setup-node@v4
         with:
-          node-version: "20"
+          node-version: ${{ env.NODE_VERSION }}
 
       - name: Install frontend dependencies
         working-directory: frontend
@@ -67,269 +70,13 @@ jobs:
       - name: Build frontend
         working-directory: frontend
         run: npm run build
-        env:
-          VITE_API_BASE_URL: /api
 
-      # ===== PREPARE BACKEND =====
-      - name: Setup Python
-        uses: actions/setup-python@v5
+      - name: Deploy to Azure Static Web Apps
+        uses: Azure/static-web-apps-deploy@v1
         with:
-          python-version: "3.11"
+          azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN }}
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          action: "upload"
+          app_location: "frontend"
+          output_location: "frontend/dist"
 
-      - name: Verify frontend build in backend/static
-        run: |
-          echo "🔍 Verifying frontend build output..."
-          if [ ! -d "backend/static" ]; then
-            echo "❌ ERROR: backend/static directory does not exist"
-            echo "Frontend build did not output to the expected location"
-            exit 1
-          fi
-
-          if [ ! -f "backend/static/index.html" ]; then
-            echo "❌ ERROR: backend/static/index.html not found"
-            echo "Frontend build appears incomplete"
-            exit 1
-          fi
-
-          # Verify JS bundles exist (critical for frontend to work)
-          if [ ! -d "backend/static/assets" ] || [ -z "$(ls -A backend/static/assets/*.js 2>/dev/null)" ]; then
-            echo "❌ ERROR: No JavaScript bundles found in backend/static/assets/"
-            echo "Frontend build failed to generate JS files"
-            exit 1
-          fi
-
-          echo "✅ Frontend built successfully to backend/static"
-          echo "Contents:"
-          ls -lh backend/static/
-
-          # Show bundle sizes
-          if [ -d "backend/static/assets" ]; then
-            echo "Asset files:"
-            du -h backend/static/assets/* | sort -h
-          fi
-
-      - name: Create deployment package
-        run: |
-          echo "📦 Creating deployment package..."
-          cd backend
-
-          # Ensure azure_startup.sh is executable
-          chmod +x azure_startup.sh
-
-          zip -r ../deploy.zip . \
-            -x "*.pyc" \
-            -x "*__pycache__*" \
-            -x "*.git*" \
-            -x "*.env*" \
-            -x "*.example" \
-            -x "*.md" \
-            -x "*test*.py" \
-            -x "*.bak" \
-            -x "*.tmp"
-          cd ..
-          echo "✅ Package created: $(du -h deploy.zip | cut -f1)"
-
-          # Verify static files are in the package
-          echo "Verifying static files in package..."
-          if ! unzip -l deploy.zip | grep -q "static/index.html"; then
-            echo "❌ ERROR: static/index.html not found in package"
-            exit 1
-          else
-            echo "✅ index.html included"
-          fi
-
-          # Verify azure_startup.sh is included
-          if ! unzip -l deploy.zip | grep -q "azure_startup.sh"; then
-            echo "❌ ERROR: azure_startup.sh not found in package"
-            exit 1
-          else
-            echo "✅ azure_startup.sh included"
-          fi
-
-      # ===== DEPLOY TO AZURE =====
-      - name: Login to Azure
-        uses: azure/login@v2
-        with:
-          client-id: ${{ secrets.AZURE_CLIENT_ID }}
-          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
-          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
-
-      - name: Ensure Azure Resources Exist
-        run: |
-          echo "🔍 Checking if Azure resources exist..."
-
-          # Check if resource group exists
-          if ! az group show --name "$RESOURCE_GROUP" --query name -o tsv 2>/dev/null; then
-            echo "📦 Creating resource group $RESOURCE_GROUP..."
-            az group create --name "$RESOURCE_GROUP" --location westeurope
-          else
-            echo "✅ Resource group $RESOURCE_GROUP exists"
-          fi
-
-          # Check if App Service plan exists
-          if ! az appservice plan show --name baynunah-hr-plan --resource-group "$RESOURCE_GROUP" --query name -o tsv 2>/dev/null; then
-            echo "📦 Creating App Service plan baynunah-hr-plan..."
-            az appservice plan create \
-              --name baynunah-hr-plan \
-              --resource-group "$RESOURCE_GROUP" \
-              --sku B1 \
-              --is-linux
-          else
-            echo "✅ App Service plan baynunah-hr-plan exists"
-          fi
-
-          # Check if Web App exists
-          if ! az webapp show --name "$WEBAPP_NAME" --resource-group "$RESOURCE_GROUP" --query name -o tsv 2>/dev/null; then
-            echo "📦 Creating Web App $WEBAPP_NAME..."
-            az webapp create \
-              --name "$WEBAPP_NAME" \
-              --resource-group "$RESOURCE_GROUP" \
-              --plan baynunah-hr-plan \
-              --runtime "PYTHON:3.11"
-          else
-            echo "✅ Web App $WEBAPP_NAME exists"
-          fi
-
-          echo "✅ All Azure resources verified/created"
-
-      - name: Configure App Settings
-        run: |
-          echo "⚙️  Configuring Azure App Service settings..."
-          ALLOWED_ORIGINS_VALUE="${{ secrets.ALLOWED_ORIGINS }}"
-          if [ -z "$ALLOWED_ORIGINS_VALUE" ]; then
-            ALLOWED_ORIGINS_VALUE="$WEBAPP_URL"
-          fi
-
-          az webapp config appsettings set \
-            --name "$WEBAPP_NAME" \
-            --resource-group "$RESOURCE_GROUP" \
-            --settings \
-              DATABASE_URL="${{ secrets.DATABASE_URL }}" \
-              AUTH_SECRET_KEY="${{ secrets.AUTH_SECRET_KEY }}" \
-              ALLOWED_ORIGINS="$ALLOWED_ORIGINS_VALUE" \
-              APP_ENV="production" \
-              SCM_DO_BUILD_DURING_DEPLOYMENT="false" \
-              ENABLE_ORYX_BUILD="false" \
-              PYTHONUNBUFFERED="1" \
-              WEBSITES_CONTAINER_START_TIME_LIMIT="1800" \
-            --output none
-
-          # Set startup command
-          az webapp config set \
-            --name "$WEBAPP_NAME" \
-            --resource-group "$RESOURCE_GROUP" \
-            --startup-file "bash azure_startup.sh" \
-            --output none
-
-          # Configure health check path (uses unauthenticated /api/health/ping)
-          az webapp config set \
-            --name "$WEBAPP_NAME" \
-            --resource-group "$RESOURCE_GROUP" \
-            --generic-configurations '{"healthCheckPath": "/api/health/ping"}' \
-            --output none
-
-          echo "✅ App settings configured successfully"
-
-      - name: Deploy to Azure App Service
-        run: |
-          echo "🚀 Deploying to Azure App Service..."
-
-          # Use az webapp deploy which respects no-build settings
-          # First, ensure build is disabled at the SCM level
-          az webapp config appsettings set \
-            --name "$WEBAPP_NAME" \
-            --resource-group "$RESOURCE_GROUP" \
-            --settings \
-              WEBSITE_RUN_FROM_PACKAGE="0" \
-              SCM_DO_BUILD_DURING_DEPLOYMENT="false" \
-              ENABLE_ORYX_BUILD="false" \
-            --output none
-
-          # Deploy using the newer az webapp deploy command with --type zip
-          az webapp deploy \
-            --name "$WEBAPP_NAME" \
-            --resource-group "$RESOURCE_GROUP" \
-            --src-path deploy.zip \
-            --type zip \
-            --clean true \
-            --restart true \
-            --timeout 1200
-
-          echo "✅ Deployment completed"
-
-      - name: Restart App Service
-        run: |
-          echo "🔄 Restarting App Service to apply changes..."
-          az webapp restart \
-            --name "$WEBAPP_NAME" \
-            --resource-group "$RESOURCE_GROUP"
-          echo "✅ App Service restarted"
-
-      - name: Verify deployment health
-        run: |
-          echo "🔍 Checking deployment health..."
-          echo "Waiting 60 seconds for app to start..."
-          sleep 60
-
-          # Try up to 6 times with increasing delays
-          for i in 1 2 3 4 5 6; do
-            echo "Attempt $i: Checking health ping (no auth)..."
-            HTTP_STATUS=$(curl -s -o /tmp/health_response.txt -w "%{http_code}" "$WEBAPP_URL/api/health/ping" 2>/dev/null || echo "000")
-            
-            if [ "$HTTP_STATUS" = "200" ]; then
-              echo "✅ Health ping passed (HTTP $HTTP_STATUS)"
-              cat /tmp/health_response.txt
-              echo ""
-              
-              # Also check DB health (optional, informational)
-              echo "Checking database health..."
-              DB_STATUS=$(curl -s -o /tmp/db_response.txt -w "%{http_code}" "$WEBAPP_URL/api/health/db" 2>/dev/null || echo "000")
-              echo "Database health: HTTP $DB_STATUS"
-              cat /tmp/db_response.txt 2>/dev/null | head -10 || echo "(no response)"
-              exit 0
-            else
-              echo "⏳ HTTP $HTTP_STATUS - Response:"
-              cat /tmp/health_response.txt 2>/dev/null | head -5 || echo "(no response)"
-              echo ""
-              
-              if [ $i -lt 6 ]; then
-                echo "Waiting $((i * 20)) seconds before retry..."
-                sleep $((i * 20))
-              fi
-            fi
-          done
-
-          echo "⚠️  Health check did not return 200 after 6 attempts"
-          echo "The app may still be starting or there may be an issue."
-          echo ""
-          echo "Check logs with:"
-          echo "  az webapp log tail --name $WEBAPP_NAME --resource-group $RESOURCE_GROUP"
-          echo ""
-          echo "Check app at: $WEBAPP_URL"
-          # Don't fail the workflow - let it complete so we can check logs
-          exit 0
-
-      - name: Deployment Summary
-        run: |
-          echo ""
-          echo "🎉 ================================================"
-          echo "   DEPLOYMENT COMPLETE!"
-          echo "================================================"
-          echo ""
-          echo "📱 App URL:      $WEBAPP_URL"
-          echo "📚 API Docs:     $WEBAPP_URL/docs"
-          echo "🔍 Health Check: $WEBAPP_URL/api/health"
-          echo "🔍 DB Health:    $WEBAPP_URL/api/health/db"
-          echo ""
-          echo "✅ Frontend assets deployed to backend/static"
-          echo "✅ App settings configured (DATABASE_URL, AUTH_SECRET_KEY)"
-          echo "✅ Startup script: azure_startup.sh (installs deps & runs migrations)"
-          echo ""
-          echo "If login issues occur, reset admin password:"
-          echo "  curl -X POST $WEBAPP_URL/api/health/reset-admin-password \\"
-          echo "    -H 'X-Admin-Secret: YOUR_AUTH_SECRET_KEY'"
-          echo ""
-          echo "Default admin credentials after reset:"
-          echo "  Employee ID: BAYN00008"
-          echo "  Password: 16051988"
-          echo ""
