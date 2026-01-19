@@ -64,11 +64,11 @@ Contents:
 - azure.yaml — Azure Developer CLI manifest referencing the Bicep templates
 
 How to use:
-1) Provision infra (resource group, App Service plan, Web App, PostgreSQL) with the Bicep templates:
+1) Provision infra (resource group, App Service plan, Web App, PostgreSQL) with the entrypoint template infra/main.bicep (which references infra/resources.bicep):
    az deployment sub create --location <location> --template-file infra/main.bicep --parameters postgresAdminPassword=<password> authSecretKey=<secret> databaseUrl=<database-url>
 2) Deploy the application:
    az webapp deploy --resource-group <rg> --name <app-service-name> --src-path deploy.zip --type zip --restart true
-3) Ensure App Service settings include DATABASE_URL, AUTH_SECRET_KEY, ALLOWED_ORIGINS, SCM_DO_BUILD_DURING_DEPLOYMENT=false, ENABLE_ORYX_BUILD=false.
+3) Ensure App Service settings include DATABASE_URL, AUTH_SECRET_KEY, ALLOWED_ORIGINS, and SCM_DO_BUILD_DURING_DEPLOYMENT=false.
 EOF
 
 echo "🗜️  Creating top-level archive..."
@@ -83,5 +83,5 @@ echo " - Archive:   ${OUTPUT_DIR}/azure-deployment-package.zip"
 echo ""
 echo "Next steps:"
 echo " 1) Deploy infra with infra/main.bicep"
-echo " 2) Deploy ${BACKEND_ZIP} to your App Service (az webapp deploy --type zip)"
+echo " 2) Deploy deploy.zip to your App Service (az webapp deploy --type zip)"
 echo " 3) Set DATABASE_URL and AUTH_SECRET_KEY in App Service settings"
