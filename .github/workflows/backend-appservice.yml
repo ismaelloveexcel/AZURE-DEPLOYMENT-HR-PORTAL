@@ -66,7 +66,10 @@ jobs:
         if: steps.auth.outputs.method == 'oidc'
         run: |
           az account show
-          az group show --name "${BACKEND_RESOURCE_GROUP}" --query name -o tsv
+          az group show --name "${BACKEND_RESOURCE_GROUP}" --query name -o tsv || {
+            echo "Azure credentials do not have access to resource group ${BACKEND_RESOURCE_GROUP}."
+            exit 1
+          }
 
       - name: Deploy to Azure App Service (publish profile)
         if: steps.auth.outputs.method == 'publish_profile'
@@ -78,7 +81,7 @@ jobs:
 
       - name: Deploy to Azure App Service (OIDC)
         if: steps.auth.outputs.method == 'oidc'
-        # OIDC path relies on azure/login context, so no publish-profile is provided here.
+        # OIDC path relies on azure/login context, so no publish-profile is provided; resource-group-name is required.
         uses: azure/webapps-deploy@v2
         with:
           app-name: ${{ env.BACKEND_APP_NAME }}
