@@ -97,10 +97,59 @@ agents:
       - "login"
       - "authentication"
       - "database connection"
-      - "python error"
-      - "environment"
-      - "troubleshoot"
-      - "production"
+   - "python error"
+   - "environment"
+   - "troubleshoot"
+   - "production"
+
+  - name: azure-debugger
+    file: .github/agents/azure-debugger.md
+    description: "Azure deployment debugger for pipelines and runtime failures"
+    capabilities:
+      - log_analysis
+      - pipeline_debugging
+      - appservice_troubleshooting
+      - cors_validation
+      - database_connectivity
+    scope:
+      - infra/
+      - .github/workflows/
+      - backend/
+      - frontend/
+      - docs/
+    triggers:
+      - "debug"
+      - "failure"
+      - "error"
+      - "kudu"
+      - "cors"
+      - "app service"
+      - "deployment issue"
+      - "connection"
+
+  - name: azure-deployment-engineer
+    file: .github/agents/azure-deployment-engineer.md
+    description: "End-to-end Azure deployment automation engineer"
+    capabilities:
+      - azure_deployment
+      - infra_as_code
+      - ci_cd_setup
+      - database_provisioning
+      - startup_configuration
+    scope:
+      - infra/
+      - .github/workflows/
+      - backend/
+      - frontend/
+      - scripts/
+    triggers:
+      - "deployment setup"
+      - "bicep"
+      - "workflow"
+      - "postgres"
+      - "app service"
+      - "publish"
+      - "azure automation"
 
 # Collaboration rules
 collaboration:
