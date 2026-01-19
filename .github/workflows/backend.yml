@@ -45,5 +45,5 @@ jobs:
     - name: Deploy to Azure App Service
       uses: azure/webapps-deploy@v3
       with:
-        app-name: "<YOUR_APP_SERVICE_NAME>"
-        package: "backend/backend.zip"
+        app-name: "hrportal-backend-new"
+        package: "backend"
