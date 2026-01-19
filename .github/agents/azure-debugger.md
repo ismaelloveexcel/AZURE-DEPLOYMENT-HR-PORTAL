@@ -39,7 +39,7 @@ When invoked, this agent must:
 ### 3. Commit fixes in a new branch
 - Branch name format:
 
-fix/azure-debug-auto-
+fix/azure-debug-auto-{issue-id}
 - Push all required changes (only what is needed to fix the issue)
 
 ### 4. Open a Pull Request automatically
