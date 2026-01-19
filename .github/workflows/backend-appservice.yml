@@ -16,6 +16,8 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     environment: production
+    env:
+      RESOURCE_GROUP: ${{ vars.AZURE_BACKEND_RESOURCE_GROUP || 'rg-hr-portal-new' }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -72,7 +74,7 @@ jobs:
         uses: azure/webapps-deploy@v2
         with:
           app-name: hrportal-backend-new
-          resource-group-name: rg-hr-portal-new
+          resource-group-name: ${{ env.RESOURCE_GROUP }}
           package: backend
 
       - name: Smoke test health endpoint
