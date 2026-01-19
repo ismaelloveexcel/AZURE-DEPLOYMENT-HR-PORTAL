@@ -191,6 +191,8 @@ The system provides **plain-language guidance** for all technical matters:
 | [HR Assistant](.github/agents/hr-assistant.md) | HR workflows & portal engineering | Planning features, automation ideas, finding HR modules |
 | [Portal Engineer](.github/agents/portal-engineer.md) | Technical implementation | Building features, fixing bugs, optimizing code |
 | [Code Quality Monitor](.github/agents/code-quality-monitor.md) | Security & quality scanning | Checking security, code quality, performance |
+| [Azure Debugger](.github/agents/azure-debugger.md) | Azure deployment break/fix | Investigating failed runs, pipeline errors, runtime issues |
+| [Azure Deployment Engineer](.github/agents/azure-deployment-engineer.md) | End-to-end Azure setup | Generating infra/workflows, provisioning Azure resources |
 | [Azure Deployment Specialist](.github/agents/azure-deployment-specialist.md) | **NEW!** Azure deployment & troubleshooting | Deploying to Azure, login issues, database problems, Python errors |
 
 ### Quick Start with Agents

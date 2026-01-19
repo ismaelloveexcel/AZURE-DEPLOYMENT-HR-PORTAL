@@ -463,6 +463,8 @@ This project has specialized agents for different tasks:
 - **HR Assistant** (`.github/agents/hr-assistant.md`) - HR workflows, planning, module discovery
 - **Portal Engineer** (`.github/agents/portal-engineer.md`) - Full-stack implementation, debugging
 - **Code Quality Monitor** (`.github/agents/code-quality-monitor.md`) - Security scans, performance checks
+- **Azure Debugger** (`.github/agents/azure-debugger.md`) - Break/fix for Azure deployments and pipelines
+- **Azure Deployment Engineer** (`.github/agents/azure-deployment-engineer.md`) - End-to-end Azure deployment setup and automation
 
 **Usage:** Reference agent files for specialized tasks. Example: "Use Portal Engineer pattern to add probation tracking."
 
