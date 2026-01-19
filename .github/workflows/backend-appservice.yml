@@ -29,19 +29,48 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
-
-      - name: Validate publish profile secret
+      - name: Select deployment authentication
+        id: auth
         run: |
-          if [ -z "${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE_BACKEND }}" ]; then
-            echo "Missing AZURE_WEBAPP_PUBLISH_PROFILE_BACKEND secret. Add the publish profile for hrportal-backend-new."
-            exit 1
+          if [ -n "${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE_BACKEND }}" ]; then
+            echo "Using publish profile secret for deployment."
+            echo "method=publish_profile" >> "$GITHUB_OUTPUT"
+            exit 0
           fi
 
-      - name: Deploy to Azure App Service (hrportal-backend-new)
+          if [ -n "${{ secrets.AZURE_CLIENT_ID }}" ] && \
+             [ -n "${{ secrets.AZURE_TENANT_ID }}" ] && \
+             [ -n "${{ secrets.AZURE_SUBSCRIPTION_ID }}" ]; then
+            echo "Publish profile not found; falling back to OIDC credentials."
+            echo "method=oidc" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          echo "Missing deployment credentials."
+          echo "Provide AZURE_WEBAPP_PUBLISH_PROFILE_BACKEND or OIDC secrets (AZURE_CLIENT_ID, AZURE_TENANT_ID, AZURE_SUBSCRIPTION_ID)."
+          exit 1
+
+      - name: Azure Login (OIDC fallback)
+        if: steps.auth.outputs.method == 'oidc'
+        uses: azure/login@v1
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Deploy to Azure App Service (publish profile)
+        if: steps.auth.outputs.method == 'publish_profile'
         uses: azure/webapps-deploy@v2
         with:
           app-name: hrportal-backend-new
           publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE_BACKEND }}
+          package: backend
+
+      - name: Deploy to Azure App Service (OIDC)
+        if: steps.auth.outputs.method == 'oidc'
+        uses: azure/webapps-deploy@v2
+        with:
+          app-name: hrportal-backend-new
           package: backend
 
       - name: Smoke test health endpoint
