@@ -14,9 +14,9 @@ jobs:
     name: Build and Deploy HR Portal
     runs-on: ubuntu-latest
     env:
-      RESOURCE_GROUP: baynunah-hr-rg
-      WEBAPP_NAME: baynunah-hr-portal
-      WEBAPP_URL: https://baynunah-hr-portal.azurewebsites.net
+      RESOURCE_GROUP: baynunah-hr-portal-prod
+      WEBAPP_NAME: baynunah-hr-portal-prod
+      WEBAPP_URL: https://baynunah-hr-portal-prod.azurewebsites.net
 
     steps:
       - name: Checkout code
@@ -161,21 +161,22 @@ jobs:
           # Check if resource group exists
           if ! az group show --name "$RESOURCE_GROUP" --query name -o tsv 2>/dev/null; then
             echo "📦 Creating resource group $RESOURCE_GROUP..."
-            az group create --name "$RESOURCE_GROUP" --location westeurope
+            az group create --name "$RESOURCE_GROUP" --location uaenorth
           else
             echo "✅ Resource group $RESOURCE_GROUP exists"
           fi
 
           # Check if App Service plan exists
-          if ! az appservice plan show --name baynunah-hr-plan --resource-group "$RESOURCE_GROUP" --query name -o tsv 2>/dev/null; then
-            echo "📦 Creating App Service plan baynunah-hr-plan..."
+          if ! az appservice plan show --name baynunah-hr-plan-prod --resource-group "$RESOURCE_GROUP" --query name -o tsv 2>/dev/null; then
+            echo "📦 Creating App Service plan baynunah-hr-plan-prod..."
             az appservice plan create \
-              --name baynunah-hr-plan \
+              --name baynunah-hr-plan-prod \
               --resource-group "$RESOURCE_GROUP" \
               --sku B1 \
-              --is-linux
+              --is-linux \
+              --location uaenorth
           else
-            echo "✅ App Service plan baynunah-hr-plan exists"
+            echo "✅ App Service plan baynunah-hr-plan-prod exists"
           fi
 
           # Check if Web App exists
@@ -184,7 +185,7 @@ jobs:
             az webapp create \
               --name "$WEBAPP_NAME" \
               --resource-group "$RESOURCE_GROUP" \
-              --plan baynunah-hr-plan \
+              --plan baynunah-hr-plan-prod \
               --runtime "PYTHON:3.11"
           else
             echo "✅ Web App $WEBAPP_NAME exists"

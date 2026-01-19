@@ -4,22 +4,22 @@ targetScope = 'subscription'
 param location string = 'uaenorth'
 
 @description('Resource group name to create or reuse.')
-param resourceGroupName string = 'rg-hr-portal-new'
+param resourceGroupName string = 'baynunah-hr-portal-prod'
 
 @description('App Service plan name for the backend.')
-param appServicePlanName string = 'hrportal-plan-new'
+param appServicePlanName string = 'baynunah-hr-plan-prod'
 
 @description('Backend App Service name.')
-param backendAppName string = 'hrportal-backend-new'
+param backendAppName string = 'baynunah-hr-portal-prod'
 
 @description('Static Web App name for the frontend.')
-param staticWebAppName string = 'hrportal-frontend-new'
+param staticWebAppName string = 'baynunah-hr-frontend-prod'
 
 @description('Static Web App region (must be a supported Static Web Apps location).')
 param staticWebAppLocation string = 'eastus2'
 
 @description('PostgreSQL flexible server name.')
-param postgresServerName string = 'hrportal-db-new'
+param postgresServerName string = 'baynunah-hr-db-prod'
 
 @description('PostgreSQL administrator username.')
 param postgresAdminUsername string = 'hradmin'
@@ -32,7 +32,7 @@ param postgresAdminPassword string
 param postgresDbName string = 'postgres'
 
 @description('Application Insights resource name.')
-param appInsightsName string = 'hrportal-backend-new-ai'
+param appInsightsName string = 'baynunah-hr-insights-prod'
 
 @secure()
 @description('AUTH_SECRET_KEY for backend App Service.')

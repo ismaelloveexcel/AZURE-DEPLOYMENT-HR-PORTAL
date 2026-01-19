@@ -59,8 +59,9 @@ frontend/dist/
 frontend/.vite/
 
 # Backend build artifacts (generated from frontend build)
-backend/static/assets/*.js
-backend/static/assets/*.css
+# These are regenerated on each build - don't commit
+backend/static/assets/
+backend/static/index.html
 
 # Backend
 backend/.env

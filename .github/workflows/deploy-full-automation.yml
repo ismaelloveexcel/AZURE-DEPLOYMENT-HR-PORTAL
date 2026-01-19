@@ -1,0 +1,607 @@
+name: Full Automated Deployment - HR Portal
+
+# Trigger: Manual dispatch, push to main, or specific trigger
+on:
+  workflow_dispatch:
+    inputs:
+      resource_group:
+        description: 'Azure Resource Group name'
+        required: true
+        default: 'baynunah-hr-portal-prod'
+      location:
+        description: 'Azure region'
+        required: true
+        default: 'uaenorth'
+      environment:
+        description: 'Deployment environment'
+        required: true
+        default: 'production'
+        type: choice
+        options:
+          - production
+          - staging
+  push:
+    branches: [main]
+    paths:
+      - 'infra/**'
+      - 'backend/**'
+      - 'frontend/**'
+      - '.github/workflows/deploy-full-automation.yml'
+
+permissions:
+  id-token: write    # Required for OIDC authentication with Azure
+  contents: read     # Required to checkout code
+
+env:
+  # Default configuration - can be overridden by workflow_dispatch inputs
+  RESOURCE_GROUP: ${{ github.event.inputs.resource_group || 'baynunah-hr-portal-prod' }}
+  LOCATION: ${{ github.event.inputs.location || 'uaenorth' }}
+  ENVIRONMENT: ${{ github.event.inputs.environment || 'production' }}
+
+  # Resource naming convention
+  APP_SERVICE_PLAN: baynunah-hr-plan-prod
+  BACKEND_APP_NAME: baynunah-hr-portal-prod
+  POSTGRES_SERVER_NAME: baynunah-hr-db-prod
+  POSTGRES_DB_NAME: hrportal
+  APP_INSIGHTS_NAME: baynunah-hr-insights-prod
+  STATIC_WEB_APP_NAME: baynunah-hr-frontend-prod
+
+  # Build versions
+  PYTHON_VERSION: '3.11'
+  NODE_VERSION: '20'
+
+jobs:
+  # ============================================
+  # JOB 1: Validate Secrets and Prerequisites
+  # ============================================
+  validate:
+    name: Validate Prerequisites
+    runs-on: ubuntu-latest
+    outputs:
+      has_bicep: ${{ steps.check.outputs.has_bicep }}
+      resource_group: ${{ env.RESOURCE_GROUP }}
+      location: ${{ env.LOCATION }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Validate required secrets
+        id: validate-secrets
+        run: |
+          echo "🔍 Validating required secrets..."
+          MISSING=""
+
+          if [ -z "${{ secrets.AZURE_CLIENT_ID }}" ]; then
+            MISSING="$MISSING AZURE_CLIENT_ID"
+          fi
+          if [ -z "${{ secrets.AZURE_TENANT_ID }}" ]; then
+            MISSING="$MISSING AZURE_TENANT_ID"
+          fi
+          if [ -z "${{ secrets.AZURE_SUBSCRIPTION_ID }}" ]; then
+            MISSING="$MISSING AZURE_SUBSCRIPTION_ID"
+          fi
+          if [ -z "${{ secrets.AUTH_SECRET_KEY }}" ]; then
+            MISSING="$MISSING AUTH_SECRET_KEY"
+          fi
+
+          if [ -n "$MISSING" ]; then
+            echo "❌ ERROR: Missing required secrets:$MISSING"
+            echo ""
+            echo "Please configure the following secrets in GitHub repository settings:"
+            echo "  - AZURE_CLIENT_ID: Azure AD App Registration client ID"
+            echo "  - AZURE_TENANT_ID: Azure AD tenant ID"
+            echo "  - AZURE_SUBSCRIPTION_ID: Azure subscription ID"
+            echo "  - AUTH_SECRET_KEY: JWT signing secret key"
+            exit 1
+          fi
+
+          echo "✅ All required secrets are present"
+
+      - name: Check infrastructure files
+        id: check
+        run: |
+          if [ -f "infra/main.bicep" ]; then
+            echo "✅ Bicep template found: infra/main.bicep"
+            echo "has_bicep=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "⚠️ No Bicep template found - will use Azure CLI for resource creation"
+            echo "has_bicep=false" >> "$GITHUB_OUTPUT"
+          fi
+
+          echo ""
+          echo "📋 Deployment Configuration:"
+          echo "   Resource Group: $RESOURCE_GROUP"
+          echo "   Location: $LOCATION"
+          echo "   Environment: $ENVIRONMENT"
+
+  # ============================================
+  # JOB 2: Deploy Infrastructure with Bicep
+  # ============================================
+  deploy-infrastructure:
+    name: Deploy Azure Infrastructure
+    runs-on: ubuntu-latest
+    needs: validate
+    outputs:
+      backend_url: ${{ steps.deploy.outputs.backend_url }}
+      frontend_url: ${{ steps.deploy.outputs.frontend_url }}
+      postgres_host: ${{ steps.deploy.outputs.postgres_host }}
+      database_url: ${{ steps.deploy.outputs.database_url }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Azure Login (OIDC)
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Create Resource Group
+        run: |
+          echo "📦 Creating/Verifying Resource Group: $RESOURCE_GROUP"
+
+          if az group show --name "$RESOURCE_GROUP" --query name -o tsv 2>/dev/null; then
+            echo "✅ Resource group $RESOURCE_GROUP already exists"
+          else
+            echo "Creating resource group..."
+            az group create \
+              --name "$RESOURCE_GROUP" \
+              --location "$LOCATION" \
+              --tags Environment=$ENVIRONMENT Project=HRPortal
+            echo "✅ Resource group created"
+          fi
+
+      - name: Deploy Infrastructure with Bicep
+        id: deploy
+        if: needs.validate.outputs.has_bicep == 'true'
+        run: |
+          echo "🚀 Deploying infrastructure with Bicep..."
+
+          # Generate secure passwords for PostgreSQL
+          POSTGRES_PASSWORD=$(openssl rand -base64 32 | tr -dc 'a-zA-Z0-9' | head -c 24)
+
+          # Build the DATABASE_URL
+          DATABASE_URL="postgresql+asyncpg://hradmin:${POSTGRES_PASSWORD}@${POSTGRES_SERVER_NAME}.postgres.database.azure.com:5432/${POSTGRES_DB_NAME}?sslmode=require"
+
+          # Deploy Bicep template
+          DEPLOYMENT_OUTPUT=$(az deployment sub create \
+            --name "hrportal-deploy-$(date +%Y%m%d%H%M%S)" \
+            --location "$LOCATION" \
+            --template-file infra/main.bicep \
+            --parameters \
+              location="$LOCATION" \
+              resourceGroupName="$RESOURCE_GROUP" \
+              appServicePlanName="$APP_SERVICE_PLAN" \
+              backendAppName="$BACKEND_APP_NAME" \
+              staticWebAppName="$STATIC_WEB_APP_NAME" \
+              staticWebAppLocation="eastus2" \
+              postgresServerName="$POSTGRES_SERVER_NAME" \
+              postgresAdminUsername="hradmin" \
+              postgresAdminPassword="$POSTGRES_PASSWORD" \
+              postgresDbName="$POSTGRES_DB_NAME" \
+              appInsightsName="$APP_INSIGHTS_NAME" \
+              authSecretKey="${{ secrets.AUTH_SECRET_KEY }}" \
+              databaseUrl="$DATABASE_URL" \
+            --query properties.outputs -o json)
+
+          echo "✅ Bicep deployment completed"
+
+          # Extract outputs
+          BACKEND_URL=$(echo "$DEPLOYMENT_OUTPUT" | jq -r '.backendUrl.value')
+          FRONTEND_URL=$(echo "$DEPLOYMENT_OUTPUT" | jq -r '.frontendUrl.value')
+          POSTGRES_HOST=$(echo "$DEPLOYMENT_OUTPUT" | jq -r '.postgresHost.value')
+
+          echo "backend_url=$BACKEND_URL" >> "$GITHUB_OUTPUT"
+          echo "frontend_url=$FRONTEND_URL" >> "$GITHUB_OUTPUT"
+          echo "postgres_host=$POSTGRES_HOST" >> "$GITHUB_OUTPUT"
+          echo "database_url=$DATABASE_URL" >> "$GITHUB_OUTPUT"
+
+          echo ""
+          echo "📋 Infrastructure Deployment Summary:"
+          echo "   Backend URL: $BACKEND_URL"
+          echo "   Frontend URL: $FRONTEND_URL"
+          echo "   PostgreSQL Host: $POSTGRES_HOST"
+
+      - name: Deploy Infrastructure with Azure CLI (Fallback)
+        id: deploy-cli
+        if: needs.validate.outputs.has_bicep != 'true'
+        run: |
+          echo "🚀 Deploying infrastructure with Azure CLI..."
+
+          # Generate secure passwords
+          POSTGRES_PASSWORD=$(openssl rand -base64 32 | tr -dc 'a-zA-Z0-9' | head -c 24)
+
+          # Create App Service Plan
+          echo "Creating App Service Plan..."
+          if ! az appservice plan show --name "$APP_SERVICE_PLAN" --resource-group "$RESOURCE_GROUP" --query name -o tsv 2>/dev/null; then
+            az appservice plan create \
+              --name "$APP_SERVICE_PLAN" \
+              --resource-group "$RESOURCE_GROUP" \
+              --sku B1 \
+              --is-linux \
+              --location "$LOCATION"
+          fi
+
+          # Create Web App
+          echo "Creating Web App..."
+          if ! az webapp show --name "$BACKEND_APP_NAME" --resource-group "$RESOURCE_GROUP" --query name -o tsv 2>/dev/null; then
+            az webapp create \
+              --name "$BACKEND_APP_NAME" \
+              --resource-group "$RESOURCE_GROUP" \
+              --plan "$APP_SERVICE_PLAN" \
+              --runtime "PYTHON:3.11"
+          fi
+
+          # Create PostgreSQL Flexible Server
+          echo "Creating PostgreSQL Flexible Server..."
+          if ! az postgres flexible-server show --name "$POSTGRES_SERVER_NAME" --resource-group "$RESOURCE_GROUP" --query name -o tsv 2>/dev/null; then
+            az postgres flexible-server create \
+              --name "$POSTGRES_SERVER_NAME" \
+              --resource-group "$RESOURCE_GROUP" \
+              --location "$LOCATION" \
+              --admin-user hradmin \
+              --admin-password "$POSTGRES_PASSWORD" \
+              --sku-name Standard_B1ms \
+              --tier Burstable \
+              --version 16 \
+              --storage-size 128 \
+              --yes
+
+            # Allow Azure Services
+            az postgres flexible-server firewall-rule create \
+              --resource-group "$RESOURCE_GROUP" \
+              --name "$POSTGRES_SERVER_NAME" \
+              --rule-name AllowAzureServices \
+              --start-ip-address 0.0.0.0 \
+              --end-ip-address 0.0.0.0
+
+            # Create database
+            az postgres flexible-server db create \
+              --resource-group "$RESOURCE_GROUP" \
+              --server-name "$POSTGRES_SERVER_NAME" \
+              --database-name "$POSTGRES_DB_NAME"
+          fi
+
+          # Build URLs
+          BACKEND_URL="https://${BACKEND_APP_NAME}.azurewebsites.net"
+          DATABASE_URL="postgresql+asyncpg://hradmin:${POSTGRES_PASSWORD}@${POSTGRES_SERVER_NAME}.postgres.database.azure.com:5432/${POSTGRES_DB_NAME}?sslmode=require"
+
+          echo "backend_url=$BACKEND_URL" >> "$GITHUB_OUTPUT"
+          echo "frontend_url=" >> "$GITHUB_OUTPUT"
+          echo "postgres_host=${POSTGRES_SERVER_NAME}.postgres.database.azure.com" >> "$GITHUB_OUTPUT"
+          echo "database_url=$DATABASE_URL" >> "$GITHUB_OUTPUT"
+
+          echo "✅ CLI deployment completed"
+
+  # ============================================
+  # JOB 3: Build Frontend
+  # ============================================
+  build-frontend:
+    name: Build Frontend
+    runs-on: ubuntu-latest
+    needs: validate
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install frontend dependencies
+        working-directory: frontend
+        run: npm ci || npm install
+
+      - name: Build frontend
+        working-directory: frontend
+        run: npm run build
+        env:
+          VITE_API_BASE_URL: /api
+
+      - name: Copy frontend to backend/static
+        run: |
+          echo "📦 Copying frontend build to backend/static..."
+          rm -rf backend/static
+          mkdir -p backend/static
+          cp -r frontend/dist/. backend/static/
+
+          # Verify the copy
+          if [ -f "backend/static/index.html" ]; then
+            echo "✅ Frontend copied successfully"
+            echo "Contents:"
+            ls -la backend/static/
+          else
+            echo "❌ ERROR: index.html not found after copy"
+            exit 1
+          fi
+
+      - name: Upload frontend artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: frontend-build
+          path: backend/static/
+          retention-days: 1
+
+  # ============================================
+  # JOB 4: Build and Deploy Backend
+  # ============================================
+  deploy-backend:
+    name: Build and Deploy Backend
+    runs-on: ubuntu-latest
+    needs: [validate, deploy-infrastructure, build-frontend]
+    outputs:
+      backend_url: ${{ steps.summary.outputs.backend_url }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Download frontend artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: frontend-build
+          path: backend/static/
+
+      - name: Verify frontend in backend/static
+        run: |
+          echo "🔍 Verifying frontend build..."
+          if [ ! -f "backend/static/index.html" ]; then
+            echo "❌ ERROR: Frontend build not found in backend/static"
+            exit 1
+          fi
+
+          # Check for JS bundles
+          JS_FILES=$(find backend/static -name "*.js" 2>/dev/null | wc -l)
+          if [ "$JS_FILES" -eq 0 ]; then
+            echo "❌ ERROR: No JavaScript files found in frontend build"
+            exit 1
+          fi
+
+          echo "✅ Frontend verified: index.html + $JS_FILES JS files"
+          ls -la backend/static/
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Create deployment package
+        run: |
+          echo "📦 Creating deployment package..."
+          cd backend
+
+          # Make startup script executable
+          chmod +x azure_startup.sh 2>/dev/null || true
+
+          # Create zip excluding unnecessary files
+          zip -r ../deploy.zip . \
+            -x "*.pyc" \
+            -x "*__pycache__*" \
+            -x "*.git*" \
+            -x "*.env*" \
+            -x "*.example" \
+            -x "tests/*" \
+            -x "*.bak" \
+            -x "*.tmp"
+
+          cd ..
+          echo "✅ Package created: $(du -h deploy.zip | cut -f1)"
+
+          # Verify critical files
+          echo "Verifying package contents..."
+          unzip -l deploy.zip | grep -E "(index.html|azure_startup.sh|main.py)" || echo "Some files may be missing"
+
+      - name: Azure Login (OIDC)
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Configure App Settings
+        run: |
+          echo "⚙️ Configuring Azure App Service settings..."
+
+          BACKEND_URL="https://${BACKEND_APP_NAME}.azurewebsites.net"
+
+          # Set app settings
+          az webapp config appsettings set \
+            --name "$BACKEND_APP_NAME" \
+            --resource-group "$RESOURCE_GROUP" \
+            --settings \
+              DATABASE_URL="${{ needs.deploy-infrastructure.outputs.database_url || secrets.DATABASE_URL }}" \
+              AUTH_SECRET_KEY="${{ secrets.AUTH_SECRET_KEY }}" \
+              ALLOWED_ORIGINS="$BACKEND_URL,${{ needs.deploy-infrastructure.outputs.frontend_url || '' }}" \
+              APP_ENV="production" \
+              SCM_DO_BUILD_DURING_DEPLOYMENT="false" \
+              ENABLE_ORYX_BUILD="false" \
+              PYTHONUNBUFFERED="1" \
+              WEBSITES_CONTAINER_START_TIME_LIMIT="1800" \
+            --output none
+
+          # Set startup command
+          az webapp config set \
+            --name "$BACKEND_APP_NAME" \
+            --resource-group "$RESOURCE_GROUP" \
+            --startup-file "bash azure_startup.sh" \
+            --output none
+
+          # Configure health check
+          az webapp config set \
+            --name "$BACKEND_APP_NAME" \
+            --resource-group "$RESOURCE_GROUP" \
+            --generic-configurations '{"healthCheckPath": "/api/health/ping"}' \
+            --output none
+
+          echo "✅ App settings configured"
+
+      - name: Deploy to Azure App Service
+        run: |
+          echo "🚀 Deploying to Azure App Service..."
+
+          az webapp deploy \
+            --name "$BACKEND_APP_NAME" \
+            --resource-group "$RESOURCE_GROUP" \
+            --src-path deploy.zip \
+            --type zip \
+            --clean true \
+            --restart true \
+            --timeout 1200
+
+          echo "✅ Deployment completed"
+
+      - name: Restart and Wait for Startup
+        run: |
+          echo "🔄 Restarting App Service..."
+          az webapp restart \
+            --name "$BACKEND_APP_NAME" \
+            --resource-group "$RESOURCE_GROUP"
+
+          echo "⏳ Waiting 90 seconds for app to initialize..."
+          sleep 90
+
+      - name: Output Summary
+        id: summary
+        run: |
+          BACKEND_URL="https://${BACKEND_APP_NAME}.azurewebsites.net"
+          echo "backend_url=$BACKEND_URL" >> "$GITHUB_OUTPUT"
+
+  # ============================================
+  # JOB 5: Validate Deployment
+  # ============================================
+  validate-deployment:
+    name: Validate Deployment
+    runs-on: ubuntu-latest
+    needs: [deploy-infrastructure, deploy-backend]
+    steps:
+      - name: Health Check - API Ping
+        id: health-ping
+        run: |
+          echo "🔍 Running health checks..."
+          BACKEND_URL="${{ needs.deploy-backend.outputs.backend_url }}"
+
+          echo "Checking: $BACKEND_URL/api/health/ping"
+
+          # Retry up to 10 times with increasing delays
+          MAX_ATTEMPTS=10
+          for i in $(seq 1 $MAX_ATTEMPTS); do
+            echo "Attempt $i/$MAX_ATTEMPTS..."
+
+            HTTP_STATUS=$(curl -s -o /tmp/health.txt -w "%{http_code}" "$BACKEND_URL/api/health/ping" 2>/dev/null || echo "000")
+
+            if [ "$HTTP_STATUS" = "200" ]; then
+              echo "✅ Health ping passed (HTTP $HTTP_STATUS)"
+              cat /tmp/health.txt
+              echo ""
+              break
+            else
+              echo "⏳ HTTP $HTTP_STATUS - waiting..."
+              if [ $i -lt $MAX_ATTEMPTS ]; then
+                sleep $((i * 15))
+              fi
+            fi
+          done
+
+          if [ "$HTTP_STATUS" != "200" ]; then
+            echo "⚠️ Health check did not return 200 after $MAX_ATTEMPTS attempts"
+            echo "The app may still be initializing"
+          fi
+
+      - name: Health Check - Database
+        run: |
+          BACKEND_URL="${{ needs.deploy-backend.outputs.backend_url }}"
+          echo "Checking database connection..."
+
+          DB_STATUS=$(curl -s -o /tmp/db.txt -w "%{http_code}" "$BACKEND_URL/api/health/db" 2>/dev/null || echo "000")
+          echo "Database health: HTTP $DB_STATUS"
+          cat /tmp/db.txt 2>/dev/null | head -20 || echo "(no response)"
+
+      - name: Verify Frontend Serving
+        run: |
+          BACKEND_URL="${{ needs.deploy-backend.outputs.backend_url }}"
+          echo "Checking frontend serving..."
+
+          FRONTEND_STATUS=$(curl -s -o /tmp/frontend.txt -w "%{http_code}" "$BACKEND_URL" 2>/dev/null || echo "000")
+          echo "Frontend status: HTTP $FRONTEND_STATUS"
+
+          if [ "$FRONTEND_STATUS" = "200" ]; then
+            # Check if it's actually HTML
+            if grep -q "<!DOCTYPE html>" /tmp/frontend.txt 2>/dev/null; then
+              echo "✅ Frontend is being served correctly"
+            else
+              echo "⚠️ Response is not HTML"
+            fi
+          fi
+
+      - name: Verify API Documentation
+        run: |
+          BACKEND_URL="${{ needs.deploy-backend.outputs.backend_url }}"
+          echo "Checking API documentation..."
+
+          DOCS_STATUS=$(curl -s -o /dev/null -w "%{http_code}" "$BACKEND_URL/docs" 2>/dev/null || echo "000")
+          echo "API Docs status: HTTP $DOCS_STATUS"
+
+          if [ "$DOCS_STATUS" = "200" ]; then
+            echo "✅ Swagger UI is accessible"
+          fi
+
+  # ============================================
+  # JOB 6: Post Deployment Summary
+  # ============================================
+  deployment-summary:
+    name: Deployment Summary
+    runs-on: ubuntu-latest
+    needs: [deploy-infrastructure, deploy-backend, validate-deployment]
+    if: always()
+    steps:
+      - name: Generate Deployment Summary
+        run: |
+          echo ""
+          echo "🎉 ================================================"
+          echo "   HR PORTAL DEPLOYMENT COMPLETE"
+          echo "================================================"
+          echo ""
+          echo "📋 DEPLOYMENT DETAILS"
+          echo "─────────────────────────────────────────────────"
+          echo "Resource Group:    $RESOURCE_GROUP"
+          echo "Region:            $LOCATION"
+          echo "Environment:       $ENVIRONMENT"
+          echo ""
+          echo "🌐 APPLICATION URLs"
+          echo "─────────────────────────────────────────────────"
+          echo "Backend URL:       ${{ needs.deploy-backend.outputs.backend_url }}"
+          echo "Frontend URL:      ${{ needs.deploy-infrastructure.outputs.frontend_url || needs.deploy-backend.outputs.backend_url }}"
+          echo "API Documentation: ${{ needs.deploy-backend.outputs.backend_url }}/docs"
+          echo "Health Check:      ${{ needs.deploy-backend.outputs.backend_url }}/api/health/ping"
+          echo "DB Health Check:   ${{ needs.deploy-backend.outputs.backend_url }}/api/health/db"
+          echo ""
+          echo "📦 AZURE RESOURCES"
+          echo "─────────────────────────────────────────────────"
+          echo "App Service:       $BACKEND_APP_NAME"
+          echo "App Service Plan:  $APP_SERVICE_PLAN"
+          echo "PostgreSQL Server: $POSTGRES_SERVER_NAME"
+          echo "PostgreSQL Host:   ${{ needs.deploy-infrastructure.outputs.postgres_host }}"
+          echo ""
+          echo "🔐 AUTHENTICATION"
+          echo "─────────────────────────────────────────────────"
+          echo "Method:            OIDC (Federated Credentials)"
+          echo "Default Admin:     BAYN00008"
+          echo ""
+          echo "📝 POST-DEPLOYMENT ACTIONS"
+          echo "─────────────────────────────────────────────────"
+          echo "1. Test login at ${{ needs.deploy-backend.outputs.backend_url }}"
+          echo "2. If admin password issues, reset with:"
+          echo "   curl -X POST ${{ needs.deploy-backend.outputs.backend_url }}/api/health/reset-admin-password \\"
+          echo "     -H 'X-Admin-Secret: <AUTH_SECRET_KEY>'"
+          echo ""
+          echo "🔍 TROUBLESHOOTING"
+          echo "─────────────────────────────────────────────────"
+          echo "View logs:  az webapp log tail --name $BACKEND_APP_NAME --resource-group $RESOURCE_GROUP"
+          echo "SSH:        az webapp ssh --name $BACKEND_APP_NAME --resource-group $RESOURCE_GROUP"
+          echo ""
+          echo "================================================"
+          echo "✅ Deployment workflow completed successfully!"
+          echo "================================================"
