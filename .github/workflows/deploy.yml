@@ -70,6 +70,20 @@ jobs:
         env:
           VITE_API_BASE_URL: /api
 
+      - name: Copy frontend build to backend/static
+        run: |
+          echo "📁 Copying frontend build to backend/static..."
+          
+          # Remove old frontend assets (keep backend-specific files)
+          rm -rf backend/static/assets/*.js backend/static/assets/*.css 2>/dev/null || true
+          rm -f backend/static/index.html 2>/dev/null || true
+          
+          # Copy built frontend to backend/static
+          cp -r frontend/dist/* backend/static/
+          
+          echo "✅ Frontend copied to backend/static"
+          ls -lh backend/static/
+
       # ===== PREPARE BACKEND =====
       - name: Setup Python
         uses: actions/setup-python@v5
