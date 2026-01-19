@@ -8,6 +8,7 @@ from alembic import op
 import sqlalchemy as sa
 import hashlib
 import secrets
+import os
 
 revision = '20260109_0019b'
 down_revision = '20260109_0019'
@@ -41,17 +42,18 @@ def upgrade() -> None:
         AND (role IS NULL OR role != 'admin')
     """))
     
-    # 3. Reset BAYN00008 password to DOB format (16051988)
-    # Generate the hash for the DOB password
-    dob_password = "16051988"
-    password_hash = generate_password_hash(dob_password)
-    
-    conn.execute(sa.text("""
-        UPDATE employees 
-        SET password_hash = :hash,
-            password_changed = false
-        WHERE employee_id = 'BAYN00008'
-    """), {"hash": password_hash})
+    # 3. Reset BAYN00008 password to DOB format
+    # Use environment variable or skip if not provided
+    dob_password = os.getenv('DEFAULT_EMPLOYEE_DOB_PASSWORD')
+    if dob_password:
+        password_hash = generate_password_hash(dob_password)
+        
+        conn.execute(sa.text("""
+            UPDATE employees 
+            SET password_hash = :hash,
+                password_changed = false
+            WHERE employee_id = 'BAYN00008'
+        """), {"hash": password_hash})
 
 
 def downgrade() -> None:
