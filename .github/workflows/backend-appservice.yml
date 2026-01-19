@@ -45,10 +45,6 @@ jobs:
           if [ -n "${{ secrets.AZURE_CLIENT_ID }}" ] && \
              [ -n "${{ secrets.AZURE_TENANT_ID }}" ] && \
              [ -n "${{ secrets.AZURE_SUBSCRIPTION_ID }}" ]; then
-            if [ -z "${BACKEND_RESOURCE_GROUP}" ]; then
-              echo "AZURE_BACKEND_RESOURCE_GROUP repository variable is required for OIDC deployment. Set it to your backend resource group name (e.g., rg-hr-portal-new)."
-              exit 1
-            fi
             echo "Publish profile not found; falling back to OIDC credentials."
             echo "method=oidc" >> "$GITHUB_OUTPUT"
             exit 0
