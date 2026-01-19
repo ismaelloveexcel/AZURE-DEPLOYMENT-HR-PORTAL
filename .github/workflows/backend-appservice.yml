@@ -1,12 +1,22 @@
-name: Deploy Backend App Service
+name: "[DEPRECATED] Deploy Backend App Service (Publish Profile)"
+
+# ⚠️ DEPRECATED: This workflow uses publish-profile authentication
+# Please use backend-appservice-oidc.yml instead, which uses OIDC authentication
+# This workflow is kept for emergency fallback only
 
 on:
-  push:
-    branches: [main]
-    paths:
-      - "backend/**"
-      - ".github/workflows/backend-appservice.yml"
+  # Disabled automatic triggers - use backend-appservice-oidc.yml instead
+  # push:
+  #   branches: [main]
+  #   paths:
+  #     - "backend/**"
+  #     - ".github/workflows/backend-appservice.yml"
   workflow_dispatch:
+    inputs:
+      confirm:
+        description: 'Type "DEPRECATED" to confirm you want to use this old workflow'
+        required: true
+        default: ''
 
 permissions:
   contents: read
@@ -16,6 +26,19 @@ jobs:
     runs-on: ubuntu-latest
     environment: production
     steps:
+      - name: Deprecation warning
+        run: |
+          echo "⚠️  WARNING: This workflow is DEPRECATED"
+          echo "Please use backend-appservice-oidc.yml which uses secure OIDC authentication"
+          echo "This workflow uses publish-profile which is less secure than OIDC"
+          if [ "${{ github.event.inputs.confirm }}" != "DEPRECATED" ]; then
+            echo "❌ Deployment cancelled - confirmation not provided"
+            echo "To use this deprecated workflow, you must type 'DEPRECATED' in the workflow_dispatch input"
+            exit 1
+          fi
+          echo "⚠️  Proceeding with deprecated workflow..."
+          sleep 5
+
       - name: Checkout repository
         uses: actions/checkout@v4
 
