@@ -72,6 +72,7 @@ jobs:
         uses: azure/webapps-deploy@v2
         with:
           app-name: hrportal-backend-new
+          resource-group-name: rg-hr-portal-new
           package: backend
 
       - name: Smoke test health endpoint
