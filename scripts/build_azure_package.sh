@@ -19,12 +19,20 @@ npm run build
 popd >/dev/null
 
 echo "🔄 Syncing frontend build into backend/static..."
+if [ ! -d "${ROOT_DIR}/frontend/dist" ] || [ -z "$(ls -A "${ROOT_DIR}/frontend/dist")" ]; then
+  echo "❌ Frontend build output not found in frontend/dist"
+  exit 1
+fi
 rm -rf "${ROOT_DIR}/backend/static"
 mkdir -p "${ROOT_DIR}/backend/static"
 cp -r "${ROOT_DIR}/frontend/dist/"* "${ROOT_DIR}/backend/static/"
 
 echo "🐍 Packaging backend (includes frontend assets)..."
 pushd "${ROOT_DIR}/backend" >/dev/null
+if [ ! -f "azure_startup.sh" ]; then
+  echo "❌ backend/azure_startup.sh missing"
+  exit 1
+fi
 chmod +x azure_startup.sh
 zip -r "${BACKEND_ZIP}" . \
   -x "*.pyc" \
@@ -40,6 +48,10 @@ popd >/dev/null
 
 echo "🗂️  Adding infrastructure (Bicep) definitions..."
 mkdir -p "${PACKAGE_DIR}/infra"
+if [ ! -f "${ROOT_DIR}/infra/main.bicep" ] || [ ! -f "${ROOT_DIR}/infra/resources.bicep" ]; then
+  echo "❌ Missing infra/main.bicep or infra/resources.bicep"
+  exit 1
+fi
 cp "${ROOT_DIR}/infra/main.bicep" "${ROOT_DIR}/infra/resources.bicep" "${PACKAGE_DIR}/infra/"
 cp "${ROOT_DIR}/azure.yaml" "${PACKAGE_DIR}/"
 
