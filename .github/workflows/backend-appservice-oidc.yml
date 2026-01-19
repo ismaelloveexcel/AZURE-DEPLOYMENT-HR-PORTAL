@@ -1,21 +1,31 @@
 name: Deploy Backend (FastAPI) to Azure App Service via OIDC
 
+# This workflow deploys ONLY the backend API to Azure App Service
+# Frontend is deployed separately to Azure Static Web Apps - split hosting architecture
+
 on:
   push:
-    branches: ["main"]
+    branches: [main]
+    paths:
+      - 'backend/**'
+      - '.github/workflows/backend-appservice-oidc.yml'
+  workflow_dispatch:
 
 permissions:
-  id-token: write
+  id-token: write   # Required for OIDC authentication with Azure
   contents: read
 
 env:
   PYTHON_VERSION: "3.11"
+  APP_NAME: "hrportal-backend-new"
 
 jobs:
   build-deploy:
     runs-on: ubuntu-latest
+    name: Build and Deploy Backend API
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
 
       - name: Azure Login (OIDC)
         uses: azure/login@v1
@@ -23,9 +33,9 @@ jobs:
           client-id: ${{ secrets.AZURE_CLIENT_ID }}
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
-        # OIDC removes publish profiles; Microsoft recommends this approach.
+        # OIDC authentication - no publish profiles needed
 
-      - name: Setup Python
+      - name: Setup Python ${{ env.PYTHON_VERSION }}
         uses: actions/setup-python@v5
         with:
           python-version: ${{ env.PYTHON_VERSION }}
@@ -34,24 +44,43 @@ jobs:
         working-directory: backend
         run: |
           python -m pip install --upgrade pip
-          if [ -f "uv.lock" ]; then
-            echo "Installing backend deps via uv.lock"
+          if [ -f "pyproject.toml" ] && [ -f "uv.lock" ]; then
+            echo "📦 Installing backend deps via uv"
             pip install uv
             uv sync
           elif [ -f "requirements.txt" ]; then
-            echo "Installing backend deps via requirements.txt"
+            echo "📦 Installing backend deps via requirements.txt"
             pip install -r requirements.txt
           else
-            echo "No dependency manifest found (expected uv.lock or requirements.txt)"
+            echo "❌ No dependency manifest found (expected pyproject.toml or requirements.txt)"
             exit 1
           fi
+
+      - name: Verify backend structure
+        run: |
+          echo "🔍 Backend structure verification:"
+          ls -lh backend/
+          if [ ! -f "backend/app/main.py" ]; then
+            echo "❌ ERROR: backend/app/main.py not found"
+            exit 1
+          fi
+          echo "✅ Backend structure looks good"
 
       # - name: Run tests
       #   working-directory: backend
       #   run: pytest -q
+      #   # Uncomment when tests are added
 
-      - name: Deploy to Azure Web App
+      - name: Deploy to Azure App Service
         uses: azure/webapps-deploy@v2
         with:
-          app-name: hrportal-backend-new
+          app-name: ${{ env.APP_NAME }}
           package: ./backend
+
+      - name: Deployment summary
+        if: success()
+        run: |
+          echo "🎉 Backend API deployed successfully!"
+          echo "OpenAPI docs: https://${{ env.APP_NAME }}.azurewebsites.net/docs"
+          echo "Health check: https://${{ env.APP_NAME }}.azurewebsites.net/healthz"
+          echo "Readiness: https://${{ env.APP_NAME }}.azurewebsites.net/readyz"
