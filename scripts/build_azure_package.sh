@@ -14,7 +14,7 @@ mkdir -p "${PACKAGE_DIR}"
 
 echo "⚛️  Building frontend..."
 pushd "${ROOT_DIR}/frontend" >/dev/null
-npm install --silent
+npm ci --silent
 npm run build
 popd >/dev/null
 
@@ -25,7 +25,7 @@ if [ ! -d "${ROOT_DIR}/frontend/dist" ] || [ -z "$(ls -A "${ROOT_DIR}/frontend/d
 fi
 rm -rf "${ROOT_DIR}/backend/static"
 mkdir -p "${ROOT_DIR}/backend/static"
-cp -r "${ROOT_DIR}/frontend/dist/"* "${ROOT_DIR}/backend/static/"
+cp -r "${ROOT_DIR}/frontend/dist/." "${ROOT_DIR}/backend/static/"
 
 echo "🐍 Packaging backend (includes frontend assets)..."
 pushd "${ROOT_DIR}/backend" >/dev/null
@@ -64,8 +64,8 @@ Contents:
 - azure.yaml — Azure Developer CLI manifest referencing the Bicep templates
 
 How to use:
-1) Provision infra (resource group, App Service plan, Web App, PostgreSQL) with the entrypoint template infra/main.bicep (which references infra/resources.bicep):
-   az deployment sub create --location <location> --template-file infra/main.bicep --parameters postgresAdminPassword=<password> authSecretKey=<secret> databaseUrl=<database-url>
+1) Provision infra (resource group, App Service plan, Web App, PostgreSQL) with the entrypoint template infra/main.bicep (which references infra/resources.bicep). Use a parameters file to avoid exposing secrets:
+   az deployment sub create --location <location> --template-file infra/main.bicep --parameters @infra/parameters.json
 2) Deploy the application:
    az webapp deploy --resource-group <rg> --name <app-service-name> --src-path deploy.zip --type zip --restart true
 3) Ensure App Service settings include DATABASE_URL, AUTH_SECRET_KEY, ALLOWED_ORIGINS, and SCM_DO_BUILD_DURING_DEPLOYMENT=false.
