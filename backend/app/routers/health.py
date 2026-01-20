@@ -734,32 +734,34 @@ async def seed_all_employees(
         await session.execute(text("DELETE FROM employees"))
         logger.info("Cleared existing employees")
 
-        # Insert all employees (without line_manager_id first to avoid FK issues)
+        # First, check what columns exist in the table
+        col_result = await session.execute(
+            text("""
+                SELECT column_name, data_type
+                FROM information_schema.columns
+                WHERE table_name = 'employees' AND table_schema = 'public'
+                ORDER BY ordinal_position
+            """)
+        )
+        db_columns = {row[0]: row[1] for row in col_result.fetchall()}
+        logger.info(f"Database columns: {db_columns}")
+
+        # Insert all employees with minimal required columns
         inserted = 0
         errors = []
         for emp in employees:
             try:
-                # Convert boolean properly for PostgreSQL
-                is_active_val = emp.get('is_active', True)
-                if isinstance(is_active_val, str):
-                    is_active_val = is_active_val.lower() == 'true'
-
-                password_changed_val = emp.get('password_changed', False)
-                if isinstance(password_changed_val, str):
-                    password_changed_val = password_changed_val.lower() == 'true'
-
                 await session.execute(
                     text("""
                         INSERT INTO employees (
                             id, employee_id, name, email, department, date_of_birth,
-                            password_hash, password_changed, role, is_active, job_title,
-                            line_manager_name, line_manager_email,
-                            employment_status, location, nationality, gender, function, profile_status
+                            password_hash, password_changed, role, is_active,
+                            employment_status, profile_status
                         ) VALUES (
-                            :id, :employee_id, :name, :email, :department, :date_of_birth,
-                            :password_hash, :password_changed, :role, :is_active, :job_title,
-                            :line_manager_name, :line_manager_email,
-                            :employment_status, :location, :nationality, :gender, :function, :profile_status
+                            :id, :employee_id, :name, :email, :department,
+                            CAST(:date_of_birth AS DATE),
+                            :password_hash, :password_changed, :role, :is_active,
+                            :employment_status, :profile_status
                         )
                     """),
                     {
@@ -770,23 +772,16 @@ async def seed_all_employees(
                         'department': emp.get('department'),
                         'date_of_birth': emp.get('date_of_birth'),
                         'password_hash': emp['password_hash'],
-                        'password_changed': password_changed_val,
+                        'password_changed': bool(emp.get('password_changed', False)),
                         'role': emp.get('role', 'viewer'),
-                        'is_active': is_active_val,
-                        'job_title': emp.get('job_title'),
-                        'line_manager_name': emp.get('line_manager_name'),
-                        'line_manager_email': emp.get('line_manager_email'),
+                        'is_active': bool(emp.get('is_active', True)),
                         'employment_status': emp.get('employment_status', 'Active'),
-                        'location': emp.get('location'),
-                        'nationality': emp.get('nationality'),
-                        'gender': emp.get('gender'),
-                        'function': emp.get('function'),
                         'profile_status': emp.get('profile_status', 'complete')
                     }
                 )
                 inserted += 1
             except Exception as e:
-                errors.append(f"{emp['employee_id']}: {str(e)[:100]}")
+                errors.append(f"{emp['employee_id']}: {str(e)[:150]}")
 
         # Now update line_manager_id references
         manager_updates = 0
@@ -815,6 +810,7 @@ async def seed_all_employees(
             "success": True,
             "total_in_seed": len(employees),
             "inserted": inserted,
+            "db_columns": list(db_columns.keys()),
             "errors": errors[:10] if errors else [],
             "message": f"Successfully loaded {inserted} employees from seed file"
         }
