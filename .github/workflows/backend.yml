@@ -2,8 +2,9 @@
 name: Deploy FastAPI Backend
 
 on:
-  push:
-    branches: [ "main" ]
+  # Disabled - using deploy.yml instead
+  # push:
+  #   branches: [ "main" ]
   workflow_dispatch:
 
 permissions:

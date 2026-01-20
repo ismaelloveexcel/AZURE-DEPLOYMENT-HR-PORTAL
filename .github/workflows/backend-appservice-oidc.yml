@@ -1,8 +1,10 @@
 name: Deploy Backend (FastAPI) to Azure App Service via OIDC
 
 on:
-  push:
-    branches: ["main"]
+  # Disabled - using deploy.yml instead
+  # push:
+  #   branches: ["main"]
+  workflow_dispatch:
 
 permissions:
   id-token: write
