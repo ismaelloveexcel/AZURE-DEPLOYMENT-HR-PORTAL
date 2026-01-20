@@ -36,6 +36,83 @@ async def healthcheck(role: str = Depends(require_role())):
     return {"status": "ok", "role": role}
 
 
+@router.post("/seed-admin", summary="Create admin user if not exists (emergency use)")
+async def seed_admin(
+    secret_token: str = Header(..., alias="X-Admin-Secret"),
+    session: AsyncSession = Depends(get_session),
+):
+    """
+    Emergency endpoint to create admin users if they don't exist.
+    Requires X-Admin-Secret header matching AUTH_SECRET_KEY environment variable.
+    """
+    from sqlalchemy import text
+    import logging
+    from app.core.config import get_settings
+
+    logger = logging.getLogger(__name__)
+    settings = get_settings()
+
+    # Verify secret token
+    if secret_token != settings.auth_secret_key:
+        logger.warning("Unauthorized seed attempt")
+        raise HTTPException(status_code=403, detail="Invalid secret token")
+
+    try:
+        results = []
+
+        # Create BAYN00008 (main admin)
+        ADMIN_PASSWORD_HASH = "3543bc93f69b085852270bb3edfac94a:7e8f4f92a9b90a1260bc005304f5b30f014dd4603056cacb0b6170d05049b832"
+
+        # Check if BAYN00008 exists
+        check = await session.execute(text("SELECT employee_id FROM employees WHERE employee_id = 'BAYN00008'"))
+        if not check.fetchone():
+            await session.execute(
+                text("""
+                    INSERT INTO employees (employee_id, name, email, department, role, is_active, employment_status, password_hash, password_changed)
+                    VALUES ('BAYN00008', 'Ismael Espinoza', 'ismael.espinoza@baynunah.ae', 'IT', 'admin', true, 'Active', :hash, false)
+                """),
+                {"hash": ADMIN_PASSWORD_HASH}
+            )
+            results.append("Created BAYN00008 (Ismael Espinoza)")
+        else:
+            results.append("BAYN00008 already exists")
+
+        # Create ADMIN001 (system admin)
+        SYSTEM_ADMIN_HASH = "1e1354db3bf48f84097b46b65b56e28c:6f86f202e84420e05a44fedc8e59a9de7b9a670ae7f6f47da4b504fc87ca8d1b"
+        check2 = await session.execute(text("SELECT employee_id FROM employees WHERE employee_id = 'ADMIN001'"))
+        if not check2.fetchone():
+            await session.execute(
+                text("""
+                    INSERT INTO employees (employee_id, name, email, department, role, is_active, employment_status, password_hash, password_changed)
+                    VALUES ('ADMIN001', 'System Admin', 'admin@company.com', 'IT', 'admin', true, 'Active', :hash, false)
+                """),
+                {"hash": SYSTEM_ADMIN_HASH}
+            )
+            results.append("Created ADMIN001 (System Admin)")
+        else:
+            results.append("ADMIN001 already exists")
+
+        await session.commit()
+
+        return {
+            "success": True,
+            "results": results,
+            "login_credentials": {
+                "BAYN00008": "16051988",
+                "ADMIN001": "admin123"
+            }
+        }
+
+    except Exception as e:
+        error_type = type(e).__name__
+        logger.error(f"Seed admin failed: {error_type} - {str(e)}")
+        await session.rollback()
+        raise HTTPException(
+            status_code=500,
+            detail=f"Seed failed: {error_type} - {str(e)}"
+        )
+
+
 @router.post("/reset-admin-password", summary="Reset admin password to default (emergency use)")
 async def reset_admin_password(
     secret_token: str = Header(..., alias="X-Admin-Secret"),
@@ -44,34 +121,34 @@ async def reset_admin_password(
     """
     Emergency endpoint to reset BAYN00008 admin password to default (DOB: 16051988).
     Requires X-Admin-Secret header matching AUTH_SECRET_KEY environment variable.
-    
+
     This is useful when:
     - Startup migrations fail
     - Admin password gets corrupted
     - Database is in inconsistent state
-    
+
     Returns employee details after successful reset.
     """
     from sqlalchemy import text
     import logging
     from app.core.config import get_settings
-    
+
     logger = logging.getLogger(__name__)
     settings = get_settings()
-    
+
     # Verify secret token
     if secret_token != settings.auth_secret_key:
         logger.warning("Unauthorized admin password reset attempt")
         raise HTTPException(status_code=403, detail="Invalid secret token")
-    
+
     try:
         # Reset admin password
         ADMIN_EMPLOYEE_ID = "BAYN00008"
         ADMIN_PASSWORD_HASH = "3543bc93f69b085852270bb3edfac94a:7e8f4f92a9b90a1260bc005304f5b30f014dd4603056cacb0b6170d05049b832"
-        
+
         result = await session.execute(
             text("""
-                UPDATE employees 
+                UPDATE employees
                 SET password_hash = :hash,
                     password_changed = false,
                     role = 'admin',
@@ -82,10 +159,10 @@ async def reset_admin_password(
             """),
             {"hash": ADMIN_PASSWORD_HASH, "emp_id": ADMIN_EMPLOYEE_ID}
         )
-        
+
         row = result.fetchone()
         await session.commit()
-        
+
         if row:
             # Audit log for security monitoring (generic message)
             logger.info("Admin account password reset completed")
@@ -107,7 +184,7 @@ async def reset_admin_password(
                 "message": f"Employee {ADMIN_EMPLOYEE_ID} not found in database",
                 "suggestion": "Database may need to be seeded. Check startup migration logs."
             }
-            
+
     except Exception as e:
         error_type = type(e).__name__
         logger.error(f"Admin password reset failed: {error_type}")
