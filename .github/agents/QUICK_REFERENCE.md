@@ -8,6 +8,7 @@ Need help? Choose your agent:
 - **Technical implementation** → Portal Engineer  
 - **Code quality/security** → Code Quality Monitor
 - **Azure deployment/troubleshooting** → Azure Deployment Specialist
+- **Azure deployment failures** → Azure Debugging Engineer ⚡NEW
 
 ## 📋 Common Commands
 
@@ -45,6 +46,17 @@ Need help? Choose your agent:
 "Run database migrations"
 ```
 
+### Azure Debugging Engineer ⚡NEW
+```
+"Analyze the latest deployment and fix everything"
+"Debug the backend failing to start"
+"Fix Bicep validation failures"
+"Resolve CORS errors between frontend and backend"
+"Fix database connection timeout"
+"Correct OIDC and workflow errors"
+"Repair the entire deployment pipeline"
+```
+
 ## 🎯 Decision Tree
 
 ```
@@ -74,8 +86,16 @@ Need help? Choose your agent:
 ├─ Database connection problems?
 │  └─→ Azure Deployment Specialist
 │
-└─ Python/backend errors?
-   └─→ Azure Deployment Specialist
+├─ Python/backend errors?
+│  └─→ Azure Deployment Specialist
+│
+└─ Azure deployment FAILED? ⚡
+   ├─ Bicep errors? → Azure Debugging Engineer
+   ├─ Workflow errors? → Azure Debugging Engineer
+   ├─ Backend won't start? → Azure Debugging Engineer
+   ├─ CORS errors? → Azure Debugging Engineer
+   ├─ Database connection fails? → Azure Debugging Engineer
+   └─ Any deployment issue? → Azure Debugging Engineer (auto-fix)
 ```
 
 ## 📚 Agent Files
@@ -84,6 +104,7 @@ Need help? Choose your agent:
 - **Portal Engineer**: `.github/agents/portal-engineer.md`
 - **Code Quality Monitor**: `.github/agents/code-quality-monitor.md`
 - **Azure Deployment Specialist**: `.github/agents/azure-deployment-specialist.md`
+- **Azure Debugging Engineer**: `.github/agents/azure-debugger.md` ⚡NEW
 - **Full Guide**: `docs/COPILOT_AGENTS.md`
 - **Configuration**: `.github/agents/config.yml`
 

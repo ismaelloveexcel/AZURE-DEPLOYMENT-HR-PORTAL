@@ -46,6 +46,20 @@ Proactive code quality and security scanner.
 - Complete repository knowledge
 - Emergency recovery procedures
 
+### 5. [Azure Debugging Engineer](azure-debugger.md)
+**AUTOMATED FIX ENGINE** - Expert in automated diagnosis and resolution of Azure deployment failures.
+
+**Use when you need**:
+- Automatic analysis of deployment failures
+- Bicep template fixes
+- GitHub Actions workflow debugging
+- Backend startup issues
+- Database connection failures
+- CORS configuration problems
+- OIDC authentication fixes
+- Automated PR creation with fixes
+- Production deployment recovery
+
 ## 📖 Documentation
 
 - **[Quick Reference](QUICK_REFERENCE.md)** - Fast lookup for common tasks
@@ -100,6 +114,8 @@ Verify (Code Quality Monitor)
   ↓
 Deploy (Azure Deployment Specialist)
   ↓
+Debug & Fix (Azure Debugging Engineer)
+  ↓
 Live ✅
 ```
 
@@ -116,6 +132,9 @@ Live ✅
 | Deploy to Azure | Azure Deployment | "Deploy to Azure App Service" |
 | Fix login issues | Azure Deployment | "Troubleshoot login errors" |
 | Fix database | Azure Deployment | "Debug database connection" |
+| Auto-fix deployment | Azure Debugger | "Analyze and fix deployment failures" |
+| Fix Bicep errors | Azure Debugger | "Fix Bicep validation failures" |
+| Resolve CORS | Azure Debugger | "Fix CORS configuration" |
 
 ## 📊 Agent Specializations
 
@@ -145,6 +164,16 @@ Azure Deployment Specialist
 ├── Login Troubleshooting ✅
 ├── Database Issues ✅
 └── Python Environment ✅
+
+Azure Debugging Engineer
+├── Automated Failure Analysis ✅
+├── Bicep Template Fixes ✅
+├── GitHub Actions Debugging ✅
+├── Backend Startup Issues ✅
+├── Database Connectivity ✅
+├── CORS & Networking ✅
+├── OIDC Authentication ✅
+└── Automated PR Creation ✅
 ```
 
 ## 🛠️ Integration
