@@ -1,11 +1,14 @@
 name: Deploy Backend App Service
 
+# DISABLED: This workflow is redundant with deploy.yml which handles both frontend and backend
+# deploy.yml is the primary deployment workflow and includes concurrency controls
+# This workflow is kept for reference and can be manually triggered if needed
 on:
-  push:
-    branches: [main]
-    paths:
-      - "backend/**"
-      - ".github/workflows/backend-appservice.yml"
+  # push:
+  #   branches: [main]
+  #   paths:
+  #     - "backend/**"
+  #     - ".github/workflows/backend-appservice.yml"
   workflow_dispatch:
 
 permissions:
