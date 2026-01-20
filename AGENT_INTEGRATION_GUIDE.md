@@ -3,7 +3,41 @@
 
 This guide explains how to use the specialized agents created for the HR Portal, including the new **Aesthetic Guardian** and **Technical Guardian** agents.
 
-> **Important Note:** These "agents" are instruction files designed for use with GitHub Copilot Chat or as reference guides for developers. They are **not** autonomous bots that automatically monitor the system or create issues/PRs. To use them, reference the agent files when interacting with GitHub Copilot Chat in your IDE or GitHub interface.
+> **Agent Status:** 
+> - ✅ **Deployed as Bots** - Technical Guardian and Aesthetic Guardian now run as automated GitHub Actions workflows
+> - 📚 **Also Available as Guidelines** - Agent instruction files can still be used with GitHub Copilot Chat for manual reviews
+
+---
+
+## 🤖 Automated Agent Bots (Active)
+
+### Technical Guardian Bot
+**Status:** ✅ Active - Runs automatically
+
+**Automated Monitoring:**
+- **Health Checks:** Every 15 minutes
+  - Monitors `/api/health/ping` and `/api/health/db`
+  - Creates GitHub issues automatically if health checks fail
+  - Workflow: `.github/workflows/technical-guardian-health.yml`
+
+- **Security Scans:** Daily at 2 AM UTC + on every PR
+  - Scans for vulnerabilities in dependencies (Python & npm)
+  - Checks for hardcoded secrets
+  - Posts results to PRs and creates issues for critical findings
+  - Workflow: `.github/workflows/technical-guardian-security.yml`
+
+### Aesthetic Guardian Bot
+**Status:** ✅ Active - Runs on PRs
+
+**Automated Checks:**
+- **UI/UX Review:** Triggered on every PR that modifies frontend files
+  - Color contrast analysis
+  - Responsive design check
+  - Loading states verification
+  - Button states review
+  - Typography consistency
+  - Posts detailed review as PR comment
+  - Workflow: `.github/workflows/aesthetic-guardian-pr.yml`
 
 ---
 
@@ -104,17 +138,17 @@ This guide explains how to use the specialized agents created for the HR Portal,
 
 ---
 
-### 6. **Aesthetic Guardian** ⭐ NEW (`.github/agents/aesthetic-guardian.md`)
+### 6. **Aesthetic Guardian** ⭐ DEPLOYED BOT (`.github/agents/aesthetic-guardian.md`)
 **Purpose:** UI/UX quality, visual consistency, accessibility, design improvements
 
-**Use when you need to:**
-- Review UI/UX design quality
-- Ensure accessibility compliance
-- Find visual inconsistencies
-- Improve user experience
-- Get design recommendations
+**🤖 Automated Bot Features:**
+- ✅ **UI/UX review** on every PR with frontend changes (automatic)
+- ✅ **Color contrast analysis** (automatic)
+- ✅ **Responsive design check** (automatic)
+- ✅ **Loading states verification** (automatic)
+- ✅ **PR comments** with design recommendations (automatic)
 
-**Example prompts for GitHub Copilot Chat:**
+**Manual Use with GitHub Copilot Chat:**
 ```
 "Using the Aesthetic Guardian agent instructions, review the employee dashboard design"
 "With the Aesthetic Guardian agent context, check accessibility compliance for the login page"
@@ -122,26 +156,25 @@ This guide explains how to use the specialized agents created for the HR Portal,
 "Using Aesthetic Guardian agent, find GitHub examples of modern HR dashboards"
 ```
 
-**What this agent helps you check (when you ask):**
+**What this agent checks (automatically on PRs):**
 - Color contrast issues and accessibility
-- Responsive design across devices
-- Missing loading states in components
-- Typography consistency
-- Modern design patterns from GitHub repositories
+- Responsive design classes (sm:, md:, lg:, xl:)
+- Missing loading states in async components
+- Button interactive states (hover, focus, disabled)
+- Typography consistency across files
 
 ---
 
-### 7. **Technical Guardian** ⭐ NEW (`.github/agents/technical-guardian.md`)
+### 7. **Technical Guardian** ⭐ DEPLOYED BOT (`.github/agents/technical-guardian.md`)
 **Purpose:** System health monitoring, proactive issue detection, automated fixes
 
-**Use when you need to:**
-- Review system health status
-- Identify performance issues
-- Find and fix security vulnerabilities
-- Optimize database queries
-- Get technical recommendations
+**🤖 Automated Bot Features:**
+- ✅ **Health monitoring** every 15 minutes (automatic)
+- ✅ **Security scans** daily + on PRs (automatic)
+- ✅ **Issue creation** when problems detected (automatic)
+- ✅ **PR comments** with security scan results (automatic)
 
-**Example prompts for GitHub Copilot Chat:**
+**Manual Use with GitHub Copilot Chat:**
 ```
 "Using the Technical Guardian agent instructions, analyze the system health"
 "With the Technical Guardian agent context, analyze API performance metrics"
@@ -149,13 +182,12 @@ This guide explains how to use the specialized agents created for the HR Portal,
 "Using Technical Guardian agent, review the code for security vulnerabilities"
 ```
 
-**What this agent helps you check (when you ask):**
-- Health endpoint status
-- Slow database queries
-- Missing database indexes
-- Security vulnerabilities
-- Code quality and formatting issues
-- Performance bottlenecks
+**What this agent monitors (automatically):**
+- Health endpoint status (every 15 min)
+- Database connectivity (every 15 min)
+- Security vulnerabilities (daily + PRs)
+- Dependency vulnerabilities (daily + PRs)
+- Hardcoded secrets (daily + PRs)
 
 ---
 

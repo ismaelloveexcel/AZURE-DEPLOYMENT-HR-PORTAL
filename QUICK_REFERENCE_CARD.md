@@ -41,15 +41,20 @@
 
 ## 🤖 New Agents Created
 
-### Aesthetic Guardian ✨
+### Aesthetic Guardian ✨ - DEPLOYED BOT
 **Purpose:** UI/UX quality & design consistency  
-**Usage:** `@aesthetic-guardian review [component]`  
-**File:** `.github/agents/aesthetic-guardian.md`
+**Status:** ✅ Active - Runs on every frontend PR  
+**Workflow:** `.github/workflows/aesthetic-guardian-pr.yml`  
+**Auto-checks:** Color contrast, responsive design, loading states, button states, typography
 
-### Technical Guardian 🛡️
+### Technical Guardian 🛡️ - DEPLOYED BOT
 **Purpose:** System health & proactive issue detection  
-**Usage:** `@technical-guardian health check`  
-**File:** `.github/agents/technical-guardian.md`
+**Status:** ✅ Active - Health checks every 15 min, security scans daily  
+**Workflows:** 
+- `technical-guardian-health.yml` (every 15 min)
+- `technical-guardian-security.yml` (daily + PRs)
+
+**Auto-monitors:** Health endpoints, database, security vulnerabilities, dependencies
 
 ---
 
@@ -121,20 +126,33 @@ curl -X POST https://hrportal-backend-new.azurewebsites.net/api/health/reset-adm
 
 ---
 
-## 🤝 Agent Quick Commands
+## 🤝 How to Use Agents
 
-> **Note:** These are instruction files for GitHub Copilot Chat, not bots with `@`-mentions.
+### Automated Bot Features (Active Now)
 
-| Task | Agent | How to use |
-|------|-------|------------|
-| Review UI design | Aesthetic Guardian | In GitHub Copilot Chat, with the Aesthetic Guardian agent instructions as context, ask: "Review the dashboard UI design for usability and branding consistency." |
-| Check system health | Technical Guardian | In GitHub Copilot Chat, with the Technical Guardian agent instructions as context, ask: "Check overall system health and highlight any issues." |
-| Optimize query | Technical Guardian | In GitHub Copilot Chat, with the Technical Guardian agent instructions as context, ask: "Review and optimize the /api/employees query for performance." |
-| Security scan | Technical Guardian | In GitHub Copilot Chat, with the Technical Guardian agent instructions as context, ask: "Perform a security scan of the relevant backend and frontend code." |
-| Add feature | Portal Engineer | In GitHub Copilot Chat, with the Portal Engineer agent instructions as context, ask: "Propose and outline implementation steps to add a leave management module." |
-| Fix deployment | Azure Debugger | In GitHub Copilot Chat, with the Azure Debugger agent instructions as context, ask: "Investigate and fix the current deployment error (include error X details)." |
+**Technical Guardian Bot:**
+- ✅ Health monitoring runs automatically every 15 minutes
+- ✅ Security scans run daily at 2 AM UTC + on every PR
+- ✅ Automatically creates GitHub issues when problems detected
+- ✅ Posts security scan results as PR comments
 
-> Note: These are example prompts for GitHub Copilot Chat (using the corresponding agent instruction files as context) or for manual reference. They are **not** GitHub `@`-mentions of bots or users.
+**Aesthetic Guardian Bot:**
+- ✅ Reviews every PR that modifies frontend files
+- ✅ Checks color contrast, responsive design, loading states
+- ✅ Posts comprehensive UI/UX review as PR comment
+
+### Manual Use with GitHub Copilot Chat
+
+For on-demand reviews, use the agent instruction files with GitHub Copilot Chat:
+
+| Task | Agent | How to use in GitHub Copilot Chat |
+|------|-------|----------------------------------|
+| Review UI design | Aesthetic Guardian | "Using Aesthetic Guardian agent instructions, review the dashboard UI design" |
+| Check system health | Technical Guardian | "Using Technical Guardian agent instructions, analyze system health status" |
+| Optimize query | Technical Guardian | "Using Technical Guardian agent instructions, optimize /api/employees query" |
+| Security review | Technical Guardian | "Using Technical Guardian agent instructions, perform security scan" |
+
+> **Note:** Bots run automatically. Manual use with GitHub Copilot is optional for deeper reviews.
 
 ---
 
