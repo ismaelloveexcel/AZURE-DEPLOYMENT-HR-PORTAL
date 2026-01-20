@@ -116,21 +116,15 @@ jobs:
           echo "✅ App settings configured"
 
       - name: Deploy to Azure App Service
-        run: |
-          az webapp deploy \
-            --name "$WEBAPP_NAME" \
-            --resource-group "$RESOURCE_GROUP" \
-            --src-path deploy.zip \
-            --type zip \
-            --clean true \
-            --restart true \
-            --timeout 1200
-          echo "✅ Deployment completed"
+        uses: azure/webapps-deploy@v3
+        with:
+          app-name: ${{ env.WEBAPP_NAME }}
+          package: deploy.zip
 
-      - name: Wait for Oryx build to complete
+      - name: Wait for deployment and Oryx build
         run: |
-          echo "⏳ Waiting 90s for Oryx build to complete..."
-          sleep 90
+          echo "⏳ Waiting 120s for deployment and Oryx build to complete..."
+          sleep 120
 
       - name: Run database migrations
         run: |
