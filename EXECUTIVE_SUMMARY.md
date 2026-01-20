@@ -132,59 +132,61 @@ This comprehensive assessment reviews the last successful deployment, identifies
 
 ---
 
-## 🤖 New Intelligent Agents Introduced
+## 🤖 New Intelligent Agent Guidelines Created
+
+> **Important:** These are instruction files for GitHub Copilot Chat, not autonomous bots. They provide guidelines for code reviews and quality checks when you use them with GitHub Copilot.
 
 ### 1. Aesthetic Guardian Agent ✨
-**Purpose:** Maintain high-quality UI/UX and visual consistency
+**Purpose:** Guidelines for maintaining high-quality UI/UX and visual consistency
 
-**Capabilities:**
-- ✅ Automatically scans for design issues
-- ✅ Ensures accessibility compliance (WCAG 2.1 AA)
-- ✅ Detects color contrast problems
-- ✅ Identifies responsive design issues
-- ✅ Recommends modern design patterns from GitHub
-- ✅ Maintains design system consistency
+**What it helps you check (when asked via GitHub Copilot Chat):**
+- Design consistency and accessibility compliance (WCAG 2.1 AA)
+- Color contrast problems
+- Responsive design issues across devices
+- Modern design patterns from GitHub repositories
+- Design system consistency
 
-**Usage:**
+**Usage in GitHub Copilot Chat:**
 ```
-@aesthetic-guardian review the employee dashboard design
-@aesthetic-guardian check accessibility compliance
-@aesthetic-guardian suggest modern UI improvements
+"Using the Aesthetic Guardian agent instructions, review the employee dashboard design"
+"With Aesthetic Guardian context, check accessibility compliance"
+"Following Aesthetic Guardian guidelines, suggest modern UI improvements"
 ```
 
 **Benefits:**
-- Professional, polished user interface
-- Consistent design across all pages
-- Accessible to all users
+- Guidelines ensure professional, polished user interface
+- Standards for consistent design across all pages
+- Accessibility best practices
 - Modern, competitive appearance
 
 ---
 
 ### 2. Technical Guardian Agent 🛡️
-**Purpose:** Monitor system health and proactively fix technical issues
+**Purpose:** Guidelines for system health monitoring and technical quality
 
-**Capabilities:**
-- ✅ 24/7 system health monitoring
-- ✅ Automatic detection of slow queries
-- ✅ Security vulnerability scanning
-- ✅ Performance optimization recommendations
-- ✅ Automated fixes for common issues
-- ✅ GitHub issue creation for problems
-- ✅ Searches GitHub for best practices
+**What it helps you check (when asked via GitHub Copilot Chat):**
+- System health status and metrics
+- Slow database queries
+- Security vulnerabilities
+- Performance bottlenecks
+- Code quality issues
+- GitHub best practices
 
-**Usage:**
+**Usage in GitHub Copilot Chat:**
 ```
-@technical-guardian run full system health check
-@technical-guardian analyze API performance
-@technical-guardian scan for security vulnerabilities
-@technical-guardian optimize database queries
+"Using the Technical Guardian agent instructions, analyze system health"
+"With Technical Guardian context, review API performance"
+"Following Technical Guardian guidelines, scan for security vulnerabilities"
+"Using Technical Guardian agent, suggest database query optimizations"
 ```
 
 **Benefits:**
-- Issues detected before users report them
-- Automatic fixes for security problems
-- Continuous performance optimization
-- Reduced downtime and errors
+- Comprehensive guidelines for quality checks
+- Standards for security and performance
+- Best practices from GitHub community
+- Systematic approach to technical reviews
+
+**Note:** To implement automated monitoring based on these guidelines, you would need to create GitHub Actions workflows. See the Agent Integration Guide for examples.
 
 ---
 

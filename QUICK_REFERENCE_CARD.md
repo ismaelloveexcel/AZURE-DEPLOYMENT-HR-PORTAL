@@ -123,14 +123,18 @@ curl -X POST https://hrportal-backend-new.azurewebsites.net/api/health/reset-adm
 
 ## 🤝 Agent Quick Commands
 
-| Task | Agent | Command |
-|------|-------|---------|
-| Review UI design | Aesthetic Guardian | `@aesthetic-guardian review dashboard` |
-| Check system health | Technical Guardian | `@technical-guardian health check` |
-| Optimize query | Technical Guardian | `@technical-guardian optimize /api/employees` |
-| Security scan | Technical Guardian | `@technical-guardian security scan` |
-| Add feature | Portal Engineer | `@portal-engineer add leave module` |
-| Fix deployment | Azure Debugger | `@azure-debugger fix error X` |
+> **Note:** These are instruction files for GitHub Copilot Chat, not bots with `@`-mentions.
+
+| Task | Agent | How to use |
+|------|-------|------------|
+| Review UI design | Aesthetic Guardian | In GitHub Copilot Chat, with the Aesthetic Guardian agent instructions as context, ask: "Review the dashboard UI design for usability and branding consistency." |
+| Check system health | Technical Guardian | In GitHub Copilot Chat, with the Technical Guardian agent instructions as context, ask: "Check overall system health and highlight any issues." |
+| Optimize query | Technical Guardian | In GitHub Copilot Chat, with the Technical Guardian agent instructions as context, ask: "Review and optimize the /api/employees query for performance." |
+| Security scan | Technical Guardian | In GitHub Copilot Chat, with the Technical Guardian agent instructions as context, ask: "Perform a security scan of the relevant backend and frontend code." |
+| Add feature | Portal Engineer | In GitHub Copilot Chat, with the Portal Engineer agent instructions as context, ask: "Propose and outline implementation steps to add a leave management module." |
+| Fix deployment | Azure Debugger | In GitHub Copilot Chat, with the Azure Debugger agent instructions as context, ask: "Investigate and fix the current deployment error (include error X details)." |
+
+> Note: These are example prompts for GitHub Copilot Chat (using the corresponding agent instruction files as context) or for manual reference. They are **not** GitHub `@`-mentions of bots or users.
 
 ---
 
