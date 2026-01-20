@@ -698,6 +698,118 @@ async def _import_table(session: AsyncSession, table_name: str, rows: List[Dict[
     return {"imported": imported, "errors": errors}
 
 
+@router.post("/seed-all-employees", summary="Force seed all employees from seed file")
+async def seed_all_employees(
+    secret_token: str = Header(..., alias="X-Admin-Secret"),
+    session: AsyncSession = Depends(get_session),
+):
+    """
+    Force load all employees from seed_employees.json.
+    This will clear existing employees and load fresh data.
+    Requires X-Admin-Secret header matching AUTH_SECRET_KEY environment variable.
+    """
+    import logging
+    from app.core.config import get_settings
+
+    logger = logging.getLogger(__name__)
+    settings = get_settings()
+
+    # Verify secret token
+    if secret_token != settings.auth_secret_key:
+        logger.warning("Unauthorized seed attempt")
+        raise HTTPException(status_code=403, detail="Invalid secret token")
+
+    try:
+        # Load seed file
+        seed_file = os.path.join(os.path.dirname(__file__), '..', 'seed_employees.json')
+        if not os.path.exists(seed_file):
+            raise HTTPException(status_code=404, detail=f"Seed file not found: {seed_file}")
+
+        with open(seed_file, 'r') as f:
+            employees = json.load(f)
+
+        logger.info(f"Loaded {len(employees)} employees from seed file")
+
+        # Clear existing employees (to avoid conflicts)
+        await session.execute(text("DELETE FROM employees"))
+        logger.info("Cleared existing employees")
+
+        # Insert all employees
+        inserted = 0
+        errors = []
+        for emp in employees:
+            try:
+                await session.execute(
+                    text("""
+                        INSERT INTO employees (
+                            id, employee_id, name, email, department, date_of_birth,
+                            password_hash, password_changed, role, is_active, job_title,
+                            line_manager_name, line_manager_email, line_manager_id,
+                            employment_status, location, nationality, gender, function, profile_status
+                        ) VALUES (
+                            :id, :employee_id, :name, :email, :department, :date_of_birth,
+                            :password_hash, :password_changed, :role, :is_active, :job_title,
+                            :line_manager_name, :line_manager_email, :line_manager_id,
+                            :employment_status, :location, :nationality, :gender, :function, :profile_status
+                        )
+                    """),
+                    {
+                        'id': emp['id'],
+                        'employee_id': emp['employee_id'],
+                        'name': emp['name'],
+                        'email': emp.get('email'),
+                        'department': emp.get('department'),
+                        'date_of_birth': emp.get('date_of_birth'),
+                        'password_hash': emp['password_hash'],
+                        'password_changed': emp.get('password_changed', False),
+                        'role': emp.get('role', 'viewer'),
+                        'is_active': emp.get('is_active', True),
+                        'job_title': emp.get('job_title'),
+                        'line_manager_name': emp.get('line_manager_name'),
+                        'line_manager_email': emp.get('line_manager_email'),
+                        'line_manager_id': emp.get('line_manager_id'),
+                        'employment_status': emp.get('employment_status', 'Active'),
+                        'location': emp.get('location'),
+                        'nationality': emp.get('nationality'),
+                        'gender': emp.get('gender'),
+                        'function': emp.get('function'),
+                        'profile_status': emp.get('profile_status', 'complete')
+                    }
+                )
+                inserted += 1
+            except Exception as e:
+                errors.append(f"{emp['employee_id']}: {str(e)[:100]}")
+
+        # Reset sequence to max id
+        if employees:
+            max_id = max(emp['id'] for emp in employees)
+            await session.execute(
+                text("SELECT setval('employees_id_seq', :max_id, true)"),
+                {"max_id": max_id}
+            )
+
+        await session.commit()
+
+        return {
+            "success": True,
+            "total_in_seed": len(employees),
+            "inserted": inserted,
+            "errors": errors[:10] if errors else [],
+            "message": f"Successfully loaded {inserted} employees from seed file"
+        }
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        error_type = type(e).__name__
+        logger.error(f"Seed all employees failed: {error_type} - {str(e)}")
+        await session.rollback()
+        raise HTTPException(
+            status_code=500,
+            detail=f"Seed failed: {error_type} - {str(e)}"
+        )
+
+
 @router.post("/import-data", summary="Import data from development")
 async def import_data(
     token: str = Query(..., description="Secure maintenance token"),
