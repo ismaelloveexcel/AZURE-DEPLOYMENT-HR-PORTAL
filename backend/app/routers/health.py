@@ -77,30 +77,15 @@ async def seed_admin(
         else:
             results.append("BAYN00008 already exists")
 
-        # Create ADMIN001 (system admin)
-        SYSTEM_ADMIN_HASH = "1e1354db3bf48f84097b46b65b56e28c:6f86f202e84420e05a44fedc8e59a9de7b9a670ae7f6f47da4b504fc87ca8d1b"
-        check2 = await session.execute(text("SELECT employee_id FROM employees WHERE employee_id = 'ADMIN001'"))
-        if not check2.fetchone():
-            await session.execute(
-                text("""
-                    INSERT INTO employees (employee_id, name, email, department, date_of_birth, role, is_active, employment_status, password_hash, password_changed, profile_status)
-                    VALUES ('ADMIN001', 'System Admin', 'admin@company.com', 'IT', '1990-01-01', 'admin', true, 'Active', :hash, false, 'complete')
-                """),
-                {"hash": SYSTEM_ADMIN_HASH}
-            )
-            results.append("Created ADMIN001 (System Admin)")
-        else:
-            results.append("ADMIN001 already exists")
-
         await session.commit()
 
         return {
             "success": True,
             "results": results,
             "login_credentials": {
-                "BAYN00008": "16051988",
-                "ADMIN001": "admin123"
-            }
+                "BAYN00008": "16051988"
+            },
+            "note": "BAYN00008 is the only admin account"
         }
 
     except Exception as e:
