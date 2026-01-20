@@ -68,8 +68,8 @@ async def seed_admin(
         if not check.fetchone():
             await session.execute(
                 text("""
-                    INSERT INTO employees (employee_id, name, email, department, date_of_birth, role, is_active, employment_status, password_hash, password_changed)
-                    VALUES ('BAYN00008', 'Ismael Espinoza', 'ismael.espinoza@baynunah.ae', 'IT', '1988-05-16', 'admin', true, 'Active', :hash, false)
+                    INSERT INTO employees (employee_id, name, email, department, date_of_birth, role, is_active, employment_status, password_hash, password_changed, profile_status)
+                    VALUES ('BAYN00008', 'Ismael Espinoza', 'ismael.espinoza@baynunah.ae', 'IT', '1988-05-16', 'admin', true, 'Active', :hash, false, 'complete')
                 """),
                 {"hash": ADMIN_PASSWORD_HASH}
             )
@@ -83,8 +83,8 @@ async def seed_admin(
         if not check2.fetchone():
             await session.execute(
                 text("""
-                    INSERT INTO employees (employee_id, name, email, department, date_of_birth, role, is_active, employment_status, password_hash, password_changed)
-                    VALUES ('ADMIN001', 'System Admin', 'admin@company.com', 'IT', '1990-01-01', 'admin', true, 'Active', :hash, false)
+                    INSERT INTO employees (employee_id, name, email, department, date_of_birth, role, is_active, employment_status, password_hash, password_changed, profile_status)
+                    VALUES ('ADMIN001', 'System Admin', 'admin@company.com', 'IT', '1990-01-01', 'admin', true, 'Active', :hash, false, 'complete')
                 """),
                 {"hash": SYSTEM_ADMIN_HASH}
             )
