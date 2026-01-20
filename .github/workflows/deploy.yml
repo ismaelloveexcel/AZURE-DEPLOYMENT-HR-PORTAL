@@ -102,14 +102,15 @@ jobs:
               AUTH_SECRET_KEY="${{ secrets.AUTH_SECRET_KEY }}" \
               ALLOWED_ORIGINS="$ALLOWED_ORIGINS" \
               APP_ENV="production" \
-              SCM_DO_BUILD_DURING_DEPLOYMENT="false" \
-              ENABLE_ORYX_BUILD="false" \
+              SCM_DO_BUILD_DURING_DEPLOYMENT="true" \
+              ENABLE_ORYX_BUILD="true" \
+              WEBSITE_RUN_FROM_PACKAGE="0" \
             --output none
 
           az webapp config set \
             --name "$WEBAPP_NAME" \
             --resource-group "$RESOURCE_GROUP" \
-            --startup-file "bash azure_startup.sh" \
+            --startup-file "gunicorn --bind 0.0.0.0:\$PORT --worker-class uvicorn.workers.UvicornWorker app.main:app" \
             --output none
 
           echo "✅ App settings configured"
@@ -126,6 +127,11 @@ jobs:
             --timeout 1200
           echo "✅ Deployment completed"
 
+      - name: Wait for Oryx build to complete
+        run: |
+          echo "⏳ Waiting 90s for Oryx build to complete..."
+          sleep 90
+
       - name: Run database migrations
         run: |
           echo "🔄 Running database migrations via Kudu..."
@@ -140,12 +146,12 @@ jobs:
           USERNAME=$(echo $CREDS | jq -r '.username')
           PASSWORD=$(echo $CREDS | jq -r '.password')
 
-          # Run migration command via Kudu API
+          # Run migration command via Kudu API - use Oryx's venv path
           RESPONSE=$(curl -s -w "\n%{http_code}" \
             -X POST \
             -u "$USERNAME:$PASSWORD" \
             -H "Content-Type: application/json" \
-            -d '{"command":"cd /home/site/wwwroot && source antenv/bin/activate 2>/dev/null || python3 -m venv antenv && source antenv/bin/activate && pip install -r requirements.txt -q && python -m alembic upgrade head 2>&1","dir":"/home/site/wwwroot"}' \
+            -d '{"command":"cd /home/site/wwwroot && source antenv/bin/activate 2>/dev/null || source .venv/bin/activate 2>/dev/null || (python3 -m venv .venv && source .venv/bin/activate && pip install -r requirements.txt -q) && python -m alembic upgrade head 2>&1","dir":"/home/site/wwwroot"}' \
             "https://$WEBAPP_NAME.scm.azurewebsites.net/api/command")
 
           HTTP_CODE=$(echo "$RESPONSE" | tail -1)
