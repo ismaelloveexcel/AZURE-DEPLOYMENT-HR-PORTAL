@@ -26,7 +26,19 @@ async def lifespan(app: FastAPI):
     """Application lifespan handler for startup/shutdown events."""
     # Startup
     logger.info("Application startup", extra={"env": settings.app_env})
-    
+
+    # Create database tables if they don't exist
+    try:
+        from app.models import Base
+        from app.database import engine
+        async with engine.begin() as conn:
+            await conn.run_sync(Base.metadata.create_all)
+        logger.info("✅ Database tables created/verified")
+    except Exception as e:
+        logger.error(f"❌ Failed to create database tables: {e}")
+        import traceback
+        logger.error(traceback.format_exc())
+
     # Start attendance scheduler for background jobs
     try:
         from app.services.attendance_scheduler import start_attendance_scheduler
@@ -34,7 +46,7 @@ async def lifespan(app: FastAPI):
         logger.info("Attendance scheduler started")
     except Exception as e:
         logger.warning(f"Could not start attendance scheduler: {e}")
-    
+
     yield
     
     # Shutdown
