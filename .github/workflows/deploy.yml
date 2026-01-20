@@ -15,8 +15,8 @@ jobs:
     runs-on: ubuntu-latest
     env:
       RESOURCE_GROUP: baynunah-hr-portal-rg
-      WEBAPP_NAME: baynunah-hr-portal
-      WEBAPP_URL: https://baynunah-hr-portal.azurewebsites.net
+      WEBAPP_NAME: hrportal-backend-new
+      WEBAPP_URL: https://hrportal-backend-new.azurewebsites.net
 
     steps:
       - name: Checkout code
