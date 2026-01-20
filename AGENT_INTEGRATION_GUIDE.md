@@ -271,10 +271,18 @@ WCAG 2.1 AA standards"
 ```
 
 ### 2. GitHub Actions Workflows
-Agents can be triggered automatically:
+Agents are **not** GitHub Actions and cannot be executed with `uses:`. Instead, you can use workflows to automatically request an agent review by adding a comment that mentions the agent (for humans or GitHub Copilot to pick up):
 ```yaml
-- name: Run Technical Guardian
-  uses: ./.github/agents/technical-guardian.md
+- name: Request Technical Guardian review
+  uses: actions/github-script@v7
+  with:
+    script: |
+      github.issues.createComment({
+        issue_number: context.issue.number,
+        owner: context.repo.owner,
+        repo: context.repo.repo,
+        body: '@technical-guardian please review this pull request'
+      })
 ```
 
 ### 3. VS Code Integration
