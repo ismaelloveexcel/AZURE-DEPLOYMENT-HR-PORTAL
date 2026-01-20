@@ -734,8 +734,15 @@ async def seed_all_employees(
         # Insert all employees with minimal required columns
         inserted = 0
         errors = []
+        from datetime import datetime, date
+
         for emp in employees:
             try:
+                # Convert date_of_birth string to date object for asyncpg
+                dob = emp.get('date_of_birth')
+                if dob and isinstance(dob, str):
+                    dob = datetime.strptime(dob, '%Y-%m-%d').date()
+
                 await session.execute(
                     text("""
                         INSERT INTO employees (
@@ -744,7 +751,7 @@ async def seed_all_employees(
                             employment_status, profile_status
                         ) VALUES (
                             :id, :employee_id, :name, :email, :department,
-                            CAST(:date_of_birth AS DATE),
+                            :date_of_birth,
                             :password_hash, :password_changed, :role, :is_active,
                             :employment_status, :profile_status
                         )
@@ -755,7 +762,7 @@ async def seed_all_employees(
                         'name': emp['name'],
                         'email': emp.get('email'),
                         'department': emp.get('department'),
-                        'date_of_birth': emp.get('date_of_birth'),
+                        'date_of_birth': dob,
                         'password_hash': emp['password_hash'],
                         'password_changed': bool(emp.get('password_changed', False)),
                         'role': emp.get('role', 'viewer'),
