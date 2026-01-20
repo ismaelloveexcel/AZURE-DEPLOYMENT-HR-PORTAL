@@ -30,10 +30,21 @@ async def lifespan(app: FastAPI):
     # Create database tables if they don't exist
     try:
         from app.models import Base
-        from app.database import engine
+        from app.database import engine, AsyncSessionLocal
         async with engine.begin() as conn:
             await conn.run_sync(Base.metadata.create_all)
         logger.info("✅ Database tables created/verified")
+
+        # Run startup migrations (seeding) immediately after table creation
+        try:
+            from app.startup_migrations import run_startup_migrations
+            async with AsyncSessionLocal() as session:
+                await run_startup_migrations(session)
+            logger.info("✅ Startup migrations completed in lifespan")
+        except Exception as e:
+            logger.error(f"❌ Startup migrations failed in lifespan: {e}")
+            import traceback
+            logger.error(traceback.format_exc())
     except Exception as e:
         logger.error(f"❌ Failed to create database tables: {e}")
         import traceback
