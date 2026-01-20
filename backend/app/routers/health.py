@@ -28,7 +28,7 @@ async def ping():
     No authentication, no database, just returns OK immediately.
     Used by Azure to verify the app is running.
     """
-    return {"status": "ok", "message": "pong"}
+    return {"status": "ok", "message": "pong", "version": "2026-01-20-v3"}
 
 
 @router.get("", summary="API healthcheck")
