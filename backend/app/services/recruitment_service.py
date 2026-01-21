@@ -866,14 +866,43 @@ class RecruitmentService:
         request: RecruitmentRequest,
         created_by: str
     ) -> Pass:
-        """Create manager pass for hiring manager."""
-        # Generate pass number
+        """
+        Create manager pass for hiring manager.
+        Uses MAX-based approach with retry logic to avoid race conditions.
+        """
         today = date.today().strftime('%Y%m%d')
-        result = await session.execute(
-            select(func.count(Pass.id)).where(Pass.pass_number.like(f'MGR-{today}-%'))
-        )
-        count = result.scalar() or 0
-        pass_number = f"MGR-{today}-{count + 1:04d}"
+        max_attempts = 5
+        
+        for attempt in range(max_attempts):
+            try:
+                # Get max sequence number for today
+                result = await session.execute(
+                    select(func.max(Pass.pass_number)).where(
+                        Pass.pass_number.like(f'MGR-{today}-%')
+                    )
+                )
+                max_number = result.scalar()
+                
+                if max_number:
+                    try:
+                        last_seq = int(max_number.split('-')[-1])
+                        next_seq = last_seq + 1
+                    except (ValueError, IndexError):
+                        next_seq = 1
+                else:
+                    next_seq = 1
+                
+                pass_number = f"MGR-{today}-{next_seq:04d}"
+                break  # Exit loop if successful
+                
+            except IntegrityError:
+                await session.rollback()
+                if attempt == max_attempts - 1:
+                    # Fallback: Use UUID suffix
+                    unique_suffix = str(uuid.uuid4())[:8].upper()
+                    logging.warning(f"Failed to generate sequential manager pass number after {max_attempts} attempts. Using UUID fallback.")
+                    pass_number = f"MGR-{today}-{unique_suffix}"
+                continue
 
         # Create pass
         manager_pass = Pass(
@@ -901,14 +930,43 @@ class RecruitmentService:
         candidate: Candidate,
         created_by: str
     ) -> Pass:
-        """Create recruitment pass for candidate."""
-        # Generate pass number
+        """
+        Create recruitment pass for candidate.
+        Uses MAX-based approach with retry logic to avoid race conditions.
+        """
         today = date.today().strftime('%Y%m%d')
-        result = await session.execute(
-            select(func.count(Pass.id)).where(Pass.pass_number.like(f'REC-{today}-%'))
-        )
-        count = result.scalar() or 0
-        pass_number = f"REC-{today}-{count + 1:04d}"
+        max_attempts = 5
+        
+        for attempt in range(max_attempts):
+            try:
+                # Get max sequence number for today
+                result = await session.execute(
+                    select(func.max(Pass.pass_number)).where(
+                        Pass.pass_number.like(f'REC-{today}-%')
+                    )
+                )
+                max_number = result.scalar()
+                
+                if max_number:
+                    try:
+                        last_seq = int(max_number.split('-')[-1])
+                        next_seq = last_seq + 1
+                    except (ValueError, IndexError):
+                        next_seq = 1
+                else:
+                    next_seq = 1
+                
+                pass_number = f"REC-{today}-{next_seq:04d}"
+                break  # Exit loop if successful
+                
+            except IntegrityError:
+                await session.rollback()
+                if attempt == max_attempts - 1:
+                    # Fallback: Use UUID suffix
+                    unique_suffix = str(uuid.uuid4())[:8].upper()
+                    logging.warning(f"Failed to generate sequential candidate pass number after {max_attempts} attempts. Using UUID fallback.")
+                    pass_number = f"REC-{today}-{unique_suffix}"
+                continue
 
         # Create pass
         candidate_pass = Pass(

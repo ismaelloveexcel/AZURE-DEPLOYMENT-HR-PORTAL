@@ -153,6 +153,31 @@ class PassService:
             qr_code_data=qr_data,
         )
 
+    async def mark_expired_passes(self, session: AsyncSession) -> int:
+        """
+        Automatically mark passes as expired if their expiry date has passed.
+        
+        Returns:
+            Number of passes marked as expired
+        """
+        from datetime import date
+        
+        today = date.today()
+        
+        # Get all active passes that have expired
+        passes = await self._repo.list_all(session, status="active")
+        
+        count = 0
+        for pass_obj in passes:
+            if pass_obj.valid_until < today:
+                pass_obj.status = "expired"
+                count += 1
+        
+        if count > 0:
+            await session.commit()
+        
+        return count
+
     def get_pass_types(self) -> List[PassTypeInfo]:
         """Get available pass types."""
         return [PassTypeInfo(**pt) for pt in PASS_TYPES]

@@ -190,3 +190,33 @@ async def get_print_data(
     
     # Get print data
     return await pass_service.get_print_data(session, pass_number)
+
+
+# ============================================================================
+# AUTOMATION ENDPOINTS (SOLO HR SUPPORT)
+# ============================================================================
+
+@router.post(
+    "/automation/mark-expired",
+    summary="Mark expired passes as expired (automation)"
+)
+async def mark_expired_passes(
+    role: str = Depends(require_role(["admin", "hr"])),
+    session: AsyncSession = Depends(get_session)
+):
+    """
+    Automatically mark passes as expired if their expiry date has passed.
+    
+    **Use Case:** Solo HR can run this daily to clean up expired passes.
+    
+    **Automation:** This should be run via cron/scheduler (e.g., once per day).
+    
+    **Admin and HR only.**
+    """
+    count = await pass_service.mark_expired_passes(session)
+    
+    return {
+        "success": True,
+        "expired_count": count,
+        "message": f"Marked {count} pass(es) as expired"
+    }
