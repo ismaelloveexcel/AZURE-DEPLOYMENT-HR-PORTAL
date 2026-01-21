@@ -1,8 +1,8 @@
 name: Deploy Frontend to Azure Static Web Apps
 
-# DISABLED: This workflow is redundant with deploy.yml which handles both frontend and backend
-# deploy.yml is the primary deployment workflow and includes concurrency controls
-# This workflow is kept for reference and can be manually triggered if needed
+# ACTIVE: Supplementary frontend deploy with concurrency to avoid conflicts.
+# deploy.yml remains the primary deploy; this workflow is serialized via
+# frontend-deployment group and can still be run manually if needed.
 on:
   push:
     branches: [main]
