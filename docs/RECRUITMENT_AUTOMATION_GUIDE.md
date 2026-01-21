@@ -5,6 +5,28 @@ This guide shows you how to leverage automation to manage recruitment efficientl
 
 ---
 
+## 🔧 Need to revise the recruitment module?
+
+Do **not** modify production directly or embed a new “agent” inside the app. Instead, use the existing Portal Engineer agent and GitHub workflow so changes stay reviewable and safe.
+
+**Fast path**
+1) Open a new PR/branch (e.g., `fix/recruitment-revisions`).
+2) In the PR description, ask the **Portal Engineer** agent to implement the change. Include:
+   - What to change (feature/bug)
+   - Relevant files/paths (see `backend/app/routers/recruitment.py`, `services/recruitment_service.py`, `schemas/recruitment.py`)
+   - Expected acceptance criteria
+3) Let the agent commit to the PR. **Do not run deploy pipelines** until you review.
+4) Review + merge once CI is green.
+
+**Why not deploy an agent inside the app?**
+- Keeps production attack surface minimal (no runtime agents or extra secrets)
+- Ensures every change is auditable in Git history and CI
+- Follows the approved “custom agent via PR” workflow already configured for this repo
+
+If you need a sandbox to test UI changes, run the app locally (`./scripts/start-portal.sh`) or spin up a temporary App Service slot—never edit the live app directly.
+
+---
+
 ## 🤖 Daily Automation Tasks
 
 ### What Gets Automated
