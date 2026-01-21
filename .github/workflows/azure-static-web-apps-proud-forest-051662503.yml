@@ -1,20 +1,16 @@
 name: Azure Static Web Apps CI/CD
 
-# DISABLED: This workflow is redundant with deploy.yml which handles both frontend and backend
-# deploy.yml is the primary deployment workflow and includes concurrency controls
-# This auto-generated workflow is kept for reference but disabled to prevent conflicts
-# on:
-#   push:
-#     branches:
-#       - main
-#   pull_request:
-#     types: [opened, synchronize, reopened]
-#     branches:
-#       - main
-#   workflow_dispatch:
+# MANUAL-ONLY: deploy.yml is the primary deployment workflow. This auto-generated
+# SWA workflow is kept for reference and manual runs only to avoid parallel
+# deploys to the same target.
+on:
+  workflow_dispatch:
 
 jobs:
   build_and_deploy_job:
+    concurrency:
+      group: swa-deployment
+      cancel-in-progress: false
     runs-on: ubuntu-latest
     name: Build and Deploy Job
     steps:
