@@ -503,6 +503,8 @@ alembic upgrade head
 
 # Ensure PORT has a sensible default if not set
 PORT=${PORT:-8000}
+# Ensure PORT has a sensible default if not set
+PORT=${PORT:-8000}
 
 # Start application
 exec gunicorn --bind 0.0.0.0:$PORT --worker-class uvicorn.workers.UvicornWorker app.main:app
