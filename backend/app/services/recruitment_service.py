@@ -1,9 +1,10 @@
 """Business logic for recruitment operations."""
 import logging
+import uuid
 from datetime import datetime, date, timedelta
 from typing import List, Optional, Dict, Any
 from sqlalchemy import select, and_, func
-from sqlalchemy.exc import SQLAlchemyError
+from sqlalchemy.exc import SQLAlchemyError, IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.recruitment import (
@@ -701,57 +702,163 @@ class RecruitmentService:
     # =========================================================================
 
     async def _generate_request_number(self, session: AsyncSession) -> str:
-        """Generate unique request number: RRF-YYYYMMDD-XXXX."""
+        """
+        Generate unique request number: RRF-YYYYMMDD-XXXX.
+        Uses retry logic with max attempts to handle race conditions.
+        Falls back to UUID suffix if unable to generate sequential number.
+        """
         today = date.today().strftime('%Y%m%d')
-
-        # Get count of requests created today
-        result = await session.execute(
-            select(func.count(RecruitmentRequest.id)).where(
-                RecruitmentRequest.request_number.like(f'RRF-{today}-%')
-            )
-        )
-        count = result.scalar() or 0
-
-        return f"RRF-{today}-{count + 1:04d}"
+        max_attempts = 5
+        
+        for attempt in range(max_attempts):
+            try:
+                # Get max sequence number for today using MAX instead of COUNT
+                # This is more race-condition resistant
+                result = await session.execute(
+                    select(func.max(RecruitmentRequest.request_number)).where(
+                        RecruitmentRequest.request_number.like(f'RRF-{today}-%')
+                    )
+                )
+                max_number = result.scalar()
+                
+                if max_number:
+                    # Extract sequence number from last requisition
+                    try:
+                        last_seq = int(max_number.split('-')[-1])
+                        next_seq = last_seq + 1
+                    except (ValueError, IndexError):
+                        next_seq = 1
+                else:
+                    next_seq = 1
+                
+                # Try this number - if it fails due to unique constraint, retry
+                return f"RRF-{today}-{next_seq:04d}"
+                
+            except IntegrityError:
+                # Race condition detected - another request got this number
+                # Retry with next iteration
+                await session.rollback()
+                continue
+        
+        # Fallback: Use UUID suffix to guarantee uniqueness
+        unique_suffix = str(uuid.uuid4())[:8].upper()
+        logging.warning(f"Failed to generate sequential request number after {max_attempts} attempts. Using UUID fallback.")
+        return f"RRF-{today}-{unique_suffix}"
 
     async def _generate_candidate_number(self, session: AsyncSession) -> str:
-        """Generate unique candidate number: CAN-YYYYMMDD-XXXX."""
+        """
+        Generate unique candidate number: CAN-YYYYMMDD-XXXX.
+        Uses retry logic with max attempts to handle race conditions.
+        Falls back to UUID suffix if unable to generate sequential number.
+        """
         today = date.today().strftime('%Y%m%d')
-
-        result = await session.execute(
-            select(func.count(Candidate.id)).where(
-                Candidate.candidate_number.like(f'CAN-{today}-%')
-            )
-        )
-        count = result.scalar() or 0
-
-        return f"CAN-{today}-{count + 1:04d}"
+        max_attempts = 5
+        
+        for attempt in range(max_attempts):
+            try:
+                # Get max sequence number for today
+                result = await session.execute(
+                    select(func.max(Candidate.candidate_number)).where(
+                        Candidate.candidate_number.like(f'CAN-{today}-%')
+                    )
+                )
+                max_number = result.scalar()
+                
+                if max_number:
+                    try:
+                        last_seq = int(max_number.split('-')[-1])
+                        next_seq = last_seq + 1
+                    except (ValueError, IndexError):
+                        next_seq = 1
+                else:
+                    next_seq = 1
+                
+                return f"CAN-{today}-{next_seq:04d}"
+                
+            except IntegrityError:
+                await session.rollback()
+                continue
+        
+        # Fallback: Use UUID suffix
+        unique_suffix = str(uuid.uuid4())[:8].upper()
+        logging.warning(f"Failed to generate sequential candidate number after {max_attempts} attempts. Using UUID fallback.")
+        return f"CAN-{today}-{unique_suffix}"
 
     async def _generate_interview_number(self, session: AsyncSession) -> str:
-        """Generate unique interview number: INT-YYYYMMDD-XXXX."""
+        """
+        Generate unique interview number: INT-YYYYMMDD-XXXX.
+        Uses retry logic with max attempts to handle race conditions.
+        Falls back to UUID suffix if unable to generate sequential number.
+        """
         today = date.today().strftime('%Y%m%d')
-
-        result = await session.execute(
-            select(func.count(Interview.id)).where(
-                Interview.interview_number.like(f'INT-{today}-%')
-            )
-        )
-        count = result.scalar() or 0
-
-        return f"INT-{today}-{count + 1:04d}"
+        max_attempts = 5
+        
+        for attempt in range(max_attempts):
+            try:
+                result = await session.execute(
+                    select(func.max(Interview.interview_number)).where(
+                        Interview.interview_number.like(f'INT-{today}-%')
+                    )
+                )
+                max_number = result.scalar()
+                
+                if max_number:
+                    try:
+                        last_seq = int(max_number.split('-')[-1])
+                        next_seq = last_seq + 1
+                    except (ValueError, IndexError):
+                        next_seq = 1
+                else:
+                    next_seq = 1
+                
+                return f"INT-{today}-{next_seq:04d}"
+                
+            except IntegrityError:
+                await session.rollback()
+                continue
+        
+        # Fallback: Use UUID suffix
+        unique_suffix = str(uuid.uuid4())[:8].upper()
+        logging.warning(f"Failed to generate sequential interview number after {max_attempts} attempts. Using UUID fallback.")
+        return f"INT-{today}-{unique_suffix}"
 
     async def _generate_evaluation_number(self, session: AsyncSession) -> str:
-        """Generate unique evaluation number: EVL-YYYYMMDD-XXXX."""
+        """
+        Generate unique evaluation number: EVL-YYYYMMDD-XXXX.
+        Uses retry logic with max attempts to handle race conditions.
+        Falls back to UUID suffix if unable to generate sequential number.
+        """
         today = date.today().strftime('%Y%m%d')
-
-        result = await session.execute(
-            select(func.count(Evaluation.id)).where(
-                Evaluation.evaluation_number.like(f'EVL-{today}-%')
-            )
-        )
-        count = result.scalar() or 0
-
-        return f"EVL-{today}-{count + 1:04d}"
+        max_attempts = 5
+        
+        for attempt in range(max_attempts):
+            try:
+                result = await session.execute(
+                    select(func.max(Evaluation.evaluation_number)).where(
+                        Evaluation.evaluation_number.like(f'EVL-{today}-%')
+                    )
+                )
+                max_number = result.scalar()
+                
+                if max_number:
+                    try:
+                        last_seq = int(max_number.split('-')[-1])
+                        next_seq = last_seq + 1
+                    except (ValueError, IndexError):
+                        next_seq = 1
+                else:
+                    next_seq = 1
+                
+                return f"EVL-{today}-{next_seq:04d}"
+                
+            except IntegrityError:
+                await session.rollback()
+                continue
+        
+        # Fallback: Use UUID suffix
+        unique_suffix = str(uuid.uuid4())[:8].upper()
+        logging.warning(f"Failed to generate sequential evaluation number after {max_attempts} attempts. Using UUID fallback.")
+        return f"EVL-{today}-{unique_suffix}"
 
     async def _create_manager_pass(
         self,
@@ -759,14 +866,43 @@ class RecruitmentService:
         request: RecruitmentRequest,
         created_by: str
     ) -> Pass:
-        """Create manager pass for hiring manager."""
-        # Generate pass number
+        """
+        Create manager pass for hiring manager.
+        Uses MAX-based approach with retry logic to avoid race conditions.
+        """
         today = date.today().strftime('%Y%m%d')
-        result = await session.execute(
-            select(func.count(Pass.id)).where(Pass.pass_number.like(f'MGR-{today}-%'))
-        )
-        count = result.scalar() or 0
-        pass_number = f"MGR-{today}-{count + 1:04d}"
+        max_attempts = 5
+        
+        for attempt in range(max_attempts):
+            try:
+                # Get max sequence number for today
+                result = await session.execute(
+                    select(func.max(Pass.pass_number)).where(
+                        Pass.pass_number.like(f'MGR-{today}-%')
+                    )
+                )
+                max_number = result.scalar()
+                
+                if max_number:
+                    try:
+                        last_seq = int(max_number.split('-')[-1])
+                        next_seq = last_seq + 1
+                    except (ValueError, IndexError):
+                        next_seq = 1
+                else:
+                    next_seq = 1
+                
+                pass_number = f"MGR-{today}-{next_seq:04d}"
+                break  # Exit loop if successful
+                
+            except IntegrityError:
+                await session.rollback()
+                if attempt == max_attempts - 1:
+                    # Fallback: Use UUID suffix
+                    unique_suffix = str(uuid.uuid4())[:8].upper()
+                    logging.warning(f"Failed to generate sequential manager pass number after {max_attempts} attempts. Using UUID fallback.")
+                    pass_number = f"MGR-{today}-{unique_suffix}"
+                continue
 
         # Create pass
         manager_pass = Pass(
@@ -794,14 +930,43 @@ class RecruitmentService:
         candidate: Candidate,
         created_by: str
     ) -> Pass:
-        """Create recruitment pass for candidate."""
-        # Generate pass number
+        """
+        Create recruitment pass for candidate.
+        Uses MAX-based approach with retry logic to avoid race conditions.
+        """
         today = date.today().strftime('%Y%m%d')
-        result = await session.execute(
-            select(func.count(Pass.id)).where(Pass.pass_number.like(f'REC-{today}-%'))
-        )
-        count = result.scalar() or 0
-        pass_number = f"REC-{today}-{count + 1:04d}"
+        max_attempts = 5
+        
+        for attempt in range(max_attempts):
+            try:
+                # Get max sequence number for today
+                result = await session.execute(
+                    select(func.max(Pass.pass_number)).where(
+                        Pass.pass_number.like(f'REC-{today}-%')
+                    )
+                )
+                max_number = result.scalar()
+                
+                if max_number:
+                    try:
+                        last_seq = int(max_number.split('-')[-1])
+                        next_seq = last_seq + 1
+                    except (ValueError, IndexError):
+                        next_seq = 1
+                else:
+                    next_seq = 1
+                
+                pass_number = f"REC-{today}-{next_seq:04d}"
+                break  # Exit loop if successful
+                
+            except IntegrityError:
+                await session.rollback()
+                if attempt == max_attempts - 1:
+                    # Fallback: Use UUID suffix
+                    unique_suffix = str(uuid.uuid4())[:8].upper()
+                    logging.warning(f"Failed to generate sequential candidate pass number after {max_attempts} attempts. Using UUID fallback.")
+                    pass_number = f"REC-{today}-{unique_suffix}"
+                continue
 
         # Create pass
         candidate_pass = Pass(

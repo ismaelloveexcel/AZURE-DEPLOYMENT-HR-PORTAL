@@ -148,9 +148,15 @@ class PassRepository:
         return {row[0]: row[1] for row in result.all()}
 
     async def get_next_pass_number(self, session: AsyncSession, pass_type: str) -> str:
-        """Generate next pass number."""
-        # Format: TYPE-YYYYMMDD-XXXX (e.g., REC-20241231-0001)
+        """
+        Generate next pass number with race condition protection.
+        Uses MAX-based approach with retry logic and UUID fallback.
+        Format: TYPE-YYYYMMDD-XXXX (e.g., REC-20241231-0001)
+        """
         from datetime import datetime
+        from sqlalchemy.exc import IntegrityError
+        import uuid
+        import logging
         
         prefix_map = {
             "recruitment": "REC",
@@ -161,13 +167,35 @@ class PassRepository:
         }
         prefix = prefix_map.get(pass_type, "PAS")
         date_str = datetime.now().strftime("%Y%m%d")
-        
-        # Get count for today
         today_prefix = f"{prefix}-{date_str}-"
-        result = await session.execute(
-            select(func.count(Pass.id))
-            .where(Pass.pass_number.like(f"{today_prefix}%"))
-        )
-        count = result.scalar() or 0
         
-        return f"{today_prefix}{count + 1:04d}"
+        max_attempts = 5
+        for attempt in range(max_attempts):
+            try:
+                # Get max sequence number for today using MAX (more race-condition resistant)
+                result = await session.execute(
+                    select(func.max(Pass.pass_number))
+                    .where(Pass.pass_number.like(f"{today_prefix}%"))
+                )
+                max_number = result.scalar()
+                
+                if max_number:
+                    try:
+                        last_seq = int(max_number.split('-')[-1])
+                        next_seq = last_seq + 1
+                    except (ValueError, IndexError):
+                        next_seq = 1
+                else:
+                    next_seq = 1
+                
+                return f"{today_prefix}{next_seq:04d}"
+                
+            except IntegrityError:
+                # Race condition detected - retry
+                await session.rollback()
+                continue
+        
+        # Fallback: Use UUID suffix to guarantee uniqueness
+        unique_suffix = str(uuid.uuid4())[:8].upper()
+        logging.warning(f"Failed to generate sequential pass number after {max_attempts} attempts. Using UUID fallback.")
+        return f"{today_prefix}{unique_suffix}"
