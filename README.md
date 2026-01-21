@@ -8,6 +8,26 @@
 
 ---
 
+## 🔄 Workflow Deployment Impact - FIXED!
+
+**Question:** "Does running the workflow on each commit impact my deployed app?"  
+**Answer:** ✅ **We just fixed it!** You had 5 redundant workflows fighting each other.
+
+### What Was Wrong
+- 5 deployment workflows running simultaneously on every commit
+- Race conditions causing ~100 failed attempts
+- Deployments overwriting each other
+
+### What We Fixed
+- ✅ Added concurrency controls (only 1 deployment at a time)
+- ✅ Disabled 4 redundant workflows (manual trigger still available)
+- ✅ Now: 1 clean deployment per commit = predictable success
+
+📖 **[READ FULL EXPLANATION](docs/WORKFLOW_IMPACT_SUMMARY.md)** - Why you had 100 failures  
+📖 **[DEPLOYMENT OPTIONS](docs/DEPLOYMENT_WORKFLOW_GUIDE.md)** - Auto vs manual deployment
+
+---
+
 ## 🚨 Deployment Currently Failing? 
 
 ### ⚡ **ULTRA-SIMPLE 3-STEP FIX (No Reading Required!)** 

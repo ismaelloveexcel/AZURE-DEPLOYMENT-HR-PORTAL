@@ -1,17 +1,20 @@
 name: Deploy Frontend to Azure Static Web Apps
 
+# DISABLED: This workflow is redundant with deploy.yml which handles both frontend and backend
+# deploy.yml is the primary deployment workflow and includes concurrency controls
+# This workflow is kept for reference and can be manually triggered if needed
 on:
-  push:
-    branches: [main]
-    paths:
-      - 'frontend/**'
-      - 'staticwebapp.config.json'
-  pull_request:
-    types: [opened, synchronize, reopened, closed]
-    branches: [main]
-    paths:
-      - 'frontend/**'
-      - 'staticwebapp.config.json'
+  # push:
+  #   branches: [main]
+  #   paths:
+  #     - 'frontend/**'
+  #     - 'staticwebapp.config.json'
+  # pull_request:
+  #   types: [opened, synchronize, reopened, closed]
+  #   branches: [main]
+  #   paths:
+  #     - 'frontend/**'
+  #     - 'staticwebapp.config.json'
   workflow_dispatch:
 
 permissions:

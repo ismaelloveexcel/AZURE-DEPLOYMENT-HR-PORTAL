@@ -1,9 +1,12 @@
 
 name: Deploy Frontend (SWA) – main only
 
+# DISABLED: This workflow is redundant with deploy.yml which handles both frontend and backend
+# deploy.yml is the primary deployment workflow and includes concurrency controls
+# This workflow is kept for reference and can be manually triggered if needed
 on:
-  push:
-    branches: [ "main" ]
+  # push:
+  #   branches: [ "main" ]
   workflow_dispatch: {}   # allows manual run when you want
 
 jobs:
