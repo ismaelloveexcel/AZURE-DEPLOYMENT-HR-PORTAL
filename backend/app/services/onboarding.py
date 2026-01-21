@@ -30,7 +30,7 @@ ONBOARDING_STAGES = [
     {"id": 7, "name": "Employment Contract", "icon": "PenTool", "shortName": "Contract"},
 ]
 
-STAGE_DATA_TEMPLATE = {
+STAGE_DATA = {
     "documentsData": {
         "passportNumber": "",
         "passportExpiry": "",
@@ -137,7 +137,7 @@ def get_onboarding_stage_config() -> dict:
     """Return static onboarding stage configuration and default data template."""
     return {
         "stages": ONBOARDING_STAGES,
-        "stageDataTemplate": STAGE_DATA_TEMPLATE,
+        "stageData": STAGE_DATA,
     }
 
 

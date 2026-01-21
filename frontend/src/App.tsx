@@ -164,7 +164,7 @@ interface OnboardingStage {
 
 interface OnboardingStageConfigResponse {
   stages: OnboardingStage[]
-  stageDataTemplate: Record<string, any>
+  stageData: Record<string, any>
 }
 
 interface ProfileFormData {
@@ -424,7 +424,7 @@ function App() {
       if (!res.ok) throw new Error('Failed to load onboarding config')
       const data: OnboardingStageConfigResponse = await res.json()
       setOnboardingStages(data.stages || [])
-      setOnboardingStageTemplate(data.stageDataTemplate || null)
+      setOnboardingStageTemplate(data.stageData || null)
     } catch (err) {
       console.error('Failed to load onboarding config', err)
     }
