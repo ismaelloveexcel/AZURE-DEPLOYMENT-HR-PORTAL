@@ -4,19 +4,17 @@ name: Azure Static Web Apps CI/CD
 # deploy.yml is the primary deployment workflow and includes concurrency controls
 # This auto-generated workflow is kept for reference but disabled to prevent conflicts
 on:
-  # push:
-  #   branches:
-  #     - main
-  # pull_request:
-  #   types: [opened, synchronize, reopened, closed]
-  #   branches:
-  #     - main
+  push:
+    branches:
+      - main
+  pull_request:
+    types: [opened, synchronize, reopened]
+    branches:
+      - main
   workflow_dispatch:
 
 jobs:
   build_and_deploy_job:
-    # Allow workflow_dispatch runs to execute (prevent zero-job runs)
-    if: github.event_name == 'workflow_dispatch' || github.event_name == 'push' || (github.event_name == 'pull_request' && github.event.action != 'closed')
     runs-on: ubuntu-latest
     name: Build and Deploy Job
     steps:
