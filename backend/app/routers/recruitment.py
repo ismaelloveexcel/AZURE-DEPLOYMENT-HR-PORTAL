@@ -1,6 +1,6 @@
 """API endpoints for recruitment module."""
 import hmac
-from typing import List, Optional
+from typing import List, Optional, Dict, Any
 from fastapi import (
     APIRouter, Depends, HTTPException, File, UploadFile,
     Query, status, Request
@@ -419,6 +419,87 @@ async def add_candidate(
     **Admin and HR only.**
     """
     return await recruitment_service.add_candidate(session, data, employee_id)
+
+
+@router.post(
+    "/candidates/batch-upload",
+    response_model=Dict[str, Any],
+    status_code=status.HTTP_201_CREATED,
+    summary="Batch upload candidates from CSV"
+)
+async def batch_upload_candidates(
+    file: UploadFile = File(..., description="CSV file with candidate data"),
+    recruitment_request_id: int = Query(..., description="Recruitment request ID to add candidates to"),
+    employee_id: str = Depends(get_current_employee_id),
+    role: str = Depends(require_role(["admin", "hr"])),
+    session: AsyncSession = Depends(get_session)
+):
+    """
+    Batch upload candidates from CSV file.
+    
+    CSV should have columns: full_name, email, phone, current_company, current_position, years_experience, location
+    
+    Returns:
+    - total: Total candidates in file
+    - success: Number successfully added
+    - failed: Number that failed
+    - errors: List of error messages
+    
+    **Admin and HR only.**
+    """
+    import csv
+    import io
+    
+    # Validate file type
+    if not file.filename.endswith('.csv'):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="File must be a CSV file"
+        )
+    
+    # Read CSV content
+    content = await file.read()
+    csv_text = content.decode('utf-8')
+    csv_reader = csv.DictReader(io.StringIO(csv_text))
+    
+    results = {
+        'total': 0,
+        'success': 0,
+        'failed': 0,
+        'errors': []
+    }
+    
+    for row_num, row in enumerate(csv_reader, start=2):  # Start at 2 (header is 1)
+        results['total'] += 1
+        
+        try:
+            # Map CSV columns to CandidateCreate schema
+            candidate_data = CandidateCreate(
+                recruitment_request_id=recruitment_request_id,
+                full_name=row.get('full_name', '').strip(),
+                email=row.get('email', '').strip() or None,
+                phone=row.get('phone', '').strip() or None,
+                current_company=row.get('current_company', '').strip() or None,
+                current_position=row.get('current_position', '').strip() or None,
+                years_experience=int(row.get('years_experience', 0)) if row.get('years_experience', '').strip() else None,
+                current_location=row.get('location', '').strip() or None
+            )
+            
+            # Validate required fields
+            if not candidate_data.full_name:
+                results['failed'] += 1
+                results['errors'].append(f"Row {row_num}: full_name is required")
+                continue
+            
+            # Add candidate
+            await recruitment_service.add_candidate(session, candidate_data, employee_id)
+            results['success'] += 1
+            
+        except Exception as e:
+            results['failed'] += 1
+            results['errors'].append(f"Row {row_num}: {str(e)}")
+    
+    return results
 
 
 @router.get(
