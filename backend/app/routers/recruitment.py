@@ -1256,3 +1256,143 @@ async def get_recruitment_metrics(
     **Admin and HR only.**
     """
     return await recruitment_service.get_recruitment_metrics(session)
+
+
+# ============================================================================
+# AUTOMATION & NOTIFICATIONS (SOLO HR SUPPORT)
+# ============================================================================
+
+@router.post(
+    "/automation/send-interview-reminders",
+    summary="Send interview reminders (automation)"
+)
+async def send_interview_reminders(
+    hours_before: int = Query(24, description="Hours before interview to send reminder"),
+    role: str = Depends(require_role(["admin", "hr"])),
+    session: AsyncSession = Depends(get_session)
+):
+    """
+    Manually trigger interview reminder emails for upcoming interviews.
+    
+    **Use Case:** Solo HR can run this daily or before checking calendar.
+    
+    **Automation:** This should be run via cron/scheduler (e.g., once per day).
+    
+    **Admin and HR only.**
+    """
+    from app.services.recruitment_notifications import recruitment_notification_service
+    
+    sent_count = await recruitment_notification_service.check_and_send_interview_reminders(
+        session, hours_before
+    )
+    
+    return {
+        "success": True,
+        "reminders_sent": sent_count,
+        "message": f"Sent {sent_count} interview reminder(s)"
+    }
+
+
+@router.post(
+    "/automation/send-offer-expiry-alerts",
+    summary="Send offer expiry alerts (automation)"
+)
+async def send_offer_expiry_alerts(
+    days_before: int = Query(3, description="Days before expiry to send alert"),
+    role: str = Depends(require_role(["admin", "hr"])),
+    session: AsyncSession = Depends(get_session)
+):
+    """
+    Manually trigger offer expiry alerts for offers expiring soon.
+    
+    **Use Case:** Solo HR can run this daily to catch expiring offers.
+    
+    **Automation:** This should be run via cron/scheduler (e.g., once per day).
+    
+    **Admin and HR only.**
+    """
+    from app.services.recruitment_notifications import recruitment_notification_service
+    
+    sent_count = await recruitment_notification_service.check_and_send_offer_expiry_alerts(
+        session, days_before
+    )
+    
+    return {
+        "success": True,
+        "alerts_sent": sent_count,
+        "message": f"Sent {sent_count} offer expiry alert(s)"
+    }
+
+
+@router.post(
+    "/automation/mark-expired-offers",
+    summary="Mark expired offers as expired (automation)"
+)
+async def mark_expired_offers(
+    role: str = Depends(require_role(["admin", "hr"])),
+    session: AsyncSession = Depends(get_session)
+):
+    """
+    Automatically mark offers as expired if their expiry date has passed.
+    
+    **Use Case:** Solo HR can run this to clean up expired offers.
+    
+    **Automation:** This should be run via cron/scheduler (e.g., once per day).
+    
+    **Admin and HR only.**
+    """
+    from app.services.recruitment_notifications import recruitment_notification_service
+    
+    count = await recruitment_notification_service.mark_expired_offers(session)
+    
+    return {
+        "success": True,
+        "expired_count": count,
+        "message": f"Marked {count} offer(s) as expired"
+    }
+
+
+@router.post(
+    "/automation/run-all-daily-tasks",
+    summary="Run all daily automation tasks (convenience endpoint)"
+)
+async def run_all_daily_tasks(
+    role: str = Depends(require_role(["admin", "hr"])),
+    session: AsyncSession = Depends(get_session)
+):
+    """
+    Convenience endpoint to run all daily automation tasks in one call.
+    
+    **Use Case:** Solo HR can bookmark this endpoint and run it every morning.
+    
+    Runs:
+    1. Send interview reminders (24 hours before)
+    2. Send offer expiry alerts (3 days before)
+    3. Mark expired offers
+    
+    **Recommended:** Set up as a daily cron job or GitHub Actions workflow.
+    
+    **Admin and HR only.**
+    """
+    from app.services.recruitment_notifications import recruitment_notification_service
+    
+    # Run all tasks
+    reminders_sent = await recruitment_notification_service.check_and_send_interview_reminders(
+        session, hours_before=24
+    )
+    
+    alerts_sent = await recruitment_notification_service.check_and_send_offer_expiry_alerts(
+        session, days_before=3
+    )
+    
+    expired_count = await recruitment_notification_service.mark_expired_offers(session)
+    
+    return {
+        "success": True,
+        "results": {
+            "interview_reminders_sent": reminders_sent,
+            "offer_alerts_sent": alerts_sent,
+            "offers_marked_expired": expired_count
+        },
+        "message": f"Daily automation completed: {reminders_sent} reminders, {alerts_sent} alerts, {expired_count} expired offers"
+    }

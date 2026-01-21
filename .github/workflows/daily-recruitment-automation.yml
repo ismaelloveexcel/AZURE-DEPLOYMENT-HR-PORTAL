@@ -1,0 +1,94 @@
+name: Daily Recruitment Automation
+
+on:
+  schedule:
+    # Run every day at 6:00 AM UTC (adjust to your timezone)
+    - cron: '0 6 * * *'
+  workflow_dispatch:  # Allow manual triggering
+
+jobs:
+  run-recruitment-automation:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Run Daily Recruitment Tasks
+        run: |
+          # Get the API base URL from secrets or environment
+          API_URL="${{ secrets.AZURE_APP_URL || vars.API_BASE_URL }}"
+          
+          if [ -z "$API_URL" ]; then
+            echo "Error: API_URL not configured"
+            exit 1
+          fi
+          
+          # Get admin credentials (should be stored as secrets)
+          ADMIN_USERNAME="${{ secrets.ADMIN_USERNAME || 'admin' }}"
+          ADMIN_PASSWORD="${{ secrets.ADMIN_PASSWORD }}"
+          
+          if [ -z "$ADMIN_PASSWORD" ]; then
+            echo "Error: ADMIN_PASSWORD not configured"
+            exit 1
+          fi
+          
+          echo "Authenticating..."
+          # Login to get JWT token
+          TOKEN=$(curl -s -X POST "$API_URL/api/auth/login" \
+            -H "Content-Type: application/json" \
+            -d "{\"employee_id\": \"$ADMIN_USERNAME\", \"password\": \"$ADMIN_PASSWORD\"}" \
+            | jq -r '.token')
+          
+          if [ -z "$TOKEN" ] || [ "$TOKEN" = "null" ]; then
+            echo "Error: Authentication failed"
+            exit 1
+          fi
+          
+          echo "Authentication successful"
+          echo "Running daily recruitment automation tasks..."
+          
+          # Call the automation endpoint
+          RESPONSE=$(curl -s -X POST "$API_URL/api/recruitment/automation/run-all-daily-tasks" \
+            -H "Authorization: Bearer $TOKEN" \
+            -H "Content-Type: application/json")
+          
+          echo "Response: $RESPONSE"
+          
+          # Check if successful
+          SUCCESS=$(echo "$RESPONSE" | jq -r '.success')
+          
+          if [ "$SUCCESS" = "true" ]; then
+            echo "✅ Daily recruitment automation completed successfully"
+            echo "$RESPONSE" | jq -r '.message'
+            echo "$RESPONSE" | jq '.results'
+          else
+            echo "❌ Daily recruitment automation failed"
+            exit 1
+          fi
+      
+      - name: Notify on failure
+        if: failure()
+        run: |
+          echo "⚠️ Daily recruitment automation failed!"
+          echo "Please check the workflow logs and verify:"
+          echo "1. API_URL is correctly configured"
+          echo "2. ADMIN_PASSWORD secret is set"
+          echo "3. Backend application is running"
+          echo "4. Admin account has proper permissions"
+
+# SETUP INSTRUCTIONS:
+# 
+# 1. Add GitHub Secrets:
+#    - AZURE_APP_URL: Your deployed app URL (e.g., https://your-app.azurewebsites.net)
+#    - ADMIN_PASSWORD: Password for admin account
+#    
+# 2. Optional Variables:
+#    - ADMIN_USERNAME: Admin username (defaults to 'admin')
+#    
+# 3. Adjust Schedule:
+#    Change the cron expression to match your timezone
+#    Current: 6:00 AM UTC
+#    
+# 4. Test Manual Run:
+#    Go to Actions → Daily Recruitment Automation → Run workflow
