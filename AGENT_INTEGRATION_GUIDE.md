@@ -166,6 +166,14 @@ This guide explains how to use the specialized agents created for the HR Portal,
 ---
 
 ### 7. **Technical Guardian** ⭐ DEPLOYED BOT (`.github/agents/technical-guardian.md`)
+
+### 8. **My Agent** (`.github/agents/my-agent.agent.md`)
+**Purpose:** Custom deployment guardrails for “my agent” aligned to the Azure OIDC pattern.
+
+**Use when you need:**
+- To run or review “my agent” deployments
+- To prevent OIDC token failures
+- To confirm required secrets and workflow steps
 **Purpose:** System health monitoring, proactive issue detection, automated fixes
 
 **🤖 Automated Bot Features:**
@@ -595,4 +603,3 @@ Actual: No issue created
 **Last Updated:** January 20, 2026  
 **Version:** 1.0  
 **Maintained by:** Azure System Engineer
-

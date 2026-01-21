@@ -60,6 +60,9 @@ Proactive code quality and security scanner.
 - Automated PR creation with fixes
 - Production deployment recovery
 
+### 6. [My Agent](my-agent.agent.md)
+Custom deployment guardrails for “my agent” (OIDC permissions, required secrets, workflow use).
+
 ## 📖 Documentation
 
 - **[Quick Reference](QUICK_REFERENCE.md)** - Fast lookup for common tasks
