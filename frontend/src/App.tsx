@@ -155,6 +155,18 @@ interface OnboardingWelcome {
   location: string | null
 }
 
+interface OnboardingStage {
+  id: number
+  name: string
+  icon: string
+  shortName: string
+}
+
+interface OnboardingStageConfigResponse {
+  stages: OnboardingStage[]
+  stageDataTemplate: Record<string, any>
+}
+
 interface ProfileFormData {
   emergency_contact_name: string
   emergency_contact_phone: string
@@ -289,6 +301,8 @@ function App() {
   const [inviteEmployeeId, setInviteEmployeeId] = useState('')
   const [generatedLink, setGeneratedLink] = useState('')
   const [onboardingLoading, setOnboardingLoading] = useState(false)
+  const [onboardingStages, setOnboardingStages] = useState<OnboardingStage[]>([])
+  const [onboardingStageTemplate, setOnboardingStageTemplate] = useState<Record<string, any> | null>(null)
   
   // Public onboarding state
   const [onboardingToken, setOnboardingToken] = useState<string | null>(null)
@@ -400,6 +414,19 @@ function App() {
     }
     if (path.startsWith('/nomination-pass')) {
       setActiveSection('nomination-pass')
+    }
+    fetchOnboardingConfig()
+  }, [])
+
+  const fetchOnboardingConfig = useCallback(async () => {
+    try {
+      const res = await fetch(`${API_BASE}/onboarding/config/stages`)
+      if (!res.ok) throw new Error('Failed to load onboarding config')
+      const data: OnboardingStageConfigResponse = await res.json()
+      setOnboardingStages(data.stages || [])
+      setOnboardingStageTemplate(data.stageDataTemplate || null)
+    } catch (err) {
+      console.error('Failed to load onboarding config', err)
     }
   }, [])
 
