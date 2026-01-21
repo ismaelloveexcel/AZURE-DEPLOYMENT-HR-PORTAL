@@ -1,5 +1,22 @@
 # Copilot Coding Agent Instructions
 
+# Repo Principles for Baynunah HR ESS
+## Mission
+Build a compliant, auditable HR ESS for UAE private sector employers. Prioritize clarity, testability, and UAE labour law alignment.
+
+## Always do this
+- Prefer PRs with: (a) spec/plan, (b) implementation, (c) tests, (d) docs, (e) changelog.
+- For legal-sensitive changes (attendance, overtime, leave, EOS), **summarize the specific UAE article(s) you relied on and link to official MOHRE/UAE sources** in the PR body.
+- Write clean, modular code. Include minimal repro data + scripts for local testing.
+
+## Never do this
+- Never rely on non-official blogs for legal statements; prefer MOHRE/UAE law and executive regulations. If unofficial is used for ideas, clearly mark it **non-authoritative**.
+- Never commit secrets. Never bypass tests/linters.
+
+## Build & Test
+- Node/Yarn workspace (update if different).
+- Commands: `npm i && npm run build && npm test`
+
 ## Goal & Purpose
 
 This repository contains the **Secure Renewals HR Portal** - a full-stack web application for managing employee contract renewals, onboarding, compliance tracking, and recruitment. Designed for UAE-based startups with solo HR operations, it provides:
