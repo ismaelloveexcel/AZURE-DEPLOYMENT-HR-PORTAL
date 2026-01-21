@@ -1,21 +1,25 @@
 name: Deploy Frontend to Azure Static Web Apps
 
-# DISABLED: This workflow is redundant with deploy.yml which handles both frontend and backend
-# deploy.yml is the primary deployment workflow and includes concurrency controls
-# This workflow is kept for reference and can be manually triggered if needed
+# ACTIVE: Supplementary frontend deploy with concurrency to avoid conflicts.
+# deploy.yml remains the primary deploy; this workflow is serialized via
+# frontend-deployment group and can still be run manually if needed.
 on:
-  # push:
-  #   branches: [main]
-  #   paths:
-  #     - 'frontend/**'
-  #     - 'staticwebapp.config.json'
-  # pull_request:
-  #   types: [opened, synchronize, reopened, closed]
-  #   branches: [main]
-  #   paths:
-  #     - 'frontend/**'
-  #     - 'staticwebapp.config.json'
+  push:
+    branches: [main]
+    paths:
+      - 'frontend/**'
+      - 'staticwebapp.config.json'
+  pull_request:
+    types: [opened, synchronize, reopened]
+    branches: [main]
+    paths:
+      - 'frontend/**'
+      - 'staticwebapp.config.json'
   workflow_dispatch:
+
+concurrency:
+  group: frontend-deployment
+  cancel-in-progress: false
 
 permissions:
   contents: read
@@ -23,7 +27,6 @@ permissions:
 
 jobs:
   build_and_deploy:
-    if: github.event_name == 'push' || (github.event_name == 'pull_request' && github.event.action != 'closed')
     runs-on: ubuntu-latest
     name: Build and Deploy Frontend
     steps:
@@ -64,14 +67,3 @@ jobs:
           app_location: "frontend/dist"
           skip_app_build: true
           skip_api_build: true
-
-  close_pull_request:
-    if: github.event_name == 'pull_request' && github.event.action == 'closed'
-    runs-on: ubuntu-latest
-    name: Close Pull Request Job
-    steps:
-      - name: Close Pull Request
-        uses: Azure/static-web-apps-deploy@v1
-        with:
-          azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN }}
-          action: "close"
