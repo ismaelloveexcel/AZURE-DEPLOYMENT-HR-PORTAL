@@ -203,57 +203,80 @@ async def get_manager_passes(
     
     Used by ManagerPassDashboard when a manager has multiple recruitment requests.
     Each recruitment request = 1 position = 1 pass.
+    
+    **OPTIMIZED:** Uses single query with aggregations to avoid N+1 problem.
     """
     from app.models.recruitment import RecruitmentRequest, Candidate, ManagerPass
-    from sqlalchemy import select, func
+    from sqlalchemy import select, func, case
+    from sqlalchemy.orm import selectinload
     from datetime import datetime, timezone
     
-    # Get all recruitment requests for this manager
-    result = await session.execute(
-        select(RecruitmentRequest).where(
-            RecruitmentRequest.hiring_manager_id == manager_id
-        ).order_by(RecruitmentRequest.created_at.desc())
+    # Single optimized query using subqueries and joins
+    # This replaces 4N+1 queries with just 1 query
+    candidate_counts_subquery = (
+        select(
+            Candidate.recruitment_request_id,
+            func.count(Candidate.id).label('total_candidates'),
+            func.sum(
+                case(
+                    (Candidate.stage.in_(['screening', 'interview', 'offer', 'hired']), 1),
+                    else_=0
+                )
+            ).label('shortlisted'),
+            func.sum(
+                case(
+                    (Candidate.stage.in_(['interview', 'offer', 'hired']), 1),
+                    else_=0
+                )
+            ).label('interviewed')
+        )
+        .group_by(Candidate.recruitment_request_id)
+        .subquery()
     )
-    requests = result.scalars().all()
     
+    # Main query with left join to get all stats in one go
+    result = await session.execute(
+        select(
+            RecruitmentRequest,
+            func.coalesce(candidate_counts_subquery.c.total_candidates, 0).label('total_candidates'),
+            func.coalesce(candidate_counts_subquery.c.shortlisted, 0).label('shortlisted'),
+            func.coalesce(candidate_counts_subquery.c.interviewed, 0).label('interviewed')
+        )
+        .outerjoin(
+            candidate_counts_subquery,
+            RecruitmentRequest.id == candidate_counts_subquery.c.recruitment_request_id
+        )
+        .where(RecruitmentRequest.hiring_manager_id == manager_id)
+        .order_by(RecruitmentRequest.created_at.desc())
+    )
+    
+    rows = result.all()
+    
+    # Get all manager passes in one query
+    request_ids = [row[0].id for row in rows]
+    if request_ids:
+        pass_result = await session.execute(
+            select(ManagerPass).where(
+                ManagerPass.recruitment_request_id.in_(request_ids)
+            )
+        )
+        manager_passes = {mp.recruitment_request_id: mp for mp in pass_result.scalars().all()}
+    else:
+        manager_passes = {}
+    
+    # Build response
     passes = []
-    for req in requests:
-        # Get candidate counts
-        candidate_result = await session.execute(
-            select(func.count(Candidate.id)).where(
-                Candidate.recruitment_request_id == req.id
-            )
-        )
-        total_candidates = candidate_result.scalar() or 0
-        
-        # Get shortlisted count (screening + interview + offer)
-        shortlisted_result = await session.execute(
-            select(func.count(Candidate.id)).where(
-                Candidate.recruitment_request_id == req.id,
-                Candidate.stage.in_(['screening', 'interview', 'offer', 'hired'])
-            )
-        )
-        shortlisted = shortlisted_result.scalar() or 0
-        
-        # Get interviewed count
-        interviewed_result = await session.execute(
-            select(func.count(Candidate.id)).where(
-                Candidate.recruitment_request_id == req.id,
-                Candidate.stage.in_(['interview', 'offer', 'hired'])
-            )
-        )
-        interviewed = interviewed_result.scalar() or 0
+    for row in rows:
+        req = row[0]
+        total_candidates = row[1]
+        shortlisted = row[2]
+        interviewed = row[3]
         
         # Calculate days since request
         days_since = (datetime.now(timezone.utc) - req.created_at).days if req.created_at else 0
         
         # Get manager pass info
-        pass_result = await session.execute(
-            select(ManagerPass).where(
-                ManagerPass.recruitment_request_id == req.id
-            )
-        )
-        manager_pass = pass_result.scalar_one_or_none()
+        manager_pass = manager_passes.get(req.id)
         
         passes.append({
             "id": req.id,
@@ -610,7 +633,44 @@ async def upload_candidate_cv(
     - Years of experience
     
     **Admin and HR only.**
+    
+    **File Restrictions:**
+    - Maximum file size: 10 MB
+    - Allowed types: PDF, DOCX, DOC, TXT
     """
+    # SECURITY: Validate file size (10 MB limit)
+    MAX_FILE_SIZE = 10 * 1024 * 1024  # 10 MB in bytes
+    
+    # SECURITY: Validate file type
+    ALLOWED_MIME_TYPES = {
+        'application/pdf',
+        'application/vnd.openxmlformats-officedocument.wordprocessingml.document',  # .docx
+        'application/msword',  # .doc
+        'text/plain'  # .txt
+    }
+    ALLOWED_EXTENSIONS = {'.pdf', '.docx', '.doc', '.txt'}
+    
+    # Check filename has valid extension
+    if not file.filename:
+        raise HTTPException(
+            status_code=400, 
+            detail="Filename is required"
+        )
+    
+    file_ext = Path(file.filename).suffix.lower()
+    if file_ext not in ALLOWED_EXTENSIONS:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Invalid file type. Allowed types: {', '.join(ALLOWED_EXTENSIONS)}"
+        )
+    
+    # Check content type if provided
+    if file.content_type and file.content_type not in ALLOWED_MIME_TYPES:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Invalid file type. Must be PDF, DOCX, DOC, or TXT"
+        )
+    
     # Get candidate and their recruitment request
     candidate = await recruitment_service.get_candidate(session, candidate_id)
     if not candidate:
@@ -621,14 +681,25 @@ async def upload_candidate_cv(
     if not request:
         raise HTTPException(status_code=404, detail="Recruitment request not found")
     
-    # Read file content
-    content = await file.read()
-    filename = file.filename or "resume.pdf"
+    # Read file content with size limit
+    content = await file.read(MAX_FILE_SIZE + 1)  # Read one extra byte to detect oversized files
+    
+    # SECURITY: Check file size
+    if len(content) > MAX_FILE_SIZE:
+        raise HTTPException(
+            status_code=413,
+            detail=f"File too large. Maximum size is 10 MB"
+        )
+    
+    # SECURITY: Sanitize filename to prevent path traversal
+    safe_filename = Path(file.filename).name  # This removes any directory components
+    # SECURITY: Sanitize filename to prevent path traversal
+    safe_filename = Path(file.filename).name  # This removes any directory components
     
     # Save CV to storage
     resume_dir = Path("storage/resumes")
     resume_dir.mkdir(parents=True, exist_ok=True)
-    resume_path = resume_dir / f"{candidate.candidate_number}_{filename}"
+    resume_path = resume_dir / f"{candidate.candidate_number}_{safe_filename}"
     
     with open(resume_path, 'wb') as f:
         f.write(content)
@@ -640,7 +711,7 @@ async def upload_candidate_cv(
     scores = await score_candidate_cv(
         candidate_id=candidate_id,
         cv_content=content,
-        filename=filename,
+        filename=safe_filename,
         job_title=request.position_title,
         job_description=job_description,
         required_skills=required_skills,
@@ -651,7 +722,7 @@ async def upload_candidate_cv(
         return {
             "success": True,
             "candidate_id": candidate_id,
-            "filename": filename,
+            "filename": safe_filename,
             "resume_path": str(resume_path),
             "scores": {
                 "cv_scoring": scores["cv_scoring"],
@@ -666,7 +737,7 @@ async def upload_candidate_cv(
         return {
             "success": True,
             "candidate_id": candidate_id,
-            "filename": filename,
+            "filename": safe_filename,
             "resume_path": str(resume_path),
             "scores": None,
             "message": "CV uploaded but automatic scoring could not be completed"
