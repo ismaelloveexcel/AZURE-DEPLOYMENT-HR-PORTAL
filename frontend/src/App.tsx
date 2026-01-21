@@ -338,6 +338,10 @@ function App() {
   const [candidateStatusFilter, setCandidateStatusFilter] = useState('')
   const [candidateSourceFilter, setCandidateSourceFilter] = useState('')
   const [showNewRequestModal, setShowNewRequestModal] = useState(false)
+  const [showBatchUploadModal, setShowBatchUploadModal] = useState(false)
+  const [batchUploadPositionId, setBatchUploadPositionId] = useState<number | null>(null)
+  const [batchUploadLoading, setBatchUploadLoading] = useState(false)
+  const [batchUploadResult, setBatchUploadResult] = useState<{total: number, success: number, failed: number, errors: string[]} | null>(null)
   const [newRequestForm, setNewRequestForm] = useState({
     position_title: '',
     department: 'Engineering / R&D',
@@ -697,6 +701,42 @@ function App() {
   }, [user])
 
   const debouncedFetchRecruitmentCandidates = useDebounce(fetchRecruitmentCandidates, 400)
+
+  const handleBatchUploadCandidates = async (file: File) => {
+    if (!user || !batchUploadPositionId) return
+    setBatchUploadLoading(true)
+    setBatchUploadResult(null)
+    
+    try {
+      const formData = new FormData()
+      formData.append('file', file)
+      
+      const res = await fetchWithAuth(
+        `${API_BASE}/recruitment/candidates/batch-upload?recruitment_request_id=${batchUploadPositionId}`,
+        {
+          method: 'POST',
+          body: formData,
+          headers: {} // Don't set Content-Type, browser will set it with boundary for FormData
+        }
+      )
+      
+      if (res.ok) {
+        const result = await res.json()
+        setBatchUploadResult(result)
+        // Refresh candidates list
+        await fetchRecruitmentCandidates()
+        await fetchRecruitmentData()
+      } else {
+        const error = await res.json()
+        alert(`Upload failed: ${error.detail || 'Unknown error'}`)
+      }
+    } catch (err) {
+      console.error('Failed to upload candidates:', err)
+      alert('Failed to upload candidates. Please try again.')
+    } finally {
+      setBatchUploadLoading(false)
+    }
+  }
 
   const handleCreateRecruitmentRequest = async () => {
     if (!user) return
@@ -2763,18 +2803,31 @@ function App() {
                                 <p className="text-xs text-gray-400">AED {req.salary_range_min.toLocaleString()} - {req.salary_range_max.toLocaleString()}</p>
                               )}
                             </div>
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation()
-                                setViewingManagerPassPositionId(req.id)
-                                setViewingManagerId(req.hiring_manager_id || user?.employee_id || '')
-                                setActiveSection('manager-pass')
-                              }}
-                              className="px-3 py-1.5 bg-blue-600 text-white text-xs font-medium rounded-lg hover:bg-blue-700 flex items-center gap-1"
-                            >
-                              <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z" /></svg>
-                              Manager Pass
-                            </button>
+                            <div className="flex gap-2">
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation()
+                                  setBatchUploadPositionId(req.id)
+                                  setShowBatchUploadModal(true)
+                                }}
+                                className="px-3 py-1.5 bg-emerald-600 text-white text-xs font-medium rounded-lg hover:bg-emerald-700 flex items-center gap-1"
+                              >
+                                <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" /></svg>
+                                Upload Candidates
+                              </button>
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation()
+                                  setViewingManagerPassPositionId(req.id)
+                                  setViewingManagerId(req.hiring_manager_id || user?.employee_id || '')
+                                  setActiveSection('manager-pass')
+                                }}
+                                className="px-3 py-1.5 bg-blue-600 text-white text-xs font-medium rounded-lg hover:bg-blue-700 flex items-center gap-1"
+                              >
+                                <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z" /></svg>
+                                Manager Pass
+                              </button>
+                            </div>
                           </div>
                         </div>
                       </div>
@@ -3212,6 +3265,135 @@ function App() {
                     </button>
                   </div>
                 </form>
+              </div>
+            </div>
+          )}
+
+          {/* Batch Upload Modal */}
+          {showBatchUploadModal && (
+            <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+              <div className="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-2xl">
+                <div className="flex items-center justify-between mb-6">
+                  <h2 className="text-xl font-semibold text-gray-800">Upload Candidates (CSV)</h2>
+                  <button 
+                    onClick={() => {
+                      setShowBatchUploadModal(false)
+                      setBatchUploadResult(null)
+                    }} 
+                    className="text-gray-400 hover:text-gray-600"
+                  >
+                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </button>
+                </div>
+
+                {!batchUploadResult ? (
+                  <div className="space-y-6">
+                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                      <h3 className="font-medium text-blue-900 mb-2">CSV Format Required</h3>
+                      <p className="text-sm text-blue-700 mb-3">Your CSV file should have these columns:</p>
+                      <code className="block text-xs bg-blue-100 text-blue-900 p-2 rounded">
+                        full_name,email,phone,current_company,current_position,years_experience,location
+                      </code>
+                      <p className="text-xs text-blue-600 mt-2">Only full_name is required. Other fields are optional.</p>
+                    </div>
+
+                    <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-emerald-400 transition-colors">
+                      <input
+                        type="file"
+                        accept=".csv"
+                        onChange={(e) => {
+                          const file = e.target.files?.[0]
+                          if (file) {
+                            handleBatchUploadCandidates(file)
+                          }
+                        }}
+                        className="hidden"
+                        id="csv-upload"
+                        disabled={batchUploadLoading}
+                      />
+                      <label htmlFor="csv-upload" className="cursor-pointer">
+                        <svg className="w-12 h-12 text-gray-400 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                        </svg>
+                        <p className="text-gray-600 font-medium mb-1">
+                          {batchUploadLoading ? 'Uploading...' : 'Click to select CSV file'}
+                        </p>
+                        <p className="text-sm text-gray-400">or drag and drop</p>
+                      </label>
+                    </div>
+
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() => {
+                          const csv = 'full_name,email,phone,current_company,current_position,years_experience,location\nJohn Doe,john@example.com,+971501234567,ABC Corp,Senior Engineer,5,Dubai'
+                          const blob = new Blob([csv], { type: 'text/csv' })
+                          const url = window.URL.createObjectURL(blob)
+                          const a = document.createElement('a')
+                          a.href = url
+                          a.download = 'candidates_template.csv'
+                          a.click()
+                        }}
+                        className="flex-1 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors text-sm font-medium"
+                      >
+                        Download Template
+                      </button>
+                      <button
+                        onClick={() => {
+                          setShowBatchUploadModal(false)
+                          setBatchUploadResult(null)
+                        }}
+                        className="flex-1 px-4 py-2 bg-white border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors text-sm font-medium"
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    <div className={`p-4 rounded-lg ${
+                      batchUploadResult.failed === 0 ? 'bg-green-50 border border-green-200' : 'bg-yellow-50 border border-yellow-200'
+                    }`}>
+                      <h3 className="font-medium text-gray-900 mb-2">Upload Results</h3>
+                      <div className="grid grid-cols-3 gap-4 text-center">
+                        <div>
+                          <p className="text-2xl font-bold text-gray-900">{batchUploadResult.total}</p>
+                          <p className="text-xs text-gray-600">Total</p>
+                        </div>
+                        <div>
+                          <p className="text-2xl font-bold text-green-600">{batchUploadResult.success}</p>
+                          <p className="text-xs text-gray-600">Success</p>
+                        </div>
+                        <div>
+                          <p className="text-2xl font-bold text-red-600">{batchUploadResult.failed}</p>
+                          <p className="text-xs text-gray-600">Failed</p>
+                        </div>
+                      </div>
+                    </div>
+
+                    {batchUploadResult.errors.length > 0 && (
+                      <div className="bg-red-50 border border-red-200 rounded-lg p-4 max-h-48 overflow-y-auto">
+                        <h4 className="font-medium text-red-900 mb-2">Errors:</h4>
+                        <ul className="text-sm text-red-700 space-y-1">
+                          {batchUploadResult.errors.map((error, idx) => (
+                            <li key={idx}>• {error}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+
+                    <button
+                      onClick={() => {
+                        setShowBatchUploadModal(false)
+                        setBatchUploadResult(null)
+                      }}
+                      className="w-full px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors font-medium"
+                    >
+                      Close
+                    </button>
+                  </div>
+                )}
               </div>
             </div>
           )}
