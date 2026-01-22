@@ -331,6 +331,11 @@ function App() {
   })
   const [profileSubmitted, setProfileSubmitted] = useState(false)
   const [publicStageCompletion, setPublicStageCompletion] = useState<Record<string, boolean>>({})
+  const startOnboardingPass = () => {
+    setActiveSection('passes')
+    setShowPassForm(true)
+    setPassFormData(prev => ({ ...prev, pass_type: 'onboarding' }))
+  }
   
   // Attendance state
   const [attendanceStatus, setAttendanceStatus] = useState<TodayAttendanceStatus | null>(null)
