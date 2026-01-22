@@ -309,7 +309,10 @@ jobs:
       - name: Measure response times
         id: perf-test
         run: |
-          BACKEND_URL="${{ secrets.BACKEND_URL || 'https://hr-portal-backend.azurewebsites.net' }}"
+          BACKEND_URL="${{ secrets.BACKEND_URL }}"
+          if [ -z "$BACKEND_URL" ]; then
+            BACKEND_URL="https://hrportal-backend-new.azurewebsites.net"
+          fi
           
           echo "Measuring response times..."
           
