@@ -2254,17 +2254,17 @@ function App() {
                 onClick={() => setAdminTab('compliance')}
                 className={`flex-1 px-6 py-4 text-sm font-medium transition-colors ${
                   adminTab === 'compliance'
-                    ? 'text-emerald-600 border-b-2 border-emerald-500 bg-emerald-50/50'
+                    ? 'text-[#00A0DF] border-b-2 border-[#00A0DF] bg-[#00A0DF]/5'
                     : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'
                 }`}
               >
                 <div className="flex items-center justify-center gap-2">
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
-                  Compliance Alerts
+                  UAE Compliance
                   {complianceAlerts && (complianceAlerts.expired.length + (complianceAlerts.days_7?.length || 0)) > 0 && (
-                    <span className="bg-red-500 text-white text-xs px-2 py-0.5 rounded-full">
+                    <span className="bg-gradient-to-r from-red-500 to-orange-500 text-white text-xs px-2 py-0.5 rounded-full font-semibold shadow-sm">
                       {complianceAlerts.expired.length + (complianceAlerts.days_7?.length || 0)}
                     </span>
                   )}
@@ -2487,84 +2487,135 @@ function App() {
             <>
               {complianceAlertsLoading ? (
                 <div className="bg-white rounded-xl shadow-lg p-12 text-center">
-                  <div className="animate-spin w-8 h-8 border-4 border-emerald-500 border-t-transparent rounded-full mx-auto mb-4"></div>
-                  <p className="text-gray-600">Loading compliance alerts...</p>
+                  <div className="animate-spin w-12 h-12 border-4 border-[#00A0DF] border-t-transparent rounded-full mx-auto mb-4"></div>
+                  <p className="text-gray-600 font-medium">Loading UAE compliance data...</p>
                 </div>
               ) : (
                 <>
-                  {/* Summary Cards */}
+                  {/* Enhanced Header with Baynunah Branding */}
+                  <div className="bg-gradient-to-r from-[#00A0DF] to-[#0080C0] rounded-xl shadow-lg p-6 mb-6 text-white">
+                    <div className="flex items-center gap-3 mb-2">
+                      <div className="w-12 h-12 bg-white/20 rounded-lg flex items-center justify-center">
+                        <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                      </div>
+                      <div>
+                        <h1 className="text-2xl font-bold">UAE Compliance Dashboard</h1>
+                        <p className="text-white/90 text-sm">Automated tracking for Visa, Emirates ID, Medical Fitness & More</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Enhanced Summary Cards with Gradients */}
                   <div className="grid grid-cols-4 gap-4 mb-6">
-                    <div className="bg-red-50 rounded-xl p-4 border border-red-100">
+                    <div className="bg-gradient-to-br from-red-50 to-red-100 rounded-xl p-5 border-2 border-red-200 shadow-md hover:shadow-lg transition-shadow">
                       <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 bg-red-100 rounded-lg flex items-center justify-center text-red-600 text-lg">!</div>
+                        <div className="w-12 h-12 bg-gradient-to-br from-red-500 to-red-600 rounded-xl flex items-center justify-center text-white text-xl font-bold shadow-md">
+                          !
+                        </div>
                         <div>
-                          <p className="text-2xl font-bold text-red-700">{complianceAlerts?.expired.length || 0}</p>
-                          <p className="text-xs text-red-600">Expired</p>
+                          <p className="text-3xl font-bold text-red-700">{complianceAlerts?.expired.length || 0}</p>
+                          <p className="text-xs font-semibold text-red-600 uppercase tracking-wide">Expired</p>
+                          <p className="text-xs text-red-500 mt-0.5">Immediate Action</p>
                         </div>
                       </div>
                     </div>
-                    <div className="bg-orange-50 rounded-xl p-4 border border-orange-100">
+                    <div className="bg-gradient-to-br from-orange-50 to-orange-100 rounded-xl p-5 border-2 border-orange-200 shadow-md hover:shadow-lg transition-shadow">
                       <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center text-orange-600 text-lg">!</div>
+                        <div className="w-12 h-12 bg-gradient-to-br from-orange-500 to-orange-600 rounded-xl flex items-center justify-center text-white text-xl font-bold shadow-md">
+                          ⚠
+                        </div>
                         <div>
-                          <p className="text-2xl font-bold text-orange-700">{complianceAlerts?.days_7?.length || 0}</p>
-                          <p className="text-xs text-orange-600">Within 7 days</p>
+                          <p className="text-3xl font-bold text-orange-700">{complianceAlerts?.days_7?.length || 0}</p>
+                          <p className="text-xs font-semibold text-orange-600 uppercase tracking-wide">Within 7 Days</p>
+                          <p className="text-xs text-orange-500 mt-0.5">Urgent Renewal</p>
                         </div>
                       </div>
                     </div>
-                    <div className="bg-yellow-50 rounded-xl p-4 border border-yellow-100">
+                    <div className="bg-gradient-to-br from-yellow-50 to-yellow-100 rounded-xl p-5 border-2 border-yellow-200 shadow-md hover:shadow-lg transition-shadow">
                       <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 bg-yellow-100 rounded-lg flex items-center justify-center text-yellow-600 text-lg">!</div>
+                        <div className="w-12 h-12 bg-gradient-to-br from-yellow-500 to-yellow-600 rounded-xl flex items-center justify-center text-white text-xl font-bold shadow-md">
+                          ⏰
+                        </div>
                         <div>
-                          <p className="text-2xl font-bold text-yellow-700">{complianceAlerts?.days_30?.length || 0}</p>
-                          <p className="text-xs text-yellow-600">Within 30 days</p>
+                          <p className="text-3xl font-bold text-yellow-700">{complianceAlerts?.days_30?.length || 0}</p>
+                          <p className="text-xs font-semibold text-yellow-600 uppercase tracking-wide">Within 30 Days</p>
+                          <p className="text-xs text-yellow-500 mt-0.5">Plan Renewal</p>
                         </div>
                       </div>
                     </div>
-                    <div className="bg-amber-50 rounded-xl p-4 border border-amber-100">
+                    <div className="bg-gradient-to-br from-amber-50 to-amber-100 rounded-xl p-5 border-2 border-amber-200 shadow-md hover:shadow-lg transition-shadow">
                       <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 bg-amber-100 rounded-lg flex items-center justify-center text-amber-600 text-lg">!</div>
+                        <div className="w-12 h-12 bg-gradient-to-br from-amber-500 to-amber-600 rounded-xl flex items-center justify-center text-white text-xl font-bold shadow-md">
+                          📋
+                        </div>
                         <div>
-                          <p className="text-2xl font-bold text-amber-700">{complianceAlerts?.days_custom?.length || 0}</p>
-                          <p className="text-xs text-amber-600">Within 60 days</p>
+                          <p className="text-3xl font-bold text-amber-700">{complianceAlerts?.days_custom?.length || 0}</p>
+                          <p className="text-xs font-semibold text-amber-600 uppercase tracking-wide">Within 60 Days</p>
+                          <p className="text-xs text-amber-500 mt-0.5">Track Progress</p>
                         </div>
                       </div>
                     </div>
                   </div>
 
-                  {/* Expired Documents */}
+                  {/* Enhanced Expired Documents Section */}
                   {complianceAlerts?.expired && complianceAlerts.expired.length > 0 && (
-                    <div className="bg-white rounded-xl shadow-lg mb-6">
-                      <div className="px-6 py-4 border-b border-gray-100 bg-red-50 rounded-t-xl">
-                        <h2 className="text-lg font-semibold text-red-700 flex items-center gap-2">
-                          <span>!</span> Expired Documents ({complianceAlerts.expired.length})
-                        </h2>
-                        <p className="text-sm text-red-600 mt-1">These documents need immediate attention</p>
+                    <div className="bg-white rounded-xl shadow-xl mb-6 overflow-hidden border-2 border-red-200">
+                      <div className="px-6 py-5 bg-gradient-to-r from-red-50 to-red-100 border-b-2 border-red-200">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 bg-gradient-to-br from-red-500 to-red-600 rounded-lg flex items-center justify-center text-white font-bold shadow-md">
+                              !
+                            </div>
+                            <div>
+                              <h2 className="text-xl font-bold text-red-700 flex items-center gap-2">
+                                Expired Documents ({complianceAlerts.expired.length})
+                              </h2>
+                              <p className="text-sm text-red-600 font-medium">⚠️ Immediate attention required for UAE compliance</p>
+                            </div>
+                          </div>
+                          <span className="bg-gradient-to-r from-red-500 to-red-600 text-white px-4 py-2 rounded-lg text-sm font-bold shadow-md">
+                            CRITICAL
+                          </span>
+                        </div>
                       </div>
                       <table className="w-full">
-                        <thead className="bg-gray-50 text-xs text-gray-500 uppercase">
+                        <thead className="bg-gradient-to-r from-gray-50 to-gray-100 text-xs text-gray-600 uppercase tracking-wider">
                           <tr>
-                            <th className="px-6 py-3 text-left">Employee</th>
-                            <th className="px-6 py-3 text-left">Document</th>
-                            <th className="px-6 py-3 text-left">Expiry Date</th>
-                            <th className="px-6 py-3 text-left">Days Overdue</th>
-                            <th className="px-6 py-3 text-left">Action</th>
+                            <th className="px-6 py-4 text-left font-bold">Employee</th>
+                            <th className="px-6 py-4 text-left font-bold">Document Type</th>
+                            <th className="px-6 py-4 text-left font-bold">Expiry Date</th>
+                            <th className="px-6 py-4 text-left font-bold">Status</th>
+                            <th className="px-6 py-4 text-left font-bold">Action</th>
                           </tr>
                         </thead>
                         <tbody className="divide-y divide-gray-100">
                           {complianceAlerts.expired.map((alert, idx) => (
-                            <tr key={`expired-${idx}`} className="hover:bg-gray-50">
+                            <tr key={`expired-${idx}`} className="hover:bg-red-50/50 transition-colors">
                               <td className="px-6 py-4">
-                                <p className="font-medium text-gray-800">{alert.employee_name}</p>
-                                <p className="text-sm text-gray-500">{alert.employee_id}</p>
-                              </td>
-                              <td className="px-6 py-4 text-sm text-gray-600">{alert.document_type}</td>
-                              <td className="px-6 py-4 text-sm text-gray-600">{alert.expiry_date}</td>
-                              <td className="px-6 py-4">
-                                <span className="text-red-600 font-medium">{Math.abs(alert.days_until_expiry)} days overdue</span>
+                                <p className="font-semibold text-gray-800">{alert.employee_name}</p>
+                                <p className="text-sm text-gray-500 font-medium">{alert.employee_id}</p>
                               </td>
                               <td className="px-6 py-4">
-                                <button onClick={() => setViewingProfileId(alert.employee_id)} className="text-emerald-600 hover:text-emerald-700 font-medium text-sm">
+                                <span className="inline-flex items-center gap-2 px-3 py-1 bg-gray-100 text-gray-700 rounded-lg text-sm font-medium">
+                                  📄 {alert.document_type}
+                                </span>
+                              </td>
+                              <td className="px-6 py-4 text-sm font-medium text-gray-600">{alert.expiry_date}</td>
+                              <td className="px-6 py-4">
+                                <span className="inline-flex items-center gap-1 px-3 py-1 bg-gradient-to-r from-red-500 to-red-600 text-white rounded-lg text-sm font-bold shadow-sm">
+                                  ⚠️ {Math.abs(alert.days_until_expiry)} days overdue
+                                </span>
+                              </td>
+                              <td className="px-6 py-4">
+                                <button 
+                                  onClick={() => setViewingProfileId(alert.employee_id)} 
+                                  className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-[#00A0DF] to-[#0080C0] hover:from-[#0080C0] hover:to-[#006090] text-white rounded-lg font-semibold text-sm shadow-md transition-all hover:shadow-lg"
+                                >
+                                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                                  </svg>
                                   View Profile
                                 </button>
                               </td>
