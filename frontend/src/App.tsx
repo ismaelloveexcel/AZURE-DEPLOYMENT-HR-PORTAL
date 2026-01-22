@@ -4,6 +4,7 @@ import { TemplateList } from './components/Templates/TemplateList'
 import { EmployeeProfile } from './components/EmployeeProfile'
 import { CandidatePass } from './components/CandidatePass'
 import { ManagerPass } from './components/ManagerPass'
+import { AttendancePass } from './components/AttendancePass'
 import { NominationPass } from './components/NominationPass'
 import { Performance } from './components/Performance'
 import { EoyNominations } from './components/EoyNominations'
@@ -11,7 +12,7 @@ import { EOYAdminPanel } from './components/EOYAdminPanel/EOYAdminPanel'
 import { InsuranceCensus } from './components/InsuranceCensus'
 import { useDebounce } from './hooks/useDebounce'
 
-type Section = 'home' | 'employees' | 'onboarding' | 'external' | 'admin' | 'secret-chamber' | 'passes' | 'public-onboarding' | 'recruitment' | 'recruitment-request' | 'recruitment-benefits' | 'templates' | 'template-manager' | 'template-candidate' | 'template-onboarding' | 'template-employee' | 'attendance' | 'compliance-alerts' | 'candidate-pass' | 'manager-pass' | 'performance' | 'insurance-census' | 'nomination-pass'
+type Section = 'home' | 'employees' | 'onboarding' | 'external' | 'admin' | 'secret-chamber' | 'passes' | 'public-onboarding' | 'recruitment' | 'recruitment-request' | 'recruitment-benefits' | 'templates' | 'template-manager' | 'template-candidate' | 'template-onboarding' | 'template-employee' | 'attendance' | 'attendance-pass' | 'compliance-alerts' | 'candidate-pass' | 'manager-pass' | 'performance' | 'insurance-census' | 'nomination-pass'
 
 interface Employee {
   id: number
@@ -390,6 +391,7 @@ function App() {
   const [viewingCandidatePassId, setViewingCandidatePassId] = useState<number | null>(null)
   const [viewingManagerPassPositionId, setViewingManagerPassPositionId] = useState<number | null>(null)
   const [viewingManagerId, setViewingManagerId] = useState<string>('')
+  const [viewingAttendancePassEmployeeId, setViewingAttendancePassEmployeeId] = useState<string | null>(null)
 
   const isAdminLogin = pendingSection === 'admin' || pendingSection === 'secret-chamber'
 
@@ -2359,6 +2361,26 @@ function App() {
                     </svg>
                     <p className="font-medium text-gray-800">Pass Generation</p>
                     <p className="text-sm text-gray-500">Create visitor passes</p>
+                  </button>
+                  <button 
+                    onClick={() => setActiveSection('attendance')}
+                    className="p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors text-left"
+                  >
+                    <svg className="w-8 h-8 text-blue-500 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <p className="font-medium text-gray-800">Attendance</p>
+                    <p className="text-sm text-gray-500">Clock in/out tracking</p>
+                  </button>
+                  <button 
+                    onClick={() => setActiveSection('attendance-pass')}
+                    className="p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors text-left"
+                  >
+                    <svg className="w-8 h-8 text-[#00A0DF] mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M10 6H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V8a2 2 0 00-2-2h-5m-4 0V5a2 2 0 114 0v1m-4 0a2 2 0 104 0m-5 8a2 2 0 100-4 2 2 0 000 4zm0 0c1.306 0 2.417.835 2.83 2M9 14a3.001 3.001 0 00-2.83 2M15 11h3m-3 4h2" />
+                    </svg>
+                    <p className="font-medium text-gray-800">Attendance Pass</p>
+                    <p className="text-sm text-gray-500">Employee attendance card</p>
                   </button>
                   <button 
                     onClick={() => setAdminTab('compliance')}
@@ -4843,6 +4865,80 @@ function App() {
           setActiveSection('admin')
         }}
       />
+    )
+  }
+
+  // Attendance Pass View
+  if (activeSection === 'attendance-pass') {
+    // If specific employee is set, show their pass, otherwise show selection screen
+    if (viewingAttendancePassEmployeeId && user?.token) {
+      return (
+        <AttendancePass
+          employeeId={viewingAttendancePassEmployeeId}
+          token={user.token}
+          onBack={() => {
+            setViewingAttendancePassEmployeeId(null)
+            setActiveSection('admin')
+          }}
+        />
+      )
+    }
+
+    // Attendance pass selection screen
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50 p-8">
+        <div className="max-w-4xl mx-auto">
+          <div className="mb-6 flex items-center justify-between">
+            <div>
+              <h1 className="text-2xl font-bold text-gray-800">Attendance Pass</h1>
+              <p className="text-gray-600 mt-1">View employee attendance passes</p>
+            </div>
+            <button
+              onClick={() => setActiveSection('admin')}
+              className="px-4 py-2 text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-lg transition-colors flex items-center gap-2"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+              </svg>
+              Back to Admin
+            </button>
+          </div>
+
+          <div className="bg-white rounded-xl shadow-lg p-6 mb-6">
+            <h2 className="text-lg font-semibold text-gray-800 mb-4">Select Employee</h2>
+            <div className="space-y-2">
+              {employees.filter(e => e.is_active).map(emp => (
+                <button
+                  key={emp.id}
+                  onClick={() => {
+                    setViewingAttendancePassEmployeeId(emp.employee_id)
+                  }}
+                  className="w-full p-4 bg-gray-50 hover:bg-blue-50 rounded-lg transition-colors text-left flex items-center justify-between group"
+                >
+                  <div>
+                    <p className="font-medium text-gray-800">{emp.name}</p>
+                    <p className="text-sm text-gray-500">
+                      {emp.employee_id} • {emp.job_title || 'N/A'} • {emp.department || 'N/A'}
+                    </p>
+                  </div>
+                  <svg className="w-5 h-5 text-gray-400 group-hover:text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                  </svg>
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="bg-blue-50 rounded-xl p-6">
+            <h3 className="font-semibold text-blue-800 mb-2">About Attendance Pass</h3>
+            <p className="text-sm text-blue-700">
+              The Attendance Pass shows today's clock in/out status, hours worked, and monthly attendance summary. 
+              Employees can use this pass to track their attendance and earned offset days. 
+              The pass includes a QR code for easy mobile access.
+            </p>
+          </div>
+        </div>
+      </div>
     )
   }
 
