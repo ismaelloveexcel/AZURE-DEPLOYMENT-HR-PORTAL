@@ -26,9 +26,9 @@ jobs:
         id: backend-health
         run: |
           # Try to reach the backend health endpoint
-          BACKEND_URL="${{ secrets.BACKEND_URL || 'https://hrportal-backend-new.azurewebsites.net' }}"
-          
-          if [ -z "${{ secrets.BACKEND_URL }}" ]; then
+          BACKEND_URL="${{ secrets.BACKEND_URL }}"
+          if [ -z "$BACKEND_URL" ]; then
+            BACKEND_URL="https://hrportal-backend-new.azurewebsites.net"
             echo "::warning::BACKEND_URL secret is not configured. Using fallback: $BACKEND_URL"
           fi
           
@@ -47,9 +47,9 @@ jobs:
       - name: Check frontend health
         id: frontend-health
         run: |
-          FRONTEND_URL="${{ secrets.FRONTEND_URL || 'https://gray-island-0b743e310.4.azurestaticapps.net' }}"
-          
-          if [ -z "${{ secrets.FRONTEND_URL }}" ]; then
+          FRONTEND_URL="${{ secrets.FRONTEND_URL }}"
+          if [ -z "$FRONTEND_URL" ]; then
+            FRONTEND_URL="https://gray-island-0b743e310.4.azurestaticapps.net"
             echo "::warning::FRONTEND_URL secret is not configured. Using fallback: $FRONTEND_URL"
           fi
           
@@ -76,7 +76,10 @@ jobs:
       - name: Basic smoke tests
         id: smoke-tests
         run: |
-          BACKEND_URL="${{ secrets.BACKEND_URL || 'https://hrportal-backend-new.azurewebsites.net' }}"
+          BACKEND_URL="${{ secrets.BACKEND_URL }}"
+          if [ -z "$BACKEND_URL" ]; then
+            BACKEND_URL="https://hrportal-backend-new.azurewebsites.net"
+          fi
           
           echo "Running smoke tests..."
           
