@@ -82,6 +82,8 @@ class PassRepository:
         purpose: Optional[str] = None,
         sponsor_name: Optional[str] = None,
         employee_id: Optional[str] = None,
+        start_stage: Optional[str] = None,
+        stage_order: Optional[str] = None,
     ) -> Pass:
         """Create a new pass."""
         pass_obj = Pass(
@@ -99,6 +101,8 @@ class PassRepository:
             sponsor_name=sponsor_name,
             employee_id=employee_id,
             created_by=created_by,
+            start_stage=start_stage,
+            stage_order=stage_order,
             status="active",
             is_printed=False,
         )

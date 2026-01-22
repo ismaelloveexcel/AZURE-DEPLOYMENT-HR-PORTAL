@@ -21,6 +21,8 @@ class PassBase(BaseModel):
     purpose: Optional[str] = Field(None, description="Purpose of visit/pass")
     sponsor_name: Optional[str] = Field(None, description="Name of employee sponsor")
     employee_id: Optional[str] = Field(None, description="Linked employee ID (for onboarding)")
+    start_stage: Optional[str] = Field(None, description="Starting stage for onboarding pass")
+    stage_order: Optional[List[str]] = Field(None, description="Custom stage order for onboarding pass")
     
     model_config = ConfigDict(from_attributes=True)
     

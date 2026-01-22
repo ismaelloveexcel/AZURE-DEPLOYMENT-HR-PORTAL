@@ -131,6 +131,8 @@ interface PassFormData {
   purpose: string
   sponsor_name: string
   employee_id: string
+  start_stage?: string
+  stage_order?: string
 }
 
 interface OnboardingToken {
@@ -277,6 +279,8 @@ function App() {
     purpose: '',
     sponsor_name: '',
     employee_id: '',
+    start_stage: '',
+    stage_order: '',
   })
   const [passesLoading, setPassesLoading] = useState(false)
   const [passFilter, setPassFilter] = useState<'all' | 'active' | 'expired' | 'revoked'>('all')
