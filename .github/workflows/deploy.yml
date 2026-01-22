@@ -121,11 +121,12 @@ jobs:
 
           echo "✅ App settings configured"
 
-      - name: Deploy to Azure App Service
-        uses: azure/webapps-deploy@v3
-        with:
-          app-name: ${{ env.WEBAPP_NAME }}
-          package: deploy.zip
+       - name: Deploy to Azure App Service
+         uses: azure/webapps-deploy@v3
+         with:
+           app-name: ${{ env.WEBAPP_NAME }}
+           package: deploy.zip
+           clean: true
 
       - name: Wait for deployment and Oryx build
         run: |
@@ -207,4 +208,3 @@ jobs:
           echo "Admin login: BAYN00008 / 16051988"
 
 # Trigger deployment Tue Jan 20 08:46:00 AM UTC 2026
-
