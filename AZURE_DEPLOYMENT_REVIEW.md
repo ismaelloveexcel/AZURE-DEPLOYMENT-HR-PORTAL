@@ -186,7 +186,7 @@ The following secrets must be configured in **GitHub repository settings** → *
 
 | Secret Name | Purpose | Default Value | Status |
 |------------|---------|---------------|--------|
-| `BACKEND_URL` | Backend URL for health checks | `https://baynunahhrportal.azurewebsites.net/api` | ⚠️ Optional |
+| `BACKEND_URL` | Backend URL for health checks | `https://hrportal-backend-new.azurewebsites.net` | ✅ Fallback used when secret unset |
 | `FRONTEND_URL` | Frontend URL for health checks | `https://baynunahhrportal.azurewebsites.net` | ⚠️ Optional |
 
 ### 3.2 How to Create Required Secrets
