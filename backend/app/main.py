@@ -188,7 +188,14 @@ def create_app() -> FastAPI:
             # Serve index.html for all other routes (SPA routing)
             index_file = static_dir / "index.html"
             if index_file.exists():
-                return FileResponse(str(index_file))
+                # Prevent stale cached index.html so new builds show immediately
+                return FileResponse(
+                    str(index_file),
+                    headers={
+                        "Cache-Control": "no-store, no-cache, must-revalidate",
+                        "Pragma": "no-cache",
+                    },
+                )
             return JSONResponse(status_code=404, content={"detail": "Frontend not built"})
 
     return app
