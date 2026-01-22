@@ -150,10 +150,10 @@ export function EmployeeProfile({ employeeId, token, currentUserRole, currentUse
   const getStatusColor = (status: string | null): string => {
     switch (status?.toLowerCase()) {
       case 'active': return 'bg-emerald-100 text-emerald-800'
-      case 'inactive': return 'bg-gray-100 text-gray-800'
+      case 'inactive': return 'bg-slate-200 text-slate-900'
       case 'probation': return 'bg-amber-100 text-amber-800'
       case 'under probation': return 'bg-amber-100 text-amber-800'
-      default: return 'bg-gray-100 text-gray-800'
+      default: return 'bg-slate-200 text-slate-900'
     }
   }
 
@@ -208,7 +208,7 @@ export function EmployeeProfile({ employeeId, token, currentUserRole, currentUse
             <div className="text-red-500 text-5xl mb-4">⚠️</div>
             <h3 className="text-lg font-semibold text-gray-900 mb-2">Error Loading Profile</h3>
             <p className="text-gray-600 mb-4">{error}</p>
-            <button onClick={onClose} className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200">
+            <button onClick={onClose} className="px-4 py-2 bg-slate-200 text-slate-900 rounded-lg hover:bg-slate-300">
               Close
             </button>
           </div>
@@ -423,7 +423,7 @@ export function EmployeeProfile({ employeeId, token, currentUserRole, currentUse
                       ? 'bg-emerald-100 text-emerald-700' 
                       : bank?.has_pending_changes 
                         ? 'bg-amber-100 text-amber-700'
-                        : 'bg-gray-100 text-gray-600'
+                        : 'bg-slate-200 text-slate-900'
                   }`}>
                     {bank?.is_verified ? 'Verified' : bank?.has_pending_changes ? 'Pending' : 'Not verified'}
                   </span>
@@ -449,7 +449,7 @@ export function EmployeeProfile({ employeeId, token, currentUserRole, currentUse
                     <span className={`px-2 py-0.5 text-xs font-medium rounded-full ${
                       compliance?.iloe_status === 'Active' 
                         ? 'bg-emerald-100 text-emerald-700'
-                        : 'bg-gray-100 text-gray-600'
+                        : 'bg-slate-200 text-slate-900'
                     }`}>
                       {compliance?.iloe_status || 'Unknown'}
                     </span>
@@ -709,7 +709,7 @@ export function EmployeeProfile({ employeeId, token, currentUserRole, currentUse
                       ? 'bg-emerald-100 text-emerald-700' 
                       : bank?.has_pending_changes 
                         ? 'bg-amber-100 text-amber-700'
-                        : 'bg-gray-200 text-gray-600'
+                        : 'bg-slate-200 text-slate-900'
                   }`}>
                     {bank?.is_verified ? '✓ Verified' : bank?.has_pending_changes ? '⏳ Pending Approval' : 'Not Verified'}
                   </span>

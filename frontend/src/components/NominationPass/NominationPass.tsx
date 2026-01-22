@@ -438,7 +438,7 @@ export function NominationPass() {
                     >
                       <div 
                         className={`w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center text-xs font-semibold ${
-                          stepIndex >= i ? 'text-white' : 'bg-gray-200 text-gray-500'
+                          stepIndex >= i ? 'text-white' : 'bg-slate-200 text-slate-900'
                         }`}
                         style={stepColor ? { backgroundColor: stepColor } : {}}
                       >
@@ -600,7 +600,7 @@ export function NominationPass() {
                           existingNomination.status === 'pending' ? 'bg-amber-100 text-amber-700' :
                           existingNomination.status === 'shortlisted' ? 'bg-purple-100 text-purple-700' :
                           existingNomination.status === 'winner' ? 'bg-green-100 text-green-700' :
-                          'bg-gray-100 text-gray-600'
+                          'bg-slate-200 text-slate-900'
                         }`}>
                           {existingNomination.status === 'pending' ? 'Submitted' : 
                            existingNomination.status.replace('_', ' ').charAt(0).toUpperCase() + existingNomination.status.replace('_', ' ').slice(1)}

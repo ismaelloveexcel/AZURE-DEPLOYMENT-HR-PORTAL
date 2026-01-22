@@ -191,9 +191,9 @@ export function EoyNominations({ managerId, isAdmin, token }: Props) {
       pending: 'bg-amber-100 text-amber-700',
       shortlisted: 'bg-blue-100 text-blue-700',
       winner: 'bg-emerald-100 text-emerald-700',
-      not_selected: 'bg-gray-100 text-gray-600'
+      not_selected: 'bg-slate-200 text-slate-900'
     }
-    return styles[status] || 'bg-gray-100 text-gray-600'
+    return styles[status] || 'bg-slate-200 text-slate-900'
   }
 
   return (
