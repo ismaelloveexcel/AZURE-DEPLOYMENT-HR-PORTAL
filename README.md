@@ -637,6 +637,31 @@ VITE_API_BASE_URL=https://your-app.azurewebsites.net/api
 
 ---
 
+## 🔧 Troubleshooting
+
+### Azure Static Web Apps Staging Environment Limit
+
+**Error**: "This Static Web App already has the maximum number of staging environments"
+
+**Quick Fix**: Delete old staging environments that are no longer needed.
+
+📚 **Detailed Guides**:
+- **[Quick Fix Guide](docs/QUICK_FIX_STAGING_LIMIT.md)** - 5-minute solution
+- **[Complete Solution Guide](docs/AZURE_STATIC_WEB_APPS_STAGING_LIMIT_SOLUTION.md)** - All options explained
+
+**Automatic Solution**: The repository now includes an automatic cleanup workflow that runs when PRs are closed.
+
+### Other Issues
+
+- **Database connection errors**: Check `DATABASE_URL` in environment variables
+- **Frontend build errors**: Ensure Node.js 18+ is installed and run `npm install` in frontend directory
+- **Backend startup errors**: Verify Python 3.11+ and run `uv sync` in backend directory
+- **Login issues**: Check `AUTH_SECRET_KEY` is set and database migrations are applied
+
+📖 See [FAQ](docs/HR_PORTAL_FAQ.md) for more common questions.
+
+---
+
 ## 📄 License
 
 ISC License - See [LICENSE](LICENSE) for details.
