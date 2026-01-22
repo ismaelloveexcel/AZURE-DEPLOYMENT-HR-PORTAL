@@ -63,8 +63,8 @@ You may also want to configure these optional secrets:
 
 | Secret | Purpose | Status |
 |--------|---------|--------|
-| `BACKEND_URL` | Health check monitoring | ⚠️ Optional |
-| `FRONTEND_URL` | Health check monitoring | ⚠️ Optional |
+| `BACKEND_URL` | Health check monitoring (workflow calls `$BACKEND_URL/health`) | ✅ Fallback to `https://hrportal-backend-new.azurewebsites.net` if unset |
+| `FRONTEND_URL` | Health check monitoring | ✅ Fallback to `https://gray-island-0b743e310.4.azurestaticapps.net` if unset |
 | `PGHOST`, `PGUSER`, `PGPASSWORD`, `PGDATABASE` | Automated database backups | ⚠️ Optional |
 
 To add optional secrets:
