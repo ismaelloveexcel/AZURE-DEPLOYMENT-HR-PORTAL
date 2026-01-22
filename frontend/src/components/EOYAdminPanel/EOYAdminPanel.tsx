@@ -566,7 +566,7 @@ export function EOYAdminPanel({ token, userId }: EOYAdminPanelProps) {
                       <span className={`px-3 py-1 rounded-full text-xs font-medium ${
                         nomination.status === 'winner' ? 'bg-amber-100 text-amber-700' :
                         nomination.status === 'shortlisted' ? 'bg-purple-100 text-purple-700' :
-                        nomination.status === 'not_selected' ? 'bg-gray-100 text-gray-600' :
+                        nomination.status === 'not_selected' ? 'bg-slate-200 text-slate-900' :
                         'bg-blue-100 text-blue-700'
                       }`}>
                         {nomination.status === 'pending' ? 'Pending Review' : 
@@ -652,7 +652,7 @@ export function EOYAdminPanel({ token, userId }: EOYAdminPanelProps) {
                               <span className={`px-2 py-1 rounded-full text-xs font-medium ${
                                 entry.status === 'winner' ? 'bg-amber-100 text-amber-700' :
                                 entry.status === 'shortlisted' ? 'bg-purple-100 text-purple-700' :
-                                entry.status === 'not_selected' ? 'bg-gray-100 text-gray-600' :
+                                entry.status === 'not_selected' ? 'bg-slate-200 text-slate-900' :
                                 'bg-blue-100 text-blue-700'
                               }`}>
                                 {entry.status === 'pending' ? 'Pending' : entry.status.replace('_', ' ')}
