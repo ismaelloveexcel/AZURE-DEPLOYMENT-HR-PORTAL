@@ -48,7 +48,7 @@ The following workflows are **disabled for automatic triggering** but can still 
 
 - `backend-appservice.yml` - Backend-only deployment
 - `frontend-deploy.yml` - Frontend to Static Web Apps
-- `deploy-frontend.yml` - Alternative frontend deployment
+- `deploy-frontend.yml` - Alternative frontend deployment (PR deploys disabled to avoid SWA staging exhaustion)
 - `azure-static-web-apps-proud-forest-051662503.yml` - Auto-generated SWA deployment
 - `backend-appservice-oidc.yml` - OIDC backend deployment
 

@@ -9,12 +9,7 @@ on:
     paths:
       - 'frontend/**'
       - 'staticwebapp.config.json'
-  pull_request:
-    types: [opened, synchronize, reopened]
-    branches: [main]
-    paths:
-      - 'frontend/**'
-      - 'staticwebapp.config.json'
+  # PR deploys disabled to avoid exhausting SWA staging environments
   workflow_dispatch:
 
 concurrency:
