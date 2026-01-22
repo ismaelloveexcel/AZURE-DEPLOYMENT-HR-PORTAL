@@ -5,11 +5,13 @@ import { EmployeeProfile } from './components/EmployeeProfile'
 import { CandidatePass } from './components/CandidatePass'
 import { ManagerPass } from './components/ManagerPass'
 import { NominationPass } from './components/NominationPass'
+import { AttendancePass } from './components/AttendancePass'
 import { Performance } from './components/Performance'
 import { EoyNominations } from './components/EoyNominations'
 import { EOYAdminPanel } from './components/EOYAdminPanel/EOYAdminPanel'
 import { InsuranceCensus } from './components/InsuranceCensus'
 import { useDebounce } from './hooks/useDebounce'
+import { AttendancePass } from './components/AttendancePass'
 
 type Section = 'home' | 'employees' | 'onboarding' | 'external' | 'admin' | 'secret-chamber' | 'passes' | 'public-onboarding' | 'recruitment' | 'recruitment-request' | 'recruitment-benefits' | 'templates' | 'template-manager' | 'template-candidate' | 'template-onboarding' | 'template-employee' | 'attendance' | 'compliance-alerts' | 'candidate-pass' | 'manager-pass' | 'performance' | 'insurance-census' | 'nomination-pass'
 
@@ -89,7 +91,7 @@ interface AdminDashboard {
   system_status: string
 }
 
-interface User {
+export interface User {
   id: number
   employee_id: string
   name: string
@@ -187,7 +189,7 @@ interface PendingProfile {
   submitted_at: string | null
 }
 
-interface TodayAttendanceStatus {
+export interface TodayAttendanceStatus {
   date: string
   is_clocked_in: boolean
   clock_in_time: string | null
@@ -328,6 +330,7 @@ const [passFormData, setPassFormData] = useState<PassFormData>({
   const [clockInWorkType, setClockInWorkType] = useState<'office' | 'wfh' | 'field'>('office')
   const [wfhReason, setWfhReason] = useState('')
   const [gpsCoords, setGpsCoords] = useState<{latitude: number, longitude: number} | null>(null)
+  const [showAttendancePass, setShowAttendancePass] = useState(false)
 
   // Compliance alerts state
   const [complianceAlerts, setComplianceAlerts] = useState<ComplianceAlerts | null>(null)
@@ -5242,6 +5245,15 @@ const [passFormData, setPassFormData] = useState<PassFormData>({
             <div className="text-sm text-gray-600">
               {user?.name} ({user?.role})
             </div>
+            <button
+              onClick={() => setShowAttendancePass(true)}
+              className="ml-4 inline-flex items-center gap-2 px-3 py-2 bg-emerald-500 text-white text-sm font-semibold rounded-lg shadow hover:bg-emerald-600 transition"
+            >
+              <svg className="w-4 h-4" viewBox="0 0 24 24" stroke="currentColor" fill="none" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M15 7h.01M9 21h6a2 2 0 002-2V5a2 2 0 00-2-2H9a2 2 0 00-2 2v14a2 2 0 002 2z" />
+              </svg>
+              Show Pass
+            </button>
           </div>
 
           {error && (
@@ -5487,6 +5499,14 @@ const [passFormData, setPassFormData] = useState<PassFormData>({
             )}
           </div>
         </div>
+
+        {showAttendancePass && (
+          <AttendancePass
+            user={user}
+            status={attendanceStatus}
+            onClose={() => setShowAttendancePass(false)}
+          />
+        )}
       </div>
     )
   }
