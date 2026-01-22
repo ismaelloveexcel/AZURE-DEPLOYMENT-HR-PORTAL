@@ -3,6 +3,11 @@ name: Deploy Frontend to Azure Static Web Apps
 # ACTIVE: Supplementary frontend deploy with concurrency to avoid conflicts.
 # deploy.yml remains the primary deploy; this workflow is serialized via
 # frontend-deployment group and can still be run manually if needed.
+#
+# NOTE: PR deployments create staging environments on Azure Static Web Apps.
+# Free tier limit: 3 staging environments. If limit is reached, deployment fails.
+# Solution: Run the "Cleanup Staging Environments" workflow to delete old environments.
+# See: docs/QUICK_FIX_STAGING_LIMIT.md for more information.
 on:
   push:
     branches: [main]
@@ -67,3 +72,51 @@ jobs:
           app_location: "frontend/dist"
           skip_app_build: true
           skip_api_build: true
+        continue-on-error: ${{ github.event_name == 'pull_request' }}
+        # Allow PR deployments to fail gracefully if staging limit is reached
+        # Production deployments (push to main) should still fail if there's an issue
+
+      - name: Comment on PR if deployment failed
+        if: github.event_name == 'pull_request' && steps.deploy.outcome == 'failure'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const message = `### ⚠️ Staging Environment Deployment Failed
+            
+            The deployment to Azure Static Web Apps failed. This is likely because the staging environment limit has been reached.
+            
+            **Quick Fix**:
+            1. Go to [Actions](https://github.com/${context.repo.owner}/${context.repo.repo}/actions/workflows/cleanup-staging-environments.yml)
+            2. Click "Run workflow"
+            3. Delete old staging environments
+            4. Re-run this workflow
+            
+            **Or manually**: Delete old environments in [Azure Portal](https://portal.azure.com) → Static Web Apps → Environments
+            
+            📚 [Full guide](https://github.com/${context.repo.owner}/${context.repo.repo}/blob/main/docs/QUICK_FIX_STAGING_LIMIT.md)
+            
+            **Note**: This does not affect the code changes in your PR. It only affects the preview deployment.`;
+            
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: message
+            })
+
+      - name: Deployment Summary
+        if: always()
+        run: |
+          echo "## Deployment Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          if [ "${{ steps.deploy.outcome }}" == "success" ]; then
+            echo "✅ **Deployment succeeded**" >> $GITHUB_STEP_SUMMARY
+          elif [ "${{ github.event_name }}" == "pull_request" ]; then
+            echo "⚠️ **PR deployment failed** - This is likely due to staging environment limits" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "**Quick fix**: Delete old staging environments" >> $GITHUB_STEP_SUMMARY
+            echo "- [Run cleanup workflow](https://github.com/${{ github.repository }}/actions/workflows/cleanup-staging-environments.yml)" >> $GITHUB_STEP_SUMMARY
+            echo "- [Read full guide](https://github.com/${{ github.repository }}/blob/main/docs/QUICK_FIX_STAGING_LIMIT.md)" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "❌ **Production deployment failed** - Please investigate" >> $GITHUB_STEP_SUMMARY
+          fi
