@@ -1963,7 +1963,7 @@ function App() {
                         <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${
                           emp.profile_status === 'complete' ? 'bg-emerald-100 text-emerald-700' :
                           emp.profile_status === 'pending_review' ? 'bg-blue-100 text-blue-700' :
-                          'bg-gray-100 text-gray-500'
+                          'bg-slate-200 text-slate-900'
                         }`}>
                           {emp.profile_status === 'complete' ? 'Complete' :
                            emp.profile_status === 'pending_review' ? 'Pending Review' :
@@ -2804,7 +2804,7 @@ function App() {
                     <div key={stage.key} className="bg-gray-50 rounded-lg p-4 min-h-[200px]">
                       <div className="flex items-center justify-between mb-3">
                         <h3 className="font-medium text-gray-700">{stage.label}</h3>
-                        <span className="bg-gray-200 text-gray-600 text-xs px-2 py-1 rounded-full">
+                        <span className="bg-slate-200 text-slate-900 text-xs px-2 py-1 rounded-full">
                           {pipelineCounts?.[stage.key as keyof typeof pipelineCounts] ?? 0}
                         </span>
                       </div>
@@ -4144,7 +4144,7 @@ function App() {
                     </div>
                     <div className="flex items-center justify-between p-2 bg-gray-50 rounded-lg">
                       <span className="text-sm text-gray-700">Offer Approval</span>
-                      <span className="px-2 py-0.5 bg-gray-200 text-gray-600 text-xs rounded-full">Not Started</span>
+                      <span className="px-2 py-0.5 bg-slate-200 text-slate-900 text-xs rounded-full">Not Started</span>
                     </div>
                   </div>
                 </div>

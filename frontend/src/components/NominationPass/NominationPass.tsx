@@ -438,7 +438,7 @@ export function NominationPass() {
                     >
                       <div 
                         className={`w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center text-xs font-semibold ${
-                          stepIndex >= i ? 'text-white' : 'bg-gray-200 text-gray-500'
+                          stepIndex >= i ? 'text-white' : 'bg-slate-200 text-slate-900'
                         }`}
                         style={stepColor ? { backgroundColor: stepColor } : {}}
                       >
