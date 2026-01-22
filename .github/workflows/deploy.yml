@@ -93,40 +93,40 @@ jobs:
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
-       - name: Configure App Settings
-         run: |
-           ALLOWED_ORIGINS="${{ secrets.ALLOWED_ORIGINS }}"
-           if [ -z "$ALLOWED_ORIGINS" ]; then
-             ALLOWED_ORIGINS="$WEBAPP_URL"
-           fi
+      - name: Configure App Settings
+        run: |
+          ALLOWED_ORIGINS="${{ secrets.ALLOWED_ORIGINS }}"
+          if [ -z "$ALLOWED_ORIGINS" ]; then
+            ALLOWED_ORIGINS="$WEBAPP_URL"
+          fi
 
-           az webapp config appsettings set \
-             --name "$WEBAPP_NAME" \
-             --resource-group "$RESOURCE_GROUP" \
-             --settings \
-               DATABASE_URL="${{ secrets.DATABASE_URL }}" \
-               AUTH_SECRET_KEY="${{ secrets.AUTH_SECRET_KEY }}" \
-               ALLOWED_ORIGINS="$ALLOWED_ORIGINS" \
-               APP_ENV="production" \
-               SCM_DO_BUILD_DURING_DEPLOYMENT="true" \
-               ENABLE_ORYX_BUILD="true" \
-               WEBSITE_RUN_FROM_PACKAGE="0" \
-             --output none
+          az webapp config appsettings set \
+            --name "$WEBAPP_NAME" \
+            --resource-group "$RESOURCE_GROUP" \
+            --settings \
+              DATABASE_URL="${{ secrets.DATABASE_URL }}" \
+              AUTH_SECRET_KEY="${{ secrets.AUTH_SECRET_KEY }}" \
+              ALLOWED_ORIGINS="$ALLOWED_ORIGINS" \
+              APP_ENV="production" \
+              SCM_DO_BUILD_DURING_DEPLOYMENT="true" \
+              ENABLE_ORYX_BUILD="true" \
+              WEBSITE_RUN_FROM_PACKAGE="0" \
+            --output none
 
-           az webapp config set \
-             --name "$WEBAPP_NAME" \
-             --resource-group "$RESOURCE_GROUP" \
-             --startup-file "gunicorn --bind 0.0.0.0:\$PORT --worker-class uvicorn.workers.UvicornWorker app.main:app" \
-             --output none
+          az webapp config set \
+            --name "$WEBAPP_NAME" \
+            --resource-group "$RESOURCE_GROUP" \
+            --startup-file "gunicorn --bind 0.0.0.0:\$PORT --worker-class uvicorn.workers.UvicornWorker app.main:app" \
+            --output none
 
-           echo "✅ App settings configured"
+          echo "✅ App settings configured"
 
-       - name: Deploy to Azure App Service
-         uses: azure/webapps-deploy@v3
-         with:
-           app-name: ${{ env.WEBAPP_NAME }}
-           package: deploy.zip
-           clean: true
+      - name: Deploy to Azure App Service
+        uses: azure/webapps-deploy@v3
+        with:
+          app-name: ${{ env.WEBAPP_NAME }}
+          package: deploy.zip
+          clean: true
 
       - name: Wait for deployment and Oryx build
         run: |
