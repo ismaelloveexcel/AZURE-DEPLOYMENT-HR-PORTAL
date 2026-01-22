@@ -25,6 +25,10 @@ class PassService:
         self, session: AsyncSession, data: PassCreate, created_by: str
     ) -> PassResponse:
         """Create a new pass."""
+        # Default onboarding validity: 1 month
+        if data.pass_type == "onboarding":
+            from datetime import timedelta
+            data = data.copy(update={"valid_until": data.valid_from + timedelta(days=30)})
         # Generate pass number
         pass_number = await self._repo.get_next_pass_number(session, data.pass_type)
         
@@ -45,6 +49,8 @@ class PassService:
             sponsor_name=data.sponsor_name,
             employee_id=data.employee_id,
             created_by=created_by,
+            start_stage=data.start_stage,
+            stage_order=",".join(data.stage_order) if data.stage_order else None,
         )
         await session.commit()
         

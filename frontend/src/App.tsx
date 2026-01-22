@@ -131,6 +131,8 @@ interface PassFormData {
   purpose: string
   sponsor_name: string
   employee_id: string
+  start_stage?: string
+  stage_order?: string
 }
 
 interface OnboardingToken {
@@ -264,20 +266,22 @@ function App() {
   const [pendingSection, setPendingSection] = useState<Section | null>(null)
   const [passes, setPasses] = useState<Pass[]>([])
   const [showPassForm, setShowPassForm] = useState(false)
-  const [passFormData, setPassFormData] = useState<PassFormData>({
-    pass_type: 'recruitment',
-    full_name: '',
-    email: '',
-    phone: '',
-    department: '',
-    position: '',
-    valid_from: new Date().toISOString().split('T')[0],
-    valid_until: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-    access_areas: '',
-    purpose: '',
-    sponsor_name: '',
-    employee_id: '',
-  })
+const [passFormData, setPassFormData] = useState<PassFormData>({
+  pass_type: 'recruitment',
+  full_name: '',
+  email: '',
+  phone: '',
+  department: '',
+  position: '',
+  valid_from: new Date().toISOString().split('T')[0],
+  valid_until: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+  access_areas: '',
+  purpose: '',
+  sponsor_name: '',
+  employee_id: '',
+  start_stage: '',
+  stage_order: '',
+})
   const [passesLoading, setPassesLoading] = useState(false)
   const [passFilter, setPassFilter] = useState<'all' | 'active' | 'expired' | 'revoked'>('all')
   const [viewingPass, setViewingPass] = useState<Pass | null>(null)
@@ -791,9 +795,21 @@ function App() {
     setPassesLoading(true)
     setError(null)
     try {
+      const payload = {
+        ...passFormData,
+        valid_until: passFormData.pass_type === 'onboarding'
+          ? new Date(new Date(passFormData.valid_from).getTime() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
+          : passFormData.valid_until,
+        stage_order: passFormData.stage_order
+          ? passFormData.stage_order.split(',').map(s => s.trim()).filter(Boolean)
+          : undefined,
+      }
+      if (payload.pass_type === 'onboarding') {
+        setPassFormData(prev => ({ ...prev, valid_until: payload.valid_until }))
+      }
       const res = await fetchWithAuth(`${API_BASE}/passes`, {
         method: 'POST',
-        body: JSON.stringify(passFormData),
+        body: JSON.stringify(payload),
       })
       if (!res.ok) {
         const data = await res.json()
@@ -3742,6 +3758,32 @@ function App() {
                       />
                     </div>
                   </div>
+                  
+                  {passFormData.pass_type === 'onboarding' && (
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Start Stage (optional)</label>
+                        <input
+                          type="text"
+                          placeholder="e.g., documents_submitted"
+                          value={passFormData.start_stage || ''}
+                          onChange={e => setPassFormData({...passFormData, start_stage: e.target.value})}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Stage Order (comma-separated)</label>
+                        <input
+                          type="text"
+                          placeholder="initiated,documents_pending,documents_submitted,pre_joining,joining_confirmed,completed"
+                          value={passFormData.stage_order || ''}
+                          onChange={e => setPassFormData({...passFormData, stage_order: e.target.value})}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500"
+                        />
+                        <p className="text-xs text-gray-500 mt-1">Admins can reorder onboarding stages or start mid-stage.</p>
+                      </div>
+                    </div>
+                  )}
                   
                   <div className="flex gap-3 pt-4">
                     <button

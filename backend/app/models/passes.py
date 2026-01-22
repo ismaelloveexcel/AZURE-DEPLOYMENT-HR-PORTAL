@@ -38,6 +38,8 @@ class Pass(Base):
     # Status
     status: Mapped[str] = mapped_column(String(20), default="active", nullable=False)  # active, expired, revoked
     is_printed: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
+    start_stage: Mapped[Optional[str]] = mapped_column(String(50), nullable=True)
+    stage_order: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
     
     # Linked employee (for onboarding passes) - string reference for display
     employee_id: Mapped[Optional[str]] = mapped_column(String(50), nullable=True)
