@@ -342,6 +342,7 @@ function App() {
   const [batchUploadPositionId, setBatchUploadPositionId] = useState<number | null>(null)
   const [batchUploadLoading, setBatchUploadLoading] = useState(false)
   const [batchUploadResult, setBatchUploadResult] = useState<{total: number, success: number, failed: number, errors: string[]} | null>(null)
+  const [lineManagers, setLineManagers] = useState<{name: string, email: string, department: string}[]>([])
   const [newRequestForm, setNewRequestForm] = useState({
     position_title: '',
     department: 'Engineering / R&D',
@@ -350,7 +351,8 @@ function App() {
     salary_range_max: '',
     headcount: '1',
     job_description: '',
-    requirements: ''
+    requirements: '',
+    hiring_manager_id: ''
   })
 
   // Employee management state
@@ -672,14 +674,16 @@ function App() {
   const fetchRecruitmentData = useCallback(async () => {
     if (!user || (user.role !== 'admin' && user.role !== 'hr')) return
     try {
-      const [statsRes, requestsRes, pipelineRes] = await Promise.all([
+      const [statsRes, requestsRes, pipelineRes, managersRes] = await Promise.all([
         fetchWithAuth(`${API_BASE}/recruitment/stats`),
         fetchWithAuth(`${API_BASE}/recruitment/requests`),
-        fetchWithAuth(`${API_BASE}/recruitment/pipeline`)
+        fetchWithAuth(`${API_BASE}/recruitment/pipeline`),
+        fetchWithAuth(`${API_BASE}/recruitment/line-managers`)
       ])
       if (statsRes.ok) setRecruitmentStats(await statsRes.json())
       if (requestsRes.ok) setRecruitmentRequests(await requestsRes.json())
       if (pipelineRes.ok) setPipelineCounts(await pipelineRes.json())
+      if (managersRes.ok) setLineManagers(await managersRes.json())
     } catch (err) {
       console.error('Failed to fetch recruitment data:', err)
     }
@@ -750,7 +754,8 @@ function App() {
         salary_range_max: newRequestForm.salary_range_max ? parseFloat(newRequestForm.salary_range_max) : null,
         headcount: parseInt(newRequestForm.headcount) || 1,
         job_description: newRequestForm.job_description || null,
-        requirements: newRequestForm.requirements || null
+        requirements: newRequestForm.requirements || null,
+        hiring_manager_id: newRequestForm.hiring_manager_id || null
       }
       const res = await fetchWithAuth(`${API_BASE}/recruitment/requests`, {
         method: 'POST',
@@ -767,7 +772,8 @@ function App() {
           salary_range_max: '',
           headcount: '1',
           job_description: '',
-          requirements: ''
+          requirements: '',
+          hiring_manager_id: ''
         })
         fetchRecruitmentData()
       } else {
@@ -2785,6 +2791,9 @@ function App() {
                           <div>
                             <h3 className="font-semibold text-gray-800">{req.position_title}</h3>
                             <p className="text-sm text-gray-500">{req.department} • {req.employment_type}</p>
+                            {req.hiring_manager_id && (
+                              <p className="text-xs text-blue-600 mt-1">👤 Line Manager: {req.hiring_manager_id}</p>
+                            )}
                             <div className="flex items-center gap-2 mt-2">
                               <span className={`px-2 py-1 text-xs rounded-full ${
                                 req.status === 'open' ? 'bg-green-100 text-green-700' :
@@ -3190,6 +3199,21 @@ function App() {
                       placeholder="e.g., Engineering / R&D"
                       required
                     />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Line Manager / Hiring Manager</label>
+                    <select
+                      value={newRequestForm.hiring_manager_id}
+                      onChange={(e) => setNewRequestForm(prev => ({ ...prev, hiring_manager_id: e.target.value }))}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+                    >
+                      <option value="">Select a line manager (optional)</option>
+                      {lineManagers.map((manager, idx) => (
+                        <option key={idx} value={manager.name}>
+                          {manager.name} - {manager.department}
+                        </option>
+                      ))}
+                    </select>
                   </div>
                   <div className="grid grid-cols-2 gap-4">
                     <div>

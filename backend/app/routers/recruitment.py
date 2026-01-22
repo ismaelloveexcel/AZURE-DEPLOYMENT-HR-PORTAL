@@ -53,6 +53,28 @@ async def get_employment_types():
     return recruitment_service.get_employment_types()
 
 
+@router.get("/line-managers", summary="Get line managers list")
+async def get_line_managers(
+    role: str = Depends(require_role(["admin", "hr"])),
+):
+    """
+    Get list of line managers for recruitment positions.
+    
+    **Admin and HR only.**
+    """
+    line_managers = [
+        {"name": "Michael Rutman", "email": "michael.rutman@baynunah.ae", "department": "Management"},
+        {"name": "Saeed Sulaiman Rashed Mohammed Alnuaimi", "email": "saeed.alnuaimi@baynunah.ae", "department": "Management"},
+        {"name": "Irfan Syed Ali", "email": "syed.irfan@baynunah.ae", "department": "Sales- Machines Sales & After Sales"},
+        {"name": "Mahmoud Saeed Mohamed", "email": "mahmoud.mohamed@baynunah.ae", "department": "Manufacturing"},
+        {"name": "Hossam Elsayed Abdo Emam", "email": "hossam.emam@baynunah.ae", "department": "Sales: Bottled/Canned Water"},
+        {"name": "Mohammad Ismael Sudally", "email": "mohammad.sudally@baynunah.ae", "department": "HR"},
+        {"name": "Amro Aly Asmael", "email": "amro.asmael@baynunah.ae", "department": "Marketing"},
+        {"name": "Gezeil Rodriguez Natividad", "email": "gezeil.natividad@baynunah.ae", "department": "Finance"},
+    ]
+    return line_managers
+
+
 @router.get("/stats", response_model=RecruitmentStats, summary="Get recruitment statistics")
 async def get_stats(
     role: str = Depends(require_role(["admin", "hr"])),
