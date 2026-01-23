@@ -1,8 +1,8 @@
 # Azure Deployment Review - Documentation Index
 
-**Review Date:** January 14, 2026  
+**Review Date:** January 23, 2026  
 **Repository:** ismaelloveexcel/AZURE-DEPLOYMENT-HR-PORTAL  
-**Status:** 🟡 Action Required (OIDC federation missing)
+**Status:** ✅ Deployed (OIDC configured; latest Actions deploy succeeded)
 
 ---
 
@@ -66,33 +66,19 @@ All files are properly aligned with Azure requirements:
 - ✅ GitHub workflow complete
 - ✅ Documentation comprehensive
 
-### What's Blocking: OIDC Federation + Secrets Verification ❌
+### Deployment Status: ✅ Completed via Actions
 
-Configure these in GitHub → Settings → Secrets, then configure Azure workload identity federation:
+- Latest `Deploy to Azure` workflow succeeded on commit `d78cdc5` (Jan 22, 2026).
+- OIDC federated credential configured; Azure login no longer blocks deployments.
+- Required secrets present (`AZURE_CLIENT_ID`, `AZURE_TENANT_ID`, `AZURE_SUBSCRIPTION_ID`, `DATABASE_URL`, `AUTH_SECRET_KEY`).
 
-1. **AZURE_CLIENT_ID / AZURE_TENANT_ID / AZURE_SUBSCRIPTION_ID** (5 min)
-   - Use existing App Registration values
-   - Required for `azure/login@v2` OIDC auth
+### What to Monitor
 
-2. **DATABASE_URL** (3 min)
-   - Format: `postgresql+asyncpg://uutfqkhm:{password}@baynunahhrportal-server.postgres.database.azure.com:5432/hrportal?sslmode=require`
-   - Replace `{password}` with actual PostgreSQL password
-
-3. **AUTH_SECRET_KEY** (1 min)
-   - Run: `openssl rand -hex 32`
-   - Copy output
-
-4. **Configure OIDC Federation** (5 min)
-   - Azure Portal → App registrations → Federated credentials
-   - Subject: `repo:ismaelloveexcel/AZURE-DEPLOYMENT-HR-PORTAL:ref:refs/heads/main`
-
-**Total time:** ~15 minutes
-
-### After Configuring OIDC and Secrets
-
-1. Go to: **Actions** → **Deploy to Azure** → **Run workflow**
-2. Wait: 5-10 minutes
-3. Verify: https://baynunahhrportal.azurewebsites.net
+1. Keep optional secrets updated for observability/backups:
+   - `BACKEND_URL`, `FRONTEND_URL` (health checks)
+   - `PGHOST`, `PGUSER`, `PGPASSWORD`, `PGDATABASE` (backups)
+2. Continue to run **Actions → Deploy to Azure** for new releases.
+3. Verify health after each deploy: https://baynunahhrportal.azurewebsites.net/api/health
 
 ---
 

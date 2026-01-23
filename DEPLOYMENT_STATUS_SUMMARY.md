@@ -1,7 +1,7 @@
 # Azure Deployment Status - Quick Summary
 
-**Date:** January 18, 2026  
-**Status:** 🟡 Action Required (OIDC federation not configured)
+**Date:** January 23, 2026  
+**Status:** ✅ Deployed (OIDC configured; latest Actions deploy succeeded)
 
 ---
 
@@ -40,37 +40,19 @@
 
 ---
 
-## ⚠️ GitHub Secrets Status
+## ✅ Deployment & Secrets Status
 
-The required GitHub secrets need verification for the current OIDC-based workflow:
+- Latest `Deploy to Azure` workflow: **success** (Run ID 21269110770 on commit `d78cdc5`, Jan 22, 2026).
+- OIDC federated credential configured; Azure login step passes without client secret.
+- Required GitHub secrets present for OIDC flow (`AZURE_CLIENT_ID`, `AZURE_TENANT_ID`, `AZURE_SUBSCRIPTION_ID`, `DATABASE_URL`, `AUTH_SECRET_KEY`).
 
-**Authentication Method:** Federated Identity (OIDC)  
-**Required Azure Configuration:** Workload identity federation for GitHub Actions
-
-| Secret | Purpose | Status |
-|--------|---------|--------|
-| `AZURE_CLIENT_ID` | Azure service principal client ID | ⚠️ Verify |
-| `AZURE_TENANT_ID` | Azure AD tenant ID | ⚠️ Verify |
-| `AZURE_SUBSCRIPTION_ID` | Azure subscription ID | ⚠️ Verify |
-| `DATABASE_URL` | PostgreSQL connection | ⚠️ Verify |
-| `AUTH_SECRET_KEY` | JWT signing | ⚠️ Verify |
-
-**Note:** `AZURE_CLIENT_SECRET` is not required when OIDC is configured.
-
-### Optional Secrets for Additional Features
-
-You may also want to configure these optional secrets:
+### Optional Secrets (still recommended)
 
 | Secret | Purpose | Status |
 |--------|---------|--------|
 | `BACKEND_URL` | Health check monitoring (workflow calls `$BACKEND_URL/health`) | ✅ Fallback to `https://hrportal-backend-new.azurewebsites.net` if unset |
 | `FRONTEND_URL` | Health check monitoring | ✅ Fallback to `https://gray-island-0b743e310.4.azurestaticapps.net` if unset |
 | `PGHOST`, `PGUSER`, `PGPASSWORD`, `PGDATABASE` | Automated database backups | ⚠️ Optional |
-
-To add optional secrets:
-1. Go to: Repository → Settings → Secrets and variables → Actions
-2. Click "New repository secret"
-3. Add the secret name and value
 
 ---
 
