@@ -1,7 +1,7 @@
 #!/bin/bash
 # Azure Backend Diagnostic Script
 # Purpose: Diagnose why hrportal-backend-new is not responding
-# Usage: ./scripts/diagnose_azure_backend.sh
+# Usage: bash scripts/diagnose_azure_backend.sh
 
 set -e
 
@@ -22,6 +22,16 @@ if ! command -v az &> /dev/null; then
 fi
 
 echo "✅ Azure CLI found"
+
+# Check if jq is installed (optional but recommended)
+if ! command -v jq &> /dev/null; then
+    echo "ℹ️  'jq' not found. Install jq for pretty JSON output: https://stedolan.github.io/jq/"
+    echo "   Script will continue without jq..."
+    JQ_AVAILABLE=false
+else
+    echo "✅ jq found"
+    JQ_AVAILABLE=true
+fi
 echo ""
 
 # Check if logged in
@@ -46,16 +56,22 @@ APP_STATUS=$(az webapp show \
     -o json 2>&1)
 
 if [ $? -eq 0 ]; then
-    echo "$APP_STATUS" | jq .
+    if [ "$JQ_AVAILABLE" = true ]; then
+        echo "$APP_STATUS" | jq .
+    else
+        echo "$APP_STATUS"
+    fi
     
-    STATE=$(echo "$APP_STATUS" | jq -r '.state')
-    ENABLED=$(echo "$APP_STATUS" | jq -r '.enabled')
+    STATE=$(echo "$APP_STATUS" | jq -r '.state' 2>/dev/null || echo "$APP_STATUS" | grep -oP '(?<="state":")[^"]*' || echo "unknown")
+    ENABLED=$(echo "$APP_STATUS" | jq -r '.enabled' 2>/dev/null || echo "$APP_STATUS" | grep -oP '(?<="enabled":")[^"]*' || echo "unknown")
     
     if [ "$STATE" != "Running" ]; then
         echo "⚠️  App is not running! Current state: $STATE"
         echo ""
+        set +e  # Disable exit on error for interactive prompt
         read -p "Would you like to start the app? (y/n) " -n 1 -r
         echo
+        set -e  # Re-enable exit on error
         if [[ $REPLY =~ ^[Yy]$ ]]; then
             echo "Starting app..."
             az webapp start --name "$WEBAPP_NAME" --resource-group "$RESOURCE_GROUP"
@@ -132,9 +148,12 @@ if [ $? -eq 0 ]; then
     echo "Extracting relevant errors..."
     unzip -q -o /tmp/webapp_logs.zip -d /tmp/webapp_logs/
     
-    if [ -f /tmp/webapp_logs/LogFiles/Application/*.log ]; then
+    # Check if any log files exist
+    if [ -n "$(find /tmp/webapp_logs/LogFiles/Application/ -name '*.log' 2>/dev/null)" ]; then
         echo "Recent Python errors:"
         grep -i "error\|exception\|traceback" /tmp/webapp_logs/LogFiles/Application/*.log | tail -20 || echo "No errors found"
+    else
+        echo "No application log files found in expected location"
     fi
 else
     echo "⚠️  Log download failed, trying log stream..."
@@ -175,7 +194,11 @@ DB_BODY=$(echo "$DB_RESPONSE" | head -n -1)
 
 if [ "$DB_HTTP_CODE" = "200" ]; then
     echo "✅ Database connection working"
-    echo "Response: $DB_BODY" | jq . 2>/dev/null || echo "$DB_BODY"
+    if [ "$JQ_AVAILABLE" = true ]; then
+        echo "Response: $DB_BODY" | jq .
+    else
+        echo "Response: $DB_BODY"
+    fi
 else
     echo "❌ Database connection issue (HTTP $DB_HTTP_CODE)"
     echo "Response: $DB_BODY"
@@ -208,7 +231,7 @@ if [ "$HTTP_CODE" != "200" ]; then
 else
     echo "✅ Backend appears healthy!"
     echo ""
-    echo "To see version info (after PR #92 is merged):"
+    echo "To see backend version info (after the version tracking feature is deployed):"
     echo "curl $WEBAPP_URL/api/health/revision"
 fi
 

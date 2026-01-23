@@ -1,24 +1,8 @@
 # Backend Downtime Troubleshooting Guide
 
-## Current Situation
+## Overview
 
-**Backend URL:** https://hrportal-backend-new.azurewebsites.net  
-**Status:** NOT RESPONDING (connection timeout)  
-**Last Successful Deployment:** Run #105, January 22, 2026, 23:49 UTC  
-
-## Important: This PR's Changes Are NOT Yet Deployed
-
-**PR #92 Status:** Open (not merged)  
-**Why you can't see changes:** This PR adds version tracking, but it hasn't been merged to `main` yet, so it hasn't been deployed to the live site.
-
-**To see the changes:**
-1. This PR must be merged to `main`
-2. Deployment workflow will run automatically (will be run #106+)
-3. Then you can check: `curl https://hrportal-backend-new.azurewebsites.net/api/health/revision`
-
-## Separate Issue: Backend is Down
-
-The backend downtime is **unrelated** to this PR. The backend was already down before these changes were made. Let's fix it.
+This guide provides step-by-step instructions for diagnosing and resolving issues when the HR Portal backend (https://hrportal-backend-new.azurewebsites.net) becomes unresponsive.
 
 ---
 

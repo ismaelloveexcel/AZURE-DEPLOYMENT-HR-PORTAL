@@ -46,7 +46,7 @@ async def get_revision():
     Shows git commit, build timestamp, and environment info.
     No authentication required - useful for verifying deployments.
     """
-    import os
+    from pathlib import Path
     from app.core.config import get_settings
     
     settings = get_settings()
@@ -54,16 +54,17 @@ async def get_revision():
     
     # Try to read build_info.txt if it exists
     build_info = {}
-    build_info_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "build_info.txt")
-    if os.path.exists(build_info_path):
+    build_info_path = Path(__file__).parent.parent.parent / "build_info.txt"
+    if build_info_path.exists():
         try:
             with open(build_info_path, 'r') as f:
                 for line in f:
                     if '=' in line:
                         key, value = line.strip().split('=', 1)
                         build_info[key.lower()] = value
-        except Exception:
-            pass
+        except (IOError, UnicodeDecodeError) as e:
+            # Log the error but continue gracefully
+            build_info = {"error": "Failed to read build_info.txt"}
     
     return {
         "status": "ok",
