@@ -42,7 +42,7 @@
 
 ## ✅ Deployment & Secrets Status
 
-- Latest `Deploy to Azure` workflow: **success** (Run ID 21269110770 on commit `d78cdc5`, Jan 22, 2026).
+- Latest `Deploy to Azure` workflow: **success** (see **Actions → Deploy to Azure** in GitHub for the most recent successful run).
 - OIDC federated credential configured; Azure login step passes without client secret.
 - Required GitHub secrets present for OIDC flow (`AZURE_CLIENT_ID`, `AZURE_TENANT_ID`, `AZURE_SUBSCRIPTION_ID`, `DATABASE_URL`, `AUTH_SECRET_KEY`).
 
