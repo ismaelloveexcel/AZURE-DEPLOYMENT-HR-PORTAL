@@ -75,6 +75,19 @@ jobs:
       - name: Create deployment package
         run: |
           cd backend
+          
+          # Generate build info for version tracking
+          echo "Generating build info..."
+          cat > build_info.txt << EOF
+          GIT_COMMIT_SHA=${{ github.sha }}
+          BUILD_TIMESTAMP=$(date -u +"%Y-%m-%d %H:%M:%S UTC")
+          GITHUB_RUN_ID=${{ github.run_id }}
+          GITHUB_RUN_NUMBER=${{ github.run_number }}
+          DEPLOYED_BY=${{ github.actor }}
+          EOF
+          
+          cat build_info.txt
+          
           chmod +x azure_startup.sh
           zip -r ../deploy.zip . \
             -x "*.pyc" \
@@ -108,6 +121,9 @@ jobs:
               AUTH_SECRET_KEY="${{ secrets.AUTH_SECRET_KEY }}" \
               ALLOWED_ORIGINS="$ALLOWED_ORIGINS" \
               APP_ENV="production" \
+              GIT_COMMIT_SHA="${{ github.sha }}" \
+              BUILD_TIMESTAMP="$(date -u +"%Y-%m-%d %H:%M:%S UTC")" \
+              APP_VERSION="${{ github.run_number }}" \
               SCM_DO_BUILD_DURING_DEPLOYMENT="true" \
               ENABLE_ORYX_BUILD="true" \
               WEBSITE_RUN_FROM_PACKAGE="0" \
@@ -119,7 +135,7 @@ jobs:
             --startup-file "gunicorn --bind 0.0.0.0:\$PORT --worker-class uvicorn.workers.UvicornWorker app.main:app" \
             --output none
 
-          echo "✅ App settings configured"
+          echo "✅ App settings configured with version tracking"
 
       - name: Deploy to Azure App Service
         uses: azure/webapps-deploy@v3
@@ -201,6 +217,13 @@ jobs:
           echo "====================="
           echo "App URL: $WEBAPP_URL"
           echo "API Docs: $WEBAPP_URL/docs"
+          echo "Version Info: $WEBAPP_URL/api/health/revision"
+          echo "Health Check: $WEBAPP_URL/api/health/ping"
+          echo ""
+          echo "Deployment Details:"
+          echo "  - Git Commit: ${{ github.sha }}"
+          echo "  - Build Number: ${{ github.run_number }}"
+          echo "  - Deployed By: ${{ github.actor }}"
           echo ""
           echo "If login issues persist, reset admin:"
           echo "curl -X POST $WEBAPP_URL/api/health/reset-admin-password -H 'X-Admin-Secret: YOUR_AUTH_SECRET_KEY'"

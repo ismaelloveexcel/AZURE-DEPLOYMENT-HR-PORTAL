@@ -28,7 +28,52 @@ async def ping():
     No authentication, no database, just returns OK immediately.
     Used by Azure to verify the app is running.
     """
-    return {"status": "ok", "message": "pong", "version": "2026-01-20-v3"}
+    from app.core.config import get_settings
+    settings = get_settings()
+    version_info = settings.get_version_info()
+    
+    return {
+        "status": "ok",
+        "message": "pong",
+        **version_info
+    }
+
+
+@router.get("/revision", summary="Deployment revision and version info (no auth)")
+async def get_revision():
+    """
+    Returns detailed deployment and version information.
+    Shows git commit, build timestamp, and environment info.
+    No authentication required - useful for verifying deployments.
+    """
+    from pathlib import Path
+    from app.core.config import get_settings
+    
+    settings = get_settings()
+    version_info = settings.get_version_info()
+    
+    # Try to read build_info.txt if it exists
+    build_info = {}
+    build_info_path = Path(__file__).parent.parent.parent / "build_info.txt"
+    if build_info_path.exists():
+        try:
+            with open(build_info_path, 'r') as f:
+                for line in f:
+                    if '=' in line:
+                        key, value = line.strip().split('=', 1)
+                        build_info[key.lower()] = value
+        except (IOError, UnicodeDecodeError) as e:
+            # Log the error but continue gracefully
+            build_info = {"error": "Failed to read build_info.txt"}
+    
+    return {
+        "status": "ok",
+        "revision": {
+            **version_info,
+            "build_info": build_info if build_info else "not available",
+            "app_name": settings.app_name,
+        }
+    }
 
 
 @router.get("", summary="API healthcheck")
