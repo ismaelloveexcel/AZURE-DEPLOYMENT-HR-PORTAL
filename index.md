@@ -49,6 +49,19 @@ If all three fail (deploy red, health red, site unreachable): rerun **Deploy to 
 
 ---
 
+## 💡 Improve the App (No-Code Requests)
+
+| Goal | What happens | Click here |
+| --- | --- | --- |
+| Request a new feature | Opens feature request form (plain questions) | [New feature request](https://github.com/ismaelloveexcel/AZURE-DEPLOYMENT-HR-PORTAL/issues/new?template=feature_request.md) |
+| Ask AI to plan & build | Portal Engineer agent drafts the change | Open `.github/agents/portal-engineer.md` and paste: “Plan and implement <your idea> end-to-end.” |
+| Security/quality scan on a branch | Code Quality Monitor reviews for risks | Open `.github/agents/code-quality-monitor.md` and paste: “Scan branch <branch-name> for security/performance.” |
+| Deployment help for new change | Azure Deployment Specialist guides deployment | Open `.github/agents/azure-deployment-specialist.md` and paste your branch + goal. |
+
+After a request: track it in [Open issues](https://github.com/ismaelloveexcel/AZURE-DEPLOYMENT-HR-PORTAL/issues) or [Open PRs](https://github.com/ismaelloveexcel/AZURE-DEPLOYMENT-HR-PORTAL/pulls). Green Actions + merged PR = live.
+
+---
+
 ## 👀 Understand What Changed
 
 | Need | One-click link | How to read it |
