@@ -19,7 +19,7 @@ pip install uv --quiet
 echo "      ✓ UV installed"
 
 # Find workspace directory (using CODESPACE_REPO_ROOT if available)
-WORKSPACE_DIR="${CODESPACE_REPO_ROOT:-/workspaces/HR-PORTAL-AZURE}"
+WORKSPACE_DIR="${CODESPACE_REPO_ROOT:-/workspaces/AZURE-DEPLOYMENT-HR-PORTAL}"
 if [ ! -d "$WORKSPACE_DIR" ]; then
     WORKSPACE_DIR=$(find /workspaces -maxdepth 1 -type d -name "*HR-PORTAL*" 2>/dev/null | head -1)
 fi

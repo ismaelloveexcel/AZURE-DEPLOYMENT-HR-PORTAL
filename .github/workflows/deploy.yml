@@ -124,15 +124,15 @@ jobs:
               GIT_COMMIT_SHA="${{ github.sha }}" \
               BUILD_TIMESTAMP="$(date -u +"%Y-%m-%d %H:%M:%S UTC")" \
               APP_VERSION="${{ github.run_number }}" \
-              SCM_DO_BUILD_DURING_DEPLOYMENT="true" \
-              ENABLE_ORYX_BUILD="true" \
+              SCM_DO_BUILD_DURING_DEPLOYMENT="false" \
+              ENABLE_ORYX_BUILD="false" \
               WEBSITE_RUN_FROM_PACKAGE="0" \
             --output none
 
           az webapp config set \
             --name "$WEBAPP_NAME" \
             --resource-group "$RESOURCE_GROUP" \
-            --startup-file "gunicorn --bind 0.0.0.0:\$PORT --worker-class uvicorn.workers.UvicornWorker app.main:app" \
+            --startup-file "./azure_startup.sh" \
             --output none
 
           echo "✅ App settings configured with version tracking"

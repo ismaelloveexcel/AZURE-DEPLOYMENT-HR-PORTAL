@@ -12,7 +12,7 @@ echo "============================================"
 echo ""
 
 # Find workspace directory using multiple methods
-WORKSPACE_DIR="${CODESPACE_REPO_ROOT:-}"
+WORKSPACE_DIR="${CODESPACE_REPO_ROOT:-/workspaces/AZURE-DEPLOYMENT-HR-PORTAL}"
 if [ -z "$WORKSPACE_DIR" ] || [ ! -d "$WORKSPACE_DIR" ]; then
     WORKSPACE_DIR=$(find /workspaces -maxdepth 1 -type d -name "*HR-PORTAL*" 2>/dev/null | head -1)
 fi
