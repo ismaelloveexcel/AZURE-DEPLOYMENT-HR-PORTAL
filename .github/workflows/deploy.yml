@@ -126,13 +126,13 @@ jobs:
               APP_VERSION="${{ github.run_number }}" \
               SCM_DO_BUILD_DURING_DEPLOYMENT="false" \
               ENABLE_ORYX_BUILD="false" \
-              WEBSITE_RUN_FROM_PACKAGE="0" \
+              WEBSITE_RUN_FROM_PACKAGE="1" \
             --output none
 
           az webapp config set \
             --name "$WEBAPP_NAME" \
             --resource-group "$RESOURCE_GROUP" \
-            --startup-file "./azure_startup.sh" \
+            --startup-file "./backend/azure_startup.sh" \
             --output none
 
           echo "✅ App settings configured with version tracking"

@@ -8,8 +8,14 @@ echo "PORT from Azure: ${PORT}"
 echo "Working directory: $(pwd)"
 
 # Navigate to the app directory
-cd /home/site/wwwroot || { echo "ERROR: Cannot cd to /home/site/wwwroot"; exit 1; }
-echo "Changed to: $(pwd)"
+# In package mode, we're already in the backend directory
+# In wwwroot mode, we need to cd to /home/site/wwwroot
+if [ -d "/home/site/wwwroot" ] && [ "$PWD" != "/home/site/wwwroot" ]; then
+    cd /home/site/wwwroot || { echo "ERROR: Cannot cd to /home/site/wwwroot"; exit 1; }
+    echo "Changed to: $(pwd) (wwwroot mode)"
+else
+    echo "Running from package mode, current directory: $(pwd)"
+fi
 echo "Directory contents:"
 ls -la
 
