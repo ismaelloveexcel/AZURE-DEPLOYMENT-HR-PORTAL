@@ -1,3 +1,5 @@
+# DEPRECATED — see START_HERE.md
+
 # HR Portal Deployment - Simple Step-by-Step Guide
 
 Follow these steps in order. Copy and paste each command.
