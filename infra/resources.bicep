@@ -52,7 +52,7 @@ param allowAzureServices bool = true
 param allowedIpAddresses array = []
 
 var linuxFxVersion = 'PYTHON|3.11'
-var backendStartupCommand = 'sh -c "alembic upgrade head && uvicorn app.main:app --host 0.0.0.0 --port 8000"'
+var backendStartupCommand = 'sh -c "cd backend && alembic upgrade head && uvicorn app.main:app --host 0.0.0.0 --port 8000"'
 
 resource appInsights 'Microsoft.Insights/components@2020-02-02' = {
   name: appInsightsName
