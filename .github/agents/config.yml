@@ -151,19 +151,98 @@ agents:
       - "publish"
       - "azure automation"
 
+  - name: guardian-hr-uae
+    file: .github/agents/guardian-hr-uae.agent.md
+    description: "Autonomous HR Engineering, Process, Design & Compliance Partner for UAE private-sector HR ESS"
+    capabilities:
+      - hr_systems_engineering
+      - process_architecture
+      - compliance_validation
+      - uae_labour_law
+      - feature_planning
+      - github_research
+      - ui_design_constraints
+      - quality_scoring
+      - digital_pass_design
+      - microsoft_integration
+    scope:
+      - backend/app/
+      - frontend/src/
+      - docs/
+      - .github/
+    triggers:
+      - "hr module"
+      - "uae compliance"
+      - "labour law"
+      - "attendance"
+      - "leave management"
+      - "overtime"
+      - "wps"
+      - "employee request"
+      - "digital pass"
+      - "hr workflow"
+      - "onboarding"
+      - "compliance alert"
+      - "visa tracking"
+      - "emirates id"
+    operating_modes:
+      - advisor: "default - diagnose and recommend"
+      - builder: "activated on explicit instruction"
+    decision_authority:
+      auto_approve:
+        - ux_flows
+        - additive_data_model
+        - technical_implementation
+      require_approval:
+        - breaking_data_model
+        - hr_policy_interpretation
+    quality_gates:
+      required_score: 4
+      dimensions:
+        - simplicity
+        - process_clarity
+        - hr_control
+        - audit_defensibility
+        - aesthetic_calm
+        - microsoft_alignment
+
+  - name: oss-scout
+    file: .github/agents/oss-scout.agent.md
+    description: "Research-first Copilot agent for Baynunah HR ESS"
+    capabilities:
+      - github_research
+      - repo_evaluation
+      - license_analysis
+      - adaptation_planning
+      - uae_compliance_awareness
+    scope:
+      - backend/app/
+      - frontend/src/
+      - docs/
+    triggers:
+      - "find module"
+      - "search github"
+      - "compare options"
+      - "open source"
+      - "evaluate repo"
+
 # Collaboration rules
 collaboration:
   planning_phase:
-    primary: hr-assistant
-    secondary: [portal-engineer]
+    primary: guardian-hr-uae
+    secondary: [hr-assistant, portal-engineer, oss-scout]
+    
+  research_phase:
+    primary: oss-scout
+    secondary: [guardian-hr-uae]
     
   implementation_phase:
     primary: portal-engineer
-    secondary: [code-quality-monitor]
+    secondary: [code-quality-monitor, guardian-hr-uae]
     
   quality_assurance_phase:
     primary: code-quality-monitor
-    secondary: [portal-engineer]
+    secondary: [portal-engineer, guardian-hr-uae]
     
   deployment_phase:
     primary: azure-deployment-specialist
@@ -171,17 +250,22 @@ collaboration:
     
   production_maintenance:
     primary: code-quality-monitor
-    secondary: [hr-assistant, portal-engineer, azure-deployment-specialist]
+    secondary: [hr-assistant, portal-engineer, azure-deployment-specialist, guardian-hr-uae]
+    
+  compliance_review:
+    primary: guardian-hr-uae
+    secondary: [hr-assistant, code-quality-monitor]
 
 # Agent priorities
 priorities:
   critical_security_issue:
     handler: code-quality-monitor
     escalate_to: portal-engineer
-    notify: hr-assistant
+    notify: [hr-assistant, guardian-hr-uae]
     
   new_hr_feature:
-    handler: hr-assistant
+    handler: guardian-hr-uae
+    research_by: oss-scout
     implement_by: portal-engineer
     verify_by: code-quality-monitor
     deploy_by: azure-deployment-specialist
@@ -205,6 +289,21 @@ priorities:
   database_issue:
     handler: azure-deployment-specialist
     fix_by: portal-engineer
+
+  uae_compliance_issue:
+    handler: guardian-hr-uae
+    verify_by: code-quality-monitor
+    notify: hr-assistant
+
+  hr_workflow_design:
+    handler: guardian-hr-uae
+    research_by: oss-scout
+    implement_by: portal-engineer
+
+  digital_pass_request:
+    handler: guardian-hr-uae
+    implement_by: portal-engineer
+    verify_by: code-quality-monitor
 
 # Quality gates
 quality_gates:
