@@ -36,8 +36,14 @@ echo "Python version: $(python --version)"
 # Install dependencies (REQUIRED since Oryx build is disabled)
 echo ""
 echo "=== Installing dependencies ==="
-pip install --upgrade pip --quiet
-pip install -r requirements.txt --quiet
+pip install --upgrade pip --quiet --timeout 60
+pip install -r requirements.txt --quiet --timeout 300 || {
+    echo "WARNING: pip install failed, trying with --no-cache-dir"
+    pip install -r requirements.txt --no-cache-dir --timeout 300 || {
+        echo "ERROR: Failed to install dependencies"
+        exit 1
+    }
+}
 echo "Dependencies installed"
 
 # Run database migrations (non-fatal - app can still start)
