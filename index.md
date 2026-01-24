@@ -20,6 +20,20 @@ Plain-language dashboard for a solo HR operator. Use this page to see what chang
 
 ---
 
+## 📡 Live App Status & Access
+
+- **Latest production deploy:** [Deploy to Azure (recent runs)](https://github.com/ismaelloveexcel/AZURE-DEPLOYMENT-HR-PORTAL/actions/workflows/deploy.yml)  
+  - Green ✅ = app deployed. Red ❌ = redeploy using the **Re-run** button or ask to fix the failing step.
+- **Automatic health check:** [Post-Deployment Health Check](https://github.com/ismaelloveexcel/AZURE-DEPLOYMENT-HR-PORTAL/actions/workflows/post-deployment-health.yml)  
+  - Run manually if the app feels down; it will report reachability.
+- **Direct app check:** Open your production URL (default pattern: `https://<app-name>.azurewebsites.net`).  
+  - Backend health: add `/api/health/db` to the URL to confirm database + admin account.  
+  - Frontend: open the base URL; if blank or 500, trigger the deploy workflow above.
+
+If all three fail (deploy red, health red, site unreachable): rerun **Deploy to Azure**, then rerun **Post-Deployment Health Check**. If still failing, create an issue and paste the error from the health check log.
+
+---
+
 ## 👀 Understand What Changed
 
 | Need | One-click link | How to read it |
