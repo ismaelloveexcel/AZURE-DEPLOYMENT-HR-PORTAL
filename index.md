@@ -49,6 +49,20 @@ If all three fail (deploy red, health red, site unreachable): rerun **Deploy to 
 
 ---
 
+## 🤖 Agent Shortcuts (1 Click)
+
+| Task | Agent | Open |
+| --- | --- | --- |
+| Plan/build a feature | Portal Engineer | [.github/agents/portal-engineer.md](.github/agents/portal-engineer.md) |
+| HR/domain guidance | HR Assistant | [.github/agents/hr-assistant.md](.github/agents/hr-assistant.md) |
+| Security/quality scan | Code Quality Monitor | [.github/agents/code-quality-monitor.md](.github/agents/code-quality-monitor.md) |
+| Fix broken deploy | Azure Deployment Specialist | [.github/agents/azure-deployment-specialist.md](.github/agents/azure-deployment-specialist.md) |
+| Investigate Azure issues | Azure Debugger | [.github/agents/azure-debugger.md](.github/agents/azure-debugger.md) |
+
+Copy/paste your request into the agent file you open; it tells you exactly what to ask.
+
+---
+
 ## 💡 Improve the App (No-Code Requests)
 
 | Goal | What happens | Click here |
