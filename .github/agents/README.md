@@ -4,7 +4,7 @@ This directory contains specialized GitHub Copilot agents designed to assist wit
 
 ## 🤖 Available Agents
 
-### 1. [HR Assistant](hr-assistant.md)
+### 1. [HR Assistant](hr-assistant.md) — see [Agent Governance](../../AGENT_GOVERNANCE.md)
 Expert HR Assistant and Portal System Engineer for solo HR professionals.
 
 **Use when you need**:
@@ -14,7 +14,7 @@ Expert HR Assistant and Portal System Engineer for solo HR professionals.
 - Automation ideas
 - Compliance advice
 
-### 2. [Portal Engineer](portal-engineer.md)
+### 2. [Portal Engineer](portal-engineer.md) — see [Agent Governance](../../AGENT_GOVERNANCE.md)
 Expert technical implementation specialist for full-stack development.
 
 **Use when you need**:
@@ -24,7 +24,7 @@ Expert technical implementation specialist for full-stack development.
 - Bug fixes
 - Performance optimization
 
-### 3. [Code Quality Monitor](code-quality-monitor.md)
+### 3. [Code Quality Monitor](code-quality-monitor.md) — see [Agent Governance](../../AGENT_GOVERNANCE.md)
 Proactive code quality and security scanner.
 
 **Use when you need**:
@@ -34,7 +34,7 @@ Proactive code quality and security scanner.
 - Best practices
 - Issue detection
 
-### 4. [Azure Deployment Specialist](azure-deployment-specialist.md)
+### 4. [Azure Deployment Specialist](azure-deployment-specialist.md) — see [Agent Governance](../../AGENT_GOVERNANCE.md)
 **NEW!** Expert in Azure deployment, repository history, and troubleshooting.
 
 **Use when you need**:
@@ -46,7 +46,7 @@ Proactive code quality and security scanner.
 - Complete repository knowledge
 - Emergency recovery procedures
 
-### 5. [Azure Debugging Engineer](azure-debugger.md)
+### 5. [Azure Debugging Engineer](azure-debugger.md) — see [Agent Governance](../../AGENT_GOVERNANCE.md)
 **AUTOMATED FIX ENGINE** - Expert in automated diagnosis and resolution of Azure deployment failures.
 
 **Use when you need**:

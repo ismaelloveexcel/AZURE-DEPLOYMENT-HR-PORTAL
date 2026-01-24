@@ -1,3 +1,5 @@
+# DEPRECATED — see START_HERE.md
+
 # PR #18 Review - Start Here
 
 **Review Date:** January 16, 2026  

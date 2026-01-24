@@ -1,3 +1,5 @@
+# DEPRECATED — see START_HERE.md
+
 # PR #18 Review: Deployment Status Check
 
 **Date:** January 16, 2026  
