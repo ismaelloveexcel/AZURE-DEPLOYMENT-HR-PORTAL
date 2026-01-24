@@ -1,216 +1,126 @@
-# GitHub Pages Deployment Guide
+# GitHub Pages - Landing Page Only
 
-This guide explains how to deploy the HR Portal frontend to GitHub Pages.
+This guide explains how to deploy the **landing page** to GitHub Pages.
 
-## ⚠️ Important Limitations
+## What Gets Deployed
 
-**GitHub Pages can ONLY host static files (HTML, CSS, JavaScript).** It cannot run:
-- Python/FastAPI backend
-- Database operations
-- Server-side authentication
-- API endpoints
+**Only the static landing page** from the `/landing` directory gets deployed to GitHub Pages. This includes:
+- Marketing/information page about the HR Portal
+- Features overview
+- UAE compliance highlights
+- Links to documentation and GitHub repository
 
-Therefore, this deployment option deploys **ONLY the frontend** to GitHub Pages. The backend must be deployed separately.
+**The main HR application** (frontend + backend) remains deployed on Azure.
 
-## Prerequisites
-
-1. **Backend Deployment**: Deploy the backend to a hosting service that supports Python/FastAPI:
-   - Azure App Service (recommended, see `AZURE_DEPLOYMENT_REFERENCE_GUIDE.md`)
-   - Heroku
-   - Railway
-   - Render
-   - DigitalOcean App Platform
-   - AWS Elastic Beanstalk
-   
-2. **Backend URL**: Note your backend API URL (e.g., `https://your-backend.azurewebsites.net/api`)
-
-## Setup Instructions
+## Quick Setup
 
 ### 1. Enable GitHub Pages
 
-1. Go to your repository on GitHub
-2. Click **Settings** → **Pages**
-3. Under **Source**, select **GitHub Actions**
+1. Go to repository **Settings** → **Pages**
+2. Under **Source**, select **GitHub Actions**
+3. Click **Save**
 
-### 2. Configure Backend API URL
+### 2. Deploy
 
-Add the backend API URL as a repository secret:
+The landing page deploys automatically:
+- **Automatic**: Push changes to `/landing` directory on `main` branch
+- **Manual**: Go to **Actions** → **Deploy Landing Page to GitHub Pages** → **Run workflow**
 
-1. Go to **Settings** → **Secrets and variables** → **Actions**
-2. Click **New repository secret**
-3. Name: `API_BASE_URL`
-4. Value: Your backend API URL (e.g., `https://your-backend.azurewebsites.net/api`)
-5. Click **Add secret**
+### 3. Access
 
-### 3. Deploy
+Landing page will be at:
+```
+https://[username].github.io/AZURE-DEPLOYMENT-HR-PORTAL/
+```
 
-The deployment happens automatically:
+## What This Means
 
-1. **Automatic**: Push to `main` branch triggers deployment
-2. **Manual**: Go to **Actions** → **Deploy to GitHub Pages** → **Run workflow**
+```
+┌─────────────────────────────────────┐
+│     GitHub Pages (Landing Only)     │
+│                                     │
+│  ┌───────────────────────────────┐ │
+│  │   Landing Page (HTML/CSS)     │ │
+│  │   - Marketing content         │ │
+│  │   - Features overview         │ │
+│  │   - Links to docs             │ │
+│  └───────────────────────────────┘ │
+└─────────────────────────────────────┘
 
-### 4. Access Your Application
+┌─────────────────────────────────────┐
+│   Azure (Full HR Application)       │
+│                                     │
+│  ┌───────────────────────────────┐ │
+│  │   Frontend (React)            │ │
+│  │   Backend (FastAPI)           │ │
+│  │   Database (PostgreSQL)       │ │
+│  └───────────────────────────────┘ │
+└─────────────────────────────────────┘
+```
 
-After deployment completes:
-- Frontend will be available at: `https://[username].github.io/AZURE-DEPLOYMENT-HR-PORTAL/`
-- Replace `[username]` with your GitHub username or organization name
+## Editing the Landing Page
 
-## Configuration Options
+The landing page files are in `/landing`:
+- `landing/index.html` - Main HTML content
+- `landing/styles.css` - Styling
+- `landing/assets/` - Images and logos
 
-### Custom Domain
+To make changes:
+1. Edit files in `/landing` directory
+2. Commit and push to `main` branch
+3. Workflow automatically redeploys
 
-To use a custom domain instead of the default GitHub Pages URL:
+## Custom Domain (Optional)
+
+To use a custom domain for the landing page:
 
 1. Go to **Settings** → **Pages**
 2. Under **Custom domain**, enter your domain (e.g., `hr.yourcompany.com`)
 3. Configure DNS records as instructed
-4. Update `vite.config.ts`:
-   ```typescript
-   // Change base path for custom domain
-   base: "/", // Instead of "/AZURE-DEPLOYMENT-HR-PORTAL/"
-   ```
-
-### Backend CORS Configuration
-
-Ensure your backend allows requests from your GitHub Pages URL:
-
-In `backend/.env` or Azure App Settings:
-```bash
-ALLOWED_ORIGINS=https://[username].github.io,https://your-custom-domain.com
-```
+4. Landing page will be accessible at your custom domain
 
 ## Deployment Workflow
 
-The workflow (`.github/workflows/github-pages.yml`) performs these steps:
-
-1. **Build**: 
-   - Installs Node.js dependencies
-   - Builds frontend with Vite
-   - Configures API base URL
-   - Sets correct base path for GitHub Pages
-
-2. **Deploy**:
-   - Uploads build artifacts
-   - Deploys to GitHub Pages
-   - Provides deployment URL
+The workflow (`.github/workflows/github-pages.yml`) triggers on:
+- Push to `main` branch that modifies `/landing` directory
+- Manual workflow dispatch
+- Changes to the workflow file itself
 
 ## Troubleshooting
 
-### 404 Errors on Refresh
+### Landing Page Shows 404
 
-If you get 404 errors when refreshing pages, this is normal for SPAs on GitHub Pages. The workflow includes a `.nojekyll` file to help, but you may need to handle this in your app routing.
+1. Verify GitHub Pages is enabled in Settings
+2. Check workflow ran successfully in Actions tab
+3. Wait a few minutes for DNS propagation
 
-### API Connection Errors
+### Changes Not Reflecting
 
-If the frontend can't connect to the backend:
-
-1. Verify `API_BASE_URL` secret is set correctly
-2. Check backend CORS configuration allows your GitHub Pages origin
-3. Ensure backend is running and accessible
-4. Check browser console for specific error messages
+1. Hard refresh browser (Ctrl+F5 or Cmd+Shift+R)
+2. Clear browser cache
+3. Check if workflow completed successfully
 
 ### Assets Not Loading
 
-If CSS/JS files return 404:
+1. Verify all asset paths in HTML are relative
+2. Check that images exist in `/landing/assets/`
+3. Ensure `.nojekyll` file is present (workflow adds this automatically)
 
-1. Verify `base` path in `vite.config.ts` matches your deployment
-2. For custom domains, use `base: "/"`
-3. For GitHub Pages URLs, use `base: "/AZURE-DEPLOYMENT-HR-PORTAL/"`
+## Main Application
 
-### Build Failures
+The landing page is separate from the main HR application:
+- **Landing**: Information/marketing page on GitHub Pages
+- **Application**: Full HR portal on Azure
+- **Documentation**: See `docs/AZURE_DEPLOYMENT_REFERENCE_GUIDE.md` for deploying the full application
 
-If the workflow fails:
+## Cost
 
-1. Check **Actions** tab for error logs
-2. Verify `frontend/package.json` scripts are correct
-3. Test build locally: `cd frontend && npm ci && npm run build`
-4. Ensure all dependencies are properly listed in `package.json`
-
-## Development vs Production
-
-### Local Development
-```bash
-cd frontend
-npm install
-npm run dev
-# Runs on http://localhost:5000 with backend proxy
-```
-
-### Production Build (Test Locally)
-```bash
-cd frontend
-GITHUB_PAGES=true VITE_API_BASE_URL=https://your-backend.com/api npm run build
-npm run preview
-```
-
-## Architecture
-
-```
-┌─────────────────────────────────────┐
-│     GitHub Pages (Static Host)      │
-│                                     │
-│  ┌───────────────────────────────┐ │
-│  │   Frontend (React + Vite)     │ │
-│  │   - HTML, CSS, JavaScript     │ │
-│  │   - Static assets             │ │
-│  └───────────────────────────────┘ │
-└─────────────────────────────────────┘
-                 │
-                 │ HTTPS Requests
-                 ▼
-┌─────────────────────────────────────┐
-│   Backend (Azure/Other Service)     │
-│                                     │
-│  ┌───────────────────────────────┐ │
-│  │   FastAPI (Python)            │ │
-│  │   - Authentication            │ │
-│  │   - API endpoints             │ │
-│  │   - Business logic            │ │
-│  └───────────────────────────────┘ │
-│                                     │
-│  ┌───────────────────────────────┐ │
-│  │   PostgreSQL Database         │ │
-│  └───────────────────────────────┘ │
-└─────────────────────────────────────┘
-```
-
-## Cost Comparison
-
-| Service | GitHub Pages | Azure Alternative |
-|---------|-------------|-------------------|
-| **Frontend Hosting** | Free (100GB bandwidth/month) | ~$0-50/month |
-| **Backend Hosting** | N/A (must use external service) | ~$13-200/month |
-| **Database** | N/A (must use external service) | ~$5-100/month |
-| **Total** | Free frontend + backend costs | All-in-one Azure cost |
-
-## Switching Back to Azure
-
-To revert to full Azure deployment:
-
-1. Use the existing `.github/workflows/deploy.yml` workflow
-2. Disable GitHub Pages in repository settings
-3. Follow `docs/AZURE_DEPLOYMENT_REFERENCE_GUIDE.md`
-
-## Security Considerations
-
-1. **Never commit secrets**: API keys, database URLs, etc.
-2. **Use repository secrets**: Store sensitive config in GitHub Secrets
-3. **Enable HTTPS**: GitHub Pages enforces HTTPS automatically
-4. **Configure CORS properly**: Restrict backend to known origins
-5. **Keep dependencies updated**: Run `npm audit` regularly
-
-## Next Steps
-
-1. ✅ Enable GitHub Pages in repository settings
-2. ✅ Set `API_BASE_URL` secret
-3. ✅ Push to main branch or manually trigger workflow
-4. ✅ Verify frontend deployment
-5. ✅ Test backend connectivity
-6. ✅ Configure custom domain (optional)
+- **GitHub Pages**: Free for public repositories
+- **Main Application**: See Azure pricing (deployed separately)
 
 ## Support
 
-For issues specific to:
-- **GitHub Pages deployment**: Check `.github/workflows/github-pages.yml`
-- **Backend deployment**: See `docs/AZURE_DEPLOYMENT_REFERENCE_GUIDE.md`
-- **Frontend build**: Check `frontend/vite.config.ts` and `frontend/package.json`
+For issues:
+- Landing page: Check `.github/workflows/github-pages.yml`
+- Main application: See `docs/AZURE_DEPLOYMENT_REFERENCE_GUIDE.md`
+- General: Open issue on GitHub repository

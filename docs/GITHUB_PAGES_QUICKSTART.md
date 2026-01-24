@@ -1,66 +1,64 @@
-# Quick Start: GitHub Pages Deployment
+# Quick Start: Deploy Landing Page to GitHub Pages
 
-## 🚀 5-Minute Setup
+## 🚀 2-Minute Setup
 
 ### Step 1: Enable GitHub Pages
 1. Go to **Settings** → **Pages**
 2. Under **Source**, select: **GitHub Actions**
 3. Click **Save**
 
-### Step 2: Set Backend URL
-1. Go to **Settings** → **Secrets and variables** → **Actions**
-2. Click **New repository secret**
-3. Add secret:
-   - Name: `API_BASE_URL`
-   - Value: `https://your-backend-url.com/api`
+### Step 2: Deploy
+- **Option A**: Push to `main` branch (auto-deploys landing page)
+- **Option B**: Go to **Actions** → **Deploy Landing Page to GitHub Pages** → **Run workflow**
 
-### Step 3: Deploy
-- **Option A**: Push to `main` branch (auto-deploys)
-- **Option B**: Go to **Actions** → **Deploy to GitHub Pages** → **Run workflow**
-
-### Step 4: Access
-Your app will be at:
+### Step 3: Access
+Your landing page will be at:
 ```
 https://[your-username].github.io/AZURE-DEPLOYMENT-HR-PORTAL/
 ```
 
-## ⚠️ Important Notes
+## 📄 What Gets Deployed
 
-1. **Backend Required**: GitHub Pages only hosts the frontend. You must deploy the backend separately.
+**Only the static landing page** from `/landing` directory:
+- Marketing/information page
+- Features overview
+- UAE compliance highlights
+- Links to docs and GitHub
 
-2. **Backend Options**:
-   - Azure App Service (recommended)
-   - Heroku
-   - Railway
-   - Render
-   - DigitalOcean
+**Main HR application stays on Azure**
 
-3. **CORS Configuration**: Update backend to allow your GitHub Pages URL:
-   ```bash
-   ALLOWED_ORIGINS=https://[username].github.io
-   ```
+## ✏️ Edit the Landing Page
+
+Files are in `/landing`:
+- `landing/index.html` - Content
+- `landing/styles.css` - Styling  
+- `landing/assets/` - Images
+
+Make changes, commit, push to `main` → auto-redeploys!
+
+## 🌐 Custom Domain (Optional)
+
+1. Go to **Settings** → **Pages**
+2. Add custom domain (e.g., `info.yourcompany.com`)
+3. Configure DNS as instructed
+
+## 🔧 Troubleshooting
+
+**404 error?**
+- Wait 2-3 minutes for deployment
+- Check Actions tab for workflow status
+- Hard refresh browser (Ctrl+F5)
+
+**Changes not showing?**
+- Clear browser cache
+- Verify workflow completed in Actions tab
 
 ## 📚 Full Documentation
 See [`docs/GITHUB_PAGES_DEPLOYMENT.md`](GITHUB_PAGES_DEPLOYMENT.md) for complete guide.
 
-## 🔧 Troubleshooting
+## 💡 Key Points
 
-**Can't connect to backend?**
-- Check `API_BASE_URL` secret is correct
-- Verify backend CORS allows your GitHub Pages origin
-- Check backend is running and accessible
-
-**Build failed?**
-- Check Actions tab for logs
-- Test locally: `cd frontend && npm ci && npm run build`
-
-**404 on page refresh?**
-- This is normal for SPAs on GitHub Pages
-- The app routing should handle this
-
-## 🔄 Switching Between Deployments
-
-**To GitHub Pages**: Use `.github/workflows/github-pages.yml`
-**To Azure**: Use `.github/workflows/deploy.yml`
-
-Both can coexist - just enable/disable as needed!
+✅ **Landing page** → GitHub Pages (free)  
+✅ **Main application** → Azure (see `AZURE_DEPLOYMENT_REFERENCE_GUIDE.md`)  
+✅ **Auto-deploys** when you modify `/landing` directory  
+✅ **No backend needed** for landing page (it's just HTML/CSS)
