@@ -3,6 +3,9 @@ import { defineConfig } from "vite";
 
 export default defineConfig({
   plugins: [react()],
+  // Use base path for GitHub Pages deployment (repo name)
+  // For custom domain or root deployment, this will be "/"
+  base: process.env.GITHUB_PAGES === "true" ? "/AZURE-DEPLOYMENT-HR-PORTAL/" : "/",
   build: {
     outDir: "dist",
     emptyOutDir: true,
