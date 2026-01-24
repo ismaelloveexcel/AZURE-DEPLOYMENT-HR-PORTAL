@@ -34,6 +34,21 @@ If all three fail (deploy red, health red, site unreachable): rerun **Deploy to 
 
 ---
 
+## 🧰 Power Maintenance Panel (No-Code Actions)
+
+| Action | What it does | Click here | When to use |
+| --- | --- | --- | --- |
+| Redeploy app | Rebuilds frontend + backend and redeploys to Azure | [Deploy to Azure workflow](https://github.com/ismaelloveexcel/AZURE-DEPLOYMENT-HR-PORTAL/actions/workflows/deploy.yml) → **Run workflow** | App is outdated or unhealthy |
+| Run health scan | Pings the live app and reports reachability | [Post-Deployment Health Check](https://github.com/ismaelloveexcel/AZURE-DEPLOYMENT-HR-PORTAL/actions/workflows/post-deployment-health.yml) → **Run workflow** | Suspect downtime; after redeploy |
+| Quick app open | Opens production site | Replace `<app-name>` and open: `https://<app-name>.azurewebsites.net` | Confirm site loads |
+| Backend health JSON | Confirms DB + admin exist | `https://<app-name>.azurewebsites.net/api/health/db` | Validate database connectivity |
+| Reset admin password | Uses built-in endpoint (needs AUTH_SECRET_KEY) | `POST https://<app-name>.azurewebsites.net/api/health/reset-admin-password` with header `X-Admin-Secret: <AUTH_SECRET_KEY>` | Admin login broken |
+| File a ticket | Opens pre-filled bug report | [New bug report](https://github.com/ismaelloveexcel/AZURE-DEPLOYMENT-HR-PORTAL/issues/new?template=bug_report.md) | When unsure or blocked |
+
+**How to run a workflow:** Click the link → “Run workflow” → keep defaults → “Run workflow”. No code required.
+
+---
+
 ## 👀 Understand What Changed
 
 | Need | One-click link | How to read it |
