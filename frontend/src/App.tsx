@@ -1,14 +1,13 @@
-import { useState, useEffect, FormEvent, ChangeEvent, useCallback } from 'react'
-import { GlassLoader } from './components/GlassLoader'
-import { TemplateList } from './components/Templates/TemplateList'
-import { EmployeeProfile } from './components/EmployeeProfile'
+import { ChangeEvent, FormEvent, useCallback, useEffect, useState } from 'react'
 import { CandidatePass } from './components/CandidatePass'
+import { EmployeeProfile } from './components/EmployeeProfile'
+import { EOYAdminPanel } from './components/EOYAdminPanel/EOYAdminPanel'
+import { GlassLoader } from './components/GlassLoader'
+import { InsuranceCensus } from './components/InsuranceCensus'
 import { ManagerPass } from './components/ManagerPass'
 import { NominationPass } from './components/NominationPass'
 import { Performance } from './components/Performance'
-import { EoyNominations } from './components/EoyNominations'
-import { EOYAdminPanel } from './components/EOYAdminPanel/EOYAdminPanel'
-import { InsuranceCensus } from './components/InsuranceCensus'
+import { TemplateList } from './components/Templates/TemplateList'
 import { useDebounce } from './hooks/useDebounce'
 
 type Section = 'home' | 'employees' | 'onboarding' | 'external' | 'admin' | 'secret-chamber' | 'passes' | 'public-onboarding' | 'recruitment' | 'recruitment-request' | 'recruitment-benefits' | 'templates' | 'template-manager' | 'template-candidate' | 'template-onboarding' | 'template-employee' | 'attendance' | 'compliance-alerts' | 'candidate-pass' | 'manager-pass' | 'performance' | 'insurance-census' | 'nomination-pass'
@@ -1523,7 +1522,7 @@ const [passFormData, setPassFormData] = useState<PassFormData>({
 
   if (activeSection === 'employees') {
     return (
-      <div className="min-h-screen bg-gray-100 p-8">
+      <div className="min-h-screen bg-primary-50 p-8">
         {loginModal}
         
         {/* Employee Profile Modal */}
@@ -1565,9 +1564,9 @@ const [passFormData, setPassFormData] = useState<PassFormData>({
               <form onSubmit={updateEmployee} className="p-6 space-y-6 max-h-[70vh] overflow-y-auto">
                 {/* Basic Info */}
                 <div>
-                  <h3 className="text-lg font-medium text-gray-800 mb-4 flex items-center gap-2">
-                    <svg className="w-5 h-5 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                  <h3 className="text-lg font-medium text-primary-800 mb-4 flex items-center gap-2">
+                    <svg className="w-5 h-5 text-accent-green" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                     </svg>
                     Basic Information
                   </h3>
@@ -1578,7 +1577,7 @@ const [passFormData, setPassFormData] = useState<PassFormData>({
                         type="text"
                         value={employeeFormData.name}
                         onChange={e => setEmployeeFormData({...employeeFormData, name: e.target.value})}
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500"
+                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent-green"
                       />
                     </div>
                     <div>
@@ -1587,7 +1586,7 @@ const [passFormData, setPassFormData] = useState<PassFormData>({
                         type="email"
                         value={employeeFormData.email}
                         onChange={e => setEmployeeFormData({...employeeFormData, email: e.target.value})}
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500"
+                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent-green"
                       />
                     </div>
                     <div>
@@ -1596,7 +1595,7 @@ const [passFormData, setPassFormData] = useState<PassFormData>({
                         type="text"
                         value={employeeFormData.department}
                         onChange={e => setEmployeeFormData({...employeeFormData, department: e.target.value})}
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500"
+                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent-green"
                       />
                     </div>
                     <div>
@@ -1658,9 +1657,9 @@ const [passFormData, setPassFormData] = useState<PassFormData>({
 
                 {/* UAE Compliance - Visa */}
                 <div>
-                  <h3 className="text-lg font-medium text-gray-800 mb-4 flex items-center gap-2">
-                    <svg className="w-5 h-5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+                  <h3 className="text-lg font-medium text-primary-800 mb-4 flex items-center gap-2">
+                    <svg className="w-5 h-5 text-accent-green" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
                     </svg>
                     Visa Details
                   </h3>
@@ -1697,9 +1696,9 @@ const [passFormData, setPassFormData] = useState<PassFormData>({
 
                 {/* UAE Compliance - Emirates ID */}
                 <div>
-                  <h3 className="text-lg font-medium text-gray-800 mb-4 flex items-center gap-2">
-                    <svg className="w-5 h-5 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V8a2 2 0 00-2-2h-5m-4 0V5a2 2 0 114 0v1m-4 0a2 2 0 104 0m-5 8a2 2 0 100-4 2 2 0 000 4zm0 0c1.306 0 2.417.835 2.83 2M9 14a3.001 3.001 0 00-2.83 2M15 11h3m-3 4h2" />
+                  <h3 className="text-lg font-medium text-primary-800 mb-4 flex items-center gap-2">
+                    <svg className="w-5 h-5 text-accent-green" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M10 6H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V8a2 2 0 00-2-2h-5m-4 0V5a2 2 0 114 0v1m-4 0a2 2 0 104 0m-5 8a2 2 0 100-4 2 2 0 000 4zm0 0c1.306 0 2.417.835 2.83 2M9 14a3.001 3.001 0 00-2.83 2M15 11h3m-3 4h2" />
                     </svg>
                     Emirates ID
                   </h3>
@@ -1728,9 +1727,9 @@ const [passFormData, setPassFormData] = useState<PassFormData>({
 
                 {/* UAE Compliance - Medical & ILOE */}
                 <div>
-                  <h3 className="text-lg font-medium text-gray-800 mb-4 flex items-center gap-2">
-                    <svg className="w-5 h-5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                  <h3 className="text-lg font-medium text-primary-800 mb-4 flex items-center gap-2">
+                    <svg className="w-5 h-5 text-accent-green" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
                     </svg>
                     Medical & Insurance
                   </h3>
@@ -1781,9 +1780,9 @@ const [passFormData, setPassFormData] = useState<PassFormData>({
 
                 {/* Contract Details */}
                 <div>
-                  <h3 className="text-lg font-medium text-gray-800 mb-4 flex items-center gap-2">
-                    <svg className="w-5 h-5 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                  <h3 className="text-lg font-medium text-primary-800 mb-4 flex items-center gap-2">
+                    <svg className="w-5 h-5 text-accent-green" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                     </svg>
                     Contract Details
                   </h3>
@@ -1835,7 +1834,7 @@ const [passFormData, setPassFormData] = useState<PassFormData>({
                   <button
                     type="submit"
                     disabled={employeeModalLoading}
-                    className="flex-1 py-3 bg-emerald-500 text-white rounded-lg hover:bg-emerald-600 transition-colors font-medium disabled:opacity-50"
+                    className="flex-1 py-3 bg-accent-green text-white rounded-lg hover:bg-accent-green/90 transition-colors font-medium disabled:opacity-50"
                   >
                     {employeeModalLoading ? 'Saving...' : 'Save Changes'}
                   </button>
@@ -1869,15 +1868,15 @@ const [passFormData, setPassFormData] = useState<PassFormData>({
           {/* Instructions and Import */}
           {(user?.role === 'admin' || user?.role === 'hr') && (
             <div className="flex flex-col sm:flex-row gap-4 mb-6">
-              <div className="bg-emerald-50 border border-emerald-200 rounded-lg p-4 flex-1">
-                <p className="text-emerald-700 text-sm">
+              <div className="bg-primary-50 border border-primary-200 rounded-lg p-4 flex-1">
+                <p className="text-primary-700 text-sm">
                   <strong>Tip:</strong> Click on any employee row to view and edit their details including UAE compliance information.
                 </p>
               </div>
               <div className="flex gap-2">
-                <label className="px-4 py-2 bg-emerald-500 text-white rounded-lg hover:bg-emerald-600 transition-colors cursor-pointer flex items-center gap-2">
+                <label className="px-4 py-2 bg-accent-green text-white rounded-lg hover:bg-accent-green/90 transition-colors cursor-pointer flex items-center gap-2">
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
                   </svg>
                   {importLoading ? 'Importing...' : 'Import CSV'}
                   <input
@@ -2371,7 +2370,7 @@ const [passFormData, setPassFormData] = useState<PassFormData>({
                         placeholder="Search employees by name, ID, or job title..."
                         value={adminEmployeeSearch}
                         onChange={e => setAdminEmployeeSearch(e.target.value)}
-                        className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+                        className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-accent-green focus:border-accent-green"
                       />
                     </div>
                   </div>
@@ -2380,8 +2379,8 @@ const [passFormData, setPassFormData] = useState<PassFormData>({
 
               {/* Employees Table */}
               <div className="bg-white rounded-xl shadow-lg overflow-hidden">
-                <div className="px-6 py-4 border-b border-gray-100 bg-gradient-to-r from-emerald-50 to-teal-50">
-                  <h2 className="text-lg font-semibold text-gray-800">Employee Directory</h2>
+                <div className="px-6 py-4 border-b border-gray-100 bg-primary-50">
+                  <h2 className="text-lg font-semibold text-primary-800">Employee Directory</h2>
                   <p className="text-sm text-gray-500 mt-1">
                     {employees.filter(e => 
                       e.name.toLowerCase().includes(adminEmployeeSearch.toLowerCase()) ||
@@ -2414,7 +2413,7 @@ const [passFormData, setPassFormData] = useState<PassFormData>({
                           <tr key={emp.id} className="hover:bg-gray-50 transition-colors">
                             <td className="px-6 py-4">
                               <div className="flex items-center gap-3">
-                                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-emerald-400 to-teal-500 flex items-center justify-center text-white font-medium">
+                                <div className="w-10 h-10 rounded-full bg-primary-200 flex items-center justify-center text-primary-700 font-medium">
                                   {emp.name.split(' ').map(n => n[0]).join('').slice(0, 2)}
                                 </div>
                                 <div>
@@ -2427,10 +2426,10 @@ const [passFormData, setPassFormData] = useState<PassFormData>({
                             <td className="px-6 py-4 text-sm text-gray-600">{emp.job_title || '-'}</td>
                             <td className="px-6 py-4 text-sm text-gray-600">{emp.function || '-'}</td>
                             <td className="px-6 py-4">
-                              <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                                emp.status === 'active' ? 'bg-green-100 text-green-800' : 
-                                emp.status === 'on_leave' ? 'bg-amber-100 text-amber-800' : 
-                                'bg-gray-100 text-gray-800'
+                              <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${
+                                emp.status === 'active' ? 'bg-accent-green/10 text-accent-green border-accent-green/20' : 
+                                emp.status === 'on_leave' ? 'bg-amber-50 text-amber-700 border-amber-200' : 
+                                'bg-gray-50 text-gray-700 border-gray-200'
                               }`}>
                                 {emp.status}
                               </span>
@@ -2438,7 +2437,7 @@ const [passFormData, setPassFormData] = useState<PassFormData>({
                             <td className="px-6 py-4">
                               <button
                                 onClick={() => setViewingProfileId(emp.employee_id)}
-                                className="text-emerald-600 hover:text-emerald-700 font-medium text-sm"
+                                className="text-accent-green hover:text-accent-green/80 font-medium text-sm"
                               >
                                 View Profile
                               </button>
@@ -2688,56 +2687,56 @@ const [passFormData, setPassFormData] = useState<PassFormData>({
 
           {/* Recruitment Tab Content */}
           {adminTab === 'recruitment' && (
-            <div className="space-y-6">
+            <div className="space-y-6 bg-primary-50 min-h-screen">
               {/* Recruitment Dashboard Header */}
               <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                <div className="bg-white rounded-xl shadow p-6">
+                <div className="bg-white rounded-xl shadow p-6 border border-primary-200">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm text-gray-500">Active Positions</p>
-                      <p className="text-3xl font-semibold text-purple-600">{recruitmentStats?.active_positions ?? recruitmentRequests.length}</p>
+                      <p className="text-sm text-primary-600">Active Positions</p>
+                      <p className="text-3xl font-semibold text-primary-800">{recruitmentStats?.active_positions ?? recruitmentRequests.length}</p>
                     </div>
-                    <div className="p-3 bg-purple-100 rounded-full">
-                      <svg className="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <div className="p-3 bg-primary-50 rounded-full">
+                      <svg className="w-6 h-6 text-accent-green" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                       </svg>
                     </div>
                   </div>
                 </div>
-                <div className="bg-white rounded-xl shadow p-6">
+                <div className="bg-white rounded-xl shadow p-6 border border-primary-200">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm text-gray-500">Total Candidates</p>
-                      <p className="text-3xl font-semibold text-blue-600">{recruitmentStats?.total_candidates ?? 0}</p>
+                      <p className="text-sm text-primary-600">Total Candidates</p>
+                      <p className="text-3xl font-semibold text-primary-800">{recruitmentStats?.total_candidates ?? 0}</p>
                     </div>
-                    <div className="p-3 bg-blue-100 rounded-full">
-                      <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <div className="p-3 bg-primary-50 rounded-full">
+                      <svg className="w-6 h-6 text-accent-green" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
                       </svg>
                     </div>
                   </div>
                 </div>
-                <div className="bg-white rounded-xl shadow p-6">
+                <div className="bg-white rounded-xl shadow p-6 border border-primary-200">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm text-gray-500">In Interview</p>
-                      <p className="text-3xl font-semibold text-orange-600">{recruitmentStats?.in_interview ?? pipelineCounts?.interview ?? 0}</p>
+                      <p className="text-sm text-primary-600">In Interview</p>
+                      <p className="text-3xl font-semibold text-primary-800">{recruitmentStats?.in_interview ?? pipelineCounts?.interview ?? 0}</p>
                     </div>
-                    <div className="p-3 bg-orange-100 rounded-full">
-                      <svg className="w-6 h-6 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <div className="p-3 bg-primary-50 rounded-full">
+                      <svg className="w-6 h-6 text-accent-green" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                       </svg>
                     </div>
                   </div>
                 </div>
-                <div className="bg-white rounded-xl shadow p-6">
+                <div className="bg-white rounded-xl shadow p-6 border border-primary-200">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm text-gray-500">Hired (30 days)</p>
-                      <p className="text-3xl font-semibold text-emerald-600">{recruitmentStats?.hired_30_days ?? pipelineCounts?.hired ?? 0}</p>
+                      <p className="text-sm text-primary-600">Hired (30 days)</p>
+                      <p className="text-3xl font-semibold text-primary-800">{recruitmentStats?.hired_30_days ?? pipelineCounts?.hired ?? 0}</p>
                     </div>
-                    <div className="p-3 bg-emerald-100 rounded-full">
-                      <svg className="w-6 h-6 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <div className="p-3 bg-primary-50 rounded-full">
+                      <svg className="w-6 h-6 text-accent-green" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                       </svg>
                     </div>
@@ -2747,36 +2746,36 @@ const [passFormData, setPassFormData] = useState<PassFormData>({
 
               {/* Active Job Positions */}
               {recruitmentRequests.length > 0 && (
-                <div className="bg-white rounded-xl shadow-lg p-6">
-                  <h2 className="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
-                    <svg className="w-5 h-5 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div className="bg-white rounded-xl shadow-lg p-6 border border-primary-200">
+                  <h2 className="text-lg font-semibold text-primary-800 mb-4 flex items-center gap-2">
+                    <svg className="w-5 h-5 text-accent-green" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                     </svg>
                     Open Positions ({recruitmentRequests.length})
                   </h2>
                   <div className="grid gap-4">
                     {recruitmentRequests.map((req: any) => (
-                      <div key={req.id} className="border border-gray-200 rounded-lg p-4 hover:border-purple-300 transition-colors">
+                      <div key={req.id} className="border border-primary-200 rounded-lg p-4 hover:border-accent-green transition-colors bg-white">
                         <div className="flex items-start justify-between">
                           <div>
-                            <h3 className="font-semibold text-gray-800">{req.position_title}</h3>
-                            <p className="text-sm text-gray-500">{req.department} • {req.employment_type}</p>
+                            <h3 className="font-semibold text-primary-800">{req.position_title}</h3>
+                            <p className="text-sm text-primary-600">{req.department} • {req.employment_type}</p>
                             <div className="flex items-center gap-2 mt-2">
-                              <span className={`px-2 py-1 text-xs rounded-full ${
-                                req.status === 'open' ? 'bg-green-100 text-green-700' :
-                                req.status === 'pending_approval' ? 'bg-yellow-100 text-yellow-700' :
-                                'bg-gray-100 text-gray-700'
+                              <span className={`px-2 py-1 text-xs rounded-full border ${
+                                req.status === 'open' ? 'border-accent-green text-accent-green bg-accent-green/5' :
+                                req.status === 'pending_approval' ? 'border-amber-400 text-amber-600 bg-amber-50' :
+                                'border-primary-300 text-primary-600 bg-primary-50'
                               }`}>
                                 {req.status?.replace('_', ' ')}
                               </span>
-                              <span className="text-xs text-gray-400">{req.request_number}</span>
+                              <span className="text-xs text-primary-500">{req.request_number}</span>
                             </div>
                           </div>
                           <div className="text-right flex flex-col items-end gap-2">
                             <div>
-                              <p className="text-sm font-medium text-gray-600">Headcount: {req.headcount || 1}</p>
+                              <p className="text-sm font-medium text-primary-700">Headcount: {req.headcount || 1}</p>
                               {req.salary_range_min && req.salary_range_max && (
-                                <p className="text-xs text-gray-400">AED {req.salary_range_min.toLocaleString()} - {req.salary_range_max.toLocaleString()}</p>
+                                <p className="text-xs text-primary-500">AED {req.salary_range_min.toLocaleString()} - {req.salary_range_max.toLocaleString()}</p>
                               )}
                             </div>
                             <button
@@ -2786,7 +2785,7 @@ const [passFormData, setPassFormData] = useState<PassFormData>({
                                 setViewingManagerId(req.hiring_manager_id || user?.employee_id || '')
                                 setActiveSection('manager-pass')
                               }}
-                              className="px-3 py-1.5 bg-blue-600 text-white text-xs font-medium rounded-lg hover:bg-blue-700 flex items-center gap-1"
+                              className="px-3 py-1.5 bg-accent-green text-white text-xs font-medium rounded-lg hover:bg-accent-green/90 transition-colors flex items-center gap-1"
                             >
                               <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z" /></svg>
                               Manager Pass
@@ -2800,9 +2799,9 @@ const [passFormData, setPassFormData] = useState<PassFormData>({
               )}
 
               {/* Kanban Pipeline */}
-              <div className="bg-white rounded-xl shadow-lg p-6">
-                <h2 className="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
-                  <svg className="w-5 h-5 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div className="bg-white rounded-xl shadow-lg p-6 border border-primary-200">
+                <h2 className="text-lg font-semibold text-primary-800 mb-4 flex items-center gap-2">
+                  <svg className="w-5 h-5 text-accent-green" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
                   </svg>
                   Candidate Pipeline
@@ -2817,16 +2816,16 @@ const [passFormData, setPassFormData] = useState<PassFormData>({
                     { key: 'offer', label: 'Offer' },
                     { key: 'hired', label: 'Hired' }
                   ].map((stage) => (
-                    <div key={stage.key} className="bg-gray-50 rounded-lg p-4 min-h-[200px]">
+                    <div key={stage.key} className="bg-primary-50 rounded-lg p-4 min-h-[200px] border border-primary-200">
                       <div className="flex items-center justify-between mb-3">
-                        <h3 className="font-medium text-gray-700">{stage.label}</h3>
-                        <span className="bg-slate-200 text-slate-900 text-xs px-2 py-1 rounded-full">
+                        <h3 className="font-medium text-primary-700">{stage.label}</h3>
+                        <span className="bg-primary-100 text-primary-800 text-xs px-2 py-1 rounded-full border border-primary-300">
                           {pipelineCounts?.[stage.key as keyof typeof pipelineCounts] ?? 0}
                         </span>
                       </div>
                       <div className="space-y-2">
                         {(pipelineCounts?.[stage.key as keyof typeof pipelineCounts] ?? 0) === 0 && (
-                          <div className="text-center py-8 text-gray-400 text-sm">
+                          <div className="text-center py-8 text-primary-500 text-sm">
                             <p>No candidates</p>
                           </div>
                         )}
@@ -2838,17 +2837,17 @@ const [passFormData, setPassFormData] = useState<PassFormData>({
 
               {/* Candidates Screening Table - Improved Spacing */}
               {candidatesList.length > 0 && (
-                <div className="bg-white rounded-2xl shadow-xl overflow-hidden">
+                <div className="bg-white rounded-2xl shadow-xl overflow-hidden border border-primary-200">
                   {/* Header with Search and Filters */}
-                  <div className="px-8 py-6 border-b border-gray-100 bg-gradient-to-r from-slate-50 to-gray-50">
+                  <div className="px-8 py-6 border-b border-primary-200 bg-primary-50">
                     <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
                       <div>
-                        <h2 className="text-xl font-bold text-gray-800">Candidate Screening</h2>
-                        <p className="text-sm text-gray-500 mt-1">{candidatesList.length} candidates in pipeline</p>
+                        <h2 className="text-xl font-bold text-primary-800">Candidate Screening</h2>
+                        <p className="text-sm text-primary-600 mt-1">{candidatesList.length} candidates in pipeline</p>
                       </div>
                       <div className="flex flex-wrap items-center gap-3">
                         <div className="relative">
-                          <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-primary-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                           </svg>
                           <input
@@ -2856,13 +2855,13 @@ const [passFormData, setPassFormData] = useState<PassFormData>({
                             placeholder="Search candidates..."
                             value={candidateSearchQuery}
                             onChange={(e) => setCandidateSearchQuery(e.target.value)}
-                            className="w-64 pl-10 pr-4 py-2.5 bg-white border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent shadow-sm"
+                            className="w-64 pl-10 pr-4 py-2.5 bg-white border border-primary-300 rounded-xl text-sm focus:ring-2 focus:ring-accent-green focus:border-accent-green shadow-sm"
                           />
                         </div>
                         <select 
                           value={candidateStatusFilter}
                           onChange={(e) => setCandidateStatusFilter(e.target.value)}
-                          className="px-4 py-2.5 bg-white border border-gray-200 rounded-xl text-sm text-gray-600 focus:ring-2 focus:ring-blue-500 shadow-sm"
+                          className="px-4 py-2.5 bg-white border border-primary-300 rounded-xl text-sm text-primary-700 focus:ring-2 focus:ring-accent-green shadow-sm"
                         >
                           <option value="">All Stages</option>
                           <option value="applied">Applied</option>
@@ -2874,7 +2873,7 @@ const [passFormData, setPassFormData] = useState<PassFormData>({
                         <select 
                           value={candidateSourceFilter}
                           onChange={(e) => setCandidateSourceFilter(e.target.value)}
-                          className="px-4 py-2.5 bg-white border border-gray-200 rounded-xl text-sm text-gray-600 focus:ring-2 focus:ring-blue-500 shadow-sm"
+                          className="px-4 py-2.5 bg-white border border-primary-300 rounded-xl text-sm text-primary-700 focus:ring-2 focus:ring-accent-green shadow-sm"
                         >
                           <option value="">All Sources</option>
                           <option value="LinkedIn">LinkedIn</option>
@@ -2891,18 +2890,18 @@ const [passFormData, setPassFormData] = useState<PassFormData>({
                   <div className="overflow-x-auto">
                     <table className="w-full">
                       <thead>
-                        <tr className="bg-[#0a1628]">
-                          <th className="py-4 px-3 text-left w-12 border-b border-slate-700">
-                            <input type="checkbox" className="rounded border-slate-600 bg-slate-800 text-blue-500 focus:ring-blue-500" />
+                        <tr className="bg-primary-50">
+                          <th className="py-4 px-3 text-left w-12 border-b border-primary-200">
+                            <input type="checkbox" className="rounded border-primary-300 bg-white text-accent-green focus:ring-accent-green" />
                           </th>
-                          <th className="py-4 px-2 text-left text-xs font-bold text-slate-200 uppercase tracking-wider w-16 border-b border-slate-700">Rank</th>
-                          <th className="py-4 px-4 text-left text-xs font-bold text-slate-200 uppercase tracking-wider min-w-[180px] border-b border-slate-700">Name</th>
-                          <th className="py-4 px-4 text-left text-xs font-bold text-slate-200 uppercase tracking-wider min-w-[200px] border-b border-slate-700">Current Position</th>
-                          <th className="py-4 px-4 text-left text-xs font-bold text-slate-200 uppercase tracking-wider w-28 border-b border-slate-700">CV Scoring</th>
-                          <th className="py-4 px-4 text-left text-xs font-bold text-slate-200 uppercase tracking-wider w-36 border-b border-slate-700">Skills Match</th>
-                          <th className="py-4 px-4 text-left text-xs font-bold text-slate-200 uppercase tracking-wider w-28 border-b border-slate-700">Education</th>
-                          <th className="py-4 px-4 text-left text-xs font-bold text-slate-200 uppercase tracking-wider w-24 border-b border-slate-700">Experience</th>
-                          <th className="py-4 px-4 text-left text-xs font-bold text-slate-200 uppercase tracking-wider w-28 border-b border-slate-700">Stage</th>
+                          <th className="py-4 px-2 text-left text-xs font-bold text-primary-700 uppercase tracking-wider w-16 border-b border-primary-200">Rank</th>
+                          <th className="py-4 px-4 text-left text-xs font-bold text-primary-700 uppercase tracking-wider min-w-[180px] border-b border-primary-200">Name</th>
+                          <th className="py-4 px-4 text-left text-xs font-bold text-primary-700 uppercase tracking-wider min-w-[200px] border-b border-primary-200">Current Position</th>
+                          <th className="py-4 px-4 text-left text-xs font-bold text-primary-700 uppercase tracking-wider w-28 border-b border-primary-200">CV Scoring</th>
+                          <th className="py-4 px-4 text-left text-xs font-bold text-primary-700 uppercase tracking-wider w-36 border-b border-primary-200">Skills Match</th>
+                          <th className="py-4 px-4 text-left text-xs font-bold text-primary-700 uppercase tracking-wider w-28 border-b border-primary-200">Education</th>
+                          <th className="py-4 px-4 text-left text-xs font-bold text-primary-700 uppercase tracking-wider w-24 border-b border-primary-200">Experience</th>
+                          <th className="py-4 px-4 text-left text-xs font-bold text-primary-700 uppercase tracking-wider w-28 border-b border-primary-200">Stage</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -2923,76 +2922,76 @@ const [passFormData, setPassFormData] = useState<PassFormData>({
                           return (
                             <tr 
                               key={candidate.id} 
-                              className="border-b border-gray-100 hover:bg-blue-50/50 cursor-pointer transition-colors group" 
+                              className="border-b border-primary-200 hover:bg-primary-50/50 cursor-pointer transition-colors group" 
                               onClick={() => { setSelectedCandidate({...candidate, position: position}); setShowCandidateProfileModal(true); }}
                             >
                               <td className="py-5 px-3">
-                                <input type="checkbox" className="rounded border-gray-300 text-blue-600 focus:ring-blue-500" onClick={(e) => e.stopPropagation()} />
+                                <input type="checkbox" className="rounded border-primary-300 text-accent-green focus:ring-accent-green" onClick={(e) => e.stopPropagation()} />
                               </td>
                               <td className="py-5 px-2">
-                                <span className="inline-flex items-center justify-center w-8 h-8 bg-gray-100 group-hover:bg-white rounded-lg text-sm font-bold text-gray-600">#{index + 1}</span>
+                                <span className="inline-flex items-center justify-center w-8 h-8 bg-primary-100 group-hover:bg-white rounded-lg text-sm font-bold text-primary-700 border border-primary-200">#{index + 1}</span>
                               </td>
                               <td className="py-5 px-4">
                                 <div className="flex items-center gap-3">
                                   <div>
-                                    <p className="font-semibold text-gray-800">{candidate.full_name}</p>
+                                    <p className="font-semibold text-primary-800">{candidate.full_name}</p>
                                   </div>
                                 </div>
                               </td>
                               <td className="py-5 px-4">
-                                <p className="text-sm text-gray-700 font-medium">{candidate.current_position || '-'}</p>
+                                <p className="text-sm text-primary-700 font-medium">{candidate.current_position || '-'}</p>
                               </td>
                               <td className="py-5 px-4">
                                 {cvScore ? (
                                   <div className="flex items-center gap-2">
-                                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center text-white font-bold text-sm ${
-                                      cvScore >= 80 ? 'bg-gradient-to-br from-green-500 to-emerald-600' :
-                                      cvScore >= 60 ? 'bg-gradient-to-br from-blue-500 to-indigo-600' :
-                                      cvScore >= 40 ? 'bg-gradient-to-br from-yellow-500 to-orange-500' :
-                                      'bg-gradient-to-br from-gray-400 to-gray-500'
+                                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center text-white font-bold text-sm border-2 ${
+                                      cvScore >= 80 ? 'bg-accent-green border-accent-green' :
+                                      cvScore >= 60 ? 'bg-accent-green/80 border-accent-green/80' :
+                                      cvScore >= 40 ? 'bg-accent-green/60 border-accent-green/60' :
+                                      'bg-primary-400 border-primary-400'
                                     }`}>
                                       {cvScore}
                                     </div>
                                   </div>
                                 ) : (
-                                  <span className="text-sm text-gray-400">-</span>
+                                  <span className="text-sm text-primary-400">-</span>
                                 )}
                               </td>
                               <td className="py-5 px-4">
                                 {candidate.skills_match_score ? (
                                   <div className="flex items-center gap-2">
-                                    <div className="w-24 h-2.5 bg-gray-200 rounded-full overflow-hidden">
+                                    <div className="w-24 h-2.5 bg-primary-200 rounded-full overflow-hidden">
                                       <div 
                                         className={`h-full rounded-full ${
-                                          candidate.skills_match_score >= 80 ? 'bg-gradient-to-r from-green-400 to-emerald-500' :
-                                          candidate.skills_match_score >= 60 ? 'bg-gradient-to-r from-blue-400 to-indigo-500' :
-                                          'bg-gradient-to-r from-yellow-400 to-orange-500'
+                                          candidate.skills_match_score >= 80 ? 'bg-accent-green' :
+                                          candidate.skills_match_score >= 60 ? 'bg-accent-green/80' :
+                                          'bg-accent-green/60'
                                         }`}
                                         style={{ width: `${candidate.skills_match_score}%` }}
                                       />
                                     </div>
-                                    <span className="text-sm font-medium text-gray-600">{candidate.skills_match_score}%</span>
+                                    <span className="text-sm font-medium text-primary-700">{candidate.skills_match_score}%</span>
                                   </div>
                                 ) : (
-                                  <span className="text-sm text-gray-400">-</span>
+                                  <span className="text-sm text-primary-400">-</span>
                                 )}
                               </td>
                               <td className="py-5 px-4">
-                                <span className="text-sm text-gray-700">{candidate.education_level || '-'}</span>
+                                <span className="text-sm text-primary-700">{candidate.education_level || '-'}</span>
                               </td>
                               <td className="py-5 px-4">
-                                <span className="text-sm font-medium text-gray-700">
+                                <span className="text-sm font-medium text-primary-700">
                                   {candidate.years_experience ? `${candidate.years_experience}+ yrs` : '-'}
                                 </span>
                               </td>
                               <td className="py-5 px-4">
-                                <span className={`inline-flex items-center px-3 py-1.5 text-xs font-semibold rounded-lg ${
-                                  candidate.stage === 'applied' ? 'bg-blue-100 text-blue-700' :
-                                  candidate.stage === 'screening' ? 'bg-amber-100 text-amber-700' :
-                                  candidate.stage === 'interview' ? 'bg-purple-100 text-purple-700' :
-                                  candidate.stage === 'offer' ? 'bg-green-100 text-green-700' :
-                                  candidate.stage === 'hired' ? 'bg-emerald-100 text-emerald-700' :
-                                  'bg-gray-100 text-gray-700'
+                                <span className={`inline-flex items-center px-3 py-1.5 text-xs font-semibold rounded-lg border ${
+                                  candidate.stage === 'applied' ? 'border-accent-green text-accent-green bg-accent-green/5' :
+                                  candidate.stage === 'screening' ? 'border-amber-400 text-amber-600 bg-amber-50' :
+                                  candidate.stage === 'interview' ? 'border-accent-green text-accent-green bg-accent-green/5' :
+                                  candidate.stage === 'offer' ? 'border-accent-green text-accent-green bg-accent-green/5' :
+                                  candidate.stage === 'hired' ? 'border-accent-green text-accent-green bg-accent-green/5' :
+                                  'border-primary-300 text-primary-600 bg-primary-50'
                                 }`}>
                                   {candidate.stage?.charAt(0).toUpperCase() + candidate.stage?.slice(1)}
                                 </span>
@@ -3004,13 +3003,13 @@ const [passFormData, setPassFormData] = useState<PassFormData>({
                                     target="_blank" 
                                     rel="noopener noreferrer"
                                     onClick={(e) => e.stopPropagation()}
-                                    className="inline-flex items-center gap-1 px-3 py-1.5 bg-blue-50 hover:bg-blue-100 text-blue-600 text-xs font-medium rounded-lg transition-colors"
+                                    className="inline-flex items-center gap-1 px-3 py-1.5 bg-primary-50 hover:bg-accent-green/10 text-accent-green text-xs font-medium rounded-lg transition-colors border border-primary-200"
                                   >
                                     <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24"><path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/></svg>
                                     View
                                   </a>
                                 ) : (
-                                  <span className="text-sm text-gray-400">-</span>
+                                  <span className="text-sm text-primary-400">-</span>
                                 )}
                               </td>
                               <td className="py-5 px-4">
@@ -3020,17 +3019,17 @@ const [passFormData, setPassFormData] = useState<PassFormData>({
                                     target="_blank" 
                                     rel="noopener noreferrer"
                                     onClick={(e) => e.stopPropagation()}
-                                    className="inline-flex items-center gap-1 px-3 py-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-600 text-xs font-medium rounded-lg transition-colors"
+                                    className="inline-flex items-center gap-1 px-3 py-1.5 bg-primary-50 hover:bg-accent-green/10 text-accent-green text-xs font-medium rounded-lg transition-colors border border-primary-200"
                                   >
                                     <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
                                     View
                                   </a>
                                 ) : (
-                                  <span className="text-sm text-gray-400">-</span>
+                                  <span className="text-sm text-primary-400">-</span>
                                 )}
                               </td>
                               <td className="py-5 px-4">
-                                <span className="text-sm text-gray-600">{candidate.source || '-'}</span>
+                                <span className="text-sm text-primary-700">{candidate.source || '-'}</span>
                               </td>
                             </tr>
                           )
@@ -3040,65 +3039,65 @@ const [passFormData, setPassFormData] = useState<PassFormData>({
                   </div>
                   
                   {/* Table Footer */}
-                  <div className="px-8 py-4 bg-gray-50/50 border-t border-gray-100">
-                    <p className="text-sm text-gray-500">Click on a candidate row to view their full profile</p>
+                  <div className="px-8 py-4 bg-primary-50 border-t border-primary-200">
+                    <p className="text-sm text-primary-600">Click on a candidate row to view their full profile</p>
                   </div>
                 </div>
               )}
 
               {/* Quick Actions */}
-              <div className="bg-white rounded-xl shadow-lg p-6">
-                <h2 className="text-lg font-semibold text-gray-800 mb-4">Quick Actions</h2>
+              <div className="bg-white rounded-xl shadow-lg p-6 border border-primary-200">
+                <h2 className="text-lg font-semibold text-primary-800 mb-4">Quick Actions</h2>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                  <button onClick={() => setShowNewRequestModal(true)} className="flex items-center gap-3 p-4 bg-purple-50 hover:bg-purple-100 rounded-lg transition-colors">
-                    <div className="p-2 bg-purple-500 rounded-lg">
-                      <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <button onClick={() => setShowNewRequestModal(true)} className="flex items-center gap-3 p-4 bg-primary-50 hover:bg-accent-green/10 rounded-lg transition-colors border border-primary-200">
+                    <div className="p-2 bg-accent-green/10 rounded-lg">
+                      <svg className="w-5 h-5 text-accent-green" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
                       </svg>
                     </div>
-                    <span className="font-medium text-gray-700">New Position</span>
+                    <span className="font-medium text-primary-700">New Position</span>
                   </button>
-                  <button onClick={() => alert('Add Candidate feature - requires selecting a position first')} className="flex items-center gap-3 p-4 bg-blue-50 hover:bg-blue-100 rounded-lg transition-colors">
-                    <div className="p-2 bg-blue-500 rounded-lg">
-                      <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <button onClick={() => alert('Add Candidate feature - requires selecting a position first')} className="flex items-center gap-3 p-4 bg-primary-50 hover:bg-accent-green/10 rounded-lg transition-colors border border-primary-200">
+                    <div className="p-2 bg-accent-green/10 rounded-lg">
+                      <svg className="w-5 h-5 text-accent-green" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
                       </svg>
                     </div>
-                    <span className="font-medium text-gray-700">Add Candidate</span>
+                    <span className="font-medium text-primary-700">Add Candidate</span>
                   </button>
-                  <button onClick={() => alert('Upload CV feature - resume parsing coming soon')} className="flex items-center gap-3 p-4 bg-green-50 hover:bg-green-100 rounded-lg transition-colors">
-                    <div className="p-2 bg-green-500 rounded-lg">
-                      <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <button onClick={() => alert('Upload CV feature - resume parsing coming soon')} className="flex items-center gap-3 p-4 bg-primary-50 hover:bg-accent-green/10 rounded-lg transition-colors border border-primary-200">
+                    <div className="p-2 bg-accent-green/10 rounded-lg">
+                      <svg className="w-5 h-5 text-accent-green" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
                       </svg>
                     </div>
-                    <span className="font-medium text-gray-700">Upload CV</span>
+                    <span className="font-medium text-primary-700">Upload CV</span>
                   </button>
-                  <button onClick={() => alert('Schedule Interview feature - requires candidates in pipeline')} className="flex items-center gap-3 p-4 bg-orange-50 hover:bg-orange-100 rounded-lg transition-colors">
-                    <div className="p-2 bg-orange-500 rounded-lg">
-                      <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <button onClick={() => alert('Schedule Interview feature - requires candidates in pipeline')} className="flex items-center gap-3 p-4 bg-primary-50 hover:bg-accent-green/10 rounded-lg transition-colors border border-primary-200">
+                    <div className="p-2 bg-accent-green/10 rounded-lg">
+                      <svg className="w-5 h-5 text-accent-green" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                       </svg>
                     </div>
-                    <span className="font-medium text-gray-700">Schedule Interview</span>
+                    <span className="font-medium text-primary-700">Schedule Interview</span>
                   </button>
                 </div>
               </div>
 
               {/* Info Banner */}
-              <div className="bg-gradient-to-r from-purple-500 to-purple-600 rounded-xl shadow-lg p-6 text-white">
+              <div className="bg-primary-50 rounded-xl shadow-lg p-6 border border-primary-200">
                 <div className="flex items-start gap-4">
-                  <div className="p-3 bg-white/20 rounded-lg">
-                    <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <div className="p-3 bg-accent-green/10 rounded-lg">
+                    <svg className="w-8 h-8 text-accent-green" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
                   </div>
                   <div>
-                    <h3 className="text-lg font-semibold mb-2">Recruitment Module Active</h3>
-                    <p className="text-purple-100 mb-3">
+                    <h3 className="text-lg font-semibold text-primary-800 mb-2">Recruitment Module Active</h3>
+                    <p className="text-primary-600 mb-3">
                       Backend API is fully implemented with 25+ endpoints. Features include:
                     </p>
-                    <ul className="text-sm text-purple-100 space-y-1">
+                    <ul className="text-sm text-primary-600 space-y-1">
                       <li>• Automated CV parsing (pyresparser)</li>
                       <li>• Kanban pipeline with drag-and-drop</li>
                       <li>• Manager & Candidate pass integration</li>
@@ -3586,7 +3585,7 @@ const [passFormData, setPassFormData] = useState<PassFormData>({
   }
   if (activeSection === 'passes') {
     return (
-      <div className="min-h-screen bg-gray-100 p-8">
+      <div className="min-h-screen bg-primary-50 p-8">
         {loginModal}
         <div className="max-w-6xl mx-auto">
           <div className="flex items-center justify-between mb-6">
@@ -3602,7 +3601,7 @@ const [passFormData, setPassFormData] = useState<PassFormData>({
               )}
               <button
                 onClick={() => handleNavigate('home')}
-                className="px-4 py-2 text-emerald-600 hover:bg-emerald-50 rounded-lg transition-colors"
+                className="px-4 py-2 text-accent-green hover:bg-accent-green/10 rounded-lg transition-colors"
               >
                 ← Back to Home
               </button>
@@ -3613,64 +3612,64 @@ const [passFormData, setPassFormData] = useState<PassFormData>({
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
             <button
               onClick={() => setPassFilter('all')}
-              className={`bg-white rounded-xl shadow-sm p-5 border-l-4 border-emerald-500 text-left transition-all hover:shadow-md ${passFilter === 'all' ? 'ring-2 ring-emerald-500' : ''}`}
+              className={`bg-white rounded-xl shadow-sm p-5 border border-primary-200 text-left transition-all hover:shadow-md hover:border-primary-300 ${passFilter === 'all' ? 'ring-2 ring-accent-green' : ''}`}
             >
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-gray-500 font-medium">Total Passes</p>
-                  <p className="text-2xl font-bold text-gray-800">{passes.length}</p>
+                  <p className="text-sm text-primary-600 font-medium">Total Passes</p>
+                  <p className="text-2xl font-bold text-primary-800">{passes.length}</p>
                 </div>
-                <div className="w-12 h-12 bg-emerald-100 rounded-full flex items-center justify-center">
-                  <svg className="w-6 h-6 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z" />
+                <div className="w-12 h-12 bg-primary-100 rounded-full flex items-center justify-center">
+                  <svg className="w-6 h-6 text-accent-green" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z" />
                   </svg>
                 </div>
               </div>
             </button>
             <button
               onClick={() => setPassFilter('active')}
-              className={`bg-white rounded-xl shadow-sm p-5 border-l-4 border-green-500 text-left transition-all hover:shadow-md ${passFilter === 'active' ? 'ring-2 ring-green-500' : ''}`}
+              className={`bg-white rounded-xl shadow-sm p-5 border border-primary-200 text-left transition-all hover:shadow-md hover:border-primary-300 ${passFilter === 'active' ? 'ring-2 ring-accent-green' : ''}`}
             >
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-gray-500 font-medium">Active</p>
-                  <p className="text-2xl font-bold text-green-600">{passes.filter(p => p.status === 'active').length}</p>
+                  <p className="text-sm text-primary-600 font-medium">Active</p>
+                  <p className="text-2xl font-bold text-accent-green">{passes.filter(p => p.status === 'active').length}</p>
                 </div>
-                <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
-                  <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                <div className="w-12 h-12 bg-primary-100 rounded-full flex items-center justify-center">
+                  <svg className="w-6 h-6 text-accent-green" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
                 </div>
               </div>
             </button>
             <button
               onClick={() => setPassFilter('expired')}
-              className={`bg-white rounded-xl shadow-sm p-5 border-l-4 border-amber-500 text-left transition-all hover:shadow-md ${passFilter === 'expired' ? 'ring-2 ring-amber-500' : ''}`}
+              className={`bg-white rounded-xl shadow-sm p-5 border border-primary-200 text-left transition-all hover:shadow-md hover:border-primary-300 ${passFilter === 'expired' ? 'ring-2 ring-accent-green' : ''}`}
             >
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-gray-500 font-medium">Expired</p>
+                  <p className="text-sm text-primary-600 font-medium">Expired</p>
                   <p className="text-2xl font-bold text-amber-600">{passes.filter(p => p.status === 'expired').length}</p>
                 </div>
-                <div className="w-12 h-12 bg-amber-100 rounded-full flex items-center justify-center">
-                  <svg className="w-6 h-6 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                <div className="w-12 h-12 bg-primary-100 rounded-full flex items-center justify-center">
+                  <svg className="w-6 h-6 text-accent-green" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
                 </div>
               </div>
             </button>
             <button
               onClick={() => setPassFilter('revoked')}
-              className={`bg-white rounded-xl shadow-sm p-5 border-l-4 border-red-500 text-left transition-all hover:shadow-md ${passFilter === 'revoked' ? 'ring-2 ring-red-500' : ''}`}
+              className={`bg-white rounded-xl shadow-sm p-5 border border-primary-200 text-left transition-all hover:shadow-md hover:border-primary-300 ${passFilter === 'revoked' ? 'ring-2 ring-accent-green' : ''}`}
             >
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-gray-500 font-medium">Revoked</p>
-                  <p className="text-2xl font-bold text-red-600">{passes.filter(p => p.status === 'revoked').length}</p>
+                  <p className="text-sm text-primary-600 font-medium">Revoked</p>
+                  <p className="text-2xl font-bold text-accent-red">{passes.filter(p => p.status === 'revoked').length}</p>
                 </div>
-                <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center">
-                  <svg className="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" />
+                <div className="w-12 h-12 bg-primary-100 rounded-full flex items-center justify-center">
+                  <svg className="w-6 h-6 text-accent-green" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" />
                   </svg>
                 </div>
               </div>
@@ -3680,10 +3679,10 @@ const [passFormData, setPassFormData] = useState<PassFormData>({
           <div className="flex gap-4 mb-6">
             <button
               onClick={() => setShowPassForm(true)}
-              className="px-4 py-2 bg-emerald-500 text-white rounded-lg hover:bg-emerald-600 transition-colors flex items-center gap-2"
+              className="px-4 py-2 bg-accent-green text-white rounded-lg hover:bg-accent-green/90 transition-colors flex items-center gap-2"
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 4v16m8-8H4" />
               </svg>
               Generate New Pass
             </button>
@@ -5515,84 +5514,79 @@ const [passFormData, setPassFormData] = useState<PassFormData>({
       name: 'Manager',
       description: 'Recruitment & team management',
       icon: (
-        <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <svg className="w-8 h-8 text-accent-green" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
         </svg>
       ),
-      route: 'recruitment' as Section,
-      color: '#3B82F6'
+      route: 'recruitment' as Section
     },
     {
       id: 'candidate',
       name: 'Candidate',
       description: 'Application tracking & interviews',
       icon: (
-        <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <svg className="w-8 h-8 text-accent-green" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
         </svg>
       ),
-      route: 'candidate-pass' as Section,
-      color: '#14B8A6'
+      route: 'candidate-pass' as Section
     },
     {
       id: 'onboarding',
       name: 'Onboarding',
       description: 'New joiner setup & documents',
       icon: (
-        <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <svg className="w-8 h-8 text-accent-green" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
         </svg>
       ),
-      route: 'onboarding' as Section,
-      color: '#F97316'
+      route: 'onboarding' as Section
     },
     {
       id: 'employee',
       name: 'Employee',
       description: 'Self-service & profile management',
       icon: (
-        <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <svg className="w-8 h-8 text-accent-green" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
         </svg>
       ),
-      route: 'employees' as Section,
-      color: '#8B5CF6'
+      route: 'employees' as Section
     },
     {
       id: 'agency',
       name: 'Agency',
       description: 'External partner access',
       icon: (
-        <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <svg className="w-8 h-8 text-accent-green" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
         </svg>
       ),
-      route: 'external' as Section,
-      color: '#EC4899'
+      route: 'external' as Section
     }
   ]
 
   return (
-    <div className="min-h-screen flex flex-col" style={{ background: 'linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%)' }}>
+    <div className="min-h-screen flex flex-col bg-primary-50">
       {loginModal}
       
       {/* Header */}
-      <header className="bg-white/80 backdrop-blur-sm border-b border-gray-200 px-6 py-4">
+      <header className="bg-white border-b border-primary-200 px-6 py-4">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#00A0DF] to-[#34D399] flex items-center justify-center">
+            <div className="w-10 h-10 rounded-full bg-accent-green flex items-center justify-center">
               <span className="text-white font-semibold text-sm">B</span>
             </div>
-            <span className="text-xl font-medium text-gray-800">Baynunah HR</span>
+            <span className="text-xl font-medium text-primary-800">Baynunah HR</span>
           </div>
           {user && (
             <div className="flex items-center gap-4">
-              <span className="text-sm text-gray-600">
+              <span className="text-sm text-primary-600">
                 {user.name} ({user.role})
               </span>
               <button
                 onClick={handleLogout}
-                className="text-sm text-red-500 hover:text-red-600 font-medium"
+                className="text-sm text-accent-red hover:text-accent-red/80 font-medium"
               >
                 Sign Out
               </button>
@@ -5605,8 +5599,8 @@ const [passFormData, setPassFormData] = useState<PassFormData>({
       <main className="flex-1 flex flex-col items-center justify-center px-6 py-12">
         {/* Title */}
         <div className="text-center mb-10">
-          <h1 className="text-3xl font-semibold text-gray-800 mb-2">Welcome to HR Portal</h1>
-          <p className="text-gray-500">Select a portal to get started</p>
+          <h1 className="text-3xl font-semibold text-primary-800 mb-2">Welcome to HR Portal</h1>
+          <p className="text-primary-600">Select a portal to get started</p>
         </div>
 
         {/* Portal Cards - Horizontal Row */}
@@ -5615,33 +5609,28 @@ const [passFormData, setPassFormData] = useState<PassFormData>({
             <button
               key={portal.id}
               onClick={() => handleNavigate(portal.route)}
-              className="bg-white rounded-2xl p-6 w-48 flex flex-col items-center text-center shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all duration-300 border border-gray-100"
+              className="bg-white rounded-2xl p-6 w-48 flex flex-col items-center text-center shadow-sm hover:shadow-md transition-all duration-300 border border-primary-200 hover:border-primary-300"
             >
-              <div 
-                className="w-16 h-16 rounded-xl flex items-center justify-center mb-4"
-                style={{ backgroundColor: `${portal.color}15` }}
-              >
-                <div style={{ color: portal.color }}>
-                  {portal.icon}
-                </div>
+              <div className="w-16 h-16 rounded-xl flex items-center justify-center mb-4">
+                {portal.icon}
               </div>
-              <h3 className="font-semibold text-gray-800 mb-1">{portal.name}</h3>
-              <p className="text-xs text-gray-500 leading-relaxed">{portal.description}</p>
+              <h3 className="font-semibold text-primary-800 mb-1">{portal.name}</h3>
+              <p className="text-xs text-primary-500 leading-relaxed">{portal.description}</p>
             </button>
           ))}
         </div>
       </main>
 
       {/* Admin Panel Bar - Always visible at bottom */}
-      <footer className="bg-white border-t border-gray-200 px-6 py-4">
+      <footer className="bg-white border-t border-primary-200 px-6 py-4">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
-          <span className="text-sm font-medium text-gray-600">Admin Panel</span>
+          <span className="text-sm font-medium text-primary-600">Admin Panel</span>
           <div className="flex gap-3">
             <button
               onClick={() => handleNavigate('admin')}
-              className="bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg px-4 py-2 flex items-center gap-2 transition-colors text-sm font-medium"
+              className="bg-primary-100 hover:bg-primary-200 text-primary-700 rounded-lg px-4 py-2 flex items-center gap-2 transition-colors text-sm font-medium"
             >
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-4 h-4 text-accent-green" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
               </svg>
@@ -5649,18 +5638,18 @@ const [passFormData, setPassFormData] = useState<PassFormData>({
             </button>
             <button
               onClick={() => handleNavigate('compliance-alerts')}
-              className="bg-red-50 hover:bg-red-100 text-red-600 rounded-lg px-4 py-2 flex items-center gap-2 transition-colors text-sm font-medium"
+              className="bg-accent-red/10 hover:bg-accent-red/20 text-accent-red rounded-lg px-4 py-2 flex items-center gap-2 transition-colors text-sm font-medium"
             >
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-4 h-4 text-accent-red" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
               </svg>
               Alerts
             </button>
             <button
               onClick={() => handleNavigate('insurance-census')}
-              className="bg-blue-50 hover:bg-blue-100 text-blue-600 rounded-lg px-4 py-2 flex items-center gap-2 transition-colors text-sm font-medium"
+              className="bg-primary-100 hover:bg-primary-200 text-primary-700 rounded-lg px-4 py-2 flex items-center gap-2 transition-colors text-sm font-medium"
             >
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-4 h-4 text-accent-green" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
               </svg>
               Census

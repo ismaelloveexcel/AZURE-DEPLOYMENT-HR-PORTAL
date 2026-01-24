@@ -17,13 +17,13 @@
   margin: 0;
 }
 .btn-submit {
-  background-color: #23c483;
+  background-color: #10b981; /* accent-green */
   color: #fff;
-  box-shadow: 0px 8px 15px rgba(46, 229, 157, 0.15);
+  box-shadow: 0px 8px 15px rgba(16, 185, 129, 0.15);
 }
 .btn-submit:hover {
-  background-color: #1fa76e;
-  box-shadow: 0px 15px 20px rgba(46, 229, 157, 0.4);
+  background-color: #059669; /* darker green */
+  box-shadow: 0px 15px 20px rgba(16, 185, 129, 0.4);
   color: #fff;
   transform: translateY(-7px);
 }
@@ -31,13 +31,13 @@
   transform: translateY(-1px);
 }
 .btn-cancel {
-  background-color: #ff4d4f;
+  background-color: #ef4444; /* accent-red */
   color: #fff;
-  box-shadow: 0px 8px 15px rgba(255, 77, 79, 0.15);
+  box-shadow: 0px 8px 15px rgba(239, 68, 68, 0.15);
 }
 .btn-cancel:hover {
-  background-color: #d9363e;
-  box-shadow: 0px 15px 20px rgba(255, 77, 79, 0.3);
+  background-color: #dc2626; /* darker red */
+  box-shadow: 0px 15px 20px rgba(239, 68, 68, 0.3);
   color: #fff;
   transform: translateY(-7px);
 }
