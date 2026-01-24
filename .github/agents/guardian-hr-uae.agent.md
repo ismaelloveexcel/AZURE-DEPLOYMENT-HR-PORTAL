@@ -130,6 +130,17 @@ Before building any HR module, workflow, UI, or pass, the agent **must search Gi
 
 > **IMPORTANT:** If repo scouting is missing, building must not proceed.
 
+## Fallback Strategy (When GitHub Search Unavailable)
+If GitHub search fails or is unavailable:
+1. **Document the search attempt** with error/reason
+2. **Check local knowledge base** for previously evaluated repos
+3. **Consult with OSS Scout agent** if available
+4. **Proceed with greenfield approach** only if:
+   - Search failure is documented
+   - Supervisor explicitly approves
+   - Build from first principles following HR Harem patterns
+5. **Flag for post-implementation review** to evaluate OSS alternatives later
+
 ---
 
 # 7. VISUAL & AESTHETIC CONSTRAINTS (LOCKED)
