@@ -14,6 +14,7 @@ from app.schemas.employee import (
     OnboardingWelcome,
 )
 from app.services import onboarding as onboarding_service
+from app.services.onboarding import get_onboarding_stage_config
 
 router = APIRouter(prefix="/onboarding", tags=["Onboarding"])
 
@@ -69,6 +70,20 @@ async def get_welcome(
         )
     
     return welcome
+
+
+@router.get(
+    "/config/stages",
+    summary="Get onboarding stage configuration",
+)
+async def get_onboarding_stages():
+    """
+    Return static onboarding stage configuration and defaults.
+    
+    This is a public, read-only endpoint to allow frontend
+    to render the onboarding experience consistently.
+    """
+    return get_onboarding_stage_config()
 
 
 @router.post(

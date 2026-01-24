@@ -6,6 +6,7 @@ import { GlassLoader } from './components/GlassLoader'
 import { InsuranceCensus } from './components/InsuranceCensus'
 import { ManagerPass } from './components/ManagerPass'
 import { NominationPass } from './components/NominationPass'
+import { ProgressBar } from './components/ProgressBar'
 import { Performance } from './components/Performance'
 import { TemplateList } from './components/Templates/TemplateList'
 import { useDebounce } from './hooks/useDebounce'
@@ -156,6 +157,18 @@ interface OnboardingWelcome {
   location: string | null
 }
 
+interface OnboardingStage {
+  id: number
+  name: string
+  icon: string
+  shortName: string
+}
+
+interface OnboardingStageConfigResponse {
+  stages: OnboardingStage[]
+  stageData: Record<string, any>
+}
+
 interface ProfileFormData {
   emergency_contact_name: string
   emergency_contact_phone: string
@@ -292,6 +305,8 @@ const [passFormData, setPassFormData] = useState<PassFormData>({
   const [inviteEmployeeId, setInviteEmployeeId] = useState('')
   const [generatedLink, setGeneratedLink] = useState('')
   const [onboardingLoading, setOnboardingLoading] = useState(false)
+  const [onboardingStages, setOnboardingStages] = useState<OnboardingStage[]>([])
+  const [onboardingStageTemplate, setOnboardingStageTemplate] = useState<Record<string, any> | null>(null)
   
   // Public onboarding state
   const [onboardingToken, setOnboardingToken] = useState<string | null>(null)
@@ -318,6 +333,12 @@ const [passFormData, setPassFormData] = useState<PassFormData>({
     shoe_size: '',
   })
   const [profileSubmitted, setProfileSubmitted] = useState(false)
+  const [publicStageCompletion, setPublicStageCompletion] = useState<Record<string, boolean>>({})
+  const startOnboardingPass = () => {
+    setActiveSection('passes')
+    setShowPassForm(true)
+    setPassFormData(prev => ({ ...prev, pass_type: 'onboarding' }))
+  }
   
   // Attendance state
   const [attendanceStatus, setAttendanceStatus] = useState<TodayAttendanceStatus | null>(null)
@@ -404,6 +425,19 @@ const [passFormData, setPassFormData] = useState<PassFormData>({
     if (path.startsWith('/nomination-pass')) {
       setActiveSection('nomination-pass')
     }
+    fetchOnboardingConfig()
+  }, [])
+
+  const fetchOnboardingConfig = useCallback(async () => {
+    try {
+      const res = await fetch(`${API_BASE}/onboarding/config/stages`)
+      if (!res.ok) throw new Error('Failed to load onboarding config')
+      const data: OnboardingStageConfigResponse = await res.json()
+      setOnboardingStages(data.stages || [])
+      setOnboardingStageTemplate(data.stageData || null)
+    } catch (err) {
+      console.error('Failed to load onboarding config', err)
+    }
   }, [])
 
   const validateAndLoadOnboarding = async (token: string) => {
@@ -417,6 +451,8 @@ const [passFormData, setPassFormData] = useState<PassFormData>({
       }
       const data = await res.json()
       setOnboardingWelcome(data)
+      // Reset public stage completion on fresh load
+      setPublicStageCompletion({})
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to validate onboarding link')
     } finally {
@@ -1257,6 +1293,32 @@ const [passFormData, setPassFormData] = useState<PassFormData>({
                 <img src="/assets/logo.png" alt="Baynunah" className="h-8 mb-4 brightness-0 invert" />
                 <h1 className="text-2xl font-semibold mb-1">Welcome, {onboardingWelcome.name}!</h1>
                 <p className="text-emerald-100">Please complete your profile information below</p>
+                {onboardingStages.length > 0 && (
+                  <div className="mt-4">
+                    <ProgressBar
+                      items={onboardingStages.map((stage, idx) => {
+                        const completed = Boolean(publicStageCompletion[stage.shortName])
+                        const completedCount = Object.values(publicStageCompletion).filter(Boolean).length
+                        const active = !completed && completedCount === idx
+                        const iconPaths: Record<string, string> = {
+                          FileText: 'M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z',
+                          Building: 'M4 21h16M4 10h16M9 21V3h6v18',
+                          Shield: 'M12 22s8-4 8-10V6l-8-4-8 4v6c0 6 8 10 8 10z',
+                          RefreshCw: 'M21 2v6h-6M3 22v-6h6M3 16a9 9 0 0015.9 4M21 8a9 9 0 00-15.9-4',
+                          Calendar: 'M8 7V5m8 2V5m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z',
+                          Heart: 'M12 21l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 6 4 4 6.5 4c1.74 0 3.41 1.01 4.13 2.44C11.09 5.01 12.76 4 14.5 4 17 4 19 6 19 8.5c0 3.78-3.4 6.86-8.55 11.18L12 21z',
+                          PenTool: 'M12 19l-4 2 2-4 7-7 2 2-7 7zM18 13l3-3a2.121 2.121 0 00-3-3l-3 3',
+                        }
+                        return {
+                          label: stage.shortName,
+                          icon: iconPaths[stage.icon] || '',
+                          active,
+                          completed,
+                        }
+                      })}
+                    />
+                  </div>
+                )}
               </div>
 
               {/* Employee Info Card */}

@@ -19,6 +19,128 @@ from app.schemas.employee import (
 )
 
 
+# Static onboarding stage configuration (aligned with onboarding blueprint)
+ONBOARDING_STAGES = [
+    {"id": 1, "name": "Document Collection", "icon": "FileText", "shortName": "Documents"},
+    {"id": 2, "name": "Bank Account", "icon": "Building", "shortName": "Bank"},
+    {"id": 3, "name": "Security Clearance", "icon": "Shield", "shortName": "Security"},
+    {"id": 4, "name": "Status Change", "icon": "RefreshCw", "shortName": "Status"},
+    {"id": 5, "name": "Joining Date", "icon": "Calendar", "shortName": "Joining"},
+    {"id": 6, "name": "Medical", "icon": "Heart", "shortName": "Medical"},
+    {"id": 7, "name": "Employment Contract", "icon": "PenTool", "shortName": "Contract"},
+]
+
+STAGE_DATA = {
+    "documentsData": {
+        "passportNumber": "",
+        "passportExpiry": "",
+        "nationality": "",
+        "fullName": "",
+        "dateOfBirth": "",
+        "gender": "",
+        "maritalStatus": "",
+        "contactNumber": "",
+        "email": "",
+        "emergencyContact": "",
+        "emergencyPhone": "",
+        "checklist": {
+            "passport": False,
+            "photo": False,
+            "degree": False,
+            "experience": False,
+            "policeClearance": False,
+            "medicalReport": False,
+            "visaCopy": False,
+            "emiratesId": False,
+            "laborCard": False,
+            "bankLetter": False,
+            "cv": False,
+        },
+    },
+    "bankData": {
+        "bankName": "",
+        "accountNumber": "",
+        "iban": "",
+        "swiftCode": "",
+        "branchName": "",
+        "accountHolderName": "",
+    },
+    "securityClearanceData": {
+        "backgroundCheckInitiated": False,
+        "backgroundCheckDate": "",
+        "referenceCheck1Completed": False,
+        "referenceCheck2Completed": False,
+        "criminalRecordCheck": False,
+        "securityClearanceStatus": "pending",
+        "securityClearanceDate": "",
+        "notes": "",
+    },
+    "statusChangeData": {
+        "currentVisaStatus": "",
+        "previousEmployer": "",
+        "nocObtained": False,
+        "nocDate": "",
+        "immigrationFormSubmitted": False,
+        "statusChangeApproved": False,
+        "statusChangeDate": "",
+        "newVisaNumber": "",
+        "notes": "",
+    },
+    "joiningDateData": {
+        "joiningDate": "",
+        "emailSetup": False,
+        "emailAddress": "",
+        "systemAccessGranted": False,
+        "accessCardIssued": False,
+        "accessCardNumber": "",
+        "equipmentIssued": False,
+        "equipmentList": "",
+        "hrInductionCompleted": False,
+        "safetyTrainingCompleted": False,
+        "companyPolicyReviewed": False,
+        "welcomeKitReceived": False,
+        "buddyAssigned": "",
+        "notes": "",
+    },
+    "medicalData": {
+        "visaMedicalDate": "",
+        "visaMedicalCenter": "",
+        "visaMedicalStatus": "pending",
+        "visaMedicalCertificateNumber": "",
+        "insuranceProvider": "",
+        "insurancePolicyNumber": "",
+        "insuranceStartDate": "",
+        "insuranceCardReceived": False,
+        "dependentsIncluded": False,
+        "notes": "",
+    },
+    "contractData": {
+        "contractDate": "",
+        "contractNumber": "",
+        "contractSigned": False,
+        "salary": "",
+        "probationPeriod": "",
+        "visaApplicationSubmitted": False,
+        "visaNumber": "",
+        "visaExpiryDate": "",
+        "emiratesIdApplicationSubmitted": False,
+        "emiratesIdNumber": "",
+        "emiratesIdExpiryDate": "",
+        "laborCardIssued": False,
+        "laborCardNumber": "",
+        "notes": "",
+    },
+}
+
+
+def get_onboarding_stage_config() -> dict:
+    """Return static onboarding stage configuration and default data template."""
+    return {
+        "stages": ONBOARDING_STAGES,
+        "stageData": STAGE_DATA,
+    }
+
+
 async def generate_onboarding_token(
     session: AsyncSession,
     employee_id: str,
