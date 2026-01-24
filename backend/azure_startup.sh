@@ -8,14 +8,8 @@ echo "PORT from Azure: ${PORT}"
 echo "Working directory: $(pwd)"
 
 # Navigate to the app directory
-# In package mode, we're already in the backend directory
-# In wwwroot mode, we need to cd to /home/site/wwwroot
-if [ -d "/home/site/wwwroot" ] && [ "$PWD" != "/home/site/wwwroot" ]; then
-    cd /home/site/wwwroot || { echo "ERROR: Cannot cd to /home/site/wwwroot"; exit 1; }
-    echo "Changed to: $(pwd) (wwwroot mode)"
-else
-    echo "Running from package mode, current directory: $(pwd)"
-fi
+cd /home/site/wwwroot || { echo "ERROR: Cannot cd to /home/site/wwwroot"; exit 1; }
+echo "Changed to: $(pwd)"
 echo "Directory contents:"
 ls -la
 
@@ -23,14 +17,19 @@ ls -la
 echo ""
 echo "=== Setting up Python environment ==="
 
-# Use system Python to create venv if needed
-if [ ! -d "antenv" ]; then
-    echo "Creating virtual environment..."
-    python3 -m venv antenv || python -m venv antenv
+# Try to create venv in current directory first, fallback to /tmp
+VENV_DIR="./antenv"
+if [ ! -d "$VENV_DIR" ]; then
+    echo "Creating virtual environment in $VENV_DIR..."
+    if ! python3 -m venv "$VENV_DIR" 2>/dev/null && ! python -m venv "$VENV_DIR" 2>/dev/null; then
+        echo "Failed to create venv in current directory, trying /tmp..."
+        VENV_DIR="/tmp/antenv"
+        python3 -m venv "$VENV_DIR" || python -m venv "$VENV_DIR"
+    fi
 fi
 
 # Activate virtual environment
-source antenv/bin/activate
+source "$VENV_DIR/bin/activate"
 echo "Python path: $(which python)"
 echo "Python version: $(python --version)"
 
