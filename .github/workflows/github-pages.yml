@@ -1,10 +1,10 @@
-name: Deploy Landing Page to GitHub Pages
+name: Deploy Repository Dashboard to GitHub Pages
 
 on:
   push:
     branches: [main]
     paths:
-      - 'landing/**'
+      - 'dashboard/**'
       - '.github/workflows/github-pages.yml'
   workflow_dispatch:
 
@@ -21,7 +21,7 @@ concurrency:
 
 jobs:
   deploy:
-    name: Deploy Landing Page
+    name: Deploy Dashboard
     runs-on: ubuntu-latest
     environment:
       name: github-pages
@@ -30,25 +30,18 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Add .nojekyll file
+      - name: Prepare dashboard for deployment
         run: |
-          cp -r landing/* landing-deploy/
-          touch landing-deploy/.nojekyll
-        shell: bash
-        continue-on-error: true
-
-      - name: Prepare landing page for deployment
-        run: |
-          mkdir -p landing-deploy
-          cp -r landing/* landing-deploy/
-          touch landing-deploy/.nojekyll
-          echo "Landing page prepared for deployment"
-          ls -la landing-deploy/
+          mkdir -p dashboard-deploy
+          cp -r dashboard/* dashboard-deploy/
+          touch dashboard-deploy/.nojekyll
+          echo "Dashboard prepared for deployment"
+          ls -la dashboard-deploy/
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: ./landing-deploy
+          path: ./dashboard-deploy
 
       - name: Deploy to GitHub Pages
         id: deployment
@@ -56,8 +49,7 @@ jobs:
 
       - name: Deployment Summary
         run: |
-          echo "🎉 Landing page deployed to GitHub Pages!"
+          echo "🎉 Repository dashboard deployed to GitHub Pages!"
           echo "URL: ${{ steps.deployment.outputs.page_url }}"
           echo ""
-          echo "📄 This deploys only the static landing page from /landing directory"
-          echo "📱 Main HR application remains on Azure"
+          echo "📊 This dashboard helps you monitor workflows, check status, and access GitHub features"
