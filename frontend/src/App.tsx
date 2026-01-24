@@ -4,6 +4,7 @@ import { TemplateList } from './components/Templates/TemplateList'
 import { EmployeeProfile } from './components/EmployeeProfile'
 import { CandidatePass } from './components/CandidatePass'
 import { ManagerPass } from './components/ManagerPass'
+import { AttendancePass } from './components/AttendancePass'
 import { NominationPass } from './components/NominationPass'
 import { Performance } from './components/Performance'
 import { EoyNominations } from './components/EoyNominations'
@@ -11,7 +12,7 @@ import { EOYAdminPanel } from './components/EOYAdminPanel/EOYAdminPanel'
 import { InsuranceCensus } from './components/InsuranceCensus'
 import { useDebounce } from './hooks/useDebounce'
 
-type Section = 'home' | 'employees' | 'onboarding' | 'external' | 'admin' | 'secret-chamber' | 'passes' | 'public-onboarding' | 'recruitment' | 'recruitment-request' | 'recruitment-benefits' | 'templates' | 'template-manager' | 'template-candidate' | 'template-onboarding' | 'template-employee' | 'attendance' | 'compliance-alerts' | 'candidate-pass' | 'manager-pass' | 'performance' | 'insurance-census' | 'nomination-pass'
+type Section = 'home' | 'employees' | 'onboarding' | 'external' | 'admin' | 'secret-chamber' | 'passes' | 'public-onboarding' | 'recruitment' | 'recruitment-request' | 'recruitment-benefits' | 'templates' | 'template-manager' | 'template-candidate' | 'template-onboarding' | 'template-employee' | 'attendance' | 'attendance-pass' | 'compliance-alerts' | 'candidate-pass' | 'manager-pass' | 'performance' | 'insurance-census' | 'nomination-pass'
 
 interface Employee {
   id: number
@@ -342,6 +343,11 @@ const [passFormData, setPassFormData] = useState<PassFormData>({
   const [candidateStatusFilter, setCandidateStatusFilter] = useState('')
   const [candidateSourceFilter, setCandidateSourceFilter] = useState('')
   const [showNewRequestModal, setShowNewRequestModal] = useState(false)
+  const [showBatchUploadModal, setShowBatchUploadModal] = useState(false)
+  const [batchUploadPositionId, setBatchUploadPositionId] = useState<number | null>(null)
+  const [batchUploadLoading, setBatchUploadLoading] = useState(false)
+  const [batchUploadResult, setBatchUploadResult] = useState<{total: number, success: number, failed: number, errors: string[]} | null>(null)
+  const [lineManagers, setLineManagers] = useState<{name: string, email: string, department: string}[]>([])
   const [newRequestForm, setNewRequestForm] = useState({
     position_title: '',
     department: 'Engineering / R&D',
@@ -350,7 +356,8 @@ const [passFormData, setPassFormData] = useState<PassFormData>({
     salary_range_max: '',
     headcount: '1',
     job_description: '',
-    requirements: ''
+    requirements: '',
+    hiring_manager_id: ''
   })
 
   // Employee management state
@@ -388,6 +395,7 @@ const [passFormData, setPassFormData] = useState<PassFormData>({
   const [viewingCandidatePassId, setViewingCandidatePassId] = useState<number | null>(null)
   const [viewingManagerPassPositionId, setViewingManagerPassPositionId] = useState<number | null>(null)
   const [viewingManagerId, setViewingManagerId] = useState<string>('')
+  const [viewingAttendancePassEmployeeId, setViewingAttendancePassEmployeeId] = useState<string | null>(null)
 
   const isAdminLogin = pendingSection === 'admin' || pendingSection === 'secret-chamber'
 
@@ -672,14 +680,16 @@ const [passFormData, setPassFormData] = useState<PassFormData>({
   const fetchRecruitmentData = useCallback(async () => {
     if (!user || (user.role !== 'admin' && user.role !== 'hr')) return
     try {
-      const [statsRes, requestsRes, pipelineRes] = await Promise.all([
+      const [statsRes, requestsRes, pipelineRes, managersRes] = await Promise.all([
         fetchWithAuth(`${API_BASE}/recruitment/stats`),
         fetchWithAuth(`${API_BASE}/recruitment/requests`),
-        fetchWithAuth(`${API_BASE}/recruitment/pipeline`)
+        fetchWithAuth(`${API_BASE}/recruitment/pipeline`),
+        fetchWithAuth(`${API_BASE}/recruitment/line-managers`)
       ])
       if (statsRes.ok) setRecruitmentStats(await statsRes.json())
       if (requestsRes.ok) setRecruitmentRequests(await requestsRes.json())
       if (pipelineRes.ok) setPipelineCounts(await pipelineRes.json())
+      if (managersRes.ok) setLineManagers(await managersRes.json())
     } catch (err) {
       console.error('Failed to fetch recruitment data:', err)
     }
@@ -702,6 +712,42 @@ const [passFormData, setPassFormData] = useState<PassFormData>({
 
   const debouncedFetchRecruitmentCandidates = useDebounce(fetchRecruitmentCandidates, 400)
 
+  const handleBatchUploadCandidates = async (file: File) => {
+    if (!user || !batchUploadPositionId) return
+    setBatchUploadLoading(true)
+    setBatchUploadResult(null)
+    
+    try {
+      const formData = new FormData()
+      formData.append('file', file)
+      
+      const res = await fetchWithAuth(
+        `${API_BASE}/recruitment/candidates/batch-upload?recruitment_request_id=${batchUploadPositionId}`,
+        {
+          method: 'POST',
+          body: formData,
+          headers: {} // Don't set Content-Type, browser will set it with boundary for FormData
+        }
+      )
+      
+      if (res.ok) {
+        const result = await res.json()
+        setBatchUploadResult(result)
+        // Refresh candidates list
+        await fetchRecruitmentCandidates()
+        await fetchRecruitmentData()
+      } else {
+        const error = await res.json()
+        alert(`Upload failed: ${error.detail || 'Unknown error'}`)
+      }
+    } catch (err) {
+      console.error('Failed to upload candidates:', err)
+      alert('Failed to upload candidates. Please try again.')
+    } finally {
+      setBatchUploadLoading(false)
+    }
+  }
+
   const handleCreateRecruitmentRequest = async () => {
     if (!user) return
     setLoading(true)
@@ -714,7 +760,8 @@ const [passFormData, setPassFormData] = useState<PassFormData>({
         salary_range_max: newRequestForm.salary_range_max ? parseFloat(newRequestForm.salary_range_max) : null,
         headcount: parseInt(newRequestForm.headcount) || 1,
         job_description: newRequestForm.job_description || null,
-        requirements: newRequestForm.requirements || null
+        requirements: newRequestForm.requirements || null,
+        hiring_manager_id: newRequestForm.hiring_manager_id || null
       }
       const res = await fetchWithAuth(`${API_BASE}/recruitment/requests`, {
         method: 'POST',
@@ -731,7 +778,8 @@ const [passFormData, setPassFormData] = useState<PassFormData>({
           salary_range_max: '',
           headcount: '1',
           job_description: '',
-          requirements: ''
+          requirements: '',
+          hiring_manager_id: ''
         })
         fetchRecruitmentData()
       } else {
@@ -2224,17 +2272,17 @@ const [passFormData, setPassFormData] = useState<PassFormData>({
                 onClick={() => setAdminTab('compliance')}
                 className={`flex-1 px-6 py-4 text-sm font-medium transition-colors ${
                   adminTab === 'compliance'
-                    ? 'text-emerald-600 border-b-2 border-emerald-500 bg-emerald-50/50'
+                    ? 'text-[#00A0DF] border-b-2 border-[#00A0DF] bg-[#00A0DF]/5'
                     : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'
                 }`}
               >
                 <div className="flex items-center justify-center gap-2">
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
-                  Compliance Alerts
+                  UAE Compliance
                   {complianceAlerts && (complianceAlerts.expired.length + (complianceAlerts.days_7?.length || 0)) > 0 && (
-                    <span className="bg-red-500 text-white text-xs px-2 py-0.5 rounded-full">
+                    <span className="bg-gradient-to-r from-red-500 to-orange-500 text-white text-xs px-2 py-0.5 rounded-full font-semibold shadow-sm">
                       {complianceAlerts.expired.length + (complianceAlerts.days_7?.length || 0)}
                     </span>
                   )}
@@ -2329,6 +2377,26 @@ const [passFormData, setPassFormData] = useState<PassFormData>({
                     </svg>
                     <p className="font-medium text-gray-800">Pass Generation</p>
                     <p className="text-sm text-gray-500">Create visitor passes</p>
+                  </button>
+                  <button 
+                    onClick={() => setActiveSection('attendance')}
+                    className="p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors text-left"
+                  >
+                    <svg className="w-8 h-8 text-blue-500 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <p className="font-medium text-gray-800">Attendance</p>
+                    <p className="text-sm text-gray-500">Clock in/out tracking</p>
+                  </button>
+                  <button 
+                    onClick={() => setActiveSection('attendance-pass')}
+                    className="p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors text-left"
+                  >
+                    <svg className="w-8 h-8 text-[#00A0DF] mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M10 6H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V8a2 2 0 00-2-2h-5m-4 0V5a2 2 0 114 0v1m-4 0a2 2 0 104 0m-5 8a2 2 0 100-4 2 2 0 000 4zm0 0c1.306 0 2.417.835 2.83 2M9 14a3.001 3.001 0 00-2.83 2M15 11h3m-3 4h2" />
+                    </svg>
+                    <p className="font-medium text-gray-800">Attendance Pass</p>
+                    <p className="text-sm text-gray-500">Employee attendance card</p>
                   </button>
                   <button 
                     onClick={() => setAdminTab('compliance')}
@@ -2457,84 +2525,135 @@ const [passFormData, setPassFormData] = useState<PassFormData>({
             <>
               {complianceAlertsLoading ? (
                 <div className="bg-white rounded-xl shadow-lg p-12 text-center">
-                  <div className="animate-spin w-8 h-8 border-4 border-emerald-500 border-t-transparent rounded-full mx-auto mb-4"></div>
-                  <p className="text-gray-600">Loading compliance alerts...</p>
+                  <div className="animate-spin w-12 h-12 border-4 border-[#00A0DF] border-t-transparent rounded-full mx-auto mb-4"></div>
+                  <p className="text-gray-600 font-medium">Loading UAE compliance data...</p>
                 </div>
               ) : (
                 <>
-                  {/* Summary Cards */}
+                  {/* Enhanced Header with Baynunah Branding */}
+                  <div className="bg-gradient-to-r from-[#00A0DF] to-[#0080C0] rounded-xl shadow-lg p-6 mb-6 text-white">
+                    <div className="flex items-center gap-3 mb-2">
+                      <div className="w-12 h-12 bg-white/20 rounded-lg flex items-center justify-center">
+                        <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                      </div>
+                      <div>
+                        <h1 className="text-2xl font-bold">UAE Compliance Dashboard</h1>
+                        <p className="text-white/90 text-sm">Automated tracking for Visa, Emirates ID, Medical Fitness & More</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Enhanced Summary Cards with Gradients */}
                   <div className="grid grid-cols-4 gap-4 mb-6">
-                    <div className="bg-red-50 rounded-xl p-4 border border-red-100">
+                    <div className="bg-gradient-to-br from-red-50 to-red-100 rounded-xl p-5 border-2 border-red-200 shadow-md hover:shadow-lg transition-shadow">
                       <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 bg-red-100 rounded-lg flex items-center justify-center text-red-600 text-lg">!</div>
+                        <div className="w-12 h-12 bg-gradient-to-br from-red-500 to-red-600 rounded-xl flex items-center justify-center text-white text-xl font-bold shadow-md">
+                          !
+                        </div>
                         <div>
-                          <p className="text-2xl font-bold text-red-700">{complianceAlerts?.expired.length || 0}</p>
-                          <p className="text-xs text-red-600">Expired</p>
+                          <p className="text-3xl font-bold text-red-700">{complianceAlerts?.expired.length || 0}</p>
+                          <p className="text-xs font-semibold text-red-600 uppercase tracking-wide">Expired</p>
+                          <p className="text-xs text-red-500 mt-0.5">Immediate Action</p>
                         </div>
                       </div>
                     </div>
-                    <div className="bg-orange-50 rounded-xl p-4 border border-orange-100">
+                    <div className="bg-gradient-to-br from-orange-50 to-orange-100 rounded-xl p-5 border-2 border-orange-200 shadow-md hover:shadow-lg transition-shadow">
                       <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center text-orange-600 text-lg">!</div>
+                        <div className="w-12 h-12 bg-gradient-to-br from-orange-500 to-orange-600 rounded-xl flex items-center justify-center text-white text-xl font-bold shadow-md">
+                          ⚠
+                        </div>
                         <div>
-                          <p className="text-2xl font-bold text-orange-700">{complianceAlerts?.days_7?.length || 0}</p>
-                          <p className="text-xs text-orange-600">Within 7 days</p>
+                          <p className="text-3xl font-bold text-orange-700">{complianceAlerts?.days_7?.length || 0}</p>
+                          <p className="text-xs font-semibold text-orange-600 uppercase tracking-wide">Within 7 Days</p>
+                          <p className="text-xs text-orange-500 mt-0.5">Urgent Renewal</p>
                         </div>
                       </div>
                     </div>
-                    <div className="bg-yellow-50 rounded-xl p-4 border border-yellow-100">
+                    <div className="bg-gradient-to-br from-yellow-50 to-yellow-100 rounded-xl p-5 border-2 border-yellow-200 shadow-md hover:shadow-lg transition-shadow">
                       <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 bg-yellow-100 rounded-lg flex items-center justify-center text-yellow-600 text-lg">!</div>
+                        <div className="w-12 h-12 bg-gradient-to-br from-yellow-500 to-yellow-600 rounded-xl flex items-center justify-center text-white text-xl font-bold shadow-md">
+                          ⏰
+                        </div>
                         <div>
-                          <p className="text-2xl font-bold text-yellow-700">{complianceAlerts?.days_30?.length || 0}</p>
-                          <p className="text-xs text-yellow-600">Within 30 days</p>
+                          <p className="text-3xl font-bold text-yellow-700">{complianceAlerts?.days_30?.length || 0}</p>
+                          <p className="text-xs font-semibold text-yellow-600 uppercase tracking-wide">Within 30 Days</p>
+                          <p className="text-xs text-yellow-500 mt-0.5">Plan Renewal</p>
                         </div>
                       </div>
                     </div>
-                    <div className="bg-amber-50 rounded-xl p-4 border border-amber-100">
+                    <div className="bg-gradient-to-br from-amber-50 to-amber-100 rounded-xl p-5 border-2 border-amber-200 shadow-md hover:shadow-lg transition-shadow">
                       <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 bg-amber-100 rounded-lg flex items-center justify-center text-amber-600 text-lg">!</div>
+                        <div className="w-12 h-12 bg-gradient-to-br from-amber-500 to-amber-600 rounded-xl flex items-center justify-center text-white text-xl font-bold shadow-md">
+                          📋
+                        </div>
                         <div>
-                          <p className="text-2xl font-bold text-amber-700">{complianceAlerts?.days_custom?.length || 0}</p>
-                          <p className="text-xs text-amber-600">Within 60 days</p>
+                          <p className="text-3xl font-bold text-amber-700">{complianceAlerts?.days_custom?.length || 0}</p>
+                          <p className="text-xs font-semibold text-amber-600 uppercase tracking-wide">Within 60 Days</p>
+                          <p className="text-xs text-amber-500 mt-0.5">Track Progress</p>
                         </div>
                       </div>
                     </div>
                   </div>
 
-                  {/* Expired Documents */}
+                  {/* Enhanced Expired Documents Section */}
                   {complianceAlerts?.expired && complianceAlerts.expired.length > 0 && (
-                    <div className="bg-white rounded-xl shadow-lg mb-6">
-                      <div className="px-6 py-4 border-b border-gray-100 bg-red-50 rounded-t-xl">
-                        <h2 className="text-lg font-semibold text-red-700 flex items-center gap-2">
-                          <span>!</span> Expired Documents ({complianceAlerts.expired.length})
-                        </h2>
-                        <p className="text-sm text-red-600 mt-1">These documents need immediate attention</p>
+                    <div className="bg-white rounded-xl shadow-xl mb-6 overflow-hidden border-2 border-red-200">
+                      <div className="px-6 py-5 bg-gradient-to-r from-red-50 to-red-100 border-b-2 border-red-200">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 bg-gradient-to-br from-red-500 to-red-600 rounded-lg flex items-center justify-center text-white font-bold shadow-md">
+                              !
+                            </div>
+                            <div>
+                              <h2 className="text-xl font-bold text-red-700 flex items-center gap-2">
+                                Expired Documents ({complianceAlerts.expired.length})
+                              </h2>
+                              <p className="text-sm text-red-600 font-medium">⚠️ Immediate attention required for UAE compliance</p>
+                            </div>
+                          </div>
+                          <span className="bg-gradient-to-r from-red-500 to-red-600 text-white px-4 py-2 rounded-lg text-sm font-bold shadow-md">
+                            CRITICAL
+                          </span>
+                        </div>
                       </div>
                       <table className="w-full">
-                        <thead className="bg-gray-50 text-xs text-gray-500 uppercase">
+                        <thead className="bg-gradient-to-r from-gray-50 to-gray-100 text-xs text-gray-600 uppercase tracking-wider">
                           <tr>
-                            <th className="px-6 py-3 text-left">Employee</th>
-                            <th className="px-6 py-3 text-left">Document</th>
-                            <th className="px-6 py-3 text-left">Expiry Date</th>
-                            <th className="px-6 py-3 text-left">Days Overdue</th>
-                            <th className="px-6 py-3 text-left">Action</th>
+                            <th className="px-6 py-4 text-left font-bold">Employee</th>
+                            <th className="px-6 py-4 text-left font-bold">Document Type</th>
+                            <th className="px-6 py-4 text-left font-bold">Expiry Date</th>
+                            <th className="px-6 py-4 text-left font-bold">Status</th>
+                            <th className="px-6 py-4 text-left font-bold">Action</th>
                           </tr>
                         </thead>
                         <tbody className="divide-y divide-gray-100">
                           {complianceAlerts.expired.map((alert, idx) => (
-                            <tr key={`expired-${idx}`} className="hover:bg-gray-50">
+                            <tr key={`expired-${idx}`} className="hover:bg-red-50/50 transition-colors">
                               <td className="px-6 py-4">
-                                <p className="font-medium text-gray-800">{alert.employee_name}</p>
-                                <p className="text-sm text-gray-500">{alert.employee_id}</p>
-                              </td>
-                              <td className="px-6 py-4 text-sm text-gray-600">{alert.document_type}</td>
-                              <td className="px-6 py-4 text-sm text-gray-600">{alert.expiry_date}</td>
-                              <td className="px-6 py-4">
-                                <span className="text-red-600 font-medium">{Math.abs(alert.days_until_expiry)} days overdue</span>
+                                <p className="font-semibold text-gray-800">{alert.employee_name}</p>
+                                <p className="text-sm text-gray-500 font-medium">{alert.employee_id}</p>
                               </td>
                               <td className="px-6 py-4">
-                                <button onClick={() => setViewingProfileId(alert.employee_id)} className="text-emerald-600 hover:text-emerald-700 font-medium text-sm">
+                                <span className="inline-flex items-center gap-2 px-3 py-1 bg-gray-100 text-gray-700 rounded-lg text-sm font-medium">
+                                  📄 {alert.document_type}
+                                </span>
+                              </td>
+                              <td className="px-6 py-4 text-sm font-medium text-gray-600">{alert.expiry_date}</td>
+                              <td className="px-6 py-4">
+                                <span className="inline-flex items-center gap-1 px-3 py-1 bg-gradient-to-r from-red-500 to-red-600 text-white rounded-lg text-sm font-bold shadow-sm">
+                                  ⚠️ {Math.abs(alert.days_until_expiry)} days overdue
+                                </span>
+                              </td>
+                              <td className="px-6 py-4">
+                                <button 
+                                  onClick={() => setViewingProfileId(alert.employee_id)} 
+                                  className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-[#00A0DF] to-[#0080C0] hover:from-[#0080C0] hover:to-[#006090] text-white rounded-lg font-semibold text-sm shadow-md transition-all hover:shadow-lg"
+                                >
+                                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                                  </svg>
                                   View Profile
                                 </button>
                               </td>
@@ -2761,6 +2880,9 @@ const [passFormData, setPassFormData] = useState<PassFormData>({
                           <div>
                             <h3 className="font-semibold text-gray-800">{req.position_title}</h3>
                             <p className="text-sm text-gray-500">{req.department} • {req.employment_type}</p>
+                            {req.hiring_manager_id && (
+                              <p className="text-xs text-blue-600 mt-1">👤 Line Manager: {req.hiring_manager_id}</p>
+                            )}
                             <div className="flex items-center gap-2 mt-2">
                               <span className={`px-2 py-1 text-xs rounded-full ${
                                 req.status === 'open' ? 'bg-green-100 text-green-700' :
@@ -2779,18 +2901,31 @@ const [passFormData, setPassFormData] = useState<PassFormData>({
                                 <p className="text-xs text-gray-400">AED {req.salary_range_min.toLocaleString()} - {req.salary_range_max.toLocaleString()}</p>
                               )}
                             </div>
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation()
-                                setViewingManagerPassPositionId(req.id)
-                                setViewingManagerId(req.hiring_manager_id || user?.employee_id || '')
-                                setActiveSection('manager-pass')
-                              }}
-                              className="px-3 py-1.5 bg-blue-600 text-white text-xs font-medium rounded-lg hover:bg-blue-700 flex items-center gap-1"
-                            >
-                              <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z" /></svg>
-                              Manager Pass
-                            </button>
+                            <div className="flex gap-2">
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation()
+                                  setBatchUploadPositionId(req.id)
+                                  setShowBatchUploadModal(true)
+                                }}
+                                className="px-3 py-1.5 bg-emerald-600 text-white text-xs font-medium rounded-lg hover:bg-emerald-700 flex items-center gap-1"
+                              >
+                                <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" /></svg>
+                                Upload Candidates
+                              </button>
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation()
+                                  setViewingManagerPassPositionId(req.id)
+                                  setViewingManagerId(req.hiring_manager_id || user?.employee_id || '')
+                                  setActiveSection('manager-pass')
+                                }}
+                                className="px-3 py-1.5 bg-blue-600 text-white text-xs font-medium rounded-lg hover:bg-blue-700 flex items-center gap-1"
+                              >
+                                <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z" /></svg>
+                                Manager Pass
+                              </button>
+                            </div>
                           </div>
                         </div>
                       </div>
@@ -3154,6 +3289,21 @@ const [passFormData, setPassFormData] = useState<PassFormData>({
                       required
                     />
                   </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Line Manager / Hiring Manager</label>
+                    <select
+                      value={newRequestForm.hiring_manager_id}
+                      onChange={(e) => setNewRequestForm(prev => ({ ...prev, hiring_manager_id: e.target.value }))}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+                    >
+                      <option value="">Select a line manager (optional)</option>
+                      {lineManagers.map((manager, idx) => (
+                        <option key={idx} value={manager.name}>
+                          {manager.name} - {manager.department}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
                   <div className="grid grid-cols-2 gap-4">
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">Employment Type</label>
@@ -3228,6 +3378,135 @@ const [passFormData, setPassFormData] = useState<PassFormData>({
                     </button>
                   </div>
                 </form>
+              </div>
+            </div>
+          )}
+
+          {/* Batch Upload Modal */}
+          {showBatchUploadModal && (
+            <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+              <div className="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-2xl">
+                <div className="flex items-center justify-between mb-6">
+                  <h2 className="text-xl font-semibold text-gray-800">Upload Candidates (CSV)</h2>
+                  <button 
+                    onClick={() => {
+                      setShowBatchUploadModal(false)
+                      setBatchUploadResult(null)
+                    }} 
+                    className="text-gray-400 hover:text-gray-600"
+                  >
+                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </button>
+                </div>
+
+                {!batchUploadResult ? (
+                  <div className="space-y-6">
+                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                      <h3 className="font-medium text-blue-900 mb-2">CSV Format Required</h3>
+                      <p className="text-sm text-blue-700 mb-3">Your CSV file should have these columns:</p>
+                      <code className="block text-xs bg-blue-100 text-blue-900 p-2 rounded">
+                        full_name,email,phone,current_company,current_position,years_experience,location
+                      </code>
+                      <p className="text-xs text-blue-600 mt-2">Only full_name is required. Other fields are optional.</p>
+                    </div>
+
+                    <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-emerald-400 transition-colors">
+                      <input
+                        type="file"
+                        accept=".csv"
+                        onChange={(e) => {
+                          const file = e.target.files?.[0]
+                          if (file) {
+                            handleBatchUploadCandidates(file)
+                          }
+                        }}
+                        className="hidden"
+                        id="csv-upload"
+                        disabled={batchUploadLoading}
+                      />
+                      <label htmlFor="csv-upload" className="cursor-pointer">
+                        <svg className="w-12 h-12 text-gray-400 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                        </svg>
+                        <p className="text-gray-600 font-medium mb-1">
+                          {batchUploadLoading ? 'Uploading...' : 'Click to select CSV file'}
+                        </p>
+                        <p className="text-sm text-gray-400">or drag and drop</p>
+                      </label>
+                    </div>
+
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() => {
+                          const csv = 'full_name,email,phone,current_company,current_position,years_experience,location\nJohn Doe,john@example.com,+971501234567,ABC Corp,Senior Engineer,5,Dubai'
+                          const blob = new Blob([csv], { type: 'text/csv' })
+                          const url = window.URL.createObjectURL(blob)
+                          const a = document.createElement('a')
+                          a.href = url
+                          a.download = 'candidates_template.csv'
+                          a.click()
+                        }}
+                        className="flex-1 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors text-sm font-medium"
+                      >
+                        Download Template
+                      </button>
+                      <button
+                        onClick={() => {
+                          setShowBatchUploadModal(false)
+                          setBatchUploadResult(null)
+                        }}
+                        className="flex-1 px-4 py-2 bg-white border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors text-sm font-medium"
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    <div className={`p-4 rounded-lg ${
+                      batchUploadResult.failed === 0 ? 'bg-green-50 border border-green-200' : 'bg-yellow-50 border border-yellow-200'
+                    }`}>
+                      <h3 className="font-medium text-gray-900 mb-2">Upload Results</h3>
+                      <div className="grid grid-cols-3 gap-4 text-center">
+                        <div>
+                          <p className="text-2xl font-bold text-gray-900">{batchUploadResult.total}</p>
+                          <p className="text-xs text-gray-600">Total</p>
+                        </div>
+                        <div>
+                          <p className="text-2xl font-bold text-green-600">{batchUploadResult.success}</p>
+                          <p className="text-xs text-gray-600">Success</p>
+                        </div>
+                        <div>
+                          <p className="text-2xl font-bold text-red-600">{batchUploadResult.failed}</p>
+                          <p className="text-xs text-gray-600">Failed</p>
+                        </div>
+                      </div>
+                    </div>
+
+                    {batchUploadResult.errors.length > 0 && (
+                      <div className="bg-red-50 border border-red-200 rounded-lg p-4 max-h-48 overflow-y-auto">
+                        <h4 className="font-medium text-red-900 mb-2">Errors:</h4>
+                        <ul className="text-sm text-red-700 space-y-1">
+                          {batchUploadResult.errors.map((error, idx) => (
+                            <li key={idx}>• {error}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+
+                    <button
+                      onClick={() => {
+                        setShowBatchUploadModal(false)
+                        setBatchUploadResult(null)
+                      }}
+                      className="w-full px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors font-medium"
+                    >
+                      Close
+                    </button>
+                  </div>
+                )}
               </div>
             </div>
           )}
@@ -4628,6 +4907,80 @@ const [passFormData, setPassFormData] = useState<PassFormData>({
           setActiveSection('admin')
         }}
       />
+    )
+  }
+
+  // Attendance Pass View
+  if (activeSection === 'attendance-pass') {
+    // If specific employee is set, show their pass, otherwise show selection screen
+    if (viewingAttendancePassEmployeeId && user?.token) {
+      return (
+        <AttendancePass
+          employeeId={viewingAttendancePassEmployeeId}
+          token={user.token}
+          onBack={() => {
+            setViewingAttendancePassEmployeeId(null)
+            setActiveSection('admin')
+          }}
+        />
+      )
+    }
+
+    // Attendance pass selection screen
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50 p-8">
+        <div className="max-w-4xl mx-auto">
+          <div className="mb-6 flex items-center justify-between">
+            <div>
+              <h1 className="text-2xl font-bold text-gray-800">Attendance Pass</h1>
+              <p className="text-gray-600 mt-1">View employee attendance passes</p>
+            </div>
+            <button
+              onClick={() => setActiveSection('admin')}
+              className="px-4 py-2 text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-lg transition-colors flex items-center gap-2"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+              </svg>
+              Back to Admin
+            </button>
+          </div>
+
+          <div className="bg-white rounded-xl shadow-lg p-6 mb-6">
+            <h2 className="text-lg font-semibold text-gray-800 mb-4">Select Employee</h2>
+            <div className="space-y-2">
+              {employees.filter(e => e.is_active).map(emp => (
+                <button
+                  key={emp.id}
+                  onClick={() => {
+                    setViewingAttendancePassEmployeeId(emp.employee_id)
+                  }}
+                  className="w-full p-4 bg-gray-50 hover:bg-blue-50 rounded-lg transition-colors text-left flex items-center justify-between group"
+                >
+                  <div>
+                    <p className="font-medium text-gray-800">{emp.name}</p>
+                    <p className="text-sm text-gray-500">
+                      {emp.employee_id} • {emp.job_title || 'N/A'} • {emp.department || 'N/A'}
+                    </p>
+                  </div>
+                  <svg className="w-5 h-5 text-gray-400 group-hover:text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                  </svg>
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="bg-blue-50 rounded-xl p-6">
+            <h3 className="font-semibold text-blue-800 mb-2">About Attendance Pass</h3>
+            <p className="text-sm text-blue-700">
+              The Attendance Pass shows today's clock in/out status, hours worked, and monthly attendance summary. 
+              Employees can use this pass to track their attendance and earned offset days. 
+              The pass includes a QR code for easy mobile access.
+            </p>
+          </div>
+        </div>
+      </div>
     )
   }
 

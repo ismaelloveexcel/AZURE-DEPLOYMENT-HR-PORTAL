@@ -1,4 +1,4 @@
-"""Employee Documents API routes - Document registry with OCR support."""
+"""Employee Documents API routes - Document registry with enhanced OCR support."""
 
 import os
 import json
@@ -21,6 +21,15 @@ from app.schemas.employee_document import (
     DocumentListResponse,
 )
 from app.auth.dependencies import require_auth, require_hr
+from app.utils.ocr_patterns import (
+    extract_all_document_numbers,
+    extract_emirates_id,
+    extract_passport_number,
+    extract_visa_number,
+    extract_iban,
+    validate_emirates_id_format,
+    validate_iban_format,
+)
 
 router = APIRouter(prefix="/api/employees", tags=["Employee Documents"])
 
@@ -314,8 +323,9 @@ async def process_document_ocr(
 
 
 async def perform_ocr(file_path: str, document_type: str) -> OCRExtractedData:
-    """Perform OCR on a document image using free Tesseract.
+    """Perform OCR on a document image using Tesseract with enhanced pattern extraction.
     
+    Uses UAE-specific patterns for Emirates ID, passport, visa, and IBAN extraction.
     Falls back to basic text extraction if OCR fails.
     """
     try:
@@ -325,15 +335,35 @@ async def perform_ocr(file_path: str, document_type: str) -> OCRExtractedData:
         img = Image.open(file_path)
         text = pytesseract.image_to_string(img, lang='eng+ara')
         
-        extracted = OCRExtractedData(raw_text=text, confidence=70)
+        extracted = OCRExtractedData(raw_text=text, confidence=75)
         
+        # Use enhanced pattern extraction utilities
+        all_numbers = extract_all_document_numbers(text)
+        
+        # Extract based on document type priority
+        if document_type == "Emirates ID" and all_numbers.get('emirates_id'):
+            extracted.document_number = all_numbers['emirates_id']
+            if validate_emirates_id_format(extracted.document_number):
+                extracted.confidence = 90
+        elif document_type == "Passport" and all_numbers.get('passport'):
+            extracted.document_number = all_numbers['passport']
+            extracted.confidence = 85
+        elif document_type == "Visa" and all_numbers.get('visa'):
+            extracted.document_number = all_numbers['visa']
+            extracted.confidence = 85
+        elif document_type == "Bank Details" and all_numbers.get('iban'):
+            extracted.document_number = all_numbers['iban']
+            if validate_iban_format(extracted.document_number):
+                extracted.confidence = 95
+        else:
+            # Try to extract any available document number
+            for doc_type, number in all_numbers.items():
+                if number:
+                    extracted.document_number = number
+                    break
+        
+        # Extract dates using improved pattern
         import re
-        
-        eid_pattern = r'\b\d{3}-\d{4}-\d{7}-\d{1}\b'
-        eid_match = re.search(eid_pattern, text)
-        if eid_match:
-            extracted.document_number = eid_match.group()
-        
         date_pattern = r'\b(\d{1,2}[/-]\d{1,2}[/-]\d{2,4})\b'
         dates = re.findall(date_pattern, text)
         

@@ -17,23 +17,29 @@ from app.schemas.employee_compliance import (
     ComplianceAlertsResponse,
 )
 from app.auth.dependencies import require_auth, require_hr
+from app.utils.compliance_utils import (
+    get_alert_urgency,
+    get_alert_color,
+    format_urgency_message,
+    get_days_remaining,
+)
 
 router = APIRouter(prefix="/api/employees", tags=["Employee Compliance"])
 
 
 def calculate_days_until_expiry(expiry_date: Optional[date]) -> Optional[int]:
     """Calculate days until a date expires."""
-    if not expiry_date:
-        return None
-    return (expiry_date - date.today()).days
+    return get_days_remaining(expiry_date)
 
 
 def get_expiry_status(days: Optional[int]) -> str:
-    """Get status based on days until expiry."""
+    """Get status based on days until expiry - Enhanced with urgency levels."""
     if days is None:
         return "unknown"
     if days < 0:
         return "expired"
+    if days <= 7:
+        return "critical"
     if days <= 30:
         return "expiring_soon"
     if days <= 60:
@@ -83,6 +89,20 @@ async def get_employee_compliance(
     response.iloe_days_until_expiry = calculate_days_until_expiry(compliance.iloe_expiry)
     response.contract_days_until_expiry = calculate_days_until_expiry(compliance.contract_end_date)
     
+    # Add color-coded urgency levels using enhanced utilities  
+    if compliance.visa_expiry_date:
+        response.visa_urgency = get_alert_urgency(compliance.visa_expiry_date)
+        response.visa_color = get_alert_color(response.visa_urgency)
+        response.visa_message = format_urgency_message("Visa", compliance.visa_expiry_date)
+    if compliance.emirates_id_expiry:
+        response.emirates_id_urgency = get_alert_urgency(compliance.emirates_id_expiry)
+        response.emirates_id_color = get_alert_color(response.emirates_id_urgency)
+        response.emirates_id_message = format_urgency_message("Emirates ID", compliance.emirates_id_expiry)
+    if compliance.medical_fitness_expiry:
+        response.medical_fitness_urgency = get_alert_urgency(compliance.medical_fitness_expiry)
+        response.medical_fitness_color = get_alert_color(response.medical_fitness_urgency)
+        response.medical_fitness_message = format_urgency_message("Medical Fitness", compliance.medical_fitness_expiry)
+    
     return response
 
 
@@ -128,6 +148,20 @@ async def update_employee_compliance(
     response.medical_fitness_days_until_expiry = calculate_days_until_expiry(compliance.medical_fitness_expiry)
     response.iloe_days_until_expiry = calculate_days_until_expiry(compliance.iloe_expiry)
     response.contract_days_until_expiry = calculate_days_until_expiry(compliance.contract_end_date)
+    
+    # Add color-coded urgency levels using enhanced utilities
+    if compliance.visa_expiry_date:
+        response.visa_urgency = get_alert_urgency(compliance.visa_expiry_date)
+        response.visa_color = get_alert_color(response.visa_urgency)
+        response.visa_message = format_urgency_message("Visa", compliance.visa_expiry_date)
+    if compliance.emirates_id_expiry:
+        response.emirates_id_urgency = get_alert_urgency(compliance.emirates_id_expiry)
+        response.emirates_id_color = get_alert_color(response.emirates_id_urgency)
+        response.emirates_id_message = format_urgency_message("Emirates ID", compliance.emirates_id_expiry)
+    if compliance.medical_fitness_expiry:
+        response.medical_fitness_urgency = get_alert_urgency(compliance.medical_fitness_expiry)
+        response.medical_fitness_color = get_alert_color(response.medical_fitness_urgency)
+        response.medical_fitness_message = format_urgency_message("Medical Fitness", compliance.medical_fitness_expiry)
     
     return response
 

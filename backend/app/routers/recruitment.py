@@ -1,6 +1,6 @@
 """API endpoints for recruitment module."""
 import hmac
-from typing import List, Optional
+from typing import List, Optional, Dict, Any
 from fastapi import (
     APIRouter, Depends, HTTPException, File, UploadFile,
     Query, status, Request
@@ -51,6 +51,28 @@ async def get_interview_types():
 async def get_employment_types():
     """Get list of employment types."""
     return recruitment_service.get_employment_types()
+
+
+@router.get("/line-managers", summary="Get line managers list")
+async def get_line_managers(
+    role: str = Depends(require_role(["admin", "hr"])),
+):
+    """
+    Get list of line managers for recruitment positions.
+    
+    **Admin and HR only.**
+    """
+    line_managers = [
+        {"name": "Michael Rutman", "email": "michael.rutman@baynunah.ae", "department": "Management"},
+        {"name": "Saeed Sulaiman Rashed Mohammed Alnuaimi", "email": "saeed.alnuaimi@baynunah.ae", "department": "Management"},
+        {"name": "Irfan Syed Ali", "email": "syed.irfan@baynunah.ae", "department": "Sales- Machines Sales & After Sales"},
+        {"name": "Mahmoud Saeed Mohamed", "email": "mahmoud.mohamed@baynunah.ae", "department": "Manufacturing"},
+        {"name": "Hossam Elsayed Abdo Emam", "email": "hossam.emam@baynunah.ae", "department": "Sales: Bottled/Canned Water"},
+        {"name": "Mohammad Ismael Sudally", "email": "mohammad.sudally@baynunah.ae", "department": "HR"},
+        {"name": "Amro Aly Asmael", "email": "amro.asmael@baynunah.ae", "department": "Marketing"},
+        {"name": "Gezeil Rodriguez Natividad", "email": "gezeil.natividad@baynunah.ae", "department": "Finance"},
+    ]
+    return line_managers
 
 
 @router.get("/stats", response_model=RecruitmentStats, summary="Get recruitment statistics")
@@ -419,6 +441,87 @@ async def add_candidate(
     **Admin and HR only.**
     """
     return await recruitment_service.add_candidate(session, data, employee_id)
+
+
+@router.post(
+    "/candidates/batch-upload",
+    response_model=Dict[str, Any],
+    status_code=status.HTTP_201_CREATED,
+    summary="Batch upload candidates from CSV"
+)
+async def batch_upload_candidates(
+    file: UploadFile = File(..., description="CSV file with candidate data"),
+    recruitment_request_id: int = Query(..., description="Recruitment request ID to add candidates to"),
+    employee_id: str = Depends(get_current_employee_id),
+    role: str = Depends(require_role(["admin", "hr"])),
+    session: AsyncSession = Depends(get_session)
+):
+    """
+    Batch upload candidates from CSV file.
+    
+    CSV should have columns: full_name, email, phone, current_company, current_position, years_experience, location
+    
+    Returns:
+    - total: Total candidates in file
+    - success: Number successfully added
+    - failed: Number that failed
+    - errors: List of error messages
+    
+    **Admin and HR only.**
+    """
+    import csv
+    import io
+    
+    # Validate file type
+    if not file.filename.endswith('.csv'):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="File must be a CSV file"
+        )
+    
+    # Read CSV content
+    content = await file.read()
+    csv_text = content.decode('utf-8')
+    csv_reader = csv.DictReader(io.StringIO(csv_text))
+    
+    results = {
+        'total': 0,
+        'success': 0,
+        'failed': 0,
+        'errors': []
+    }
+    
+    for row_num, row in enumerate(csv_reader, start=2):  # Start at 2 (header is 1)
+        results['total'] += 1
+        
+        try:
+            # Map CSV columns to CandidateCreate schema
+            candidate_data = CandidateCreate(
+                recruitment_request_id=recruitment_request_id,
+                full_name=row.get('full_name', '').strip(),
+                email=row.get('email', '').strip() or None,
+                phone=row.get('phone', '').strip() or None,
+                current_company=row.get('current_company', '').strip() or None,
+                current_position=row.get('current_position', '').strip() or None,
+                years_experience=int(row.get('years_experience', 0)) if row.get('years_experience', '').strip() else None,
+                current_location=row.get('location', '').strip() or None
+            )
+            
+            # Validate required fields
+            if not candidate_data.full_name:
+                results['failed'] += 1
+                results['errors'].append(f"Row {row_num}: full_name is required")
+                continue
+            
+            # Add candidate
+            await recruitment_service.add_candidate(session, candidate_data, employee_id)
+            results['success'] += 1
+            
+        except Exception as e:
+            results['failed'] += 1
+            results['errors'].append(f"Row {row_num}: {str(e)}")
+    
+    return results
 
 
 @router.get(

@@ -1568,3 +1568,131 @@ async def get_manager_daily_summary(
         wfh_count=wfh_count,
         employees=summary_rows
     )
+
+
+@router.get("/pass/{employee_id}")
+async def get_attendance_pass_data(
+    employee_id: str,
+    current_user: Employee = Depends(get_current_employee),
+    session: AsyncSession = Depends(get_session)
+):
+    """Get attendance pass data for an employee.
+    
+    Returns today's attendance status and monthly summary for display on the attendance pass.
+    Employees can view their own pass, admins/HR can view any employee's pass.
+    """
+    # Get target employee
+    result = await session.execute(
+        select(Employee).where(Employee.employee_id == employee_id)
+    )
+    employee = result.scalar_one_or_none()
+    
+    if not employee:
+        raise HTTPException(status_code=404, detail="Employee not found")
+    
+    # Authorization check - employees can only view their own pass
+    if current_user.role not in ["admin", "hr"] and current_user.employee_id != employee_id:
+        raise HTTPException(status_code=403, detail="Access denied")
+    
+    # Get today's attendance record
+    today = get_uae_today()
+    today_result = await session.execute(
+        select(AttendanceRecord).where(
+            and_(
+                AttendanceRecord.employee_id == employee.id,
+                AttendanceRecord.attendance_date == today
+            )
+        )
+    )
+    today_record = today_result.scalar_one_or_none()
+    
+    # Determine today's status
+    today_status = "not_clocked_in"
+    clock_in_time = None
+    clock_out_time = None
+    break_start_time = None
+    total_hours_today = 0.0
+    overtime_hours_today = 0.0
+    location = None
+    is_wfh = False
+    wfh_approved = False
+    
+    if today_record:
+        if today_record.break_start and not today_record.break_end:
+            today_status = "on_break"
+        elif today_record.clock_out:
+            today_status = "clocked_out"
+        elif today_record.clock_in:
+            today_status = "clocked_in"
+        
+        clock_in_time = today_record.clock_in.isoformat() if today_record.clock_in else None
+        clock_out_time = today_record.clock_out.isoformat() if today_record.clock_out else None
+        break_start_time = today_record.break_start.isoformat() if today_record.break_start else None
+        total_hours_today = float(today_record.total_hours) if today_record.total_hours else 0.0
+        overtime_hours_today = float(today_record.overtime_hours) if today_record.overtime_hours else 0.0
+        location = today_record.work_location
+        is_wfh = today_record.work_type == "wfh"
+        wfh_approved = today_record.wfh_approved or False
+    
+    # Get monthly summary (current month)
+    from calendar import monthrange
+    current_year = today.year
+    current_month = today.month
+    days_in_month = monthrange(current_year, current_month)[1]
+    month_start = date(current_year, current_month, 1)
+    month_end = date(current_year, current_month, days_in_month)
+    
+    monthly_result = await session.execute(
+        select(AttendanceRecord).where(
+            and_(
+                AttendanceRecord.employee_id == employee.id,
+                AttendanceRecord.attendance_date >= month_start,
+                AttendanceRecord.attendance_date <= month_end
+            )
+        )
+    )
+    monthly_records = monthly_result.scalars().all()
+    
+    # Calculate monthly stats
+    days_present = 0
+    days_absent = 0
+    total_overtime_month = 0.0
+    total_offset_days_month = 0.0
+    
+    for record in monthly_records:
+        if record.status in ["present", "late"]:
+            days_present += 1
+        elif record.status == "absent":
+            days_absent += 1
+        
+        if record.overtime_hours:
+            total_overtime_month += float(record.overtime_hours)
+        
+        if record.offset_hours_earned:
+            # 8 hours = 1 offset day
+            total_offset_days_month += float(record.offset_hours_earned) / 8.0
+    
+    # Calculate attendance percentage
+    working_days_so_far = today.day  # Simple approximation
+    attendance_percentage = (days_present / working_days_so_far * 100) if working_days_so_far > 0 else 0.0
+    
+    return {
+        "employee_id": employee.employee_id,
+        "employee_name": employee.name,
+        "department": employee.department or "N/A",
+        "job_title": employee.job_title or "N/A",
+        "today_status": today_status,
+        "clock_in_time": clock_in_time,
+        "clock_out_time": clock_out_time,
+        "break_start_time": break_start_time,
+        "total_hours_today": round(total_hours_today, 1),
+        "overtime_hours_today": round(overtime_hours_today, 1),
+        "location": location,
+        "is_wfh": is_wfh,
+        "wfh_approved": wfh_approved,
+        "monthly_attendance_percentage": round(attendance_percentage, 1),
+        "current_month_days_present": days_present,
+        "current_month_days_absent": days_absent,
+        "total_overtime_this_month": round(total_overtime_month, 1),
+        "offset_days_earned_this_month": round(total_offset_days_month, 2)
+    }

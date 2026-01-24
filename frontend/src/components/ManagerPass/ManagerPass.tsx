@@ -387,8 +387,8 @@ export function ManagerPass({ recruitmentRequestId, managerId, token, onBack }: 
 
   const renderHeader = () => (
     <div className="flex-shrink-0 relative">
-      {/* Top Header Bar - Deep Blue */}
-      <div className="bg-[#1800ad] px-4 pt-4 pb-6">
+      {/* Top Header Bar - Baynunah Blue */}
+      <div className="bg-[#00A0DF] px-3 pt-3 pb-4">
         <div className="flex items-center justify-between">
           {/* Left: Pass Type */}
           <div>
@@ -396,10 +396,10 @@ export function ManagerPass({ recruitmentRequestId, managerId, token, onBack }: 
           </div>
           
           {/* Right: Flip Button + Logo */}
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2">
             <button
               onClick={() => setIsFlipped(true)}
-              className="p-1.5 rounded-full bg-white/10 hover:bg-white/20 transition-colors"
+              className="p-1 rounded-full bg-white/10 hover:bg-white/20 transition-colors"
               aria-label="View metrics"
               title="View recruitment metrics"
             >
@@ -410,7 +410,7 @@ export function ManagerPass({ recruitmentRequestId, managerId, token, onBack }: 
             <img 
               src="/assets/logo-white.png" 
               alt="Baynunah" 
-              className="h-5 opacity-90"
+              className="h-4 opacity-90"
               style={{ filter: 'brightness(0) invert(1)' }}
             />
           </div>
@@ -418,55 +418,54 @@ export function ManagerPass({ recruitmentRequestId, managerId, token, onBack }: 
       </div>
       
       {/* Info Card - overlapping the header with clean styling */}
-      <div className="px-4 -mt-3">
+      <div className="px-3 -mt-2">
         <div 
-          className="rounded-2xl border border-slate-200 shadow-lg p-4 relative overflow-hidden bg-white"
+          className="rounded-xl border border-slate-200 shadow-lg p-3 relative overflow-hidden bg-white"
         >
-          <div className="flex items-start gap-3">
+          <div className="flex items-start gap-2">
             {/* Left: Info */}
             <div className="flex-1 min-w-0">
               {/* Small: Manager name and Pass reference */}
-              <p className="text-[11px] text-slate-500 mb-0.5">{passData.manager_name}</p>
-              <p className="text-[10px] font-mono text-slate-400 mb-2">{passData.pass_id}</p>
+              <p className="text-[10px] text-slate-500 mb-0.5">{passData.manager_name}</p>
+              <p className="text-[9px] font-mono text-slate-400 mb-1.5">{passData.pass_id}</p>
               
               {/* Large: Position and Department */}
-              <h2 className="text-lg font-black text-slate-900 leading-tight">{passData.position_title}</h2>
+              <h2 className="text-base font-black text-slate-900 leading-tight">{passData.position_title}</h2>
               <p className="text-sm font-medium text-slate-600">{passData.department}</p>
             </div>
             
             {/* Right: QR Code - Click to view applicants */}
             <div 
               onClick={handleQrClick}
-              className="flex-shrink-0 relative p-2 bg-white/80 rounded-xl cursor-pointer hover:shadow-lg transition-all duration-300 hover:scale-105 group border border-white/30"
+              className="flex-shrink-0 relative p-1.5 bg-white/80 rounded-lg cursor-pointer hover:shadow-lg transition-all duration-300 hover:scale-105 group border border-white/30"
             >
               <QRCodeSVG 
                 value={getPassUrl()} 
-                size={60}
+                size={50}
                 level="H"
-                fgColor="#1800ad"
+                fgColor="#00A0DF"
               />
-              <p className="text-[7px] text-center text-slate-400 mt-1">View Applicants</p>
+              <p className="text-[7px] text-center text-slate-400 mt-0.5">View Applicants</p>
             </div>
           </div>
           
           {/* Stage/Status Row */}
-          <div className="flex gap-6 mt-4 pt-3 border-t border-slate-200/50">
-            <div className="flex items-center gap-2">
+          <div className="flex gap-4 mt-2 pt-2 border-t border-slate-200/50">
+            <div className="flex items-center gap-1.5">
               <div 
-                className="w-2 h-2 rounded-full"
-                style={{ backgroundColor: '#1800ad' }}
+                className="w-1.5 h-1.5 rounded-full bg-[#00A0DF]"
               />
               <div>
-                <p className="text-[9px] uppercase tracking-wider text-slate-400 font-semibold">Stage</p>
+                <p className="text-[8px] uppercase tracking-wider text-slate-400 font-semibold">Stage</p>
                 <p className="text-xs font-bold text-slate-800">
                   {getStageLabel(passData.current_stage || 'application', 'manager')}
                 </p>
               </div>
             </div>
-            <div className="flex items-center gap-2">
-              <div className="w-2 h-2 rounded-full bg-emerald-500" />
+            <div className="flex items-center gap-1.5">
+              <div className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
               <div>
-                <p className="text-[9px] uppercase tracking-wider text-slate-400 font-semibold">Status</p>
+                <p className="text-[8px] uppercase tracking-wider text-slate-400 font-semibold">Status</p>
                 <p className="text-xs font-bold text-slate-800">
                   {getStatusLabel(passData.current_stage || 'application', passData.status || passData.position_status, 'manager')}
                 </p>
@@ -475,8 +474,8 @@ export function ManagerPass({ recruitmentRequestId, managerId, token, onBack }: 
           </div>
           
           {/* Active Badge - Positioned in card */}
-          <div className="absolute top-3 right-3">
-            <div className="flex items-center gap-1.5 px-2 py-1 bg-emerald-50/80 rounded-full">
+          <div className="absolute top-2 right-2">
+            <div className="flex items-center gap-1 px-1.5 py-0.5 bg-emerald-50/80 rounded-full">
               <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
               <span className="text-[9px] font-bold text-emerald-600 uppercase">Active</span>
             </div>

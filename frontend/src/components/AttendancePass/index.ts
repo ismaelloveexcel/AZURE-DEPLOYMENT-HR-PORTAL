@@ -1,0 +1,1 @@
+export { AttendancePass } from './AttendancePass'

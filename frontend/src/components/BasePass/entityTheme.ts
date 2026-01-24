@@ -33,9 +33,9 @@ export const ENTITY_THEMES: Record<string, EntityTheme> = {
     label: 'Watergeneration'
   },
   default: {
-    primaryColor: '#1800ad',
-    secondaryColor: '#12007d',
-    headerBgColor: '#1800ad',
+    primaryColor: '#00A0DF',
+    secondaryColor: '#0085c7',
+    headerBgColor: '#00A0DF',
     pattern: 'default',
     label: 'Baynunah Group'
   }
