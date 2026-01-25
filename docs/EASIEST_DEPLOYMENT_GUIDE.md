@@ -134,7 +134,7 @@ Based on your requirements:
 ### Prerequisites (5 minutes one-time)
 
 1. **Python 3.11+** - [Download here](https://www.python.org/downloads/)
-2. **Node.js 18+** - [Download here](https://nodejs.org/)
+2. **Node.js 20+** - [Download here](https://nodejs.org/) (required for React Router v7)
 
 ### Installation (5 minutes)
 
@@ -354,7 +354,7 @@ cd backend && uv run alembic upgrade head
 
 If you're still having issues:
 
-1. **Check prerequisites:** Python 3.11+, Node.js 18+
+1. **Check prerequisites:** Python 3.11+, Node.js 20+
 2. **Read the logs:** Error messages tell you what's wrong
 3. **Try a fresh clone:** Sometimes starting fresh helps
 4. **Use Codespaces:** If local setup fails, Codespaces works out of the box
@@ -365,7 +365,7 @@ If you're still having issues:
 
 **Fastest Path to Success:**
 
-1. Install Python 3.11+ and Node.js 18+
+1. Install Python 3.11+ and Node.js 20+
 2. Run `./scripts/install.sh` (or `scripts\install-windows.bat`)
 3. Run `./scripts/start-portal.sh` (or `scripts\start-portal-windows.bat`)
 4. Open http://localhost:5000

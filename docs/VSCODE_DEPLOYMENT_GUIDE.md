@@ -25,7 +25,7 @@ This guide explains how to develop, debug, and deploy the Secure Renewals HR Por
    - Download: https://www.python.org/downloads/
    - Verify: `python --version` or `python3 --version`
 
-3. **Node.js 18+**
+3. **Node.js 20+** (required for React Router v7)
    - Download: https://nodejs.org/
    - Verify: `node --version`
 

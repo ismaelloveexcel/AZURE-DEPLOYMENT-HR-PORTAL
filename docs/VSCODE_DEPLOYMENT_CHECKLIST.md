@@ -9,7 +9,7 @@ Use this checklist when deploying the Secure Renewals HR Portal from Visual Stud
 - [ ] **Install Prerequisites**
   - [ ] Visual Studio Code (latest version)
   - [ ] Python 3.11 or higher (`python --version`)
-  - [ ] Node.js 18 or higher (`node --version`)
+  - [ ] Node.js 20 or higher (`node --version`)
   - [ ] UV package manager (`pip install uv`)
   - [ ] PostgreSQL database access
   - [ ] Git (`git --version`)
@@ -204,7 +204,7 @@ Use this checklist when deploying the Secure Renewals HR Portal from Visual Stud
 - [ ] **Server Prerequisites**
   - [ ] Ubuntu/Debian server with SSH access
   - [ ] Python 3.11+ installed
-  - [ ] Node.js 18+ installed
+  - [ ] Node.js 20+ installed
   - [ ] PostgreSQL installed
   - [ ] Nginx installed
 

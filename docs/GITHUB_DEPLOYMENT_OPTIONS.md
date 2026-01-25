@@ -31,7 +31,7 @@ This runs the entire application on your laptop. Only accessible from your compu
 
 #### Prerequisites
 1. Install Python 3.11+: https://www.python.org/downloads/
-2. Install Node.js 18+: https://nodejs.org/
+2. Install Node.js 20+: https://nodejs.org/
 3. Install PostgreSQL: https://www.postgresql.org/download/
 
 #### Quick Start
@@ -477,7 +477,7 @@ Based on your requirements:
 ### Local Desktop Setup
 
 - [ ] Install Python 3.11+
-- [ ] Install Node.js 18+
+- [ ] Install Node.js 20+
 - [ ] Install PostgreSQL
 - [ ] Clone repository
 - [ ] Configure `.env` files

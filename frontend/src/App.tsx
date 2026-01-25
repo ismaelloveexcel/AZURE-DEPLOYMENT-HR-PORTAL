@@ -9,6 +9,13 @@ import { NominationPass } from './components/NominationPass'
 import { Performance } from './components/Performance'
 import { TemplateList } from './components/Templates/TemplateList'
 import { useDebounce } from './hooks/useDebounce'
+import { 
+  exportEmployeesToCSV, 
+  exportComplianceAlertsToCSV, 
+  exportAttendanceToCSV,
+  exportCandidatesToCSV,
+  exportRecruitmentRequestsToCSV 
+} from './utils/exportToCSV'
 
 type Section = 'home' | 'employees' | 'onboarding' | 'external' | 'admin' | 'secret-chamber' | 'passes' | 'public-onboarding' | 'recruitment' | 'recruitment-request' | 'recruitment-benefits' | 'templates' | 'template-manager' | 'template-candidate' | 'template-onboarding' | 'template-employee' | 'attendance' | 'compliance-alerts' | 'candidate-pass' | 'manager-pass' | 'performance' | 'insurance-census' | 'nomination-pass'
 
@@ -2355,7 +2362,7 @@ const [passFormData, setPassFormData] = useState<PassFormData>({
           {/* Employees Tab Content */}
           {adminTab === 'employees' && (
             <>
-              {/* Search Bar */}
+              {/* Search Bar and Export */}
               <div className="bg-white rounded-card shadow-card p-4 mb-6">
                 <div className="flex flex-wrap items-center gap-4">
                   <div className="flex-1 min-w-64">
@@ -2372,6 +2379,15 @@ const [passFormData, setPassFormData] = useState<PassFormData>({
                       />
                     </div>
                   </div>
+                  <button
+                    onClick={() => exportEmployeesToCSV(employees)}
+                    className="px-4 py-2 bg-accent-green text-white rounded-lg hover:bg-accent-green/90 transition-colors flex items-center gap-2"
+                  >
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                    Export to Excel
+                  </button>
                 </div>
               </div>
 
@@ -2745,12 +2761,23 @@ const [passFormData, setPassFormData] = useState<PassFormData>({
               {/* Active Job Positions */}
               {recruitmentRequests.length > 0 && (
                 <div className="bg-white rounded-card shadow-card p-6 border border-primary-200">
-                  <h2 className="text-lg font-semibold text-primary-800 mb-4 flex items-center gap-2">
-                    <svg className="w-5 h-5 text-accent-green" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                    </svg>
-                    Open Positions ({recruitmentRequests.length})
-                  </h2>
+                  <div className="flex items-center justify-between mb-4">
+                    <h2 className="text-lg font-semibold text-primary-800 flex items-center gap-2">
+                      <svg className="w-5 h-5 text-accent-green" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                      </svg>
+                      Open Positions ({recruitmentRequests.length})
+                    </h2>
+                    <button
+                      onClick={() => exportRecruitmentRequestsToCSV(recruitmentRequests)}
+                      className="px-3 py-1.5 bg-accent-green text-white text-sm rounded-lg hover:bg-accent-green/90 transition-colors flex items-center gap-2"
+                    >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                      </svg>
+                      Export
+                    </button>
+                  </div>
                   <div className="grid gap-4">
                     {recruitmentRequests.map((req: any) => (
                       <div key={req.id} className="border border-primary-200 rounded-lg p-4 hover:border-accent-green transition-colors bg-white">
@@ -2798,12 +2825,23 @@ const [passFormData, setPassFormData] = useState<PassFormData>({
 
               {/* Kanban Pipeline */}
               <div className="bg-white rounded-card shadow-card p-6 border border-primary-200">
-                <h2 className="text-lg font-semibold text-primary-800 mb-4 flex items-center gap-2">
-                  <svg className="w-5 h-5 text-accent-green" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-                  </svg>
-                  Candidate Pipeline
-                </h2>
+                <div className="flex items-center justify-between mb-4">
+                  <h2 className="text-lg font-semibold text-primary-800 flex items-center gap-2">
+                    <svg className="w-5 h-5 text-accent-green" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                    </svg>
+                    Candidate Pipeline
+                  </h2>
+                  <button
+                    onClick={() => exportCandidatesToCSV(candidatesList)}
+                    className="px-3 py-1.5 bg-accent-green text-white text-sm rounded-lg hover:bg-accent-green/90 transition-colors flex items-center gap-2"
+                  >
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                    Export
+                  </button>
+                </div>
                 
                 {/* Pipeline Stages */}
                 <div className="grid grid-cols-5 gap-4">
@@ -5029,11 +5067,30 @@ const [passFormData, setPassFormData] = useState<PassFormData>({
             <div className="flex items-center gap-4">
               <button
                 onClick={fetchComplianceAlerts}
-                className="px-4 py-2 bg-accent-green text-white rounded-lg text-sm font-medium hover:bg-accent-green/90 transition-colors"
+                className="px-4 py-2 bg-white text-primary-700 border border-primary-200 rounded-lg text-sm font-medium hover:bg-primary-50 transition-colors"
               >
                 Refresh
               </button>
-              <span className="text-sm text-primary-600">{user?.name} ({user?.role})</span>
+              <button
+                onClick={() => {
+                  const allAlerts = [
+                    ...(complianceAlerts?.expired || []),
+                    ...(complianceAlerts?.days_7 || []),
+                    ...(complianceAlerts?.days_30 || []),
+                    ...(complianceAlerts?.days_custom || [])
+                  ]
+                  exportComplianceAlertsToCSV(allAlerts)
+                }}
+                className="px-4 py-2 bg-accent-green text-white rounded-lg text-sm font-medium hover:bg-accent-green/90 transition-colors flex items-center gap-2"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+                Export to Excel
+              </button>
+            </div>
+            <div className="text-sm text-primary-600">
+              {user?.name} ({user?.role})
             </div>
           </div>
 
@@ -5382,7 +5439,18 @@ const [passFormData, setPassFormData] = useState<PassFormData>({
           {/* Admin Dashboard */}
           {(user?.role === 'admin' || user?.role === 'hr') && attendanceDashboard && (
             <div className="bg-white rounded-card shadow-card p-6 mb-6">
-              <h2 className="text-lg font-semibold text-primary-800 mb-4">Today's Overview</h2>
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-lg font-semibold text-primary-800">Today's Overview</h2>
+                <button
+                  onClick={() => exportAttendanceToCSV(attendanceRecords)}
+                  className="px-4 py-2 bg-accent-green text-white rounded-lg text-sm font-medium hover:bg-accent-green/90 transition-colors flex items-center gap-2"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                  </svg>
+                  Export to Excel
+                </button>
+              </div>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 <div className="text-center p-4 bg-primary-50 rounded-lg">
                   <div className="text-2xl font-bold text-accent-green">{attendanceDashboard.clocked_in_today}</div>
