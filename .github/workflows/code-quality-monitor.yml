@@ -190,9 +190,12 @@ jobs:
           cd frontend/src
           ANY_COUNT=$(grep -r ": any" --include="*.ts" --include="*.tsx" | wc -l || echo "0")
           
+          # Threshold: more than 5 'any' types suggests need for better typing
+          ANY_THRESHOLD=5
+          
           echo "**Usage of 'any' type:** $ANY_COUNT occurrences" >> ../../quality-report.md
           
-          if [ "$ANY_COUNT" -gt 5 ]; then
+          if [ "$ANY_COUNT" -gt $ANY_THRESHOLD ]; then
             echo "" >> ../../quality-report.md
             echo "⚠️ Consider reducing 'any' usage for better type safety:" >> ../../quality-report.md
             echo '```' >> ../../quality-report.md
@@ -220,11 +223,12 @@ jobs:
           TOTAL_EFFECTS=$(grep -r "useEffect" --include="*.tsx" | wc -l || echo "0")
           echo "- **useEffect hooks:** $TOTAL_EFFECTS total, $EMPTY_DEPS with empty deps" >> ../../quality-report.md
           
-          # Check for console.log statements
+          # Check for console.log statements (threshold: 10 is acceptable for debugging)
+          CONSOLE_LOG_THRESHOLD=10
           CONSOLE_LOGS=$(grep -r "console.log" --include="*.tsx" --include="*.ts" | wc -l || echo "0")
           echo "- **Console.log statements:** $CONSOLE_LOGS" >> ../../quality-report.md
           
-          if [ "$CONSOLE_LOGS" -gt 10 ]; then
+          if [ "$CONSOLE_LOGS" -gt $CONSOLE_LOG_THRESHOLD ]; then
             echo "  ⚠️ Consider removing console.log statements before production" >> ../../quality-report.md
           fi
           
