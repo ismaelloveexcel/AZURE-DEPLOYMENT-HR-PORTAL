@@ -280,6 +280,15 @@ export interface RecruitmentRequest {
 }
 
 // Navigation types
+/**
+ * LEGACY: Section type for App.tsx navigation system
+ * 
+ * This type is used by the existing App.tsx (5,730 lines) which uses
+ * activeSection state for navigation. As we migrate to React Router,
+ * this type will eventually be removed.
+ * 
+ * DO NOT use this type in new code - use React Router routes instead.
+ */
 export type Section = 
   | 'home' 
   | 'employees' 

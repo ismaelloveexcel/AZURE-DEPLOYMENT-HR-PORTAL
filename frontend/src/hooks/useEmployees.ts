@@ -54,7 +54,7 @@ export function useEmployees(user: User | null): UseEmployeesReturn {
   const [importResult, setImportResult] = useState<any | null>(null)
 
   const fetchEmployees = useCallback(async () => {
-    if (!user) return
+    if (!user?.token || !user?.role) return
     setLoading(true)
     try {
       const res = await fetchWithAuth(`${API_BASE}/employees?active_only=false`, {
@@ -70,7 +70,7 @@ export function useEmployees(user: User | null): UseEmployeesReturn {
     } finally {
       setLoading(false)
     }
-  }, [user])
+  }, [user?.token, user?.role])
 
   const openEmployeeModal = useCallback((emp: Employee) => {
     setSelectedEmployee(emp)

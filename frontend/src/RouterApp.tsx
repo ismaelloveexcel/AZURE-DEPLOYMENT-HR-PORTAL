@@ -22,6 +22,10 @@ import { ComplianceModule } from './pages/ComplianceModule'
  * - /admin - Admin dashboard
  */
 export function RouterApp() {
+  // TODO: Implement shared auth context to pass authenticated user to routes
+  // Currently passing user={null} which forces ComplianceModule to redirect
+  // to home for authentication. Future: Create AuthContext or use state management.
+  
   return (
     <BrowserRouter>
       <Routes>

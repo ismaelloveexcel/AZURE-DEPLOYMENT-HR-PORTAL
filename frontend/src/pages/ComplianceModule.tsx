@@ -138,9 +138,9 @@ export function ComplianceModule({ user }: ComplianceModuleProps) {
               Export to Excel
             </button>
           </div>
-          <div className="text-sm text-primary-600">
-            {user.name} ({user.role})
-          </div>
+            <div className="text-sm text-primary-600">
+              {user?.name} ({user?.role})
+            </div>
         </div>
 
         {loading && !complianceAlerts ? (
