@@ -63,6 +63,30 @@ Proactive code quality and security scanner.
 ### 6. [My Agent](my-agent.agent.md)
 Custom deployment guardrails for “my agent” (OIDC permissions, required secrets, workflow use).
 
+### 7. [HR Portal Finalizer & Auditor](hr-portal-finalizer.agent.md) — **NEW!** Autonomous MVP Finisher
+**AUTONOMOUS MODE** - Sole owner and finisher of the HR Portal MVP for a non-technical solo HR user.
+
+**Use when you need**:
+- Urgent MVP completion
+- Autonomous execution without waiting for instructions
+- Employee module completion (source of truth)
+- Pass generation (dynamic, visible)
+- ESS workflow implementation (leave, document requests)
+- Dashboard & navigation
+- UAE compliance (visa tracking, alerts)
+- Deployment health checks
+- Blueprint-guided pragmatic decisions
+
+**Quick Commands**:
+- `begin` - Start default MVP sequence
+- `status` - Show MVP progress tracker
+- `employees` - Focus on employee module
+- `passes` - Focus on pass generation
+- `ess` - Focus on ESS flows
+- `compliance` - Focus on UAE compliance
+- `deploy` - Focus on deployment health
+- `audit` - Run full codebase audit
+
 ## 📖 Documentation
 
 - **[Quick Reference](QUICK_REFERENCE.md)** - Fast lookup for common tasks
@@ -128,6 +152,22 @@ Debug & Fix (Azure Debugging Engineer)
 Live ✅
 ```
 
+### 🚀 Urgent MVP Completion Workflow
+
+```
+Invoke HR Portal Finalizer
+  ↓
+Auto-scan repo + blueprint
+  ↓
+Prioritized plan with deviations
+  ↓
+Deliver ready code/config
+  ↓
+Minimal clarifications (if blocked)
+  ↓
+MVP Complete ✅
+```
+
 ## 🎯 Quick Commands
 
 | Task | Agent | Command |
@@ -150,6 +190,13 @@ Live ✅
 | Quality scoring | Guardian HR-UAE | "Score this implementation" |
 | Search GitHub repos | OSS Scout | "Find open-source [module] for HR" |
 | Evaluate repo | OSS Scout | "Evaluate [repo] for UAE HR use" |
+| **Urgent MVP finish** | **HR Portal Finalizer** | "begin" or "finish MVP" |
+| MVP status | HR Portal Finalizer | "status" |
+| Fix employees | HR Portal Finalizer | "employees" |
+| Generate passes | HR Portal Finalizer | "passes" |
+| ESS workflows | HR Portal Finalizer | "ess" |
+| UAE compliance | HR Portal Finalizer | "compliance" |
+| Full audit | HR Portal Finalizer | "audit" |
 
 ## 📊 Agent Specializations
 
@@ -206,6 +253,17 @@ OSS Scout
 ├── License Analysis ✅
 ├── Adaptation Planning ✅
 └── UAE Compliance Awareness ✅
+
+HR Portal Finalizer
+├── Autonomous MVP Execution ✅
+├── Employee Module Completion ✅
+├── Pass Generation ✅
+├── ESS Workflow Implementation ✅
+├── Dashboard & Navigation ✅
+├── UAE Compliance Tracking ✅
+├── Deployment Health ✅
+├── Blueprint Interpretation ✅
+└── Pragmatic Decision Making ✅
 ```
 
 ## 🛠️ Integration

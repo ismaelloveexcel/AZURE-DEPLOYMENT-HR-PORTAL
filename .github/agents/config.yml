@@ -97,10 +97,10 @@ agents:
       - "login"
       - "authentication"
       - "database connection"
-   - "python error"
-   - "environment"
-   - "troubleshoot"
-   - "production"
+      - "python error"
+      - "environment"
+      - "troubleshoot"
+      - "production"
 
   - name: azure-debugger
     file: .github/agents/azure-debugger.md
@@ -226,11 +226,66 @@ agents:
       - "open source"
       - "evaluate repo"
 
+  - name: hr-portal-finalizer
+    file: .github/agents/hr-portal-finalizer.agent.md
+    description: "Autonomous MVP finisher for AZURE-DEPLOYMENT-HR-PORTAL. Owns completion of the HR portal for a non-technical solo HR user."
+    capabilities:
+      - mvp_execution
+      - autonomous_implementation
+      - employee_management
+      - pass_generation
+      - ess_workflows
+      - compliance_tracking
+      - blueprint_interpretation
+      - pragmatic_decision_making
+      - user_empathy
+    scope:
+      - backend/app/
+      - frontend/src/
+      - docs/
+      - .github/
+      - alembic/
+    triggers:
+      - "begin"
+      - "finish"
+      - "mvp"
+      - "employees"
+      - "passes"
+      - "ess"
+      - "status"
+      - "audit"
+      - "finalize"
+      - "complete portal"
+      - "urgent"
+    operating_modes:
+      - autonomous: "default - execute without waiting for instructions"
+      - guided: "activated when blocking issues arise"
+    decision_authority:
+      auto_approve:
+        - bug_fixes
+        - code_cleanup
+        - additive_fields
+        - new_endpoints
+        - new_components
+        - ui_improvements
+      require_approval:
+        - breaking_schema_changes
+        - delete_functionality
+        - security_sensitive_changes
+    priorities:
+      - employees_solid
+      - passes_visible
+      - ess_flows
+      - dashboard
+      - uae_compliance
+      - deployment_health
+      - nice_to_haves
+
 # Collaboration rules
 collaboration:
   planning_phase:
     primary: guardian-hr-uae
-    secondary: [hr-assistant, portal-engineer, oss-scout]
+    secondary: [hr-assistant, portal-engineer, oss-scout, hr-portal-finalizer]
     
   research_phase:
     primary: oss-scout
@@ -238,7 +293,7 @@ collaboration:
     
   implementation_phase:
     primary: portal-engineer
-    secondary: [code-quality-monitor, guardian-hr-uae]
+    secondary: [code-quality-monitor, guardian-hr-uae, hr-portal-finalizer]
     
   quality_assurance_phase:
     primary: code-quality-monitor
@@ -255,6 +310,10 @@ collaboration:
   compliance_review:
     primary: guardian-hr-uae
     secondary: [hr-assistant, code-quality-monitor]
+
+  mvp_completion:
+    primary: hr-portal-finalizer
+    secondary: [portal-engineer, guardian-hr-uae, code-quality-monitor]
 
 # Agent priorities
 priorities:
@@ -303,6 +362,17 @@ priorities:
   digital_pass_request:
     handler: guardian-hr-uae
     implement_by: portal-engineer
+    verify_by: code-quality-monitor
+
+  mvp_completion_request:
+    handler: hr-portal-finalizer
+    implement_by: portal-engineer
+    verify_by: code-quality-monitor
+    deploy_by: azure-deployment-specialist
+
+  urgent_portal_finish:
+    handler: hr-portal-finalizer
+    secondary: [portal-engineer, guardian-hr-uae]
     verify_by: code-quality-monitor
 
 # Quality gates
