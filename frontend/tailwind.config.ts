@@ -21,11 +21,6 @@ export default {
           amber: '#f59e0b',    // Amber for warnings
           gray: '#6b7280',     // Gray for neutral/secondary
         },
-        // Design System specific aliases
-        'ds-white': '#FFFFFF',
-        'ds-text': '#1e3a5f',
-        'ds-icon': '#10b981',
-        'ds-border': '#e2e8f0',
       },
       fontFamily: {
         sans: ['Inter', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'],
@@ -38,14 +33,6 @@ export default {
       boxShadow: {
         'card': '0 1px 3px rgba(0, 0, 0, 0.05)',
         'card-hover': '0 4px 6px rgba(0, 0, 0, 0.1)',
-      },
-      spacing: {
-        'xs': '4px',
-        'sm': '8px',
-        'md': '16px',
-        'lg': '24px',
-        'xl': '32px',
-        '2xl': '48px',
       },
     },
   },

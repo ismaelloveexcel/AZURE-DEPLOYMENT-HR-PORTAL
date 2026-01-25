@@ -2080,7 +2080,7 @@ const [passFormData, setPassFormData] = useState<PassFormData>({
                     <div>
                       <p className="font-medium text-primary-800">{feature.key}</p>
                       <p className="text-sm text-primary-600">{feature.description}</p>
-                      <span className="text-xs text-accent-gray">{feature.category}</span>
+                      <span className="text-xs text-gray-500">{feature.category}</span>
                     </div>
                     <button
                       onClick={() => toggleFeature(feature.key, !feature.is_enabled)}
