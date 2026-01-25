@@ -1111,11 +1111,11 @@ const [passFormData, setPassFormData] = useState<PassFormData>({
 
   const loginModal = showLoginModal ? (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-md relative">
+      <div className="bg-white rounded-card shadow-card p-8 w-full max-w-md relative">
         <button
           onClick={closeLoginModal}
           type="button"
-          className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors"
+          className="absolute top-4 right-4 text-primary-300 hover:text-primary-600 transition-colors"
         >
           <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -1124,7 +1124,7 @@ const [passFormData, setPassFormData] = useState<PassFormData>({
         
         <div className="text-center mb-6">
           <img src="/assets/logo.png" alt="Baynunah" className="h-8 mx-auto mb-2" />
-          <h2 className="text-xl font-semibold text-gray-800">
+          <h2 className="text-xl font-semibold text-primary-800">
             {isAdminLogin ? 'Admin Sign In' : 'Sign In'}
           </h2>
         </div>
@@ -1136,14 +1136,14 @@ const [passFormData, setPassFormData] = useState<PassFormData>({
         <form onSubmit={handleLogin} className="space-y-4" data-testid="login-form">
           {!isAdminLogin && (
             <div>
-              <label htmlFor="employee-id" className="block text-sm font-medium text-gray-700 mb-1">Employee ID</label>
+              <label htmlFor="employee-id" className="block text-sm font-medium text-primary-700 mb-1">Employee ID</label>
               <input
                 id="employee-id"
                 name="employee_id"
                 type="text"
                 value={employeeId}
                 onChange={e => setEmployeeId(e.target.value)}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+                className="w-full px-4 py-2 border border-primary-200 rounded-lg focus:ring-2 focus:ring-accent-green focus:border-accent-green"
                 placeholder="e.g., BAYN00008"
                 required
                 autoComplete="username"
@@ -1152,7 +1152,7 @@ const [passFormData, setPassFormData] = useState<PassFormData>({
             </div>
           )}
           <div>
-            <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
+            <label htmlFor="password" className="block text-sm font-medium text-primary-700 mb-1">
               {isAdminLogin ? 'Admin Password' : 'Password'}
             </label>
             <div className="relative">
@@ -1162,7 +1162,7 @@ const [passFormData, setPassFormData] = useState<PassFormData>({
                 type={showPassword ? 'text' : 'password'}
                 value={password}
                 onChange={e => setPassword(e.target.value)}
-                className="w-full px-4 py-2 pr-12 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+                className="w-full px-4 py-2 pr-12 border border-primary-200 rounded-lg focus:ring-2 focus:ring-accent-green focus:border-accent-green"
                 placeholder={isAdminLogin ? 'Enter admin password' : 'First login: DOB as DDMMYYYY'}
                 required
                 autoComplete="current-password"
@@ -1171,7 +1171,7 @@ const [passFormData, setPassFormData] = useState<PassFormData>({
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-primary-600 hover:text-primary-700"
               >
                 {showPassword ? (
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1195,7 +1195,7 @@ const [passFormData, setPassFormData] = useState<PassFormData>({
             {loading ? 'Signing in...' : 'Sign In'}
           </button>
         </form>
-        <p className="text-xs text-gray-500 text-center mt-4">
+        <p className="text-xs text-primary-600 text-center mt-4">
           {isAdminLogin 
             ? 'Enter the admin password to access the admin panel.'
             : 'First-time login? Use your date of birth (DDMMYYYY) as password.'
@@ -1219,14 +1219,14 @@ const [passFormData, setPassFormData] = useState<PassFormData>({
 
     if (error) {
       return (
-        <div className="min-h-screen bg-gradient-to-br from-red-50 to-orange-100 flex items-center justify-center p-8">
-          <div className="bg-white rounded-2xl shadow-xl p-8 max-w-md text-center">
-            <svg className="w-16 h-16 text-red-500 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+        <div className="min-h-screen bg-primary-50 flex items-center justify-center p-8">
+          <div className="bg-white rounded-card shadow-card border border-primary-200 p-8 max-w-md text-center">
+            <svg className="w-16 h-16 text-accent-red mx-auto mb-4" fill="none" stroke="currentColor" strokeWidth={1.5} viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
             </svg>
-            <h2 className="text-xl font-semibold text-gray-800 mb-2">Link Invalid or Expired</h2>
-            <p className="text-gray-600 mb-6">{error}</p>
-            <p className="text-sm text-gray-500">Please contact HR for a new onboarding link.</p>
+            <h2 className="text-xl font-semibold text-primary-800 mb-2">Link Invalid or Expired</h2>
+            <p className="text-primary-600 mb-6">{error}</p>
+            <p className="text-sm text-primary-500">Please contact HR for a new onboarding link.</p>
           </div>
         </div>
       )
@@ -1234,14 +1234,14 @@ const [passFormData, setPassFormData] = useState<PassFormData>({
 
     if (profileSubmitted) {
       return (
-        <div className="min-h-screen bg-gradient-to-br from-emerald-50 to-teal-100 flex items-center justify-center p-8">
-          <div className="bg-white rounded-2xl shadow-xl p-8 max-w-md text-center">
-            <svg className="w-16 h-16 text-emerald-500 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+        <div className="min-h-screen bg-primary-50 flex items-center justify-center p-8">
+          <div className="bg-white rounded-card shadow-card border border-primary-200 p-8 max-w-md text-center">
+            <svg className="w-16 h-16 text-accent-green mx-auto mb-4" fill="none" stroke="currentColor" strokeWidth={1.5} viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
-            <h2 className="text-xl font-semibold text-gray-800 mb-2">Profile Submitted!</h2>
-            <p className="text-gray-600 mb-6">Thank you for completing your profile. HR will review your information shortly.</p>
-            <p className="text-sm text-gray-500">You can close this window now.</p>
+            <h2 className="text-xl font-semibold text-primary-800 mb-2">Profile Submitted!</h2>
+            <p className="text-primary-600 mb-6">Thank you for completing your profile. HR will review your information shortly.</p>
+            <p className="text-sm text-primary-500">You can close this window now.</p>
           </div>
         </div>
       )
@@ -1249,34 +1249,34 @@ const [passFormData, setPassFormData] = useState<PassFormData>({
 
     if (onboardingWelcome) {
       return (
-        <div className="min-h-screen bg-gradient-to-br from-emerald-50 to-teal-100 py-8 px-4">
+        <div className="min-h-screen bg-primary-50 py-8 px-4">
           <div className="max-w-2xl mx-auto">
-            <div className="bg-white rounded-2xl shadow-xl overflow-hidden">
+            <div className="bg-white rounded-card shadow-card border border-primary-200 overflow-hidden">
               {/* Header */}
-              <div className="bg-gradient-to-r from-emerald-500 to-teal-600 p-6 text-white">
-                <img src="/assets/logo.png" alt="Baynunah" className="h-8 mb-4 brightness-0 invert" />
-                <h1 className="text-2xl font-semibold mb-1">Welcome, {onboardingWelcome.name}!</h1>
-                <p className="text-emerald-100">Please complete your profile information below</p>
+              <div className="bg-white border-b border-primary-200 p-6">
+                <img src="/assets/logo.png" alt="Baynunah" className="h-8 mb-4" />
+                <h1 className="text-2xl font-semibold text-primary-800 mb-1">Welcome, {onboardingWelcome.name}!</h1>
+                <p className="text-accent-green">Please complete your profile information below</p>
               </div>
 
               {/* Employee Info Card */}
-              <div className="p-6 bg-gray-50 border-b">
+              <div className="p-6 bg-primary-50 border-b border-primary-200">
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
                   <div>
-                    <p className="text-gray-500">Employee ID</p>
-                    <p className="font-medium">{onboardingWelcome.employee_id}</p>
+                    <p className="text-primary-500">Employee ID</p>
+                    <p className="font-medium text-primary-800">{onboardingWelcome.employee_id}</p>
                   </div>
                   <div>
-                    <p className="text-gray-500">Department</p>
-                    <p className="font-medium">{onboardingWelcome.department || '-'}</p>
+                    <p className="text-primary-500">Department</p>
+                    <p className="font-medium text-primary-800">{onboardingWelcome.department || '-'}</p>
                   </div>
                   <div>
-                    <p className="text-gray-500">Job Title</p>
-                    <p className="font-medium">{onboardingWelcome.job_title || '-'}</p>
+                    <p className="text-primary-500">Job Title</p>
+                    <p className="font-medium text-primary-800">{onboardingWelcome.job_title || '-'}</p>
                   </div>
                   <div>
-                    <p className="text-gray-500">Location</p>
-                    <p className="font-medium">{onboardingWelcome.location || '-'}</p>
+                    <p className="text-primary-500">Location</p>
+                    <p className="font-medium text-primary-800">{onboardingWelcome.location || '-'}</p>
                   </div>
                 </div>
               </div>
@@ -1289,7 +1289,7 @@ const [passFormData, setPassFormData] = useState<PassFormData>({
 
                 {/* Emergency Contact */}
                 <div>
-                  <h3 className="text-lg font-medium text-gray-800 mb-4 flex items-center gap-2">
+                  <h3 className="text-lg font-medium text-primary-800 mb-4 flex items-center gap-2">
                     <svg className="w-5 h-5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
                     </svg>
@@ -1301,7 +1301,7 @@ const [passFormData, setPassFormData] = useState<PassFormData>({
                       placeholder="Contact Name *"
                       value={profileFormData.emergency_contact_name}
                       onChange={e => setProfileFormData({...profileFormData, emergency_contact_name: e.target.value})}
-                      className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500"
+                      className="px-4 py-2 border border-primary-200 rounded-lg focus:ring-2 focus:ring-accent-green"
                       required
                     />
                     <input
@@ -1309,13 +1309,13 @@ const [passFormData, setPassFormData] = useState<PassFormData>({
                       placeholder="Phone Number *"
                       value={profileFormData.emergency_contact_phone}
                       onChange={e => setProfileFormData({...profileFormData, emergency_contact_phone: e.target.value})}
-                      className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500"
+                      className="px-4 py-2 border border-primary-200 rounded-lg focus:ring-2 focus:ring-accent-green"
                       required
                     />
                     <select
                       value={profileFormData.emergency_contact_relationship}
                       onChange={e => setProfileFormData({...profileFormData, emergency_contact_relationship: e.target.value})}
-                      className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500"
+                      className="px-4 py-2 border border-primary-200 rounded-lg focus:ring-2 focus:ring-accent-green"
                       required
                     >
                       <option value="">Relationship *</option>
@@ -1330,7 +1330,7 @@ const [passFormData, setPassFormData] = useState<PassFormData>({
 
                 {/* Personal Contact */}
                 <div>
-                  <h3 className="text-lg font-medium text-gray-800 mb-4 flex items-center gap-2">
+                  <h3 className="text-lg font-medium text-primary-800 mb-4 flex items-center gap-2">
                     <svg className="w-5 h-5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                     </svg>
@@ -1342,21 +1342,21 @@ const [passFormData, setPassFormData] = useState<PassFormData>({
                       placeholder="Personal Phone"
                       value={profileFormData.personal_phone}
                       onChange={e => setProfileFormData({...profileFormData, personal_phone: e.target.value})}
-                      className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500"
+                      className="px-4 py-2 border border-primary-200 rounded-lg focus:ring-2 focus:ring-accent-green"
                     />
                     <input
                       type="email"
                       placeholder="Personal Email"
                       value={profileFormData.personal_email}
                       onChange={e => setProfileFormData({...profileFormData, personal_email: e.target.value})}
-                      className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500"
+                      className="px-4 py-2 border border-primary-200 rounded-lg focus:ring-2 focus:ring-accent-green"
                     />
                   </div>
                 </div>
 
                 {/* Address */}
                 <div>
-                  <h3 className="text-lg font-medium text-gray-800 mb-4 flex items-center gap-2">
+                  <h3 className="text-lg font-medium text-primary-800 mb-4 flex items-center gap-2">
                     <svg className="w-5 h-5 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -1368,7 +1368,7 @@ const [passFormData, setPassFormData] = useState<PassFormData>({
                       placeholder="Street Address"
                       value={profileFormData.current_address}
                       onChange={e => setProfileFormData({...profileFormData, current_address: e.target.value})}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500"
+                      className="w-full px-4 py-2 border border-primary-200 rounded-lg focus:ring-2 focus:ring-accent-green"
                       rows={2}
                     />
                     <div className="grid grid-cols-2 gap-4">
@@ -1377,14 +1377,14 @@ const [passFormData, setPassFormData] = useState<PassFormData>({
                         placeholder="City"
                         value={profileFormData.city}
                         onChange={e => setProfileFormData({...profileFormData, city: e.target.value})}
-                        className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500"
+                        className="px-4 py-2 border border-primary-200 rounded-lg focus:ring-2 focus:ring-accent-green"
                       />
                       <input
                         type="text"
                         placeholder="Country"
                         value={profileFormData.country}
                         onChange={e => setProfileFormData({...profileFormData, country: e.target.value})}
-                        className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500"
+                        className="px-4 py-2 border border-primary-200 rounded-lg focus:ring-2 focus:ring-accent-green"
                       />
                     </div>
                   </div>
@@ -1392,7 +1392,7 @@ const [passFormData, setPassFormData] = useState<PassFormData>({
 
                 {/* Bank Details */}
                 <div>
-                  <h3 className="text-lg font-medium text-gray-800 mb-4 flex items-center gap-2">
+                  <h3 className="text-lg font-medium text-primary-800 mb-4 flex items-center gap-2">
                     <svg className="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
                     </svg>
@@ -1404,28 +1404,28 @@ const [passFormData, setPassFormData] = useState<PassFormData>({
                       placeholder="Bank Name"
                       value={profileFormData.bank_name}
                       onChange={e => setProfileFormData({...profileFormData, bank_name: e.target.value})}
-                      className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500"
+                      className="px-4 py-2 border border-primary-200 rounded-lg focus:ring-2 focus:ring-accent-green"
                     />
                     <input
                       type="text"
                       placeholder="Account Number"
                       value={profileFormData.bank_account_number}
                       onChange={e => setProfileFormData({...profileFormData, bank_account_number: e.target.value})}
-                      className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500"
+                      className="px-4 py-2 border border-primary-200 rounded-lg focus:ring-2 focus:ring-accent-green"
                     />
                     <input
                       type="text"
                       placeholder="IBAN"
                       value={profileFormData.bank_iban}
                       onChange={e => setProfileFormData({...profileFormData, bank_iban: e.target.value})}
-                      className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500"
+                      className="px-4 py-2 border border-primary-200 rounded-lg focus:ring-2 focus:ring-accent-green"
                     />
                   </div>
                 </div>
 
                 {/* ID Documents */}
                 <div>
-                  <h3 className="text-lg font-medium text-gray-800 mb-4 flex items-center gap-2">
+                  <h3 className="text-lg font-medium text-primary-800 mb-4 flex items-center gap-2">
                     <svg className="w-5 h-5 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V8a2 2 0 00-2-2h-5m-4 0V5a2 2 0 114 0v1m-4 0a2 2 0 104 0m-5 8a2 2 0 100-4 2 2 0 000 4zm0 0c1.306 0 2.417.835 2.83 2M9 14a3.001 3.001 0 00-2.83 2M15 11h3m-3 4h2" />
                     </svg>
@@ -1437,36 +1437,36 @@ const [passFormData, setPassFormData] = useState<PassFormData>({
                       placeholder="Passport Number"
                       value={profileFormData.passport_number}
                       onChange={e => setProfileFormData({...profileFormData, passport_number: e.target.value})}
-                      className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500"
+                      className="px-4 py-2 border border-primary-200 rounded-lg focus:ring-2 focus:ring-accent-green"
                     />
                     <input
                       type="text"
                       placeholder="Passport Expiry (DD/MM/YYYY)"
                       value={profileFormData.passport_expiry}
                       onChange={e => setProfileFormData({...profileFormData, passport_expiry: e.target.value})}
-                      className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500"
+                      className="px-4 py-2 border border-primary-200 rounded-lg focus:ring-2 focus:ring-accent-green"
                     />
                     <input
                       type="text"
                       placeholder="UAE ID Number"
                       value={profileFormData.uae_id_number}
                       onChange={e => setProfileFormData({...profileFormData, uae_id_number: e.target.value})}
-                      className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500"
+                      className="px-4 py-2 border border-primary-200 rounded-lg focus:ring-2 focus:ring-accent-green"
                     />
                     <input
                       type="text"
                       placeholder="UAE ID Expiry (DD/MM/YYYY)"
                       value={profileFormData.uae_id_expiry}
                       onChange={e => setProfileFormData({...profileFormData, uae_id_expiry: e.target.value})}
-                      className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500"
+                      className="px-4 py-2 border border-primary-200 rounded-lg focus:ring-2 focus:ring-accent-green"
                     />
                   </div>
                 </div>
 
                 {/* Other Info */}
                 <div>
-                  <h3 className="text-lg font-medium text-gray-800 mb-4 flex items-center gap-2">
-                    <svg className="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <h3 className="text-lg font-medium text-primary-800 mb-4 flex items-center gap-2">
+                    <svg className="w-5 h-5 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
                     Additional Information
@@ -1477,28 +1477,28 @@ const [passFormData, setPassFormData] = useState<PassFormData>({
                       placeholder="Highest Education"
                       value={profileFormData.highest_education}
                       onChange={e => setProfileFormData({...profileFormData, highest_education: e.target.value})}
-                      className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500"
+                      className="px-4 py-2 border border-primary-200 rounded-lg focus:ring-2 focus:ring-accent-green"
                     />
                     <input
                       type="text"
                       placeholder="Shirt Size"
                       value={profileFormData.shirt_size}
                       onChange={e => setProfileFormData({...profileFormData, shirt_size: e.target.value})}
-                      className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500"
+                      className="px-4 py-2 border border-primary-200 rounded-lg focus:ring-2 focus:ring-accent-green"
                     />
                     <input
                       type="text"
                       placeholder="Pants Size"
                       value={profileFormData.pants_size}
                       onChange={e => setProfileFormData({...profileFormData, pants_size: e.target.value})}
-                      className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500"
+                      className="px-4 py-2 border border-primary-200 rounded-lg focus:ring-2 focus:ring-accent-green"
                     />
                     <input
                       type="text"
                       placeholder="Shoe Size"
                       value={profileFormData.shoe_size}
                       onChange={e => setProfileFormData({...profileFormData, shoe_size: e.target.value})}
-                      className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500"
+                      className="px-4 py-2 border border-primary-200 rounded-lg focus:ring-2 focus:ring-accent-green"
                     />
                   </div>
                 </div>
@@ -1539,16 +1539,16 @@ const [passFormData, setPassFormData] = useState<PassFormData>({
         {/* Employee Edit Modal */}
         {showEmployeeModal && selectedEmployee && (
           <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 overflow-y-auto">
-            <div className="bg-white rounded-2xl shadow-2xl w-full max-w-3xl my-8">
-              <div className="p-6 border-b border-gray-200">
+            <div className="bg-white rounded-card shadow-card w-full max-w-3xl my-8">
+              <div className="p-6 border-b border-primary-200">
                 <div className="flex items-center justify-between">
                   <div>
-                    <h2 className="text-xl font-semibold text-gray-800">Edit Employee</h2>
-                    <p className="text-sm text-gray-500">{selectedEmployee.employee_id}</p>
+                    <h2 className="text-xl font-semibold text-primary-800">Edit Employee</h2>
+                    <p className="text-sm text-primary-600">{selectedEmployee.employee_id}</p>
                   </div>
                   <button
                     onClick={closeEmployeeModal}
-                    className="text-gray-400 hover:text-gray-600 transition-colors"
+                    className="text-primary-300 hover:text-primary-600 transition-colors"
                   >
                     <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -1572,65 +1572,65 @@ const [passFormData, setPassFormData] = useState<PassFormData>({
                   </h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
+                      <label className="block text-sm font-medium text-primary-700 mb-1">Full Name</label>
                       <input
                         type="text"
                         value={employeeFormData.name}
                         onChange={e => setEmployeeFormData({...employeeFormData, name: e.target.value})}
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent-green"
+                        className="w-full px-4 py-2 border border-primary-200 rounded-lg focus:ring-2 focus:ring-accent-green"
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                      <label className="block text-sm font-medium text-primary-700 mb-1">Email</label>
                       <input
                         type="email"
                         value={employeeFormData.email}
                         onChange={e => setEmployeeFormData({...employeeFormData, email: e.target.value})}
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent-green"
+                        className="w-full px-4 py-2 border border-primary-200 rounded-lg focus:ring-2 focus:ring-accent-green"
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Department</label>
+                      <label className="block text-sm font-medium text-primary-700 mb-1">Department</label>
                       <input
                         type="text"
                         value={employeeFormData.department}
                         onChange={e => setEmployeeFormData({...employeeFormData, department: e.target.value})}
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent-green"
+                        className="w-full px-4 py-2 border border-primary-200 rounded-lg focus:ring-2 focus:ring-accent-green"
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Job Title</label>
+                      <label className="block text-sm font-medium text-primary-700 mb-1">Job Title</label>
                       <input
                         type="text"
                         value={employeeFormData.job_title}
                         onChange={e => setEmployeeFormData({...employeeFormData, job_title: e.target.value})}
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500"
+                        className="w-full px-4 py-2 border border-primary-200 rounded-lg focus:ring-2 focus:ring-accent-green"
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Location</label>
+                      <label className="block text-sm font-medium text-primary-700 mb-1">Location</label>
                       <input
                         type="text"
                         value={employeeFormData.location}
                         onChange={e => setEmployeeFormData({...employeeFormData, location: e.target.value})}
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500"
+                        className="w-full px-4 py-2 border border-primary-200 rounded-lg focus:ring-2 focus:ring-accent-green"
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Nationality</label>
+                      <label className="block text-sm font-medium text-primary-700 mb-1">Nationality</label>
                       <input
                         type="text"
                         value={employeeFormData.nationality}
                         onChange={e => setEmployeeFormData({...employeeFormData, nationality: e.target.value})}
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500"
+                        className="w-full px-4 py-2 border border-primary-200 rounded-lg focus:ring-2 focus:ring-accent-green"
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Gender</label>
+                      <label className="block text-sm font-medium text-primary-700 mb-1">Gender</label>
                       <select
                         value={employeeFormData.gender}
                         onChange={e => setEmployeeFormData({...employeeFormData, gender: e.target.value})}
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500"
+                        className="w-full px-4 py-2 border border-primary-200 rounded-lg focus:ring-2 focus:ring-accent-green"
                       >
                         <option value="">Select...</option>
                         <option value="Male">Male</option>
@@ -1638,11 +1638,11 @@ const [passFormData, setPassFormData] = useState<PassFormData>({
                       </select>
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Employment Status</label>
+                      <label className="block text-sm font-medium text-primary-700 mb-1">Employment Status</label>
                       <select
                         value={employeeFormData.employment_status}
                         onChange={e => setEmployeeFormData({...employeeFormData, employment_status: e.target.value})}
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500"
+                        className="w-full px-4 py-2 border border-primary-200 rounded-lg focus:ring-2 focus:ring-accent-green"
                       >
                         <option value="">Select...</option>
                         <option value="Active">Active</option>
@@ -1665,30 +1665,30 @@ const [passFormData, setPassFormData] = useState<PassFormData>({
                   </h3>
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Visa Number</label>
+                      <label className="block text-sm font-medium text-primary-700 mb-1">Visa Number</label>
                       <input
                         type="text"
                         value={employeeFormData.visa_number}
                         onChange={e => setEmployeeFormData({...employeeFormData, visa_number: e.target.value})}
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500"
+                        className="w-full px-4 py-2 border border-primary-200 rounded-lg focus:ring-2 focus:ring-accent-green"
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Issue Date</label>
+                      <label className="block text-sm font-medium text-primary-700 mb-1">Issue Date</label>
                       <input
                         type="date"
                         value={employeeFormData.visa_issue_date}
                         onChange={e => setEmployeeFormData({...employeeFormData, visa_issue_date: e.target.value})}
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500"
+                        className="w-full px-4 py-2 border border-primary-200 rounded-lg focus:ring-2 focus:ring-accent-green"
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Expiry Date</label>
+                      <label className="block text-sm font-medium text-primary-700 mb-1">Expiry Date</label>
                       <input
                         type="date"
                         value={employeeFormData.visa_expiry_date}
                         onChange={e => setEmployeeFormData({...employeeFormData, visa_expiry_date: e.target.value})}
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500"
+                        className="w-full px-4 py-2 border border-primary-200 rounded-lg focus:ring-2 focus:ring-accent-green"
                       />
                     </div>
                   </div>
@@ -1704,22 +1704,22 @@ const [passFormData, setPassFormData] = useState<PassFormData>({
                   </h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Emirates ID Number</label>
+                      <label className="block text-sm font-medium text-primary-700 mb-1">Emirates ID Number</label>
                       <input
                         type="text"
                         value={employeeFormData.emirates_id_number}
                         onChange={e => setEmployeeFormData({...employeeFormData, emirates_id_number: e.target.value})}
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500"
+                        className="w-full px-4 py-2 border border-primary-200 rounded-lg focus:ring-2 focus:ring-accent-green"
                         placeholder="784-XXXX-XXXXXXX-X"
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Expiry Date</label>
+                      <label className="block text-sm font-medium text-primary-700 mb-1">Expiry Date</label>
                       <input
                         type="date"
                         value={employeeFormData.emirates_id_expiry}
                         onChange={e => setEmployeeFormData({...employeeFormData, emirates_id_expiry: e.target.value})}
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500"
+                        className="w-full px-4 py-2 border border-primary-200 rounded-lg focus:ring-2 focus:ring-accent-green"
                       />
                     </div>
                   </div>
@@ -1735,29 +1735,29 @@ const [passFormData, setPassFormData] = useState<PassFormData>({
                   </h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Medical Fitness Date</label>
+                      <label className="block text-sm font-medium text-primary-700 mb-1">Medical Fitness Date</label>
                       <input
                         type="date"
                         value={employeeFormData.medical_fitness_date}
                         onChange={e => setEmployeeFormData({...employeeFormData, medical_fitness_date: e.target.value})}
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500"
+                        className="w-full px-4 py-2 border border-primary-200 rounded-lg focus:ring-2 focus:ring-accent-green"
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Medical Fitness Expiry</label>
+                      <label className="block text-sm font-medium text-primary-700 mb-1">Medical Fitness Expiry</label>
                       <input
                         type="date"
                         value={employeeFormData.medical_fitness_expiry}
                         onChange={e => setEmployeeFormData({...employeeFormData, medical_fitness_expiry: e.target.value})}
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500"
+                        className="w-full px-4 py-2 border border-primary-200 rounded-lg focus:ring-2 focus:ring-accent-green"
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">ILOE Status</label>
+                      <label className="block text-sm font-medium text-primary-700 mb-1">ILOE Status</label>
                       <select
                         value={employeeFormData.iloe_status}
                         onChange={e => setEmployeeFormData({...employeeFormData, iloe_status: e.target.value})}
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500"
+                        className="w-full px-4 py-2 border border-primary-200 rounded-lg focus:ring-2 focus:ring-accent-green"
                       >
                         <option value="">Select...</option>
                         <option value="Active">Active</option>
@@ -1767,12 +1767,12 @@ const [passFormData, setPassFormData] = useState<PassFormData>({
                       </select>
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">ILOE Expiry</label>
+                      <label className="block text-sm font-medium text-primary-700 mb-1">ILOE Expiry</label>
                       <input
                         type="date"
                         value={employeeFormData.iloe_expiry}
                         onChange={e => setEmployeeFormData({...employeeFormData, iloe_expiry: e.target.value})}
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500"
+                        className="w-full px-4 py-2 border border-primary-200 rounded-lg focus:ring-2 focus:ring-accent-green"
                       />
                     </div>
                   </div>
@@ -1788,11 +1788,11 @@ const [passFormData, setPassFormData] = useState<PassFormData>({
                   </h3>
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Contract Type</label>
+                      <label className="block text-sm font-medium text-primary-700 mb-1">Contract Type</label>
                       <select
                         value={employeeFormData.contract_type}
                         onChange={e => setEmployeeFormData({...employeeFormData, contract_type: e.target.value})}
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500"
+                        className="w-full px-4 py-2 border border-primary-200 rounded-lg focus:ring-2 focus:ring-accent-green"
                       >
                         <option value="">Select...</option>
                         <option value="Limited">Limited</option>
@@ -1802,21 +1802,21 @@ const [passFormData, setPassFormData] = useState<PassFormData>({
                       </select>
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Start Date</label>
+                      <label className="block text-sm font-medium text-primary-700 mb-1">Start Date</label>
                       <input
                         type="date"
                         value={employeeFormData.contract_start_date}
                         onChange={e => setEmployeeFormData({...employeeFormData, contract_start_date: e.target.value})}
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500"
+                        className="w-full px-4 py-2 border border-primary-200 rounded-lg focus:ring-2 focus:ring-accent-green"
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">End Date</label>
+                      <label className="block text-sm font-medium text-primary-700 mb-1">End Date</label>
                       <input
                         type="date"
                         value={employeeFormData.contract_end_date}
                         onChange={e => setEmployeeFormData({...employeeFormData, contract_end_date: e.target.value})}
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500"
+                        className="w-full px-4 py-2 border border-primary-200 rounded-lg focus:ring-2 focus:ring-accent-green"
                       />
                     </div>
                   </div>
@@ -1827,7 +1827,7 @@ const [passFormData, setPassFormData] = useState<PassFormData>({
                   <button
                     type="button"
                     onClick={closeEmployeeModal}
-                    className="flex-1 py-3 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors font-medium"
+                    className="flex-1 py-3 border border-primary-200 rounded-lg hover:bg-primary-50 transition-colors font-medium"
                   >
                     Cancel
                   </button>
@@ -1848,17 +1848,17 @@ const [passFormData, setPassFormData] = useState<PassFormData>({
           <div className="flex items-center justify-between mb-6">
             <div>
               <img src="/assets/logo.png" alt="Baynunah" className="h-6 mb-1" />
-              <h1 className="text-2xl font-semibold text-gray-800">Employees</h1>
+              <h1 className="text-2xl font-semibold text-primary-800">Employees</h1>
             </div>
             <div className="flex items-center gap-4">
               {user && (
-                <span className="text-sm text-gray-600">
+                <span className="text-sm text-primary-600">
                   {user.name} ({user.role})
                 </span>
               )}
               <button
                 onClick={() => handleNavigate('home')}
-                className="px-4 py-2 text-emerald-600 hover:bg-emerald-50 rounded-lg transition-colors"
+                className="px-4 py-2 text-accent-green hover:bg-primary-50 rounded-lg transition-colors"
               >
                 ← Back to Home
               </button>
@@ -1932,43 +1932,43 @@ const [passFormData, setPassFormData] = useState<PassFormData>({
             </div>
           )}
           
-          <div className="bg-white rounded-xl shadow-lg overflow-hidden">
+          <div className="bg-white rounded-card shadow-card overflow-hidden">
             {loading ? (
-              <div className="p-8 text-center text-gray-500">Loading employees...</div>
+              <div className="p-8 text-center text-primary-600">Loading employees...</div>
             ) : employees.length === 0 ? (
               <div className="p-8 text-center">
-                <p className="text-gray-500 mb-4">No employees found</p>
-                <p className="text-sm text-gray-400">Add employees via CSV import or the admin panel</p>
+                <p className="text-primary-600 mb-4">No employees found</p>
+                <p className="text-sm text-primary-300">Add employees via CSV import or the admin panel</p>
               </div>
             ) : (
               <table className="w-full">
-                <thead className="bg-gray-50 border-b border-gray-200">
+                <thead className="bg-primary-50 border-b border-primary-200">
                   <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">ID</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Name</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Job Title</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Department</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Profile</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Action</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-primary-600 uppercase">ID</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-primary-600 uppercase">Name</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-primary-600 uppercase">Job Title</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-primary-600 uppercase">Department</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-primary-600 uppercase">Status</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-primary-600 uppercase">Profile</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-primary-600 uppercase">Action</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-200">
                   {employees.map(emp => (
                     <tr 
                       key={emp.id} 
-                      className="hover:bg-gray-50 cursor-pointer"
+                      className="hover:bg-primary-50 cursor-pointer"
                       onClick={() => (user?.role === 'admin' || user?.role === 'hr') && openEmployeeModal(emp)}
                     >
-                      <td className="px-6 py-4 text-sm font-medium text-gray-900">{emp.employee_id}</td>
-                      <td className="px-6 py-4 text-sm text-gray-900">{emp.name}</td>
-                      <td className="px-6 py-4 text-sm text-gray-500">{emp.job_title || '-'}</td>
-                      <td className="px-6 py-4 text-sm text-gray-500">{emp.department || '-'}</td>
+                      <td className="px-6 py-4 text-sm font-medium text-primary-900">{emp.employee_id}</td>
+                      <td className="px-6 py-4 text-sm text-primary-900">{emp.name}</td>
+                      <td className="px-6 py-4 text-sm text-primary-600">{emp.job_title || '-'}</td>
+                      <td className="px-6 py-4 text-sm text-primary-600">{emp.department || '-'}</td>
                       <td className="px-6 py-4">
                         <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${
                           emp.employment_status === 'Active' ? 'bg-green-100 text-green-700' :
                           emp.employment_status === 'Terminated' ? 'bg-red-100 text-red-700' :
-                          emp.employment_status === 'Resigned' ? 'bg-gray-100 text-gray-700' :
+                          emp.employment_status === 'Resigned' ? 'bg-primary-100 text-primary-700' :
                           'bg-yellow-100 text-yellow-700'
                         }`}>
                           {emp.employment_status || (emp.is_active ? 'Active' : 'Inactive')}
@@ -1976,7 +1976,7 @@ const [passFormData, setPassFormData] = useState<PassFormData>({
                       </td>
                       <td className="px-6 py-4">
                         <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${
-                          emp.profile_status === 'complete' ? 'bg-emerald-100 text-emerald-700' :
+                          emp.profile_status === 'complete' ? 'bg-accent-green/10 text-accent-green' :
                           emp.profile_status === 'pending_review' ? 'bg-blue-100 text-blue-700' :
                           'bg-slate-200 text-slate-900'
                         }`}>
@@ -1992,7 +1992,7 @@ const [passFormData, setPassFormData] = useState<PassFormData>({
                               e.stopPropagation()
                               setViewingProfileId(emp.employee_id)
                             }}
-                            className="px-3 py-1 text-sm text-teal-600 hover:bg-teal-50 rounded-lg transition-colors"
+                            className="px-3 py-1 text-sm text-accent-green hover:bg-primary-50 rounded-lg transition-colors"
                           >
                             View
                           </button>
@@ -2002,7 +2002,7 @@ const [passFormData, setPassFormData] = useState<PassFormData>({
                                 e.stopPropagation()
                                 openEmployeeModal(emp)
                               }}
-                              className="px-3 py-1 text-sm text-emerald-600 hover:bg-emerald-50 rounded-lg transition-colors"
+                              className="px-3 py-1 text-sm text-accent-green hover:bg-primary-50 rounded-lg transition-colors"
                             >
                               Edit
                             </button>
@@ -2015,7 +2015,7 @@ const [passFormData, setPassFormData] = useState<PassFormData>({
               </table>
             )}
           </div>
-          <p className="text-sm text-gray-500 mt-4">Total: {employees.length} employees</p>
+          <p className="text-sm text-primary-600 mt-4">Total: {employees.length} employees</p>
         </div>
       </div>
     )
@@ -2080,7 +2080,7 @@ const [passFormData, setPassFormData] = useState<PassFormData>({
                     <div>
                       <p className="font-medium text-primary-800">{feature.key}</p>
                       <p className="text-sm text-primary-600">{feature.description}</p>
-                      <span className="text-xs text-gray-500">{feature.category}</span>
+                      <span className="text-xs text-primary-600">{feature.category}</span>
                     </div>
                     <button
                       onClick={() => toggleFeature(feature.key, !feature.is_enabled)}
@@ -2089,7 +2089,7 @@ const [passFormData, setPassFormData] = useState<PassFormData>({
                       }`}
                     >
                       <span
-                        className={`inline-block h-5 w-5 transform rounded-full bg-white transition-transform shadow-lg ${
+                        className={`inline-block h-5 w-5 transform rounded-full bg-white transition-transform shadow-card ${
                           feature.is_enabled ? 'translate-x-6' : 'translate-x-1'
                         }`}
                       />
@@ -2111,14 +2111,14 @@ const [passFormData, setPassFormData] = useState<PassFormData>({
   if (activeSection === 'admin') {
     if (user?.role !== 'admin') {
       return (
-        <div className="min-h-screen bg-gray-100 flex flex-col items-center justify-center p-8">
+        <div className="min-h-screen bg-primary-100 flex flex-col items-center justify-center p-8">
           {loginModal}
-          <div className="bg-white rounded-2xl shadow-lg p-8 max-w-md text-center">
-            <h2 className="text-xl font-semibold text-gray-800 mb-4">Access Denied</h2>
-            <p className="text-gray-600 mb-6">You need admin privileges to access this section.</p>
+          <div className="bg-white rounded-2xl shadow-card p-8 max-w-md text-center">
+            <h2 className="text-xl font-semibold text-primary-800 mb-4">Access Denied</h2>
+            <p className="text-primary-600 mb-6">You need admin privileges to access this section.</p>
             <button
               onClick={() => handleNavigate('home')}
-              className="px-6 py-2 bg-emerald-500 text-white rounded-lg hover:bg-emerald-600 transition-colors"
+              className="px-6 py-2 bg-accent-green text-white rounded-lg hover:bg-accent-green transition-colors"
             >
               Back to Home
             </button>
@@ -2128,7 +2128,7 @@ const [passFormData, setPassFormData] = useState<PassFormData>({
     }
 
     return (
-      <div className="min-h-screen bg-gray-100 p-8 relative">
+      <div className="min-h-screen bg-primary-50 p-8 relative">
         {loginModal}
         {viewingProfileId && user?.token && (
           <EmployeeProfile
@@ -2169,15 +2169,15 @@ const [passFormData, setPassFormData] = useState<PassFormData>({
           <div className="flex items-center justify-between mb-6">
             <div>
               <img src="/assets/logo.png" alt="Baynunah" className="h-6 mb-1" />
-              <h1 className="text-2xl font-semibold text-gray-800">Admin Section</h1>
+              <h1 className="text-2xl font-semibold text-primary-800">Admin Section</h1>
             </div>
             <div className="flex items-center gap-4">
-              <span className="text-sm text-gray-600">
+              <span className="text-sm text-primary-600">
                 {user?.name} ({user?.role})
               </span>
               <button
                 onClick={() => handleNavigate('home')}
-                className="px-4 py-2 text-emerald-600 hover:bg-emerald-50 rounded-lg transition-colors"
+                className="px-4 py-2 text-accent-green hover:bg-primary-100 rounded-lg transition-colors"
               >
                 ← Back to Home
               </button>
@@ -2185,19 +2185,19 @@ const [passFormData, setPassFormData] = useState<PassFormData>({
           </div>
 
           {/* Admin Tab Navigation */}
-          <div className="bg-white rounded-xl shadow-lg mb-6">
-            <div className="flex border-b border-gray-200">
+          <div className="bg-white rounded-card shadow-card border border-primary-200 mb-6">
+            <div className="flex border-b border-primary-200">
               <button
                 onClick={() => setAdminTab('dashboard')}
                 className={`flex-1 px-6 py-4 text-sm font-medium transition-colors ${
                   adminTab === 'dashboard'
-                    ? 'text-emerald-600 border-b-2 border-emerald-500 bg-emerald-50/50'
-                    : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'
+                    ? 'text-accent-green border-b-2 border-accent-green bg-primary-50'
+                    : 'text-primary-600 hover:text-primary-800 hover:bg-primary-50'
                 }`}
               >
                 <div className="flex items-center justify-center gap-2">
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z" />
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth={1.5} viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z" />
                   </svg>
                   Dashboard
                 </div>
@@ -2206,13 +2206,13 @@ const [passFormData, setPassFormData] = useState<PassFormData>({
                 onClick={() => setAdminTab('employees')}
                 className={`flex-1 px-6 py-4 text-sm font-medium transition-colors ${
                   adminTab === 'employees'
-                    ? 'text-emerald-600 border-b-2 border-emerald-500 bg-emerald-50/50'
-                    : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'
+                    ? 'text-accent-green border-b-2 border-accent-green bg-primary-50'
+                    : 'text-primary-600 hover:text-primary-800 hover:bg-primary-50'
                 }`}
               >
                 <div className="flex items-center justify-center gap-2">
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth={1.5} viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
                   </svg>
                   Employees ({employees.length})
                 </div>
@@ -2221,17 +2221,17 @@ const [passFormData, setPassFormData] = useState<PassFormData>({
                 onClick={() => setAdminTab('compliance')}
                 className={`flex-1 px-6 py-4 text-sm font-medium transition-colors ${
                   adminTab === 'compliance'
-                    ? 'text-emerald-600 border-b-2 border-emerald-500 bg-emerald-50/50'
-                    : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'
+                    ? 'text-accent-green border-b-2 border-accent-green bg-primary-50'
+                    : 'text-primary-600 hover:text-primary-800 hover:bg-primary-50'
                 }`}
               >
                 <div className="flex items-center justify-center gap-2">
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth={1.5} viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                   </svg>
                   Compliance Alerts
                   {complianceAlerts && (complianceAlerts.expired.length + (complianceAlerts.days_7?.length || 0)) > 0 && (
-                    <span className="bg-red-500 text-white text-xs px-2 py-0.5 rounded-full">
+                    <span className="bg-accent-red text-white text-xs px-2 py-0.5 rounded-full">
                       {complianceAlerts.expired.length + (complianceAlerts.days_7?.length || 0)}
                     </span>
                   )}
@@ -2241,8 +2241,8 @@ const [passFormData, setPassFormData] = useState<PassFormData>({
                 onClick={() => setAdminTab('recruitment')}
                 className={`flex-1 px-6 py-4 text-sm font-medium transition-colors ${
                   adminTab === 'recruitment'
-                    ? 'text-purple-600 border-b-2 border-purple-500 bg-purple-50/50'
-                    : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'
+                    ? 'text-accent-green border-b-2 border-accent-green bg-primary-50'
+                    : 'text-primary-600 hover:text-primary-800 hover:bg-primary-50'
                 }`}
               >
                 <div className="flex items-center justify-center gap-2">
@@ -2256,8 +2256,8 @@ const [passFormData, setPassFormData] = useState<PassFormData>({
                 onClick={() => setAdminTab('evaluation')}
                 className={`flex-1 px-6 py-4 text-sm font-medium transition-colors ${
                   adminTab === 'evaluation'
-                    ? 'text-emerald-600 border-b-2 border-emerald-500 bg-emerald-50/50'
-                    : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'
+                    ? 'text-accent-green border-b-2 border-emerald-500 bg-primary-50/50'
+                    : 'text-primary-600 hover:text-primary-700 hover:bg-primary-50'
                 }`}
               >
                 <div className="flex items-center justify-center gap-2">
@@ -2276,76 +2276,76 @@ const [passFormData, setPassFormData] = useState<PassFormData>({
               {dashboard && (
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
                   <div className="bg-white rounded-xl shadow p-6">
-                    <p className="text-sm text-gray-500">Total Employees</p>
-                    <p className="text-3xl font-semibold text-gray-800">{dashboard.total_employees}</p>
+                    <p className="text-sm text-primary-600">Total Employees</p>
+                    <p className="text-3xl font-semibold text-primary-800">{dashboard.total_employees}</p>
                   </div>
                   <div className="bg-white rounded-xl shadow p-6">
-                    <p className="text-sm text-gray-500">Active Employees</p>
-                    <p className="text-3xl font-semibold text-emerald-600">{dashboard.active_employees}</p>
+                    <p className="text-sm text-primary-600">Active Employees</p>
+                    <p className="text-3xl font-semibold text-accent-green">{dashboard.active_employees}</p>
                   </div>
                   <div className="bg-white rounded-xl shadow p-6">
-                    <p className="text-sm text-gray-500">Pending Renewals</p>
+                    <p className="text-sm text-primary-600">Pending Renewals</p>
                     <p className="text-3xl font-semibold text-amber-600">{dashboard.pending_renewals}</p>
                   </div>
                   <div className="bg-white rounded-xl shadow p-6">
-                    <p className="text-sm text-gray-500">Features Enabled</p>
+                    <p className="text-sm text-primary-600">Features Enabled</p>
                     <p className="text-3xl font-semibold text-blue-600">{dashboard.features_enabled}/{dashboard.features_total}</p>
                   </div>
                 </div>
               )}
 
-              <div className="bg-white rounded-xl shadow-lg p-6">
-                <h2 className="text-lg font-semibold text-gray-800 mb-4">Quick Actions</h2>
+              <div className="bg-white rounded-card shadow-card p-6">
+                <h2 className="text-lg font-semibold text-primary-800 mb-4">Quick Actions</h2>
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                   <button 
                     onClick={() => setAdminTab('employees')}
-                    className="p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors text-left"
+                    className="p-4 bg-primary-50 rounded-lg hover:bg-primary-100 transition-colors text-left"
                   >
-                    <svg className="w-8 h-8 text-emerald-500 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg className="w-8 h-8 text-accent-green mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
                     </svg>
-                    <p className="font-medium text-gray-800">Manage Employees</p>
-                    <p className="text-sm text-gray-500">View and manage employees</p>
+                    <p className="font-medium text-primary-800">Manage Employees</p>
+                    <p className="text-sm text-primary-600">View and manage employees</p>
                   </button>
                   <button 
                     onClick={() => setActiveSection('onboarding')}
-                    className="p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors text-left"
+                    className="p-4 bg-primary-50 rounded-lg hover:bg-primary-100 transition-colors text-left"
                   >
                     <svg className="w-8 h-8 text-blue-500 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
                     </svg>
-                    <p className="font-medium text-gray-800">Onboarding</p>
-                    <p className="text-sm text-gray-500">Invite new joiners</p>
+                    <p className="font-medium text-primary-800">Onboarding</p>
+                    <p className="text-sm text-primary-600">Invite new joiners</p>
                   </button>
                   <button 
                     onClick={() => setActiveSection('passes')}
-                    className="p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors text-left"
+                    className="p-4 bg-primary-50 rounded-lg hover:bg-primary-100 transition-colors text-left"
                   >
                     <svg className="w-8 h-8 text-amber-500 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z" />
                     </svg>
-                    <p className="font-medium text-gray-800">Pass Generation</p>
-                    <p className="text-sm text-gray-500">Create visitor passes</p>
+                    <p className="font-medium text-primary-800">Pass Generation</p>
+                    <p className="text-sm text-primary-600">Create visitor passes</p>
                   </button>
                   <button 
                     onClick={() => setAdminTab('compliance')}
-                    className="p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors text-left"
+                    className="p-4 bg-primary-50 rounded-lg hover:bg-primary-100 transition-colors text-left"
                   >
                     <svg className="w-8 h-8 text-red-500 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                     </svg>
-                    <p className="font-medium text-gray-800">Compliance Alerts</p>
-                    <p className="text-sm text-gray-500">Document expiry warnings</p>
+                    <p className="font-medium text-primary-800">Compliance Alerts</p>
+                    <p className="text-sm text-primary-600">Document expiry warnings</p>
                   </button>
                   <button 
                     onClick={() => setActiveSection('templates')}
-                    className="p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors text-left"
+                    className="p-4 bg-primary-50 rounded-lg hover:bg-primary-100 transition-colors text-left"
                   >
                     <svg className="w-8 h-8 text-indigo-500 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z" />
                     </svg>
-                    <p className="font-medium text-gray-800">Templates</p>
-                    <p className="text-sm text-gray-500">Pass templates</p>
+                    <p className="font-medium text-primary-800">Templates</p>
+                    <p className="text-sm text-primary-600">Pass templates</p>
                   </button>
                 </div>
               </div>
@@ -2356,11 +2356,11 @@ const [passFormData, setPassFormData] = useState<PassFormData>({
           {adminTab === 'employees' && (
             <>
               {/* Search Bar */}
-              <div className="bg-white rounded-xl shadow-lg p-4 mb-6">
+              <div className="bg-white rounded-card shadow-card p-4 mb-6">
                 <div className="flex flex-wrap items-center gap-4">
                   <div className="flex-1 min-w-64">
                     <div className="relative">
-                      <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-primary-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                       </svg>
                       <input
@@ -2368,7 +2368,7 @@ const [passFormData, setPassFormData] = useState<PassFormData>({
                         placeholder="Search employees by name, ID, or job title..."
                         value={adminEmployeeSearch}
                         onChange={e => setAdminEmployeeSearch(e.target.value)}
-                        className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-accent-green focus:border-accent-green"
+                        className="w-full pl-10 pr-4 py-2 border border-primary-200 rounded-lg focus:ring-2 focus:ring-accent-green focus:border-accent-green"
                       />
                     </div>
                   </div>
@@ -2376,10 +2376,10 @@ const [passFormData, setPassFormData] = useState<PassFormData>({
               </div>
 
               {/* Employees Table */}
-              <div className="bg-white rounded-xl shadow-lg overflow-hidden">
-                <div className="px-6 py-4 border-b border-gray-100 bg-primary-50">
+              <div className="bg-white rounded-card shadow-card overflow-hidden">
+                <div className="px-6 py-4 border-b border-primary-100 bg-primary-50">
                   <h2 className="text-lg font-semibold text-primary-800">Employee Directory</h2>
-                  <p className="text-sm text-gray-500 mt-1">
+                  <p className="text-sm text-primary-600 mt-1">
                     {employees.filter(e => 
                       e.name.toLowerCase().includes(adminEmployeeSearch.toLowerCase()) ||
                       e.employee_id.toLowerCase().includes(adminEmployeeSearch.toLowerCase()) ||
@@ -2389,7 +2389,7 @@ const [passFormData, setPassFormData] = useState<PassFormData>({
                 </div>
                 <div className="overflow-x-auto">
                   <table className="w-full">
-                    <thead className="bg-gray-50 text-xs text-gray-500 uppercase tracking-wider">
+                    <thead className="bg-primary-50 text-xs text-primary-600 uppercase tracking-wider">
                       <tr>
                         <th className="px-6 py-3 text-left">Employee</th>
                         <th className="px-6 py-3 text-left">ID</th>
@@ -2408,26 +2408,26 @@ const [passFormData, setPassFormData] = useState<PassFormData>({
                         )
                         .slice(0, 50)
                         .map(emp => (
-                          <tr key={emp.id} className="hover:bg-gray-50 transition-colors">
+                          <tr key={emp.id} className="hover:bg-primary-50 transition-colors">
                             <td className="px-6 py-4">
                               <div className="flex items-center gap-3">
                                 <div className="w-10 h-10 rounded-full bg-primary-200 flex items-center justify-center text-primary-700 font-medium">
                                   {emp.name.split(' ').map(n => n[0]).join('').slice(0, 2)}
                                 </div>
                                 <div>
-                                  <p className="font-medium text-gray-800">{emp.name}</p>
-                                  <p className="text-sm text-gray-500">{emp.email}</p>
+                                  <p className="font-medium text-primary-800">{emp.name}</p>
+                                  <p className="text-sm text-primary-600">{emp.email}</p>
                                 </div>
                               </div>
                             </td>
-                            <td className="px-6 py-4 text-sm text-gray-600 font-mono">{emp.employee_id}</td>
-                            <td className="px-6 py-4 text-sm text-gray-600">{emp.job_title || '-'}</td>
-                            <td className="px-6 py-4 text-sm text-gray-600">{emp.function || '-'}</td>
+                            <td className="px-6 py-4 text-sm text-primary-600 font-mono">{emp.employee_id}</td>
+                            <td className="px-6 py-4 text-sm text-primary-600">{emp.job_title || '-'}</td>
+                            <td className="px-6 py-4 text-sm text-primary-600">{emp.function || '-'}</td>
                             <td className="px-6 py-4">
                               <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${
                                 emp.status === 'active' ? 'bg-accent-green/10 text-accent-green border-accent-green/20' : 
                                 emp.status === 'on_leave' ? 'bg-amber-50 text-amber-700 border-amber-200' : 
-                                'bg-gray-50 text-gray-700 border-gray-200'
+                                'bg-primary-50 text-primary-700 border-primary-200'
                               }`}>
                                 {emp.status}
                               </span>
@@ -2453,9 +2453,9 @@ const [passFormData, setPassFormData] = useState<PassFormData>({
           {adminTab === 'compliance' && (
             <>
               {complianceAlertsLoading ? (
-                <div className="bg-white rounded-xl shadow-lg p-12 text-center">
+                <div className="bg-white rounded-card shadow-card p-12 text-center">
                   <div className="animate-spin w-8 h-8 border-4 border-emerald-500 border-t-transparent rounded-full mx-auto mb-4"></div>
-                  <p className="text-gray-600">Loading compliance alerts...</p>
+                  <p className="text-primary-600">Loading compliance alerts...</p>
                 </div>
               ) : (
                 <>
@@ -2501,15 +2501,15 @@ const [passFormData, setPassFormData] = useState<PassFormData>({
 
                   {/* Expired Documents */}
                   {complianceAlerts?.expired && complianceAlerts.expired.length > 0 && (
-                    <div className="bg-white rounded-xl shadow-lg mb-6">
-                      <div className="px-6 py-4 border-b border-gray-100 bg-red-50 rounded-t-xl">
+                    <div className="bg-white rounded-card shadow-card mb-6">
+                      <div className="px-6 py-4 border-b border-primary-100 bg-red-50 rounded-t-xl">
                         <h2 className="text-lg font-semibold text-red-700 flex items-center gap-2">
                           <span>!</span> Expired Documents ({complianceAlerts.expired.length})
                         </h2>
                         <p className="text-sm text-red-600 mt-1">These documents need immediate attention</p>
                       </div>
                       <table className="w-full">
-                        <thead className="bg-gray-50 text-xs text-gray-500 uppercase">
+                        <thead className="bg-primary-50 text-xs text-primary-600 uppercase">
                           <tr>
                             <th className="px-6 py-3 text-left">Employee</th>
                             <th className="px-6 py-3 text-left">Document</th>
@@ -2520,18 +2520,18 @@ const [passFormData, setPassFormData] = useState<PassFormData>({
                         </thead>
                         <tbody className="divide-y divide-gray-100">
                           {complianceAlerts.expired.map((alert, idx) => (
-                            <tr key={`expired-${idx}`} className="hover:bg-gray-50">
+                            <tr key={`expired-${idx}`} className="hover:bg-primary-50">
                               <td className="px-6 py-4">
-                                <p className="font-medium text-gray-800">{alert.employee_name}</p>
-                                <p className="text-sm text-gray-500">{alert.employee_id}</p>
+                                <p className="font-medium text-primary-800">{alert.employee_name}</p>
+                                <p className="text-sm text-primary-600">{alert.employee_id}</p>
                               </td>
-                              <td className="px-6 py-4 text-sm text-gray-600">{alert.document_type}</td>
-                              <td className="px-6 py-4 text-sm text-gray-600">{alert.expiry_date}</td>
+                              <td className="px-6 py-4 text-sm text-primary-600">{alert.document_type}</td>
+                              <td className="px-6 py-4 text-sm text-primary-600">{alert.expiry_date}</td>
                               <td className="px-6 py-4">
                                 <span className="text-red-600 font-medium">{Math.abs(alert.days_until_expiry)} days overdue</span>
                               </td>
                               <td className="px-6 py-4">
-                                <button onClick={() => setViewingProfileId(alert.employee_id)} className="text-emerald-600 hover:text-emerald-700 font-medium text-sm">
+                                <button onClick={() => setViewingProfileId(alert.employee_id)} className="text-accent-green hover:text-accent-green font-medium text-sm">
                                   View Profile
                                 </button>
                               </td>
@@ -2544,15 +2544,15 @@ const [passFormData, setPassFormData] = useState<PassFormData>({
 
                   {/* Expiring in 7 Days */}
                   {complianceAlerts?.days_7 && complianceAlerts.days_7.length > 0 && (
-                    <div className="bg-white rounded-xl shadow-lg mb-6">
-                      <div className="px-6 py-4 border-b border-gray-100 bg-orange-50 rounded-t-xl">
+                    <div className="bg-white rounded-card shadow-card mb-6">
+                      <div className="px-6 py-4 border-b border-primary-100 bg-orange-50 rounded-t-xl">
                         <h2 className="text-lg font-semibold text-orange-700 flex items-center gap-2">
                           <span>!</span> Expiring Within 7 Days ({complianceAlerts.days_7.length})
                         </h2>
                         <p className="text-sm text-orange-600 mt-1">Urgent - documents that need immediate attention</p>
                       </div>
                       <table className="w-full">
-                        <thead className="bg-gray-50 text-xs text-gray-500 uppercase">
+                        <thead className="bg-primary-50 text-xs text-primary-600 uppercase">
                           <tr>
                             <th className="px-6 py-3 text-left">Employee</th>
                             <th className="px-6 py-3 text-left">Document</th>
@@ -2563,18 +2563,18 @@ const [passFormData, setPassFormData] = useState<PassFormData>({
                         </thead>
                         <tbody className="divide-y divide-gray-100">
                           {complianceAlerts.days_7.map((alert, idx) => (
-                            <tr key={`days7-${idx}`} className="hover:bg-gray-50">
+                            <tr key={`days7-${idx}`} className="hover:bg-primary-50">
                               <td className="px-6 py-4">
-                                <p className="font-medium text-gray-800">{alert.employee_name}</p>
-                                <p className="text-sm text-gray-500">{alert.employee_id}</p>
+                                <p className="font-medium text-primary-800">{alert.employee_name}</p>
+                                <p className="text-sm text-primary-600">{alert.employee_id}</p>
                               </td>
-                              <td className="px-6 py-4 text-sm text-gray-600">{alert.document_type}</td>
-                              <td className="px-6 py-4 text-sm text-gray-600">{alert.expiry_date}</td>
+                              <td className="px-6 py-4 text-sm text-primary-600">{alert.document_type}</td>
+                              <td className="px-6 py-4 text-sm text-primary-600">{alert.expiry_date}</td>
                               <td className="px-6 py-4">
                                 <span className="text-orange-600 font-medium">{alert.days_until_expiry} days</span>
                               </td>
                               <td className="px-6 py-4">
-                                <button onClick={() => setViewingProfileId(alert.employee_id)} className="text-emerald-600 hover:text-emerald-700 font-medium text-sm">
+                                <button onClick={() => setViewingProfileId(alert.employee_id)} className="text-accent-green hover:text-accent-green font-medium text-sm">
                                   View Profile
                                 </button>
                               </td>
@@ -2587,15 +2587,15 @@ const [passFormData, setPassFormData] = useState<PassFormData>({
 
                   {/* Expiring in 30 Days */}
                   {complianceAlerts?.days_30 && complianceAlerts.days_30.length > 0 && (
-                    <div className="bg-white rounded-xl shadow-lg mb-6">
-                      <div className="px-6 py-4 border-b border-gray-100 bg-yellow-50 rounded-t-xl">
+                    <div className="bg-white rounded-card shadow-card mb-6">
+                      <div className="px-6 py-4 border-b border-primary-100 bg-yellow-50 rounded-t-xl">
                         <h2 className="text-lg font-semibold text-yellow-700 flex items-center gap-2">
                           <span>!</span> Expiring Within 30 Days ({complianceAlerts.days_30.length})
                         </h2>
                         <p className="text-sm text-yellow-600 mt-1">Documents that need to be renewed soon</p>
                       </div>
                       <table className="w-full">
-                        <thead className="bg-gray-50 text-xs text-gray-500 uppercase">
+                        <thead className="bg-primary-50 text-xs text-primary-600 uppercase">
                           <tr>
                             <th className="px-6 py-3 text-left">Employee</th>
                             <th className="px-6 py-3 text-left">Document</th>
@@ -2606,18 +2606,18 @@ const [passFormData, setPassFormData] = useState<PassFormData>({
                         </thead>
                         <tbody className="divide-y divide-gray-100">
                           {complianceAlerts.days_30.map((alert, idx) => (
-                            <tr key={`days30-${idx}`} className="hover:bg-gray-50">
+                            <tr key={`days30-${idx}`} className="hover:bg-primary-50">
                               <td className="px-6 py-4">
-                                <p className="font-medium text-gray-800">{alert.employee_name}</p>
-                                <p className="text-sm text-gray-500">{alert.employee_id}</p>
+                                <p className="font-medium text-primary-800">{alert.employee_name}</p>
+                                <p className="text-sm text-primary-600">{alert.employee_id}</p>
                               </td>
-                              <td className="px-6 py-4 text-sm text-gray-600">{alert.document_type}</td>
-                              <td className="px-6 py-4 text-sm text-gray-600">{alert.expiry_date}</td>
+                              <td className="px-6 py-4 text-sm text-primary-600">{alert.document_type}</td>
+                              <td className="px-6 py-4 text-sm text-primary-600">{alert.expiry_date}</td>
                               <td className="px-6 py-4">
                                 <span className="text-yellow-600 font-medium">{alert.days_until_expiry} days</span>
                               </td>
                               <td className="px-6 py-4">
-                                <button onClick={() => setViewingProfileId(alert.employee_id)} className="text-emerald-600 hover:text-emerald-700 font-medium text-sm">
+                                <button onClick={() => setViewingProfileId(alert.employee_id)} className="text-accent-green hover:text-accent-green font-medium text-sm">
                                   View Profile
                                 </button>
                               </td>
@@ -2630,14 +2630,14 @@ const [passFormData, setPassFormData] = useState<PassFormData>({
 
                   {/* Expiring in 60 Days */}
                   {complianceAlerts?.days_custom && complianceAlerts.days_custom.length > 0 && (
-                    <div className="bg-white rounded-xl shadow-lg mb-6">
-                      <div className="px-6 py-4 border-b border-gray-100 bg-amber-50 rounded-t-xl">
+                    <div className="bg-white rounded-card shadow-card mb-6">
+                      <div className="px-6 py-4 border-b border-primary-100 bg-amber-50 rounded-t-xl">
                         <h2 className="text-lg font-semibold text-amber-700 flex items-center gap-2">
                           <span>!</span> Expiring Within 60 Days ({complianceAlerts.days_custom.length})
                         </h2>
                       </div>
                       <table className="w-full">
-                        <thead className="bg-gray-50 text-xs text-gray-500 uppercase">
+                        <thead className="bg-primary-50 text-xs text-primary-600 uppercase">
                           <tr>
                             <th className="px-6 py-3 text-left">Employee</th>
                             <th className="px-6 py-3 text-left">Document</th>
@@ -2648,18 +2648,18 @@ const [passFormData, setPassFormData] = useState<PassFormData>({
                         </thead>
                         <tbody className="divide-y divide-gray-100">
                           {complianceAlerts.days_custom.map((alert, idx) => (
-                            <tr key={`days60-${idx}`} className="hover:bg-gray-50">
+                            <tr key={`days60-${idx}`} className="hover:bg-primary-50">
                               <td className="px-6 py-4">
-                                <p className="font-medium text-gray-800">{alert.employee_name}</p>
-                                <p className="text-sm text-gray-500">{alert.employee_id}</p>
+                                <p className="font-medium text-primary-800">{alert.employee_name}</p>
+                                <p className="text-sm text-primary-600">{alert.employee_id}</p>
                               </td>
-                              <td className="px-6 py-4 text-sm text-gray-600">{alert.document_type}</td>
-                              <td className="px-6 py-4 text-sm text-gray-600">{alert.expiry_date}</td>
+                              <td className="px-6 py-4 text-sm text-primary-600">{alert.document_type}</td>
+                              <td className="px-6 py-4 text-sm text-primary-600">{alert.expiry_date}</td>
                               <td className="px-6 py-4">
                                 <span className="text-amber-600 font-medium">{alert.days_until_expiry} days</span>
                               </td>
                               <td className="px-6 py-4">
-                                <button onClick={() => setViewingProfileId(alert.employee_id)} className="text-emerald-600 hover:text-emerald-700 font-medium text-sm">
+                                <button onClick={() => setViewingProfileId(alert.employee_id)} className="text-accent-green hover:text-accent-green font-medium text-sm">
                                   View Profile
                                 </button>
                               </td>
@@ -2672,10 +2672,10 @@ const [passFormData, setPassFormData] = useState<PassFormData>({
 
                   {/* No Alerts */}
                   {complianceAlerts && (complianceAlerts.expired.length + (complianceAlerts.days_7?.length || 0) + (complianceAlerts.days_30?.length || 0) + (complianceAlerts.days_custom?.length || 0)) === 0 && (
-                    <div className="bg-white rounded-xl shadow-lg p-12 text-center">
+                    <div className="bg-white rounded-card shadow-card p-12 text-center">
                       <p className="text-4xl mb-4">All Clear!</p>
-                      <p className="text-xl font-semibold text-emerald-600 mb-2">No Compliance Issues</p>
-                      <p className="text-gray-600">No documents are expired or expiring within the next 60 days.</p>
+                      <p className="text-xl font-semibold text-accent-green mb-2">No Compliance Issues</p>
+                      <p className="text-primary-600">No documents are expired or expiring within the next 60 days.</p>
                     </div>
                   )}
                 </>
@@ -2744,7 +2744,7 @@ const [passFormData, setPassFormData] = useState<PassFormData>({
 
               {/* Active Job Positions */}
               {recruitmentRequests.length > 0 && (
-                <div className="bg-white rounded-xl shadow-lg p-6 border border-primary-200">
+                <div className="bg-white rounded-card shadow-card p-6 border border-primary-200">
                   <h2 className="text-lg font-semibold text-primary-800 mb-4 flex items-center gap-2">
                     <svg className="w-5 h-5 text-accent-green" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
@@ -2797,7 +2797,7 @@ const [passFormData, setPassFormData] = useState<PassFormData>({
               )}
 
               {/* Kanban Pipeline */}
-              <div className="bg-white rounded-xl shadow-lg p-6 border border-primary-200">
+              <div className="bg-white rounded-card shadow-card p-6 border border-primary-200">
                 <h2 className="text-lg font-semibold text-primary-800 mb-4 flex items-center gap-2">
                   <svg className="w-5 h-5 text-accent-green" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
@@ -2835,7 +2835,7 @@ const [passFormData, setPassFormData] = useState<PassFormData>({
 
               {/* Candidates Screening Table - Improved Spacing */}
               {candidatesList.length > 0 && (
-                <div className="bg-white rounded-2xl shadow-xl overflow-hidden border border-primary-200">
+                <div className="bg-white rounded-2xl shadow-card overflow-hidden border border-primary-200">
                   {/* Header with Search and Filters */}
                   <div className="px-8 py-6 border-b border-primary-200 bg-primary-50">
                     <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
@@ -3044,7 +3044,7 @@ const [passFormData, setPassFormData] = useState<PassFormData>({
               )}
 
               {/* Quick Actions */}
-              <div className="bg-white rounded-xl shadow-lg p-6 border border-primary-200">
+              <div className="bg-white rounded-card shadow-card p-6 border border-primary-200">
                 <h2 className="text-lg font-semibold text-primary-800 mb-4">Quick Actions</h2>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                   <button onClick={() => setShowNewRequestModal(true)} className="flex items-center gap-3 p-4 bg-primary-50 hover:bg-accent-green/10 rounded-lg transition-colors border border-primary-200">
@@ -3083,7 +3083,7 @@ const [passFormData, setPassFormData] = useState<PassFormData>({
               </div>
 
               {/* Info Banner */}
-              <div className="bg-primary-50 rounded-xl shadow-lg p-6 border border-primary-200">
+              <div className="bg-primary-50 rounded-card shadow-card p-6 border border-primary-200">
                 <div className="flex items-start gap-4">
                   <div className="p-3 bg-accent-green/10 rounded-lg">
                     <svg className="w-8 h-8 text-accent-green" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -3119,10 +3119,10 @@ const [passFormData, setPassFormData] = useState<PassFormData>({
           {/* New Recruitment Request Modal */}
           {showNewRequestModal && (
             <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-              <div className="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+              <div className="bg-white rounded-card shadow-card p-8 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
                 <div className="flex items-center justify-between mb-6">
-                  <h2 className="text-xl font-semibold text-gray-800">Create New Position</h2>
-                  <button onClick={() => setShowNewRequestModal(false)} className="text-gray-400 hover:text-gray-600">
+                  <h2 className="text-xl font-semibold text-primary-800">Create New Position</h2>
+                  <button onClick={() => setShowNewRequestModal(false)} className="text-primary-300 hover:text-primary-600">
                     <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                     </svg>
@@ -3130,34 +3130,34 @@ const [passFormData, setPassFormData] = useState<PassFormData>({
                 </div>
                 <form onSubmit={(e) => { e.preventDefault(); handleCreateRecruitmentRequest(); }} className="space-y-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Position Title *</label>
+                    <label className="block text-sm font-medium text-primary-700 mb-1">Position Title *</label>
                     <input
                       type="text"
                       value={newRequestForm.position_title}
                       onChange={(e) => setNewRequestForm(prev => ({ ...prev, position_title: e.target.value }))}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+                      className="w-full px-4 py-2 border border-primary-200 rounded-lg focus:ring-2 focus:ring-accent-green focus:border-accent-green"
                       placeholder="e.g., Thermodynamics Engineer"
                       required
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Department *</label>
+                    <label className="block text-sm font-medium text-primary-700 mb-1">Department *</label>
                     <input
                       type="text"
                       value={newRequestForm.department}
                       onChange={(e) => setNewRequestForm(prev => ({ ...prev, department: e.target.value }))}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+                      className="w-full px-4 py-2 border border-primary-200 rounded-lg focus:ring-2 focus:ring-accent-green focus:border-accent-green"
                       placeholder="e.g., Engineering / R&D"
                       required
                     />
                   </div>
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Employment Type</label>
+                      <label className="block text-sm font-medium text-primary-700 mb-1">Employment Type</label>
                       <select
                         value={newRequestForm.employment_type}
                         onChange={(e) => setNewRequestForm(prev => ({ ...prev, employment_type: e.target.value }))}
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+                        className="w-full px-4 py-2 border border-primary-200 rounded-lg focus:ring-2 focus:ring-accent-green focus:border-accent-green"
                       >
                         <option value="Full-time">Full-time</option>
                         <option value="Part-time">Part-time</option>
@@ -3166,61 +3166,61 @@ const [passFormData, setPassFormData] = useState<PassFormData>({
                       </select>
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Headcount</label>
+                      <label className="block text-sm font-medium text-primary-700 mb-1">Headcount</label>
                       <input
                         type="number"
                         value={newRequestForm.headcount}
                         onChange={(e) => setNewRequestForm(prev => ({ ...prev, headcount: e.target.value }))}
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+                        className="w-full px-4 py-2 border border-primary-200 rounded-lg focus:ring-2 focus:ring-accent-green focus:border-accent-green"
                         min="1"
                       />
                     </div>
                   </div>
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Salary Range Min (AED)</label>
+                      <label className="block text-sm font-medium text-primary-700 mb-1">Salary Range Min (AED)</label>
                       <input
                         type="number"
                         value={newRequestForm.salary_range_min}
                         onChange={(e) => setNewRequestForm(prev => ({ ...prev, salary_range_min: e.target.value }))}
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+                        className="w-full px-4 py-2 border border-primary-200 rounded-lg focus:ring-2 focus:ring-accent-green focus:border-accent-green"
                         placeholder="e.g., 15000"
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Salary Range Max (AED)</label>
+                      <label className="block text-sm font-medium text-primary-700 mb-1">Salary Range Max (AED)</label>
                       <input
                         type="number"
                         value={newRequestForm.salary_range_max}
                         onChange={(e) => setNewRequestForm(prev => ({ ...prev, salary_range_max: e.target.value }))}
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+                        className="w-full px-4 py-2 border border-primary-200 rounded-lg focus:ring-2 focus:ring-accent-green focus:border-accent-green"
                         placeholder="e.g., 25000"
                       />
                     </div>
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Job Description</label>
+                    <label className="block text-sm font-medium text-primary-700 mb-1">Job Description</label>
                     <textarea
                       value={newRequestForm.job_description}
                       onChange={(e) => setNewRequestForm(prev => ({ ...prev, job_description: e.target.value }))}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 min-h-[100px]"
+                      className="w-full px-4 py-2 border border-primary-200 rounded-lg focus:ring-2 focus:ring-accent-green focus:border-accent-green min-h-[100px]"
                       placeholder="Enter job description..."
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Requirements</label>
+                    <label className="block text-sm font-medium text-primary-700 mb-1">Requirements</label>
                     <textarea
                       value={newRequestForm.requirements}
                       onChange={(e) => setNewRequestForm(prev => ({ ...prev, requirements: e.target.value }))}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 min-h-[100px]"
+                      className="w-full px-4 py-2 border border-primary-200 rounded-lg focus:ring-2 focus:ring-accent-green focus:border-accent-green min-h-[100px]"
                       placeholder="Enter requirements..."
                     />
                   </div>
                   <div className="flex justify-end gap-3 pt-4">
-                    <button type="button" onClick={() => setShowNewRequestModal(false)} className="px-6 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50">
+                    <button type="button" onClick={() => setShowNewRequestModal(false)} className="px-6 py-2 border border-primary-200 text-primary-700 rounded-lg hover:bg-primary-50">
                       Cancel
                     </button>
-                    <button type="submit" disabled={loading || !newRequestForm.position_title} className="px-6 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 disabled:opacity-50">
+                    <button type="submit" disabled={loading || !newRequestForm.position_title} className="px-6 py-2 bg-accent-green text-white rounded-lg hover:bg-accent-green/90 disabled:opacity-50">
                       {loading ? 'Creating...' : 'Create Position'}
                     </button>
                   </div>
@@ -3232,7 +3232,7 @@ const [passFormData, setPassFormData] = useState<PassFormData>({
           {/* Candidate Profile Modal - Premium Dark Blue Design */}
           {showCandidateProfileModal && selectedCandidate && (
             <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-              <div className="w-full max-w-5xl max-h-[95vh] overflow-y-auto rounded-2xl shadow-2xl" style={{ background: 'linear-gradient(135deg, #0a1628 0%, #1a2942 50%, #0d1f38 100%)' }}>
+              <div className="w-full max-w-5xl max-h-[95vh] overflow-y-auto rounded-card shadow-card" style={{ background: 'linear-gradient(135deg, #0a1628 0%, #1a2942 50%, #0d1f38 100%)' }}>
                 {/* Header */}
                 <div className="p-6 border-b border-white/10">
                   <div className="flex items-center justify-between">
@@ -3301,7 +3301,7 @@ const [passFormData, setPassFormData] = useState<PassFormData>({
                         selectedCandidate.stage === 'screening' ? 'bg-amber-500/20 text-amber-400 border border-amber-500/30' :
                         selectedCandidate.stage === 'interview' ? 'bg-purple-500/20 text-purple-400 border border-purple-500/30' :
                         selectedCandidate.stage === 'offer' ? 'bg-green-500/20 text-green-400 border border-green-500/30' :
-                        selectedCandidate.stage === 'hired' ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' :
+                        selectedCandidate.stage === 'hired' ? 'bg-accent-green/20 text-accent-green border border-emerald-500/30' :
                         'bg-slate-500/20 text-slate-400 border border-slate-500/30'
                       }`}>
                         {selectedCandidate.stage === 'interview' ? 'Interview Stage' : selectedCandidate.stage?.toUpperCase()}
@@ -3494,12 +3494,12 @@ const [passFormData, setPassFormData] = useState<PassFormData>({
                     {(user?.role === 'admin' || user?.role === 'hr') && (
                       <div className="bg-gradient-to-br from-emerald-900/40 to-green-900/20 rounded-xl p-5 border border-emerald-700/30">
                         <div className="flex items-center gap-2 mb-3">
-                          <svg className="w-5 h-5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <svg className="w-5 h-5 text-accent-green" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                           </svg>
-                          <p className="text-xs text-emerald-400 uppercase tracking-wide font-bold">Recommendation</p>
+                          <p className="text-xs text-accent-green uppercase tracking-wide font-bold">Recommendation</p>
                         </div>
-                        <p className="text-3xl font-bold text-emerald-400 mb-3">
+                        <p className="text-3xl font-bold text-accent-green mb-3">
                           {(selectedCandidate.cv_scoring || selectedCandidate.ai_ranking || 0) >= 70 ? 'Hire' : 
                            (selectedCandidate.cv_scoring || selectedCandidate.ai_ranking || 0) >= 50 ? 'Consider' : 'Review'}
                         </p>
@@ -3589,11 +3589,11 @@ const [passFormData, setPassFormData] = useState<PassFormData>({
           <div className="flex items-center justify-between mb-6">
             <div>
               <img src="/assets/logo.png" alt="Baynunah" className="h-6 mb-1" />
-              <h1 className="text-2xl font-semibold text-gray-800">Pass Generation</h1>
+              <h1 className="text-2xl font-semibold text-primary-800">Pass Generation</h1>
             </div>
             <div className="flex items-center gap-4">
               {user && (
-                <span className="text-sm text-gray-600">
+                <span className="text-sm text-primary-600">
                   {user.name} ({user.role})
                 </span>
               )}
@@ -3688,12 +3688,12 @@ const [passFormData, setPassFormData] = useState<PassFormData>({
 
           {showPassForm && (
             <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-              <div className="bg-white rounded-2xl shadow-2xl p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+              <div className="bg-white rounded-card shadow-card p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
                 <div className="flex items-center justify-between mb-4">
-                  <h2 className="text-xl font-semibold text-gray-800">Generate New Pass</h2>
+                  <h2 className="text-xl font-semibold text-primary-800">Generate New Pass</h2>
                   <button
                     onClick={() => setShowPassForm(false)}
-                    className="text-gray-400 hover:text-gray-600"
+                    className="text-primary-300 hover:text-primary-600"
                   >
                     <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -3708,11 +3708,11 @@ const [passFormData, setPassFormData] = useState<PassFormData>({
                 <form onSubmit={createPass} className="space-y-4">
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Pass Type</label>
+                      <label className="block text-sm font-medium text-primary-700 mb-1">Pass Type</label>
                       <select
                         value={passFormData.pass_type}
                         onChange={e => setPassFormData({...passFormData, pass_type: e.target.value})}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500"
+                        className="w-full px-3 py-2 border border-primary-200 rounded-lg focus:ring-2 focus:ring-accent-green"
                       >
                         <option value="recruitment">Recruitment</option>
                         <option value="onboarding">Onboarding</option>
@@ -3722,12 +3722,12 @@ const [passFormData, setPassFormData] = useState<PassFormData>({
                       </select>
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Full Name *</label>
+                      <label className="block text-sm font-medium text-primary-700 mb-1">Full Name *</label>
                       <input
                         type="text"
                         value={passFormData.full_name}
                         onChange={e => setPassFormData({...passFormData, full_name: e.target.value})}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500"
+                        className="w-full px-3 py-2 border border-primary-200 rounded-lg focus:ring-2 focus:ring-accent-green"
                         required
                       />
                     </div>
@@ -3735,22 +3735,22 @@ const [passFormData, setPassFormData] = useState<PassFormData>({
                   
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Valid From *</label>
+                      <label className="block text-sm font-medium text-primary-700 mb-1">Valid From *</label>
                       <input
                         type="date"
                         value={passFormData.valid_from}
                         onChange={e => setPassFormData({...passFormData, valid_from: e.target.value})}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500"
+                        className="w-full px-3 py-2 border border-primary-200 rounded-lg focus:ring-2 focus:ring-accent-green"
                         required
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Valid Until *</label>
+                      <label className="block text-sm font-medium text-primary-700 mb-1">Valid Until *</label>
                       <input
                         type="date"
                         value={passFormData.valid_until}
                         onChange={e => setPassFormData({...passFormData, valid_until: e.target.value})}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500"
+                        className="w-full px-3 py-2 border border-primary-200 rounded-lg focus:ring-2 focus:ring-accent-green"
                         required
                       />
                     </div>
@@ -3759,25 +3759,25 @@ const [passFormData, setPassFormData] = useState<PassFormData>({
                   {passFormData.pass_type === 'onboarding' && (
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Start Stage (optional)</label>
+                        <label className="block text-sm font-medium text-primary-700 mb-1">Start Stage (optional)</label>
                         <input
                           type="text"
                           placeholder="e.g., documents_submitted"
                           value={passFormData.start_stage || ''}
                           onChange={e => setPassFormData({...passFormData, start_stage: e.target.value})}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500"
+                          className="w-full px-3 py-2 border border-primary-200 rounded-lg focus:ring-2 focus:ring-accent-green"
                         />
                       </div>
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Stage Order (comma-separated)</label>
+                        <label className="block text-sm font-medium text-primary-700 mb-1">Stage Order (comma-separated)</label>
                         <input
                           type="text"
                           placeholder="initiated,documents_pending,documents_submitted,pre_joining,joining_confirmed,completed"
                           value={passFormData.stage_order || ''}
                           onChange={e => setPassFormData({...passFormData, stage_order: e.target.value})}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500"
+                          className="w-full px-3 py-2 border border-primary-200 rounded-lg focus:ring-2 focus:ring-accent-green"
                         />
-                        <p className="text-xs text-gray-500 mt-1">Admins can reorder onboarding stages or start mid-stage.</p>
+                        <p className="text-xs text-primary-600 mt-1">Admins can reorder onboarding stages or start mid-stage.</p>
                       </div>
                     </div>
                   )}
@@ -3806,7 +3806,7 @@ const [passFormData, setPassFormData] = useState<PassFormData>({
           {/* Filter indicator */}
           {passFilter !== 'all' && (
             <div className="flex items-center gap-2 mb-4">
-              <span className="text-sm text-gray-600">Showing:</span>
+              <span className="text-sm text-primary-600">Showing:</span>
               <span className={`inline-flex px-3 py-1 text-sm font-medium rounded-full ${
                 passFilter === 'active' ? 'bg-green-100 text-green-700' :
                 passFilter === 'expired' ? 'bg-amber-100 text-amber-700' :
@@ -3816,51 +3816,51 @@ const [passFormData, setPassFormData] = useState<PassFormData>({
               </span>
               <button
                 onClick={() => setPassFilter('all')}
-                className="text-sm text-emerald-600 hover:text-emerald-800"
+                className="text-sm text-accent-green hover:text-accent-green"
               >
                 Clear filter
               </button>
             </div>
           )}
 
-          <div className="bg-white rounded-xl shadow-lg overflow-hidden">
+          <div className="bg-white rounded-card shadow-card overflow-hidden">
             {passesLoading && passes.length === 0 ? (
-              <div className="p-8 text-center text-gray-500">Loading passes...</div>
+              <div className="p-8 text-center text-primary-600">Loading passes...</div>
             ) : passes.filter(p => passFilter === 'all' || p.status === passFilter).length === 0 ? (
               <div className="p-8 text-center">
-                <p className="text-gray-500 mb-2">
+                <p className="text-primary-600 mb-2">
                   {passFilter === 'all' ? 'No passes generated yet' : `No ${passFilter} passes`}
                 </p>
               </div>
             ) : (
               <table className="w-full">
-                <thead className="bg-emerald-50 border-b border-emerald-100">
+                <thead className="bg-primary-50 border-b border-emerald-100">
                   <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-emerald-700 uppercase">Pass #</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-emerald-700 uppercase">Type</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-emerald-700 uppercase">Name</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-emerald-700 uppercase">Valid</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-emerald-700 uppercase">Status</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-emerald-700 uppercase">Actions</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-accent-green uppercase">Pass #</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-accent-green uppercase">Type</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-accent-green uppercase">Name</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-accent-green uppercase">Valid</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-accent-green uppercase">Status</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-accent-green uppercase">Actions</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-200">
                   {passes.filter(p => passFilter === 'all' || p.status === passFilter).map(pass => (
-                    <tr key={pass.id} className="hover:bg-emerald-50/50">
-                      <td className="px-6 py-4 text-sm font-mono text-gray-900">{pass.pass_number}</td>
+                    <tr key={pass.id} className="hover:bg-primary-50/50">
+                      <td className="px-6 py-4 text-sm font-mono text-primary-900">{pass.pass_number}</td>
                       <td className="px-6 py-4">
                         <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${
                           pass.pass_type === 'recruitment' ? 'bg-blue-100 text-blue-700' :
-                          pass.pass_type === 'onboarding' ? 'bg-emerald-100 text-emerald-700' :
+                          pass.pass_type === 'onboarding' ? 'bg-accent-green/10 text-accent-green' :
                           pass.pass_type === 'visitor' ? 'bg-purple-100 text-purple-700' :
                           pass.pass_type === 'contractor' ? 'bg-orange-100 text-orange-700' :
-                          'bg-gray-100 text-gray-700'
+                          'bg-primary-100 text-primary-700'
                         }`}>
                           {pass.pass_type}
                         </span>
                       </td>
-                      <td className="px-6 py-4 text-sm text-gray-900">{pass.full_name}</td>
-                      <td className="px-6 py-4 text-sm text-gray-500">
+                      <td className="px-6 py-4 text-sm text-primary-900">{pass.full_name}</td>
+                      <td className="px-6 py-4 text-sm text-primary-600">
                         {pass.valid_from} to {pass.valid_until}
                       </td>
                       <td className="px-6 py-4">
@@ -3875,7 +3875,7 @@ const [passFormData, setPassFormData] = useState<PassFormData>({
                       <td className="px-6 py-4 flex gap-2">
                         <button
                           onClick={() => setViewingPass(pass)}
-                          className="text-emerald-600 hover:text-emerald-800 text-sm font-medium"
+                          className="text-accent-green hover:text-accent-green text-sm font-medium"
                         >
                           View
                         </button>
@@ -3898,12 +3898,12 @@ const [passFormData, setPassFormData] = useState<PassFormData>({
           {/* View Pass Modal */}
           {viewingPass && (
             <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-              <div className="bg-white rounded-2xl shadow-2xl p-6 w-full max-w-lg">
+              <div className="bg-white rounded-card shadow-card p-6 w-full max-w-lg">
                 <div className="flex items-center justify-between mb-6">
-                  <h2 className="text-xl font-semibold text-gray-800">Pass Details</h2>
+                  <h2 className="text-xl font-semibold text-primary-800">Pass Details</h2>
                   <button
                     onClick={() => setViewingPass(null)}
-                    className="text-gray-400 hover:text-gray-600"
+                    className="text-primary-300 hover:text-primary-600"
                   >
                     <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -3912,24 +3912,24 @@ const [passFormData, setPassFormData] = useState<PassFormData>({
                 </div>
                 
                 <div className="space-y-4">
-                  <div className="flex items-center justify-between p-4 bg-emerald-50 rounded-lg">
-                    <span className="text-sm text-gray-600">Pass Number</span>
-                    <span className="font-mono font-bold text-emerald-700">{viewingPass.pass_number}</span>
+                  <div className="flex items-center justify-between p-4 bg-primary-50 rounded-lg">
+                    <span className="text-sm text-primary-600">Pass Number</span>
+                    <span className="font-mono font-bold text-accent-green">{viewingPass.pass_number}</span>
                   </div>
                   
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <p className="text-sm text-gray-500">Full Name</p>
-                      <p className="font-medium text-gray-800">{viewingPass.full_name}</p>
+                      <p className="text-sm text-primary-600">Full Name</p>
+                      <p className="font-medium text-primary-800">{viewingPass.full_name}</p>
                     </div>
                     <div>
-                      <p className="text-sm text-gray-500">Pass Type</p>
+                      <p className="text-sm text-primary-600">Pass Type</p>
                       <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${
                         viewingPass.pass_type === 'recruitment' ? 'bg-blue-100 text-blue-700' :
-                        viewingPass.pass_type === 'onboarding' ? 'bg-emerald-100 text-emerald-700' :
+                        viewingPass.pass_type === 'onboarding' ? 'bg-accent-green/10 text-accent-green' :
                         viewingPass.pass_type === 'visitor' ? 'bg-purple-100 text-purple-700' :
                         viewingPass.pass_type === 'contractor' ? 'bg-orange-100 text-orange-700' :
-                        'bg-gray-100 text-gray-700'
+                        'bg-primary-100 text-primary-700'
                       }`}>
                         {viewingPass.pass_type}
                       </span>
@@ -3938,17 +3938,17 @@ const [passFormData, setPassFormData] = useState<PassFormData>({
 
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <p className="text-sm text-gray-500">Valid From</p>
-                      <p className="font-medium text-gray-800">{viewingPass.valid_from}</p>
+                      <p className="text-sm text-primary-600">Valid From</p>
+                      <p className="font-medium text-primary-800">{viewingPass.valid_from}</p>
                     </div>
                     <div>
-                      <p className="text-sm text-gray-500">Valid Until</p>
-                      <p className="font-medium text-gray-800">{viewingPass.valid_until}</p>
+                      <p className="text-sm text-primary-600">Valid Until</p>
+                      <p className="font-medium text-primary-800">{viewingPass.valid_until}</p>
                     </div>
                   </div>
 
                   <div>
-                    <p className="text-sm text-gray-500">Status</p>
+                    <p className="text-sm text-primary-600">Status</p>
                     <span className={`inline-flex px-3 py-1 text-sm font-medium rounded-full ${
                       viewingPass.status === 'active' ? 'bg-green-100 text-green-700' :
                       viewingPass.status === 'expired' ? 'bg-amber-100 text-amber-700' :
@@ -3973,7 +3973,7 @@ const [passFormData, setPassFormData] = useState<PassFormData>({
                   )}
                   <button
                     onClick={() => setViewingPass(null)}
-                    className="flex-1 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+                    className="flex-1 py-2 border border-primary-200 rounded-lg hover:bg-primary-50 transition-colors"
                   >
                     Close
                   </button>
@@ -3994,17 +3994,17 @@ const [passFormData, setPassFormData] = useState<PassFormData>({
                          activeSection === 'template-employee' ? 'employee' : null
 
     return (
-      <div className="min-h-screen bg-gray-100 p-8">
+      <div className="min-h-screen bg-primary-100 p-8">
         {loginModal}
         <div className="max-w-6xl mx-auto">
           <div className="flex items-center justify-between mb-6">
             <div>
               <img src="/assets/logo.png" alt="Baynunah" className="h-6 mb-1" />
-              <h1 className="text-2xl font-semibold text-gray-800">Pass Templates</h1>
+              <h1 className="text-2xl font-semibold text-primary-800">Pass Templates</h1>
             </div>
             <div className="flex items-center gap-4">
               {user && (
-                <span className="text-sm text-gray-600">
+                <span className="text-sm text-primary-600">
                   {user.name} ({user.role})
                 </span>
               )}
@@ -4023,7 +4023,7 @@ const [passFormData, setPassFormData] = useState<PassFormData>({
               {/* Manager Pass Card */}
               <button
                 onClick={() => setActiveSection('template-manager')}
-                className="bg-white rounded-xl shadow-lg p-6 text-left hover:shadow-xl transition-all border-l-4 border-blue-500"
+                className="bg-white rounded-card shadow-card p-6 text-left hover:shadow-card transition-all border-l-4 border-blue-500"
               >
                 <div className="flex items-start gap-4">
                   <div className="w-14 h-14 bg-blue-100 rounded-xl flex items-center justify-center flex-shrink-0">
@@ -4032,8 +4032,8 @@ const [passFormData, setPassFormData] = useState<PassFormData>({
                     </svg>
                   </div>
                   <div>
-                    <h3 className="text-lg font-semibold text-gray-800 mb-1">Manager Pass</h3>
-                    <p className="text-sm text-gray-500 mb-3">Recruitment governance, approvals, visibility, next actions</p>
+                    <h3 className="text-lg font-semibold text-primary-800 mb-1">Manager Pass</h3>
+                    <p className="text-sm text-primary-600 mb-3">Recruitment governance, approvals, visibility, next actions</p>
                     <div className="flex flex-wrap gap-2">
                       <span className="px-2 py-1 bg-blue-50 text-blue-600 text-xs rounded-full">Approvals</span>
                       <span className="px-2 py-1 bg-blue-50 text-blue-600 text-xs rounded-full">Pipeline</span>
@@ -4046,7 +4046,7 @@ const [passFormData, setPassFormData] = useState<PassFormData>({
               {/* Candidate Pass Card */}
               <button
                 onClick={() => setActiveSection('template-candidate')}
-                className="bg-white rounded-xl shadow-lg p-6 text-left hover:shadow-xl transition-all border-l-4 border-purple-500"
+                className="bg-white rounded-card shadow-card p-6 text-left hover:shadow-card transition-all border-l-4 border-purple-500"
               >
                 <div className="flex items-start gap-4">
                   <div className="w-14 h-14 bg-purple-100 rounded-xl flex items-center justify-center flex-shrink-0">
@@ -4055,8 +4055,8 @@ const [passFormData, setPassFormData] = useState<PassFormData>({
                     </svg>
                   </div>
                   <div>
-                    <h3 className="text-lg font-semibold text-gray-800 mb-1">Candidate Pass</h3>
-                    <p className="text-sm text-gray-500 mb-3">Candidate experience, HR visibility, recruitment timeline</p>
+                    <h3 className="text-lg font-semibold text-primary-800 mb-1">Candidate Pass</h3>
+                    <p className="text-sm text-primary-600 mb-3">Candidate experience, HR visibility, recruitment timeline</p>
                     <div className="flex flex-wrap gap-2">
                       <span className="px-2 py-1 bg-purple-50 text-purple-600 text-xs rounded-full">Stages</span>
                       <span className="px-2 py-1 bg-purple-50 text-purple-600 text-xs rounded-full">Timeline</span>
@@ -4069,21 +4069,21 @@ const [passFormData, setPassFormData] = useState<PassFormData>({
               {/* Onboarding Pass Card */}
               <button
                 onClick={() => setActiveSection('template-onboarding')}
-                className="bg-white rounded-xl shadow-lg p-6 text-left hover:shadow-xl transition-all border-l-4 border-emerald-500"
+                className="bg-white rounded-card shadow-card p-6 text-left hover:shadow-card transition-all border-l-4 border-emerald-500"
               >
                 <div className="flex items-start gap-4">
-                  <div className="w-14 h-14 bg-emerald-100 rounded-xl flex items-center justify-center flex-shrink-0">
-                    <svg className="w-7 h-7 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <div className="w-14 h-14 bg-accent-green/10 rounded-xl flex items-center justify-center flex-shrink-0">
+                    <svg className="w-7 h-7 text-accent-green" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
                     </svg>
                   </div>
                   <div>
-                    <h3 className="text-lg font-semibold text-gray-800 mb-1">Onboarding Pass</h3>
-                    <p className="text-sm text-gray-500 mb-3">Post-offer acceptance, new joiner checklist, document collection</p>
+                    <h3 className="text-lg font-semibold text-primary-800 mb-1">Onboarding Pass</h3>
+                    <p className="text-sm text-primary-600 mb-3">Post-offer acceptance, new joiner checklist, document collection</p>
                     <div className="flex flex-wrap gap-2">
-                      <span className="px-2 py-1 bg-emerald-50 text-emerald-600 text-xs rounded-full">Checklist</span>
-                      <span className="px-2 py-1 bg-emerald-50 text-emerald-600 text-xs rounded-full">Documents</span>
-                      <span className="px-2 py-1 bg-emerald-50 text-emerald-600 text-xs rounded-full">Setup</span>
+                      <span className="px-2 py-1 bg-primary-50 text-accent-green text-xs rounded-full">Checklist</span>
+                      <span className="px-2 py-1 bg-primary-50 text-accent-green text-xs rounded-full">Documents</span>
+                      <span className="px-2 py-1 bg-primary-50 text-accent-green text-xs rounded-full">Setup</span>
                     </div>
                   </div>
                 </div>
@@ -4092,7 +4092,7 @@ const [passFormData, setPassFormData] = useState<PassFormData>({
               {/* Employee Pass Card */}
               <button
                 onClick={() => setActiveSection('template-employee')}
-                className="bg-white rounded-xl shadow-lg p-6 text-left hover:shadow-xl transition-all border-l-4 border-amber-500"
+                className="bg-white rounded-card shadow-card p-6 text-left hover:shadow-card transition-all border-l-4 border-amber-500"
               >
                 <div className="flex items-start gap-4">
                   <div className="w-14 h-14 bg-amber-100 rounded-xl flex items-center justify-center flex-shrink-0">
@@ -4101,8 +4101,8 @@ const [passFormData, setPassFormData] = useState<PassFormData>({
                     </svg>
                   </div>
                   <div>
-                    <h3 className="text-lg font-semibold text-gray-800 mb-1">Employee Pass</h3>
-                    <p className="text-sm text-gray-500 mb-3">Living digital identity for the employee lifecycle</p>
+                    <h3 className="text-lg font-semibold text-primary-800 mb-1">Employee Pass</h3>
+                    <p className="text-sm text-primary-600 mb-3">Living digital identity for the employee lifecycle</p>
                     <div className="flex flex-wrap gap-2">
                       <span className="px-2 py-1 bg-amber-50 text-amber-600 text-xs rounded-full">Profile</span>
                       <span className="px-2 py-1 bg-amber-50 text-amber-600 text-xs rounded-full">Requests</span>
@@ -4118,7 +4118,7 @@ const [passFormData, setPassFormData] = useState<PassFormData>({
           {templateType === 'manager' && (
             <div className="space-y-6">
               {/* Pass Preview Card */}
-              <div className="bg-white rounded-2xl shadow-xl overflow-hidden max-w-md mx-auto">
+              <div className="bg-white rounded-2xl shadow-card overflow-hidden max-w-md mx-auto">
                 {/* Header */}
                 <div className="bg-gradient-to-r from-blue-600 to-blue-700 p-6 text-white">
                   <div className="flex items-start justify-between">
@@ -4135,7 +4135,7 @@ const [passFormData, setPassFormData] = useState<PassFormData>({
                       </div>
                     </div>
                     <div className="w-16 h-16 bg-white rounded-lg flex items-center justify-center">
-                      <svg className="w-12 h-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <svg className="w-12 h-12 text-primary-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" />
                       </svg>
                     </div>
@@ -4148,41 +4148,41 @@ const [passFormData, setPassFormData] = useState<PassFormData>({
 
                 {/* Recruitment Overview */}
                 <div className="p-4 border-b">
-                  <h4 className="text-sm font-semibold text-gray-500 uppercase mb-3">Recruitment Overview</h4>
+                  <h4 className="text-sm font-semibold text-primary-600 uppercase mb-3">Recruitment Overview</h4>
                   <div className="grid grid-cols-2 gap-3">
-                    <div className="p-3 bg-gray-50 rounded-lg">
-                      <p className="text-xs text-gray-500">Position</p>
-                      <p className="font-medium text-gray-800">[Position Title]</p>
+                    <div className="p-3 bg-primary-50 rounded-lg">
+                      <p className="text-xs text-primary-600">Position</p>
+                      <p className="font-medium text-primary-800">[Position Title]</p>
                     </div>
-                    <div className="p-3 bg-gray-50 rounded-lg">
-                      <p className="text-xs text-gray-500">Status</p>
+                    <div className="p-3 bg-primary-50 rounded-lg">
+                      <p className="text-xs text-primary-600">Status</p>
                       <span className="px-2 py-0.5 bg-green-100 text-green-700 text-xs rounded-full">Open</span>
                     </div>
-                    <div className="p-3 bg-gray-50 rounded-lg">
-                      <p className="text-xs text-gray-500">SLA Days</p>
-                      <p className="font-medium text-gray-800">[X] days</p>
+                    <div className="p-3 bg-primary-50 rounded-lg">
+                      <p className="text-xs text-primary-600">SLA Days</p>
+                      <p className="font-medium text-primary-800">[X] days</p>
                     </div>
-                    <div className="p-3 bg-gray-50 rounded-lg">
-                      <p className="text-xs text-gray-500">Pipeline</p>
-                      <p className="font-medium text-gray-800">[X] candidates</p>
+                    <div className="p-3 bg-primary-50 rounded-lg">
+                      <p className="text-xs text-primary-600">Pipeline</p>
+                      <p className="font-medium text-primary-800">[X] candidates</p>
                     </div>
                   </div>
                 </div>
 
                 {/* Approvals Block */}
                 <div className="p-4 border-b">
-                  <h4 className="text-sm font-semibold text-gray-500 uppercase mb-3">Approvals</h4>
+                  <h4 className="text-sm font-semibold text-primary-600 uppercase mb-3">Approvals</h4>
                   <div className="space-y-2">
                     <div className="flex items-center justify-between p-2 bg-amber-50 rounded-lg">
-                      <span className="text-sm text-gray-700">Job Requisition</span>
+                      <span className="text-sm text-primary-700">Job Requisition</span>
                       <span className="px-2 py-0.5 bg-amber-100 text-amber-700 text-xs rounded-full">Pending</span>
                     </div>
                     <div className="flex items-center justify-between p-2 bg-green-50 rounded-lg">
-                      <span className="text-sm text-gray-700">Budget/Salary</span>
+                      <span className="text-sm text-primary-700">Budget/Salary</span>
                       <span className="px-2 py-0.5 bg-green-100 text-green-700 text-xs rounded-full">Approved</span>
                     </div>
-                    <div className="flex items-center justify-between p-2 bg-gray-50 rounded-lg">
-                      <span className="text-sm text-gray-700">Offer Approval</span>
+                    <div className="flex items-center justify-between p-2 bg-primary-50 rounded-lg">
+                      <span className="text-sm text-primary-700">Offer Approval</span>
                       <span className="px-2 py-0.5 bg-slate-200 text-slate-900 text-xs rounded-full">Not Started</span>
                     </div>
                   </div>
@@ -4190,44 +4190,44 @@ const [passFormData, setPassFormData] = useState<PassFormData>({
 
                 {/* Pipeline Snapshot */}
                 <div className="p-4 border-b">
-                  <h4 className="text-sm font-semibold text-gray-500 uppercase mb-3">Pipeline Snapshot</h4>
+                  <h4 className="text-sm font-semibold text-primary-600 uppercase mb-3">Pipeline Snapshot</h4>
                   <div className="flex items-center justify-between">
                     <div className="text-center">
                       <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-1">
                         <span className="text-blue-600 font-bold text-sm">5</span>
                       </div>
-                      <p className="text-xs text-gray-500">Screen</p>
+                      <p className="text-xs text-primary-600">Screen</p>
                     </div>
                     <div className="text-center">
                       <div className="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-1">
                         <span className="text-purple-600 font-bold text-sm">3</span>
                       </div>
-                      <p className="text-xs text-gray-500">Assess</p>
+                      <p className="text-xs text-primary-600">Assess</p>
                     </div>
                     <div className="text-center">
                       <div className="w-10 h-10 bg-amber-100 rounded-full flex items-center justify-center mx-auto mb-1">
                         <span className="text-amber-600 font-bold text-sm">2</span>
                       </div>
-                      <p className="text-xs text-gray-500">Interview</p>
+                      <p className="text-xs text-primary-600">Interview</p>
                     </div>
                     <div className="text-center">
-                      <div className="w-10 h-10 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-1">
-                        <span className="text-emerald-600 font-bold text-sm">1</span>
+                      <div className="w-10 h-10 bg-accent-green/10 rounded-full flex items-center justify-center mx-auto mb-1">
+                        <span className="text-accent-green font-bold text-sm">1</span>
                       </div>
-                      <p className="text-xs text-gray-500">Offer</p>
+                      <p className="text-xs text-primary-600">Offer</p>
                     </div>
                     <div className="text-center">
-                      <div className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-1">
-                        <span className="text-gray-600 font-bold text-sm">0</span>
+                      <div className="w-10 h-10 bg-primary-100 rounded-full flex items-center justify-center mx-auto mb-1">
+                        <span className="text-primary-600 font-bold text-sm">0</span>
                       </div>
-                      <p className="text-xs text-gray-500">Onboard</p>
+                      <p className="text-xs text-primary-600">Onboard</p>
                     </div>
                   </div>
                 </div>
 
                 {/* Next Actions */}
                 <div className="p-4">
-                  <h4 className="text-sm font-semibold text-gray-500 uppercase mb-3">Next Actions</h4>
+                  <h4 className="text-sm font-semibold text-primary-600 uppercase mb-3">Next Actions</h4>
                   <div className="space-y-2">
                     <button className="w-full p-3 bg-blue-50 text-blue-700 rounded-lg text-sm font-medium hover:bg-blue-100 transition-colors text-left flex items-center gap-2">
                       <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -4235,7 +4235,7 @@ const [passFormData, setPassFormData] = useState<PassFormData>({
                       </svg>
                       Approve Pending Items
                     </button>
-                    <button className="w-full p-3 bg-gray-50 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-100 transition-colors text-left flex items-center gap-2">
+                    <button className="w-full p-3 bg-primary-50 text-primary-700 rounded-lg text-sm font-medium hover:bg-primary-100 transition-colors text-left flex items-center gap-2">
                       <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
                       </svg>
@@ -4256,7 +4256,7 @@ const [passFormData, setPassFormData] = useState<PassFormData>({
           {/* Candidate Pass Template */}
           {templateType === 'candidate' && (
             <div className="space-y-6">
-              <div className="bg-white rounded-2xl shadow-xl overflow-hidden max-w-md mx-auto">
+              <div className="bg-white rounded-2xl shadow-card overflow-hidden max-w-md mx-auto">
                 {/* Header */}
                 <div className="bg-gradient-to-r from-purple-600 to-purple-700 p-6 text-white">
                   <div className="flex items-start justify-between">
@@ -4273,7 +4273,7 @@ const [passFormData, setPassFormData] = useState<PassFormData>({
                       </div>
                     </div>
                     <div className="w-16 h-16 bg-white rounded-lg flex items-center justify-center">
-                      <svg className="w-12 h-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <svg className="w-12 h-12 text-primary-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" />
                       </svg>
                     </div>
@@ -4294,7 +4294,7 @@ const [passFormData, setPassFormData] = useState<PassFormData>({
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>
                     Email HR
                   </button>
-                  <button className="flex-1 p-2 bg-gray-50 text-gray-700 rounded-lg text-xs font-medium flex items-center justify-center gap-1">
+                  <button className="flex-1 p-2 bg-primary-50 text-primary-700 rounded-lg text-xs font-medium flex items-center justify-center gap-1">
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
                     Download JD
                   </button>
@@ -4302,60 +4302,60 @@ const [passFormData, setPassFormData] = useState<PassFormData>({
 
                 {/* Stage Panel */}
                 <div className="p-4 border-b">
-                  <h4 className="text-sm font-semibold text-gray-500 uppercase mb-3">Recruitment Stages</h4>
+                  <h4 className="text-sm font-semibold text-primary-600 uppercase mb-3">Recruitment Stages</h4>
                   <div className="space-y-2">
                     <div className="flex items-center gap-3 p-2 bg-green-50 rounded-lg">
                       <div className="w-6 h-6 bg-green-500 rounded-full flex items-center justify-center">
                         <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
                       </div>
-                      <span className="text-sm text-gray-700 flex-1">Application Received</span>
-                      <span className="text-xs text-gray-500">Jan 15</span>
+                      <span className="text-sm text-primary-700 flex-1">Application Received</span>
+                      <span className="text-xs text-primary-600">Jan 15</span>
                     </div>
                     <div className="flex items-center gap-3 p-2 bg-green-50 rounded-lg">
                       <div className="w-6 h-6 bg-green-500 rounded-full flex items-center justify-center">
                         <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
                       </div>
-                      <span className="text-sm text-gray-700 flex-1">Screening</span>
-                      <span className="text-xs text-gray-500">Jan 18</span>
+                      <span className="text-sm text-primary-700 flex-1">Screening</span>
+                      <span className="text-xs text-primary-600">Jan 18</span>
                     </div>
                     <div className="flex items-center gap-3 p-2 bg-green-50 rounded-lg">
                       <div className="w-6 h-6 bg-green-500 rounded-full flex items-center justify-center">
                         <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
                       </div>
-                      <span className="text-sm text-gray-700 flex-1">Assessment</span>
-                      <span className="text-xs text-gray-500">Jan 22</span>
+                      <span className="text-sm text-primary-700 flex-1">Assessment</span>
+                      <span className="text-xs text-primary-600">Jan 22</span>
                     </div>
                     <div className="flex items-center gap-3 p-2 bg-amber-50 rounded-lg">
                       <div className="w-6 h-6 bg-amber-500 rounded-full flex items-center justify-center">
                         <span className="text-white text-xs font-bold">4</span>
                       </div>
-                      <span className="text-sm text-gray-700 flex-1 font-medium">Interview</span>
+                      <span className="text-sm text-primary-700 flex-1 font-medium">Interview</span>
                       <span className="px-2 py-0.5 bg-amber-100 text-amber-700 text-xs rounded-full">In Progress</span>
                     </div>
-                    <div className="flex items-center gap-3 p-2 bg-gray-50 rounded-lg opacity-60">
-                      <div className="w-6 h-6 bg-gray-300 rounded-full flex items-center justify-center">
+                    <div className="flex items-center gap-3 p-2 bg-primary-50 rounded-lg opacity-60">
+                      <div className="w-6 h-6 bg-primary-300 rounded-full flex items-center justify-center">
                         <span className="text-white text-xs font-bold">5</span>
                       </div>
-                      <span className="text-sm text-gray-500 flex-1">Offer</span>
+                      <span className="text-sm text-primary-600 flex-1">Offer</span>
                     </div>
-                    <div className="flex items-center gap-3 p-2 bg-gray-50 rounded-lg opacity-60">
-                      <div className="w-6 h-6 bg-gray-300 rounded-full flex items-center justify-center">
+                    <div className="flex items-center gap-3 p-2 bg-primary-50 rounded-lg opacity-60">
+                      <div className="w-6 h-6 bg-primary-300 rounded-full flex items-center justify-center">
                         <span className="text-white text-xs font-bold">6</span>
                       </div>
-                      <span className="text-sm text-gray-500 flex-1">Onboarding</span>
+                      <span className="text-sm text-primary-600 flex-1">Onboarding</span>
                     </div>
                   </div>
                 </div>
 
                 {/* Next Actions */}
                 <div className="p-4">
-                  <h4 className="text-sm font-semibold text-gray-500 uppercase mb-3">Next Actions</h4>
+                  <h4 className="text-sm font-semibold text-primary-600 uppercase mb-3">Next Actions</h4>
                   <div className="space-y-2">
                     <button className="w-full p-3 bg-purple-50 text-purple-700 rounded-lg text-sm font-medium hover:bg-purple-100 transition-colors text-left flex items-center gap-2">
                       <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
                       Attend Interview
                     </button>
-                    <button className="w-full p-3 bg-gray-50 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-100 transition-colors text-left flex items-center gap-2">
+                    <button className="w-full p-3 bg-primary-50 text-primary-700 rounded-lg text-sm font-medium hover:bg-primary-100 transition-colors text-left flex items-center gap-2">
                       <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
                       Submit Documents
                     </button>
@@ -4373,7 +4373,7 @@ const [passFormData, setPassFormData] = useState<PassFormData>({
           {/* Onboarding Pass Template */}
           {templateType === 'onboarding' && (
             <div className="space-y-6">
-              <div className="bg-white rounded-2xl shadow-xl overflow-hidden max-w-md mx-auto">
+              <div className="bg-white rounded-2xl shadow-card overflow-hidden max-w-md mx-auto">
                 {/* Header */}
                 <div className="bg-gradient-to-r from-emerald-600 to-emerald-700 p-6 text-white">
                   <div className="flex items-start justify-between">
@@ -4390,7 +4390,7 @@ const [passFormData, setPassFormData] = useState<PassFormData>({
                       </div>
                     </div>
                     <div className="w-16 h-16 bg-white rounded-lg flex items-center justify-center">
-                      <svg className="w-12 h-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <svg className="w-12 h-12 text-primary-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" />
                       </svg>
                     </div>
@@ -4403,70 +4403,70 @@ const [passFormData, setPassFormData] = useState<PassFormData>({
 
                 {/* Onboarding Checklist */}
                 <div className="p-4 border-b">
-                  <h4 className="text-sm font-semibold text-gray-500 uppercase mb-3">Onboarding Checklist</h4>
+                  <h4 className="text-sm font-semibold text-primary-600 uppercase mb-3">Onboarding Checklist</h4>
                   <div className="space-y-2">
                     <div className="flex items-center gap-3 p-2 bg-green-50 rounded-lg">
                       <div className="w-6 h-6 bg-green-500 rounded-full flex items-center justify-center">
                         <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
                       </div>
-                      <span className="text-sm text-gray-700 flex-1">Document Collection</span>
-                      <span className="text-xs text-gray-500">By HR</span>
+                      <span className="text-sm text-primary-700 flex-1">Document Collection</span>
+                      <span className="text-xs text-primary-600">By HR</span>
                     </div>
                     <div className="flex items-center gap-3 p-2 bg-amber-50 rounded-lg">
                       <div className="w-6 h-6 bg-amber-500 rounded-full flex items-center justify-center">
                         <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
                       </div>
-                      <span className="text-sm text-gray-700 flex-1 font-medium">Visa / Clearance</span>
+                      <span className="text-sm text-primary-700 flex-1 font-medium">Visa / Clearance</span>
                       <span className="px-2 py-0.5 bg-amber-100 text-amber-700 text-xs rounded-full">Pending</span>
                     </div>
-                    <div className="flex items-center gap-3 p-2 bg-gray-50 rounded-lg opacity-70">
-                      <div className="w-6 h-6 bg-gray-300 rounded-full flex items-center justify-center">
+                    <div className="flex items-center gap-3 p-2 bg-primary-50 rounded-lg opacity-70">
+                      <div className="w-6 h-6 bg-primary-300 rounded-full flex items-center justify-center">
                         <span className="text-white text-xs">3</span>
                       </div>
-                      <span className="text-sm text-gray-500 flex-1">Medical</span>
+                      <span className="text-sm text-primary-600 flex-1">Medical</span>
                     </div>
-                    <div className="flex items-center gap-3 p-2 bg-gray-50 rounded-lg opacity-70">
-                      <div className="w-6 h-6 bg-gray-300 rounded-full flex items-center justify-center">
+                    <div className="flex items-center gap-3 p-2 bg-primary-50 rounded-lg opacity-70">
+                      <div className="w-6 h-6 bg-primary-300 rounded-full flex items-center justify-center">
                         <span className="text-white text-xs">4</span>
                       </div>
-                      <span className="text-sm text-gray-500 flex-1">IT Setup</span>
+                      <span className="text-sm text-primary-600 flex-1">IT Setup</span>
                     </div>
-                    <div className="flex items-center gap-3 p-2 bg-gray-50 rounded-lg opacity-70">
-                      <div className="w-6 h-6 bg-gray-300 rounded-full flex items-center justify-center">
+                    <div className="flex items-center gap-3 p-2 bg-primary-50 rounded-lg opacity-70">
+                      <div className="w-6 h-6 bg-primary-300 rounded-full flex items-center justify-center">
                         <span className="text-white text-xs">5</span>
                       </div>
-                      <span className="text-sm text-gray-500 flex-1">Induction Schedule</span>
+                      <span className="text-sm text-primary-600 flex-1">Induction Schedule</span>
                     </div>
-                    <div className="flex items-center gap-3 p-2 bg-gray-50 rounded-lg opacity-70">
-                      <div className="w-6 h-6 bg-gray-300 rounded-full flex items-center justify-center">
+                    <div className="flex items-center gap-3 p-2 bg-primary-50 rounded-lg opacity-70">
+                      <div className="w-6 h-6 bg-primary-300 rounded-full flex items-center justify-center">
                         <span className="text-white text-xs">6</span>
                       </div>
-                      <span className="text-sm text-gray-500 flex-1">Insurance Activation</span>
+                      <span className="text-sm text-primary-600 flex-1">Insurance Activation</span>
                     </div>
-                    <div className="flex items-center gap-3 p-2 bg-gray-50 rounded-lg opacity-70">
-                      <div className="w-6 h-6 bg-gray-300 rounded-full flex items-center justify-center">
+                    <div className="flex items-center gap-3 p-2 bg-primary-50 rounded-lg opacity-70">
+                      <div className="w-6 h-6 bg-primary-300 rounded-full flex items-center justify-center">
                         <span className="text-white text-xs">7</span>
                       </div>
-                      <span className="text-sm text-gray-500 flex-1">Bank Setup</span>
+                      <span className="text-sm text-primary-600 flex-1">Bank Setup</span>
                     </div>
-                    <div className="flex items-center gap-3 p-2 bg-gray-50 rounded-lg opacity-70">
-                      <div className="w-6 h-6 bg-gray-300 rounded-full flex items-center justify-center">
+                    <div className="flex items-center gap-3 p-2 bg-primary-50 rounded-lg opacity-70">
+                      <div className="w-6 h-6 bg-primary-300 rounded-full flex items-center justify-center">
                         <span className="text-white text-xs">8</span>
                       </div>
-                      <span className="text-sm text-gray-500 flex-1">Attendance Registration</span>
+                      <span className="text-sm text-primary-600 flex-1">Attendance Registration</span>
                     </div>
                   </div>
                 </div>
 
                 {/* Next Actions */}
                 <div className="p-4">
-                  <h4 className="text-sm font-semibold text-gray-500 uppercase mb-3">Next Actions</h4>
+                  <h4 className="text-sm font-semibold text-primary-600 uppercase mb-3">Next Actions</h4>
                   <div className="space-y-2">
-                    <button className="w-full p-3 bg-emerald-50 text-emerald-700 rounded-lg text-sm font-medium hover:bg-emerald-100 transition-colors text-left flex items-center gap-2">
+                    <button className="w-full p-3 bg-primary-50 text-accent-green rounded-lg text-sm font-medium hover:bg-primary-100 transition-colors text-left flex items-center gap-2">
                       <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" /></svg>
                       Upload Document
                     </button>
-                    <button className="w-full p-3 bg-gray-50 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-100 transition-colors text-left flex items-center gap-2">
+                    <button className="w-full p-3 bg-primary-50 text-primary-700 rounded-lg text-sm font-medium hover:bg-primary-100 transition-colors text-left flex items-center gap-2">
                       <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
                       Acknowledge Policies
                     </button>
@@ -4474,9 +4474,9 @@ const [passFormData, setPassFormData] = useState<PassFormData>({
                 </div>
               </div>
 
-              <div className="bg-emerald-50 rounded-xl p-6 max-w-md mx-auto">
-                <h4 className="font-semibold text-emerald-800 mb-2">Onboarding Pass Template</h4>
-                <p className="text-sm text-emerald-700">This template is used after offer acceptance to track new joiner onboarding progress including documents, visa, IT setup, and induction scheduling.</p>
+              <div className="bg-primary-50 rounded-xl p-6 max-w-md mx-auto">
+                <h4 className="font-semibold text-accent-green mb-2">Onboarding Pass Template</h4>
+                <p className="text-sm text-accent-green">This template is used after offer acceptance to track new joiner onboarding progress including documents, visa, IT setup, and induction scheduling.</p>
               </div>
             </div>
           )}
@@ -4484,7 +4484,7 @@ const [passFormData, setPassFormData] = useState<PassFormData>({
           {/* Employee Pass Template */}
           {templateType === 'employee' && (
             <div className="space-y-6">
-              <div className="bg-white rounded-2xl shadow-xl overflow-hidden max-w-md mx-auto">
+              <div className="bg-white rounded-2xl shadow-card overflow-hidden max-w-md mx-auto">
                 {/* Header */}
                 <div className="bg-gradient-to-r from-amber-500 to-amber-600 p-6 text-white">
                   <div className="flex items-start justify-between">
@@ -4501,7 +4501,7 @@ const [passFormData, setPassFormData] = useState<PassFormData>({
                       </div>
                     </div>
                     <div className="w-16 h-16 bg-white rounded-lg flex items-center justify-center">
-                      <svg className="w-12 h-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <svg className="w-12 h-12 text-primary-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" />
                       </svg>
                     </div>
@@ -4514,7 +4514,7 @@ const [passFormData, setPassFormData] = useState<PassFormData>({
 
                 {/* Quick Actions */}
                 <div className="p-4 border-b">
-                  <h4 className="text-sm font-semibold text-gray-500 uppercase mb-3">Quick Actions</h4>
+                  <h4 className="text-sm font-semibold text-primary-600 uppercase mb-3">Quick Actions</h4>
                   <div className="grid grid-cols-3 gap-2">
                     <button className="p-3 bg-green-50 text-green-700 rounded-lg text-xs font-medium flex flex-col items-center gap-1 hover:bg-green-100">
                       <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981z"/></svg>
@@ -4532,11 +4532,11 @@ const [passFormData, setPassFormData] = useState<PassFormData>({
                       <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
                       Documents
                     </button>
-                    <button className="p-3 bg-emerald-50 text-emerald-700 rounded-lg text-xs font-medium flex flex-col items-center gap-1 hover:bg-emerald-100">
+                    <button className="p-3 bg-primary-50 text-accent-green rounded-lg text-xs font-medium flex flex-col items-center gap-1 hover:bg-primary-100">
                       <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
                       Leave
                     </button>
-                    <button className="p-3 bg-gray-50 text-gray-700 rounded-lg text-xs font-medium flex flex-col items-center gap-1 hover:bg-gray-100">
+                    <button className="p-3 bg-primary-50 text-primary-700 rounded-lg text-xs font-medium flex flex-col items-center gap-1 hover:bg-primary-100">
                       <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" /></svg>
                       Bank Details
                     </button>
@@ -4545,42 +4545,42 @@ const [passFormData, setPassFormData] = useState<PassFormData>({
 
                 {/* Profile Snapshot */}
                 <div className="p-4 border-b">
-                  <h4 className="text-sm font-semibold text-gray-500 uppercase mb-3">Profile Snapshot</h4>
+                  <h4 className="text-sm font-semibold text-primary-600 uppercase mb-3">Profile Snapshot</h4>
                   <div className="grid grid-cols-2 gap-3">
-                    <div className="p-3 bg-gray-50 rounded-lg">
-                      <p className="text-xs text-gray-500">Join Date</p>
-                      <p className="font-medium text-gray-800">[DD/MM/YYYY]</p>
+                    <div className="p-3 bg-primary-50 rounded-lg">
+                      <p className="text-xs text-primary-600">Join Date</p>
+                      <p className="font-medium text-primary-800">[DD/MM/YYYY]</p>
                     </div>
-                    <div className="p-3 bg-gray-50 rounded-lg">
-                      <p className="text-xs text-gray-500">Visa Expiry</p>
-                      <p className="font-medium text-gray-800">[DD/MM/YYYY]</p>
+                    <div className="p-3 bg-primary-50 rounded-lg">
+                      <p className="text-xs text-primary-600">Visa Expiry</p>
+                      <p className="font-medium text-primary-800">[DD/MM/YYYY]</p>
                     </div>
-                    <div className="p-3 bg-gray-50 rounded-lg">
-                      <p className="text-xs text-gray-500">Insurance Plan</p>
-                      <p className="font-medium text-gray-800">[Plan Name]</p>
+                    <div className="p-3 bg-primary-50 rounded-lg">
+                      <p className="text-xs text-primary-600">Insurance Plan</p>
+                      <p className="font-medium text-primary-800">[Plan Name]</p>
                     </div>
-                    <div className="p-3 bg-gray-50 rounded-lg">
-                      <p className="text-xs text-gray-500">Work Schedule</p>
-                      <p className="font-medium text-gray-800">5 days/week</p>
+                    <div className="p-3 bg-primary-50 rounded-lg">
+                      <p className="text-xs text-primary-600">Work Schedule</p>
+                      <p className="font-medium text-primary-800">5 days/week</p>
                     </div>
                   </div>
                 </div>
 
                 {/* Current Requests */}
                 <div className="p-4">
-                  <h4 className="text-sm font-semibold text-gray-500 uppercase mb-3">Current Requests</h4>
+                  <h4 className="text-sm font-semibold text-primary-600 uppercase mb-3">Current Requests</h4>
                   <div className="space-y-2">
                     <div className="flex items-center justify-between p-3 bg-amber-50 rounded-lg">
                       <div className="flex items-center gap-2">
                         <svg className="w-4 h-4 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
-                        <span className="text-sm text-gray-700">Leave Request</span>
+                        <span className="text-sm text-primary-700">Leave Request</span>
                       </div>
                       <span className="px-2 py-0.5 bg-amber-100 text-amber-700 text-xs rounded-full">Pending</span>
                     </div>
                     <div className="flex items-center justify-between p-3 bg-green-50 rounded-lg">
                       <div className="flex items-center gap-2">
                         <svg className="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
-                        <span className="text-sm text-gray-700">Document Request</span>
+                        <span className="text-sm text-primary-700">Document Request</span>
                       </div>
                       <span className="px-2 py-0.5 bg-green-100 text-green-700 text-xs rounded-full">Completed</span>
                     </div>
@@ -4666,23 +4666,23 @@ const [passFormData, setPassFormData] = useState<PassFormData>({
     const recruitmentTab = activeSection === 'recruitment-benefits' ? 'benefits' : 'request'
     
     return (
-      <div className="min-h-screen bg-gray-100 p-8">
+      <div className="min-h-screen bg-primary-100 p-8">
         {loginModal}
         <div className="max-w-6xl mx-auto">
           <div className="flex items-center justify-between mb-6">
             <div>
               <img src="/assets/logo.png" alt="Baynunah" className="h-6 mb-1" />
-              <h1 className="text-2xl font-semibold text-gray-800">Recruitment</h1>
+              <h1 className="text-2xl font-semibold text-primary-800">Recruitment</h1>
             </div>
             <div className="flex items-center gap-4">
               {user && (
-                <span className="text-sm text-gray-600">
+                <span className="text-sm text-primary-600">
                   {user.name} ({user.role})
                 </span>
               )}
               <button
                 onClick={() => handleNavigate('home')}
-                className="px-4 py-2 text-emerald-600 hover:bg-emerald-50 rounded-lg transition-colors"
+                className="px-4 py-2 text-accent-green hover:bg-primary-50 rounded-lg transition-colors"
               >
                 ← Back to Home
               </button>
@@ -4695,8 +4695,8 @@ const [passFormData, setPassFormData] = useState<PassFormData>({
               onClick={() => setActiveSection('recruitment-request')}
               className={`px-6 py-3 rounded-lg font-medium transition-all ${
                 recruitmentTab === 'request'
-                  ? 'bg-purple-500 text-white shadow-md'
-                  : 'bg-white text-gray-600 hover:bg-purple-50'
+                  ? 'bg-primary-800 text-white shadow-card'
+                  : 'bg-white text-primary-600 hover:bg-primary-50'
               }`}
             >
               <div className="flex items-center gap-2">
@@ -4710,8 +4710,8 @@ const [passFormData, setPassFormData] = useState<PassFormData>({
               onClick={() => setActiveSection('recruitment-benefits')}
               className={`px-6 py-3 rounded-lg font-medium transition-all ${
                 recruitmentTab === 'benefits'
-                  ? 'bg-purple-500 text-white shadow-md'
-                  : 'bg-white text-gray-600 hover:bg-purple-50'
+                  ? 'bg-primary-800 text-white shadow-card'
+                  : 'bg-white text-primary-600 hover:bg-primary-50'
               }`}
             >
               <div className="flex items-center gap-2">
@@ -4725,28 +4725,28 @@ const [passFormData, setPassFormData] = useState<PassFormData>({
 
           {/* Request Tab Content */}
           {recruitmentTab === 'request' && (
-            <div className="bg-white rounded-xl shadow-lg p-8">
+            <div className="bg-white rounded-card shadow-card p-8">
               <div className="text-center py-12">
                 <svg className="w-16 h-16 text-purple-200 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                 </svg>
-                <h3 className="text-xl font-semibold text-gray-800 mb-2">Recruitment Requests</h3>
-                <p className="text-gray-500 mb-6">Manage job requisitions and hiring requests</p>
-                <p className="text-sm text-gray-400">Coming soon - this section will allow you to submit and track recruitment requests</p>
+                <h3 className="text-xl font-semibold text-primary-800 mb-2">Recruitment Requests</h3>
+                <p className="text-primary-600 mb-6">Manage job requisitions and hiring requests</p>
+                <p className="text-sm text-primary-300">Coming soon - this section will allow you to submit and track recruitment requests</p>
               </div>
             </div>
           )}
 
           {/* Benefits Tab Content */}
           {recruitmentTab === 'benefits' && (
-            <div className="bg-white rounded-xl shadow-lg p-8">
+            <div className="bg-white rounded-card shadow-card p-8">
               <div className="text-center py-12">
                 <svg className="w-16 h-16 text-purple-200 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
-                <h3 className="text-xl font-semibold text-gray-800 mb-2">Benefits Information</h3>
-                <p className="text-gray-500 mb-6">View and manage employee benefits packages</p>
-                <p className="text-sm text-gray-400">Coming soon - this section will display benefits details for candidates and employees</p>
+                <h3 className="text-xl font-semibold text-primary-800 mb-2">Benefits Information</h3>
+                <p className="text-primary-600 mb-6">View and manage employee benefits packages</p>
+                <p className="text-sm text-primary-300">Coming soon - this section will display benefits details for candidates and employees</p>
               </div>
             </div>
           )}
@@ -4759,14 +4759,14 @@ const [passFormData, setPassFormData] = useState<PassFormData>({
   if (activeSection === 'onboarding') {
     if (!user || (user.role !== 'admin' && user.role !== 'hr')) {
       return (
-        <div className="min-h-screen bg-gray-100 flex flex-col items-center justify-center p-8">
+        <div className="min-h-screen bg-primary-100 flex flex-col items-center justify-center p-8">
           {loginModal}
-          <div className="bg-white rounded-2xl shadow-lg p-8 max-w-md text-center">
-            <h2 className="text-xl font-semibold text-gray-800 mb-4">Access Required</h2>
-            <p className="text-gray-600 mb-6">Please sign in with HR or Admin access.</p>
+          <div className="bg-white rounded-2xl shadow-card p-8 max-w-md text-center">
+            <h2 className="text-xl font-semibold text-primary-800 mb-4">Access Required</h2>
+            <p className="text-primary-600 mb-6">Please sign in with HR or Admin access.</p>
             <button
               onClick={() => handleNavigate('home')}
-              className="px-6 py-2 bg-emerald-500 text-white rounded-lg hover:bg-emerald-600 transition-colors"
+              className="px-6 py-2 bg-accent-green text-white rounded-lg hover:bg-accent-green transition-colors"
             >
               Back to Home
             </button>
@@ -4776,21 +4776,21 @@ const [passFormData, setPassFormData] = useState<PassFormData>({
     }
 
     return (
-      <div className="min-h-screen bg-gray-100 p-8">
+      <div className="min-h-screen bg-primary-100 p-8">
         {loginModal}
         <div className="max-w-6xl mx-auto">
           <div className="flex items-center justify-between mb-6">
             <div>
               <img src="/assets/logo.png" alt="Baynunah" className="h-6 mb-1" />
-              <h1 className="text-2xl font-semibold text-gray-800">Onboarding Management</h1>
+              <h1 className="text-2xl font-semibold text-primary-800">Onboarding Management</h1>
             </div>
             <div className="flex items-center gap-4">
-              <span className="text-sm text-gray-600">
+              <span className="text-sm text-primary-600">
                 {user.name} ({user.role})
               </span>
               <button
                 onClick={() => handleNavigate('home')}
-                className="px-4 py-2 text-emerald-600 hover:bg-emerald-50 rounded-lg transition-colors"
+                className="px-4 py-2 text-accent-green hover:bg-primary-50 rounded-lg transition-colors"
               >
                 ← Back to Home
               </button>
@@ -4806,7 +4806,7 @@ const [passFormData, setPassFormData] = useState<PassFormData>({
                 setInviteEmployeeId('')
                 setError(null)
               }}
-              className="px-4 py-2 bg-emerald-500 text-white rounded-lg hover:bg-emerald-600 transition-colors flex items-center gap-2"
+              className="px-4 py-2 bg-accent-green text-white rounded-lg hover:bg-accent-green transition-colors flex items-center gap-2"
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
@@ -4818,12 +4818,12 @@ const [passFormData, setPassFormData] = useState<PassFormData>({
           {/* Invite Modal */}
           {showInviteModal && (
             <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-              <div className="bg-white rounded-2xl shadow-2xl p-6 w-full max-w-md">
+              <div className="bg-white rounded-card shadow-card p-6 w-full max-w-md">
                 <div className="flex items-center justify-between mb-4">
-                  <h2 className="text-xl font-semibold text-gray-800">Generate Onboarding Link</h2>
+                  <h2 className="text-xl font-semibold text-primary-800">Generate Onboarding Link</h2>
                   <button
                     onClick={() => setShowInviteModal(false)}
-                    className="text-gray-400 hover:text-gray-600"
+                    className="text-primary-300 hover:text-primary-600"
                   >
                     <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -4838,27 +4838,27 @@ const [passFormData, setPassFormData] = useState<PassFormData>({
                 {!generatedLink ? (
                   <div className="space-y-4">
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Employee ID</label>
+                      <label className="block text-sm font-medium text-primary-700 mb-1">Employee ID</label>
                       <input
                         type="text"
                         value={inviteEmployeeId}
                         onChange={e => setInviteEmployeeId(e.target.value)}
                         placeholder="e.g., BAYN00010"
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500"
+                        className="w-full px-4 py-2 border border-primary-200 rounded-lg focus:ring-2 focus:ring-accent-green"
                       />
                     </div>
                     <button
                       onClick={generateInviteLink}
                       disabled={onboardingLoading || !inviteEmployeeId.trim()}
-                      className="w-full py-2 bg-emerald-500 text-white rounded-lg hover:bg-emerald-600 transition-colors disabled:opacity-50"
+                      className="w-full py-2 bg-accent-green text-white rounded-lg hover:bg-accent-green transition-colors disabled:opacity-50"
                     >
                       {onboardingLoading ? 'Generating...' : 'Generate Link'}
                     </button>
                   </div>
                 ) : (
                   <div className="space-y-4">
-                    <div className="bg-emerald-50 p-4 rounded-lg">
-                      <p className="text-sm text-emerald-800 mb-2">Share this link with the new joiner:</p>
+                    <div className="bg-primary-50 p-4 rounded-lg">
+                      <p className="text-sm text-accent-green mb-2">Share this link with the new joiner:</p>
                       <div className="flex gap-2">
                         <input
                           type="text"
@@ -4868,16 +4868,16 @@ const [passFormData, setPassFormData] = useState<PassFormData>({
                         />
                         <button
                           onClick={() => copyToClipboard(generatedLink)}
-                          className="px-3 py-2 bg-emerald-500 text-white rounded-lg hover:bg-emerald-600"
+                          className="px-3 py-2 bg-accent-green text-white rounded-lg hover:bg-accent-green"
                         >
                           Copy
                         </button>
                       </div>
                     </div>
-                    <p className="text-sm text-gray-500">This link expires in 7 days.</p>
+                    <p className="text-sm text-primary-600">This link expires in 7 days.</p>
                     <button
                       onClick={() => setShowInviteModal(false)}
-                      className="w-full py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+                      className="w-full py-2 border border-primary-200 rounded-lg hover:bg-primary-50 transition-colors"
                     >
                       Done
                     </button>
@@ -4889,8 +4889,8 @@ const [passFormData, setPassFormData] = useState<PassFormData>({
 
           {/* Pending Profiles */}
           {pendingProfiles.length > 0 && (
-            <div className="bg-white rounded-xl shadow-lg p-6 mb-6">
-              <h2 className="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
+            <div className="bg-white rounded-card shadow-card p-6 mb-6">
+              <h2 className="text-lg font-semibold text-primary-800 mb-4 flex items-center gap-2">
                 <span className="w-3 h-3 bg-blue-500 rounded-full animate-pulse"></span>
                 Pending Profile Reviews ({pendingProfiles.length})
               </h2>
@@ -4898,19 +4898,19 @@ const [passFormData, setPassFormData] = useState<PassFormData>({
                 {pendingProfiles.map(profile => (
                   <div key={profile.employee_id} className="flex items-center justify-between p-4 bg-blue-50 rounded-lg">
                     <div>
-                      <p className="font-medium text-gray-800">{profile.name}</p>
-                      <p className="text-sm text-gray-500">
+                      <p className="font-medium text-primary-800">{profile.name}</p>
+                      <p className="text-sm text-primary-600">
                         {profile.employee_id} • {profile.department || 'No department'} • {profile.job_title || 'No title'}
                       </p>
                       {profile.submitted_at && (
-                        <p className="text-xs text-gray-400 mt-1">
+                        <p className="text-xs text-primary-300 mt-1">
                           Submitted: {new Date(profile.submitted_at).toLocaleDateString()}
                         </p>
                       )}
                     </div>
                     <button
                       onClick={() => approveProfile(profile.employee_id)}
-                      className="px-4 py-2 bg-emerald-500 text-white rounded-lg hover:bg-emerald-600 transition-colors text-sm"
+                      className="px-4 py-2 bg-accent-green text-white rounded-lg hover:bg-accent-green transition-colors text-sm"
                     >
                       Approve
                     </button>
@@ -4921,51 +4921,51 @@ const [passFormData, setPassFormData] = useState<PassFormData>({
           )}
 
           {/* Onboarding Tokens */}
-          <div className="bg-white rounded-xl shadow-lg overflow-hidden">
-            <div className="p-4 border-b border-gray-200">
-              <h2 className="text-lg font-semibold text-gray-800">Onboarding Invites</h2>
+          <div className="bg-white rounded-card shadow-card overflow-hidden">
+            <div className="p-4 border-b border-primary-200">
+              <h2 className="text-lg font-semibold text-primary-800">Onboarding Invites</h2>
             </div>
             {onboardingLoading && onboardingTokens.length === 0 ? (
-              <div className="p-8 text-center text-gray-500">Loading...</div>
+              <div className="p-8 text-center text-primary-600">Loading...</div>
             ) : onboardingTokens.length === 0 ? (
               <div className="p-8 text-center">
-                <p className="text-gray-500">No onboarding invites yet</p>
-                <p className="text-sm text-gray-400 mt-1">Click "Invite New Joiner" to create one</p>
+                <p className="text-primary-600">No onboarding invites yet</p>
+                <p className="text-sm text-primary-300 mt-1">Click "Invite New Joiner" to create one</p>
               </div>
             ) : (
               <table className="w-full">
-                <thead className="bg-gray-50 border-b border-gray-200">
+                <thead className="bg-primary-50 border-b border-primary-200">
                   <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Employee</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Created</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Expires</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Views</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-primary-600 uppercase">Employee</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-primary-600 uppercase">Created</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-primary-600 uppercase">Expires</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-primary-600 uppercase">Status</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-primary-600 uppercase">Views</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-200">
                   {onboardingTokens.map(token => (
-                    <tr key={token.token} className="hover:bg-gray-50">
+                    <tr key={token.token} className="hover:bg-primary-50">
                       <td className="px-6 py-4">
-                        <p className="text-sm font-medium text-gray-900">{token.employee_name}</p>
-                        <p className="text-xs text-gray-500">{token.employee_id}</p>
+                        <p className="text-sm font-medium text-primary-900">{token.employee_name}</p>
+                        <p className="text-xs text-primary-600">{token.employee_id}</p>
                       </td>
-                      <td className="px-6 py-4 text-sm text-gray-500">
+                      <td className="px-6 py-4 text-sm text-primary-600">
                         {new Date(token.created_at).toLocaleDateString()}
                       </td>
-                      <td className="px-6 py-4 text-sm text-gray-500">
+                      <td className="px-6 py-4 text-sm text-primary-600">
                         {new Date(token.expires_at).toLocaleDateString()}
                       </td>
                       <td className="px-6 py-4">
                         <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${
-                          token.is_used ? 'bg-emerald-100 text-emerald-700' :
+                          token.is_used ? 'bg-accent-green/10 text-accent-green' :
                           token.is_expired ? 'bg-red-100 text-red-700' :
                           'bg-yellow-100 text-yellow-700'
                         }`}>
                           {token.is_used ? 'Completed' : token.is_expired ? 'Expired' : 'Pending'}
                         </span>
                       </td>
-                      <td className="px-6 py-4 text-sm text-gray-500">{token.access_count}</td>
+                      <td className="px-6 py-4 text-sm text-primary-600">{token.access_count}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -4983,13 +4983,13 @@ const [passFormData, setPassFormData] = useState<PassFormData>({
     }
 
     const renderAlertRow = (alert: ComplianceAlertItem) => (
-      <tr key={`${alert.employee_id}-${alert.document_type}`} className="hover:bg-gray-50">
+      <tr key={`${alert.employee_id}-${alert.document_type}`} className="hover:bg-primary-50">
         <td className="px-6 py-4">
-          <p className="text-sm font-medium text-gray-900">{alert.employee_name}</p>
-          <p className="text-xs text-gray-500">{alert.employee_id}</p>
+          <p className="text-sm font-medium text-primary-900">{alert.employee_name}</p>
+          <p className="text-xs text-primary-600">{alert.employee_id}</p>
         </td>
-        <td className="px-6 py-4 text-sm text-gray-700">{alert.document_type}</td>
-        <td className="px-6 py-4 text-sm text-gray-700">{formatDate(alert.expiry_date)}</td>
+        <td className="px-6 py-4 text-sm text-primary-700">{alert.document_type}</td>
+        <td className="px-6 py-4 text-sm text-primary-700">{formatDate(alert.expiry_date)}</td>
         <td className="px-6 py-4">
           <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${
             alert.days_until_expiry < 0 ? 'bg-red-100 text-red-700' :
@@ -5003,7 +5003,7 @@ const [passFormData, setPassFormData] = useState<PassFormData>({
         <td className="px-6 py-4">
           <button
             onClick={() => setViewingProfileId(alert.employee_id)}
-            className="text-teal-600 hover:text-teal-800 text-sm font-medium"
+            className="text-accent-green hover:text-accent-green text-sm font-medium"
           >
             View Profile
           </button>
@@ -5012,40 +5012,40 @@ const [passFormData, setPassFormData] = useState<PassFormData>({
     )
 
     return (
-      <div className="min-h-screen bg-gray-100 p-8">
+      <div className="min-h-screen bg-primary-100 p-8">
         <div className="max-w-6xl mx-auto">
           <div className="flex items-center justify-between mb-6">
             <div className="flex items-center gap-4">
               <button
                 onClick={() => handleNavigate('home')}
-                className="text-gray-500 hover:text-gray-700"
+                className="text-primary-600 hover:text-primary-700"
               >
                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
                 </svg>
               </button>
-              <h1 className="text-2xl font-semibold text-gray-800">Compliance Alerts</h1>
+              <h1 className="text-2xl font-semibold text-primary-800">Compliance Alerts</h1>
             </div>
             <div className="flex items-center gap-4">
               <button
                 onClick={fetchComplianceAlerts}
-                className="px-4 py-2 bg-teal-600 text-white rounded-lg text-sm font-medium hover:bg-teal-700 transition-colors"
+                className="px-4 py-2 bg-accent-green text-white rounded-lg text-sm font-medium hover:bg-accent-green/90 transition-colors"
               >
                 Refresh
               </button>
-              <span className="text-sm text-gray-600">{user?.name} ({user?.role})</span>
+              <span className="text-sm text-primary-600">{user?.name} ({user?.role})</span>
             </div>
           </div>
 
           {complianceAlertsLoading && !complianceAlerts ? (
-            <div className="text-center py-12 text-gray-500">Loading compliance data...</div>
+            <div className="text-center py-12 text-primary-600">Loading compliance data...</div>
           ) : !user || (user.role !== 'admin' && user.role !== 'hr') ? (
-            <div className="bg-white rounded-xl shadow-lg p-12 text-center">
+            <div className="bg-white rounded-card shadow-card p-12 text-center">
               <p className="text-4xl mb-4">🔒</p>
-              <p className="text-gray-600 mb-6">Please sign in with HR or Admin access to view compliance alerts.</p>
+              <p className="text-primary-600 mb-6">Please sign in with HR or Admin access to view compliance alerts.</p>
               <button
                 onClick={() => handleNavigate('admin')}
-                className="px-6 py-3 bg-teal-600 text-white rounded-lg font-medium hover:bg-teal-700 transition-colors"
+                className="px-6 py-3 bg-accent-green text-white rounded-lg font-medium hover:bg-accent-green/90 transition-colors"
               >
                 Sign In
               </button>
@@ -5094,15 +5094,15 @@ const [passFormData, setPassFormData] = useState<PassFormData>({
 
               {/* Expired Documents */}
               {complianceAlerts?.expired && complianceAlerts.expired.length > 0 && (
-                <div className="bg-white rounded-xl shadow-lg mb-6">
-                  <div className="px-6 py-4 border-b border-gray-100 bg-red-50 rounded-t-xl">
+                <div className="bg-white rounded-card shadow-card mb-6">
+                  <div className="px-6 py-4 border-b border-primary-100 bg-red-50 rounded-t-xl">
                     <h2 className="text-lg font-semibold text-red-700 flex items-center gap-2">
                       <span>⚠️</span> Expired Documents ({complianceAlerts.expired.length})
                     </h2>
                     <p className="text-sm text-red-600 mt-1">These documents have expired and require immediate attention</p>
                   </div>
                   <table className="w-full">
-                    <thead className="bg-gray-50 text-xs text-gray-500 uppercase">
+                    <thead className="bg-primary-50 text-xs text-primary-600 uppercase">
                       <tr>
                         <th className="px-6 py-3 text-left">Employee</th>
                         <th className="px-6 py-3 text-left">Document</th>
@@ -5120,15 +5120,15 @@ const [passFormData, setPassFormData] = useState<PassFormData>({
 
               {/* Expiring in 7 Days */}
               {complianceAlerts?.days_7 && complianceAlerts.days_7.length > 0 && (
-                <div className="bg-white rounded-xl shadow-lg mb-6">
-                  <div className="px-6 py-4 border-b border-gray-100 bg-orange-50 rounded-t-xl">
+                <div className="bg-white rounded-card shadow-card mb-6">
+                  <div className="px-6 py-4 border-b border-primary-100 bg-orange-50 rounded-t-xl">
                     <h2 className="text-lg font-semibold text-orange-700 flex items-center gap-2">
                       <span>🔶</span> Expiring Within 7 Days ({complianceAlerts.days_7.length})
                     </h2>
                     <p className="text-sm text-orange-600 mt-1">Urgent - documents that need immediate attention</p>
                   </div>
                   <table className="w-full">
-                    <thead className="bg-gray-50 text-xs text-gray-500 uppercase">
+                    <thead className="bg-primary-50 text-xs text-primary-600 uppercase">
                       <tr>
                         <th className="px-6 py-3 text-left">Employee</th>
                         <th className="px-6 py-3 text-left">Document</th>
@@ -5146,15 +5146,15 @@ const [passFormData, setPassFormData] = useState<PassFormData>({
 
               {/* Expiring in 30 Days */}
               {complianceAlerts?.days_30 && complianceAlerts.days_30.length > 0 && (
-                <div className="bg-white rounded-xl shadow-lg mb-6">
-                  <div className="px-6 py-4 border-b border-gray-100 bg-yellow-50 rounded-t-xl">
+                <div className="bg-white rounded-card shadow-card mb-6">
+                  <div className="px-6 py-4 border-b border-primary-100 bg-yellow-50 rounded-t-xl">
                     <h2 className="text-lg font-semibold text-yellow-700 flex items-center gap-2">
                       <span>🟡</span> Expiring Within 30 Days ({complianceAlerts.days_30.length})
                     </h2>
                     <p className="text-sm text-yellow-600 mt-1">Documents that need to be renewed soon</p>
                   </div>
                   <table className="w-full">
-                    <thead className="bg-gray-50 text-xs text-gray-500 uppercase">
+                    <thead className="bg-primary-50 text-xs text-primary-600 uppercase">
                       <tr>
                         <th className="px-6 py-3 text-left">Employee</th>
                         <th className="px-6 py-3 text-left">Document</th>
@@ -5172,14 +5172,14 @@ const [passFormData, setPassFormData] = useState<PassFormData>({
 
               {/* Expiring in 60 Days */}
               {complianceAlerts?.days_custom && complianceAlerts.days_custom.length > 0 && (
-                <div className="bg-white rounded-xl shadow-lg mb-6">
-                  <div className="px-6 py-4 border-b border-gray-100 bg-amber-50 rounded-t-xl">
+                <div className="bg-white rounded-card shadow-card mb-6">
+                  <div className="px-6 py-4 border-b border-primary-100 bg-amber-50 rounded-t-xl">
                     <h2 className="text-lg font-semibold text-amber-700 flex items-center gap-2">
                       <span>📋</span> Expiring Within 60 Days ({complianceAlerts.days_custom.length})
                     </h2>
                   </div>
                   <table className="w-full">
-                    <thead className="bg-gray-50 text-xs text-gray-500 uppercase">
+                    <thead className="bg-primary-50 text-xs text-primary-600 uppercase">
                       <tr>
                         <th className="px-6 py-3 text-left">Employee</th>
                         <th className="px-6 py-3 text-left">Document</th>
@@ -5197,10 +5197,10 @@ const [passFormData, setPassFormData] = useState<PassFormData>({
 
               {/* No Alerts */}
               {complianceAlerts && (complianceAlerts.expired.length + (complianceAlerts.days_7?.length || 0) + (complianceAlerts.days_30?.length || 0) + (complianceAlerts.days_custom?.length || 0)) === 0 && (
-                <div className="bg-white rounded-xl shadow-lg p-12 text-center">
+                <div className="bg-white rounded-card shadow-card p-12 text-center">
                   <p className="text-4xl mb-4">✅</p>
-                  <p className="text-xl font-semibold text-emerald-600 mb-2">All Clear!</p>
-                  <p className="text-gray-600">No documents are expired or expiring within the next 90 days.</p>
+                  <p className="text-xl font-semibold text-accent-green mb-2">All Clear!</p>
+                  <p className="text-primary-600">No documents are expired or expiring within the next 90 days.</p>
                 </div>
               )}
             </>
@@ -5222,21 +5222,21 @@ const [passFormData, setPassFormData] = useState<PassFormData>({
 
   if (activeSection === 'attendance') {
     return (
-      <div className="min-h-screen bg-gray-100 p-8">
+      <div className="min-h-screen bg-primary-100 p-8">
         <div className="max-w-4xl mx-auto">
           <div className="flex items-center justify-between mb-6">
             <div className="flex items-center gap-4">
               <button
                 onClick={() => handleNavigate('home')}
-                className="text-gray-500 hover:text-gray-700"
+                className="text-primary-600 hover:text-primary-700"
               >
                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
                 </svg>
               </button>
-              <h1 className="text-2xl font-semibold text-gray-800">Attendance</h1>
+              <h1 className="text-2xl font-semibold text-primary-800">Attendance</h1>
             </div>
-            <div className="text-sm text-gray-600">
+            <div className="text-sm text-primary-600">
               {user?.name} ({user?.role})
             </div>
           </div>
@@ -5246,25 +5246,25 @@ const [passFormData, setPassFormData] = useState<PassFormData>({
           )}
 
           {/* Today's Status Card */}
-          <div className="bg-white rounded-xl shadow-lg p-6 mb-6">
+          <div className="bg-white rounded-card shadow-card p-6 mb-6">
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-semibold text-gray-800">Today's Status</h2>
-              <span className="text-sm text-gray-500">
+              <h2 className="text-lg font-semibold text-primary-800">Today's Status</h2>
+              <span className="text-sm text-primary-600">
                 {new Date().toLocaleDateString('en-GB', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
               </span>
             </div>
 
             {attendanceLoading && !attendanceStatus ? (
-              <div className="text-center py-8 text-gray-500">Loading...</div>
+              <div className="text-center py-8 text-primary-600">Loading...</div>
             ) : attendanceStatus ? (
               <div className="space-y-4">
                 <div className="flex items-center gap-3">
-                  <div className={`w-4 h-4 rounded-full ${attendanceStatus.is_clocked_in ? 'bg-emerald-500' : 'bg-gray-300'}`}></div>
-                  <span className="text-gray-700">{attendanceStatus.message}</span>
+                  <div className={`w-4 h-4 rounded-full ${attendanceStatus.is_clocked_in ? 'bg-accent-green' : 'bg-primary-300'}`}></div>
+                  <span className="text-primary-700">{attendanceStatus.message}</span>
                 </div>
 
                 {gpsCoords && (
-                  <div className="flex items-center gap-2 text-sm text-gray-500">
+                  <div className="flex items-center gap-2 text-sm text-primary-600">
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -5281,8 +5281,8 @@ const [passFormData, setPassFormData] = useState<PassFormData>({
                         onClick={() => setClockInWorkType('office')}
                         className={`p-3 rounded-lg border text-center transition-all ${
                           clockInWorkType === 'office' 
-                            ? 'border-emerald-500 bg-emerald-50 text-emerald-700' 
-                            : 'border-gray-200 hover:border-gray-300'
+                            ? 'border-emerald-500 bg-primary-50 text-accent-green' 
+                            : 'border-primary-200 hover:border-primary-200'
                         }`}
                       >
                         <svg className="w-6 h-6 mx-auto mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -5295,7 +5295,7 @@ const [passFormData, setPassFormData] = useState<PassFormData>({
                         className={`p-3 rounded-lg border text-center transition-all ${
                           clockInWorkType === 'wfh' 
                             ? 'border-blue-500 bg-blue-50 text-blue-700' 
-                            : 'border-gray-200 hover:border-gray-300'
+                            : 'border-primary-200 hover:border-primary-200'
                         }`}
                       >
                         <svg className="w-6 h-6 mx-auto mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -5308,7 +5308,7 @@ const [passFormData, setPassFormData] = useState<PassFormData>({
                         className={`p-3 rounded-lg border text-center transition-all ${
                           clockInWorkType === 'field' 
                             ? 'border-amber-500 bg-amber-50 text-amber-700' 
-                            : 'border-gray-200 hover:border-gray-300'
+                            : 'border-primary-200 hover:border-primary-200'
                         }`}
                       >
                         <svg className="w-6 h-6 mx-auto mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -5320,11 +5320,11 @@ const [passFormData, setPassFormData] = useState<PassFormData>({
 
                     {clockInWorkType === 'wfh' && (
                       <div className="mb-4">
-                        <label className="block text-sm font-medium text-gray-700 mb-1">WFH Reason</label>
+                        <label className="block text-sm font-medium text-primary-700 mb-1">WFH Reason</label>
                         <textarea
                           value={wfhReason}
                           onChange={(e) => setWfhReason(e.target.value)}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+                          className="w-full px-3 py-2 border border-primary-200 rounded-lg focus:ring-2 focus:ring-accent-green focus:border-accent-green"
                           placeholder="Please provide a reason for working from home..."
                           rows={2}
                         />
@@ -5334,7 +5334,7 @@ const [passFormData, setPassFormData] = useState<PassFormData>({
                     <button
                       onClick={handleClockIn}
                       disabled={attendanceLoading}
-                      className="w-full py-3 bg-emerald-500 text-white rounded-lg hover:bg-emerald-600 transition-colors font-medium disabled:opacity-50"
+                      className="w-full py-3 bg-accent-green text-white rounded-lg hover:bg-accent-green transition-colors font-medium disabled:opacity-50"
                     >
                       {attendanceLoading ? 'Processing...' : 'Clock In'}
                     </button>
@@ -5375,30 +5375,30 @@ const [passFormData, setPassFormData] = useState<PassFormData>({
                 )}
               </div>
             ) : (
-              <div className="text-center py-8 text-gray-500">Unable to load attendance status</div>
+              <div className="text-center py-8 text-primary-600">Unable to load attendance status</div>
             )}
           </div>
 
           {/* Admin Dashboard */}
           {(user?.role === 'admin' || user?.role === 'hr') && attendanceDashboard && (
-            <div className="bg-white rounded-xl shadow-lg p-6 mb-6">
-              <h2 className="text-lg font-semibold text-gray-800 mb-4">Today's Overview</h2>
+            <div className="bg-white rounded-card shadow-card p-6 mb-6">
+              <h2 className="text-lg font-semibold text-primary-800 mb-4">Today's Overview</h2>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <div className="text-center p-4 bg-emerald-50 rounded-lg">
-                  <div className="text-2xl font-bold text-emerald-600">{attendanceDashboard.clocked_in_today}</div>
-                  <div className="text-sm text-gray-600">Clocked In</div>
+                <div className="text-center p-4 bg-primary-50 rounded-lg">
+                  <div className="text-2xl font-bold text-accent-green">{attendanceDashboard.clocked_in_today}</div>
+                  <div className="text-sm text-primary-600">Clocked In</div>
                 </div>
                 <div className="text-center p-4 bg-blue-50 rounded-lg">
                   <div className="text-2xl font-bold text-blue-600">{attendanceDashboard.wfh_today}</div>
-                  <div className="text-sm text-gray-600">WFH</div>
+                  <div className="text-sm text-primary-600">WFH</div>
                 </div>
                 <div className="text-center p-4 bg-amber-50 rounded-lg">
                   <div className="text-2xl font-bold text-amber-600">{attendanceDashboard.late_today}</div>
-                  <div className="text-sm text-gray-600">Late</div>
+                  <div className="text-sm text-primary-600">Late</div>
                 </div>
                 <div className="text-center p-4 bg-red-50 rounded-lg">
                   <div className="text-2xl font-bold text-red-600">{attendanceDashboard.absent_today}</div>
-                  <div className="text-sm text-gray-600">Absent</div>
+                  <div className="text-sm text-primary-600">Absent</div>
                 </div>
               </div>
               {(attendanceDashboard.pending_wfh_approvals > 0 || attendanceDashboard.pending_overtime_approvals > 0) && (
@@ -5419,48 +5419,48 @@ const [passFormData, setPassFormData] = useState<PassFormData>({
           )}
 
           {/* Recent Records */}
-          <div className="bg-white rounded-xl shadow-lg overflow-hidden">
-            <div className="p-4 border-b border-gray-200">
-              <h2 className="text-lg font-semibold text-gray-800">Recent Attendance</h2>
+          <div className="bg-white rounded-card shadow-card overflow-hidden">
+            <div className="p-4 border-b border-primary-200">
+              <h2 className="text-lg font-semibold text-primary-800">Recent Attendance</h2>
             </div>
             {attendanceLoading && attendanceRecords.length === 0 ? (
-              <div className="p-8 text-center text-gray-500">Loading...</div>
+              <div className="p-8 text-center text-primary-600">Loading...</div>
             ) : attendanceRecords.length === 0 ? (
-              <div className="p-8 text-center text-gray-500">No attendance records yet</div>
+              <div className="p-8 text-center text-primary-600">No attendance records yet</div>
             ) : (
               <table className="w-full">
-                <thead className="bg-gray-50 border-b border-gray-200">
+                <thead className="bg-primary-50 border-b border-primary-200">
                   <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Date</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Clock In</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Clock Out</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Type</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Hours</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-primary-600 uppercase">Date</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-primary-600 uppercase">Clock In</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-primary-600 uppercase">Clock Out</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-primary-600 uppercase">Type</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-primary-600 uppercase">Hours</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-primary-600 uppercase">Status</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-200">
                   {attendanceRecords.slice(0, 10).map(record => (
-                    <tr key={record.id} className="hover:bg-gray-50">
-                      <td className="px-6 py-4 text-sm text-gray-900">
+                    <tr key={record.id} className="hover:bg-primary-50">
+                      <td className="px-6 py-4 text-sm text-primary-900">
                         {new Date(record.attendance_date).toLocaleDateString('en-GB')}
                       </td>
-                      <td className="px-6 py-4 text-sm text-gray-600">
+                      <td className="px-6 py-4 text-sm text-primary-600">
                         {record.clock_in ? new Date(record.clock_in).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' }) : '-'}
                       </td>
-                      <td className="px-6 py-4 text-sm text-gray-600">
+                      <td className="px-6 py-4 text-sm text-primary-600">
                         {record.clock_out ? new Date(record.clock_out).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' }) : '-'}
                       </td>
                       <td className="px-6 py-4">
                         <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${
-                          record.work_type === 'office' ? 'bg-emerald-100 text-emerald-700' :
+                          record.work_type === 'office' ? 'bg-accent-green/10 text-accent-green' :
                           record.work_type === 'wfh' ? 'bg-blue-100 text-blue-700' :
                           'bg-amber-100 text-amber-700'
                         }`}>
                           {record.work_type.toUpperCase()}
                         </span>
                       </td>
-                      <td className="px-6 py-4 text-sm text-gray-600">
+                      <td className="px-6 py-4 text-sm text-primary-600">
                         {record.total_hours ? `${record.total_hours}h` : '-'}
                         {record.overtime_hours && record.overtime_hours > 0 && (
                           <span className="ml-1 text-purple-600">(+{record.overtime_hours}h OT)</span>
@@ -5468,10 +5468,10 @@ const [passFormData, setPassFormData] = useState<PassFormData>({
                       </td>
                       <td className="px-6 py-4">
                         <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${
-                          record.status === 'present' ? 'bg-emerald-100 text-emerald-700' :
+                          record.status === 'present' ? 'bg-accent-green/10 text-accent-green' :
                           record.status === 'late' ? 'bg-amber-100 text-amber-700' :
                           record.status === 'absent' ? 'bg-red-100 text-red-700' :
-                          'bg-gray-100 text-gray-700'
+                          'bg-primary-100 text-primary-700'
                         }`}>
                           {record.status}
                           {record.is_late && record.late_minutes && ` (${record.late_minutes}m)`}
@@ -5490,14 +5490,14 @@ const [passFormData, setPassFormData] = useState<PassFormData>({
 
   if (activeSection === 'external') {
     return (
-      <div className="min-h-screen bg-gray-100 flex flex-col items-center justify-center p-8">
+      <div className="min-h-screen bg-primary-100 flex flex-col items-center justify-center p-8">
         {loginModal}
-        <div className="bg-white rounded-2xl shadow-lg p-8 max-w-2xl w-full text-center">
-          <h2 className="text-2xl font-semibold text-gray-800 mb-4">External Users</h2>
-          <p className="text-gray-600 mb-6">This section is under development.</p>
+        <div className="bg-white rounded-2xl shadow-card p-8 max-w-2xl w-full text-center">
+          <h2 className="text-2xl font-semibold text-primary-800 mb-4">External Users</h2>
+          <p className="text-primary-600 mb-6">This section is under development.</p>
           <button
             onClick={() => handleNavigate('home')}
-            className="px-6 py-2 bg-emerald-500 text-white rounded-lg hover:bg-emerald-600 transition-colors"
+            className="px-6 py-2 bg-accent-green text-white rounded-lg hover:bg-accent-green transition-colors"
           >
             Back to Home
           </button>
