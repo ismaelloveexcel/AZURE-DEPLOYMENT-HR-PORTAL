@@ -99,7 +99,7 @@ def create_app() -> FastAPI:
     app.include_router(admin.router, prefix=settings.api_prefix)
     from app.routers import templates, audit_logs, notifications, activity_logs
     from app.routers import employee_compliance, employee_bank, employee_documents
-    from app.routers import recruitment, interview, performance
+    from app.routers import recruitment, interview  # , performance
     app.include_router(templates.router, prefix=settings.api_prefix)
     app.include_router(audit_logs.router, prefix=settings.api_prefix)
     app.include_router(notifications.router, prefix=settings.api_prefix)
@@ -111,21 +111,33 @@ def create_app() -> FastAPI:
     app.include_router(recruitment.router, prefix=settings.api_prefix)
     # Interview scheduling
     app.include_router(interview.router, prefix=settings.api_prefix)
-    # Performance management
-    app.include_router(performance.router, prefix=settings.api_prefix)
-    # Employee of the Year nominations
-    from app.routers import nominations
-    app.include_router(nominations.router, prefix=settings.api_prefix)
-    # Insurance Census management
-    from app.routers import insurance_census
-    app.include_router(insurance_census.router, prefix=settings.api_prefix)
     
-    # Enhanced Attendance Module routers
-    from app.routers import leave, public_holidays, timesheets, geofences
+    # SIMPLIFICATION: Commented out low-usage features for solo HR
+    # To re-enable, uncomment the imports and include_router lines below
+    
+    # Performance management - typically used yearly, can use Excel instead
+    # app.include_router(performance.router, prefix=settings.api_prefix)
+    
+    # Employee of the Year nominations - seasonal feature (EOY only)
+    # from app.routers import nominations
+    # app.include_router(nominations.router, prefix=settings.api_prefix)
+    
+    # Insurance Census management - quarterly, may be overkill for small teams
+    # from app.routers import insurance_census
+    # app.include_router(insurance_census.router, prefix=settings.api_prefix)
+    
+    # Timesheets - can be replaced with Excel export of attendance logs
+    # from app.routers import timesheets
+    # app.include_router(timesheets.router, prefix=settings.api_prefix)
+    
+    # Enhanced Attendance Module routers - keeping core leave and holidays
+    from app.routers import leave, public_holidays  # , timesheets, geofences
     app.include_router(leave.router, prefix=settings.api_prefix)
     app.include_router(public_holidays.router, prefix=settings.api_prefix)
-    app.include_router(timesheets.router, prefix=settings.api_prefix)
-    app.include_router(geofences.router, prefix=settings.api_prefix)
+    
+    # Geofences - advanced attendance feature, may not be needed for basic operations
+    # from app.routers import geofences
+    # app.include_router(geofences.router, prefix=settings.api_prefix)
 
     @app.on_event("startup")
     async def on_startup():
