@@ -18,7 +18,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (savedUser) {
       try {
         const parsed = JSON.parse(savedUser) as {
-          id: string
+          id: number
           name: string
           role: string
         }
@@ -29,7 +29,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           name: parsed.name,
           role: parsed.role,
           token: '', // token is not persisted
-        } as User)
+        })
       } catch (e) {
         localStorage.removeItem('hr_portal_user')
       }
