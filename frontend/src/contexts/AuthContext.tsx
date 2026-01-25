@@ -12,12 +12,24 @@ const AuthContext = createContext<AuthContextType | null>(null)
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null)
 
-  // Load user from localStorage on mount
+  // Load non-sensitive user data from localStorage on mount
   useEffect(() => {
     const savedUser = localStorage.getItem('hr_portal_user')
     if (savedUser) {
       try {
-        setUser(JSON.parse(savedUser))
+        const parsed = JSON.parse(savedUser) as {
+          id: string
+          name: string
+          role: string
+        }
+        // Reconstruct a User-compatible object without sensitive fields
+        setUser({
+          id: parsed.id,
+          employee_id: '', // employee_id is not persisted
+          name: parsed.name,
+          role: parsed.role,
+          token: '', // token is not persisted
+        } as User)
       } catch (e) {
         localStorage.removeItem('hr_portal_user')
       }
@@ -26,7 +38,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const login = (loggedInUser: User) => {
     setUser(loggedInUser)
-    localStorage.setItem('hr_portal_user', JSON.stringify(loggedInUser))
+    // Persist only non-sensitive fields to localStorage
+    const { id, name, role } = loggedInUser
+    localStorage.setItem(
+      'hr_portal_user',
+      JSON.stringify({ id, name, role })
+    )
   }
 
   const logout = () => {
