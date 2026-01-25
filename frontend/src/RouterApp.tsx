@@ -4,6 +4,7 @@ import { ComplianceModule } from './pages/ComplianceModule'
 import { AttendanceModule } from './pages/AttendanceModule'
 import { RecruitmentModule } from './pages/RecruitmentModule'
 import { OnboardingModule } from './pages/OnboardingModule'
+import { AdminDashboard } from './pages/AdminDashboard'
 
 /**
  * Router wrapper for the HR Portal
@@ -17,14 +18,12 @@ import { OnboardingModule } from './pages/OnboardingModule'
  * 3. Gradually migrate more sections over time
  * 
  * Current extracted routes:
+ * - /admin - Admin dashboard with tabs (Dashboard, Employees, Compliance, Recruitment, Settings)
  * - /compliance - Compliance alerts dashboard
  * - /attendance - Attendance tracking
  * - /recruitment - Recruitment management (positions, candidates, pipeline)
  * - /onboarding - Onboarding management (HR view)
  * - /public-onboarding/:token - Public onboarding form (no auth)
- * 
- * Planned extractions:
- * - /admin - Admin dashboard
  */
 export function RouterApp() {
   // TODO: Implement shared auth context to pass authenticated user to routes
@@ -35,6 +34,7 @@ export function RouterApp() {
     <BrowserRouter>
       <Routes>
         {/* Extracted modular pages */}
+        <Route path="/admin" element={<AdminDashboard />} />
         <Route path="/compliance" element={<ComplianceModule user={null} />} />
         <Route path="/attendance" element={<AttendanceModule />} />
         <Route path="/recruitment" element={<RecruitmentModule />} />
