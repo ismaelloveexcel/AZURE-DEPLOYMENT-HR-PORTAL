@@ -78,14 +78,14 @@ jobs:
           echo "" >> quality-report.md
           
           cd backend
-          # Create minimal mypy config if not exists
+          # Require an explicit mypy configuration; do not create a permissive default
           if [ ! -f "mypy.ini" ] && [ ! -f "pyproject.toml" ]; then
-            echo "[mypy]" > mypy.ini
-            echo "ignore_missing_imports = True" >> mypy.ini
-            echo "no_error_summary = False" >> mypy.ini
+            echo "Mypy is not configured for the backend (no mypy.ini or pyproject.toml found)." >> ../quality-report.md
+            echo "Please add a mypy configuration file to the backend/ directory and re-run this workflow." >> ../quality-report.md
+            exit 1
           fi
           
-          mypy app --ignore-missing-imports --no-error-summary 2>&1 | head -30 > ../mypy-report.txt || true
+          mypy app 2>&1 | head -30 > ../mypy-report.txt || true
           
           ERROR_COUNT=$(grep -c "error:" ../mypy-report.txt || echo "0")
           echo "**Type Errors:** $ERROR_COUNT" >> ../quality-report.md
