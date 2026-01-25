@@ -1,6 +1,7 @@
 # Agent Inventory & Deployment Status
 
 > **Generated:** 2026-01-25  
+> **Updated:** 2026-01-25 (Deployed 3 new agents)  
 > **Purpose:** Comprehensive list of all agents in the HR Portal repository with their purpose and deployment status.
 
 ---
@@ -9,13 +10,13 @@
 
 | Total Agents | Deployed as Bots | Instructions Only | Advisory/Research |
 |--------------|------------------|-------------------|-------------------|
-| **12**       | **2**            | **8**             | **2**             |
+| **12**       | **5**            | **5**             | **2**             |
 
 ---
 
 ## Agent Categories
 
-### 🤖 **DEPLOYED AS AUTOMATED BOTS** (2)
+### 🤖 **DEPLOYED AS AUTOMATED BOTS** (5)
 
 These agents have GitHub Actions workflows that run automatically.
 
@@ -23,10 +24,13 @@ These agents have GitHub Actions workflows that run automatically.
 |---|-------|------|----------|---------|--------|
 | 1 | **Technical Guardian** | `.github/agents/technical-guardian.md` | `technical-guardian-health.yml`<br>`technical-guardian-security.yml` | Every 15 min (health)<br>Daily + PRs (security) | ✅ **ACTIVE** |
 | 2 | **Aesthetic Guardian** | `.github/agents/aesthetic-guardian.md` | `aesthetic-guardian-pr.yml` | On PRs (frontend files) | ✅ **ACTIVE** |
+| 3 | **Azure Debugger** | `.github/agents/azure-debugger.md` | `azure-debugger-monitor.yml` | On deployment failures + manual | ✅ **ACTIVE** |
+| 4 | **Code Quality Monitor** | `.github/agents/code-quality-monitor.md` | `code-quality-monitor.yml` | PRs + push to main + weekly | ✅ **ACTIVE** |
+| 5 | **Azure Deployment Engineer** | `.github/agents/azure-deployment-engineer.md` | `azure-deployment-engineer.yml` | On infra changes + PRs | ✅ **ACTIVE** |
 
 ---
 
-### 📋 **INSTRUCTION-BASED AGENTS** (8)
+### 📋 **INSTRUCTION-BASED AGENTS** (5)
 
 These agents exist as instruction files for GitHub Copilot Chat or manual reference. They are **not deployed as automated bots** but can be invoked manually with Copilot.
 
@@ -34,12 +38,9 @@ These agents exist as instruction files for GitHub Copilot Chat or manual refere
 |---|-------|------|---------|-------------------|
 | 1 | **HR Assistant** | `.github/agents/hr-assistant.md` | HR workflows, compliance guidance, feature planning, employee management | 📋 Instructions Only |
 | 2 | **Portal Engineer** | `.github/agents/portal-engineer.md` | Full-stack implementation, API development, database design, bug fixes | 📋 Instructions Only |
-| 3 | **Code Quality Monitor** | `.github/agents/code-quality-monitor.md` | Security scanning, code quality checks, vulnerability detection | 📋 Instructions Only |
-| 4 | **Azure Deployment Specialist** | `.github/agents/azure-deployment-specialist.md` | Azure deployment through VS Code, troubleshooting, login issues | 📋 Instructions Only |
-| 5 | **Azure Debugger** | `.github/agents/azure-debugger.md` | Automated diagnosis/resolution of Azure deployment failures, PR creation | 📋 Instructions Only |
-| 6 | **Azure Deployment Engineer** | `.github/agents/azure-deployment-engineer.md` | End-to-end Azure setup, infrastructure as code, CI/CD automation | 📋 Instructions Only |
-| 7 | **Repo Steward** | `.github/agents/repo-steward.md` | One-off autonomous repository stabilisation and governance (self-terminating) | 📋 Instructions Only (One-off) |
-| 8 | **My Agent** | `.github/agents/my-agent.agent.md` | Custom deployment guardrails for OIDC pattern | 📋 Instructions Only |
+| 3 | **Azure Deployment Specialist** | `.github/agents/azure-deployment-specialist.md` | Azure deployment through VS Code, troubleshooting, login issues | 📋 Instructions Only |
+| 4 | **Repo Steward** | `.github/agents/repo-steward.md` | One-off autonomous repository stabilisation and governance (self-terminating) | 📋 Instructions Only (One-off) |
+| 5 | **My Agent** | `.github/agents/my-agent.agent.md` | Custom deployment guardrails for OIDC pattern | 📋 Instructions Only |
 
 ---
 
@@ -106,7 +107,97 @@ These agents use the GitHub Copilot agent format (`.agent.md`) and are designed 
 
 ---
 
-### 3. HR Assistant 📋 NOT DEPLOYED
+### 3. Azure Debugger ✅ DEPLOYED
+
+**File:** `.github/agents/azure-debugger.md`
+
+**Purpose:** Automated diagnosis and resolution of Azure deployment failures.
+
+**Automated Features:**
+- ✅ **Deployment failure monitoring** via `azure-debugger-monitor.yml`
+  - Triggered automatically when Deploy/CI workflows fail
+  - Can be manually triggered for analysis
+- ✅ **Automated failure analysis**
+  - Gets failed job details and logs
+  - Identifies common error patterns (OIDC, CORS, DB connection, etc.)
+  - Validates infrastructure files
+- ✅ **Diagnostic issue creation**
+  - Creates GitHub issues with detailed analysis
+  - Includes recommended actions and quick fix commands
+
+**Key Capabilities:**
+- Automated failure analysis
+- Bicep template validation
+- GitHub Actions workflow debugging
+- Backend startup issue detection
+- Database connection diagnosis
+- CORS configuration checks
+- OIDC authentication verification
+
+---
+
+### 4. Code Quality Monitor ✅ DEPLOYED
+
+**File:** `.github/agents/code-quality-monitor.md`
+
+**Purpose:** Proactive code quality and security scanner.
+
+**Automated Features:**
+- ✅ **Code quality analysis** via `code-quality-monitor.yml`
+  - Triggered on PRs and push to main
+  - Weekly scheduled comprehensive scan
+- ✅ **Python quality checks**
+  - Flake8 linting
+  - mypy type checking
+  - Radon complexity analysis
+  - Vulture dead code detection
+- ✅ **Frontend quality checks**
+  - TypeScript compilation
+  - 'any' type usage detection
+  - React best practices validation
+- ✅ **PR comments and weekly reports**
+  - Detailed quality report on PRs
+  - Weekly summary issues
+
+**Detection Patterns:**
+- Critical linting issues
+- Type safety violations
+- High complexity functions
+- Dead code
+- Console.log statements
+- Missing key props in React
+
+---
+
+### 5. Azure Deployment Engineer ✅ DEPLOYED
+
+**File:** `.github/agents/azure-deployment-engineer.md`
+
+**Purpose:** End-to-end Azure deployment validation and setup.
+
+**Automated Features:**
+- ✅ **Infrastructure validation** via `azure-deployment-engineer.yml`
+  - Triggered on changes to infra/, workflows, or dependency files
+  - Validates Bicep templates
+  - Checks workflow YAML syntax
+- ✅ **Deployment configuration check**
+  - Verifies required files exist
+  - Checks environment variable documentation
+  - Analyzes secrets usage in workflows
+- ✅ **Readiness assessment**
+  - Calculates deployment readiness score
+  - Creates issues if configuration is incomplete
+
+**Key Capabilities:**
+- Bicep template validation
+- Workflow file analysis
+- Required files verification
+- Environment variables check
+- Deployment readiness scoring
+
+---
+
+### 6. HR Assistant 📋 NOT DEPLOYED
 
 **File:** `.github/agents/hr-assistant.md`
 
@@ -130,7 +221,7 @@ These agents use the GitHub Copilot agent format (`.agent.md`) and are designed 
 
 ---
 
-### 4. Portal Engineer 📋 NOT DEPLOYED
+### 7. Portal Engineer 📋 NOT DEPLOYED
 
 **File:** `.github/agents/portal-engineer.md`
 
@@ -155,31 +246,7 @@ These agents use the GitHub Copilot agent format (`.agent.md`) and are designed 
 
 ---
 
-### 5. Code Quality Monitor 📋 NOT DEPLOYED
-
-**File:** `.github/agents/code-quality-monitor.md`
-
-**Purpose:** Proactive code quality and security scanner.
-
-**Key Capabilities:**
-- Security vulnerability detection
-- Code quality issue identification
-- Performance issue detection
-- Database health monitoring
-- Frontend quality checks
-
-**Detection Patterns:**
-- SQL injection risks
-- XSS vulnerabilities
-- Missing authentication
-- N+1 queries
-- Type safety violations
-
-**To Deploy:** Partially overlaps with Technical Guardian's security scanning. Could be expanded into additional automated workflows for code quality metrics.
-
----
-
-### 6. Azure Deployment Specialist 📋 NOT DEPLOYED
+### 8. Azure Deployment Specialist 📋 NOT DEPLOYED
 
 **File:** `.github/agents/azure-deployment-specialist.md`
 
@@ -200,56 +267,6 @@ These agents use the GitHub Copilot agent format (`.agent.md`) and are designed 
 - Health endpoint documentation
 
 **To Deploy:** Could be integrated into deployment workflows for automated troubleshooting or ChatOps.
-
----
-
-### 7. Azure Debugger 📋 NOT DEPLOYED
-
-**File:** `.github/agents/azure-debugger.md`
-
-**Purpose:** Automated diagnosis and resolution of Azure deployment failures.
-
-**Key Capabilities:**
-- Automated failure analysis
-- Bicep template fixes
-- GitHub Actions workflow debugging
-- Backend startup issue resolution
-- Database connection fixes
-- CORS configuration
-- OIDC authentication fixes
-- Automated PR creation with fixes
-
-**Fix Patterns:**
-- OIDC authentication fixes
-- Database connection timeout resolution
-- CORS error fixes
-- Startup script corrections
-- Environment variable fixes
-
-**To Deploy:** Would require building an automated workflow that analyzes deployment failures and creates fix PRs.
-
----
-
-### 8. Azure Deployment Engineer 📋 NOT DEPLOYED
-
-**File:** `.github/agents/azure-deployment-engineer.md`
-
-**Purpose:** End-to-end Azure deployment automation.
-
-**Key Capabilities:**
-- Full Azure deployment setup
-- Bicep template generation
-- GitHub Actions workflow creation
-- Database provisioning
-- Startup configuration
-- Production build setup
-
-**Expected Outputs:**
-- `infra/main.bicep` - Infrastructure definition
-- `.github/workflows/deploy-*.yml` - CI/CD pipelines
-- `backend/Procfile` - Startup configuration
-
-**To Deploy:** Could be integrated with infrastructure-as-code automation tools.
 
 ---
 
@@ -345,16 +362,18 @@ These agents use the GitHub Copilot agent format (`.agent.md`) and are designed 
 
 ## Agents Yet to Be Deployed
 
-The following agents are defined but **not deployed as automated bots**:
+The following agents remain as **instruction-only** (not deployed as automated bots):
 
 | Agent | Potential Deployment | Effort | Priority |
 |-------|---------------------|--------|----------|
-| Code Quality Monitor | Extend security workflows with quality metrics | Low | Medium |
-| Azure Debugger | Auto-analyze failures and create fix PRs | High | High |
-| Azure Deployment Engineer | Auto-setup infrastructure on demand | High | Medium |
 | HR Assistant | Automated HR workflow notifications | Medium | Low |
 | Portal Engineer | Code generation assistance | High | Low |
 | Azure Deployment Specialist | ChatOps deployment commands | Medium | Medium |
+
+**Recently Deployed (2026-01-25):**
+- ✅ **Azure Debugger** - Now monitors deployment failures automatically
+- ✅ **Code Quality Monitor** - Now runs on PRs and weekly
+- ✅ **Azure Deployment Engineer** - Now validates infrastructure on changes
 
 ---
 
@@ -411,9 +430,15 @@ All agents must follow rules defined in:
 ## How to Use Agents
 
 ### Using Deployed Bots
-The Technical Guardian and Aesthetic Guardian run automatically. Monitor their outputs in:
-- GitHub Issues (health check failures, security alerts)
-- PR comments (UI/UX reviews, security scan results)
+The following agents run automatically and post results in GitHub:
+
+| Agent | Output Location |
+|-------|-----------------|
+| Technical Guardian | Issues (health alerts), PRs (security scans) |
+| Aesthetic Guardian | PRs (UI/UX reviews) |
+| Azure Debugger | Issues (deployment failure analysis) |
+| Code Quality Monitor | PRs (quality reports), Issues (weekly reports) |
+| Azure Deployment Engineer | PRs (infrastructure validation), Issues (if config incomplete) |
 
 ### Using Instruction Agents with Copilot
 In VS Code or GitHub Copilot Chat:
@@ -444,4 +469,4 @@ Guardian HR-UAE and OSS Scout are auto-selected by Copilot when tasks match thei
 
 ---
 
-*Last Updated: 2026-01-25*
+*Last Updated: 2026-01-25 (Deployed Azure Debugger, Code Quality Monitor, Azure Deployment Engineer)*
