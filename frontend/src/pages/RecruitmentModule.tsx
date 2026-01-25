@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useRecruitment } from '../hooks/useRecruitment'
-import { useAuth } from '../hooks/useAuth'
+import { useAuthContext } from '../contexts/AuthContext'
 import { exportCandidatesToCSV, exportRecruitmentRequestsToCSV } from '../utils/exportToCSV'
 import { fetchWithAuth, API_BASE } from '../utils/api'
 
@@ -16,25 +16,21 @@ import { fetchWithAuth, API_BASE } from '../utils/api'
  * - Integration with CandidatePass and ManagerPass
  */
 export function RecruitmentModule() {
-  const { user } = useAuth()
+  const { user } = useAuthContext()
   const {
     recruitmentStats,
     recruitmentRequests,
     pipelineCounts,
     candidatesList,
-    selectedCandidate,
     candidateSearchQuery,
     candidateStatusFilter,
     candidateSourceFilter,
-    showCandidateProfileModal,
     loading,
     fetchRecruitmentData,
     fetchRecruitmentCandidates,
-    setSelectedCandidate,
     setCandidateSearchQuery,
     setCandidateStatusFilter,
     setCandidateSourceFilter,
-    setShowCandidateProfileModal,
   } = useRecruitment(user)
 
   const [showNewRequestModal, setShowNewRequestModal] = useState(false)

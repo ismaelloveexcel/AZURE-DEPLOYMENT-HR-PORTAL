@@ -1,6 +1,6 @@
 import { useState, useEffect, FormEvent } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
-import { useAuth } from '../hooks/useAuth'
+import { useAuthContext } from '../contexts/AuthContext'
 import { API_BASE } from '../utils/api'
 
 interface OnboardingToken {
@@ -72,7 +72,7 @@ interface PendingProfile {
 export function OnboardingModule() {
   const navigate = useNavigate()
   const { token: urlToken } = useParams<{ token?: string }>()
-  const { user } = useAuth()
+  const { user } = useAuthContext()
 
   // HR View state
   const [onboardingTokens, setOnboardingTokens] = useState<OnboardingToken[]>([])

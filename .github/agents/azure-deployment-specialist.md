@@ -91,7 +91,7 @@ HR-PORTAL-AZURE/
 1. **Azure CLI installed**: https://learn.microsoft.com/cli/azure/install-azure-cli
 2. **Azure account**: `az login`
 3. **VS Code extensions**: Azure App Service, Python, Azure Account
-4. **Node.js 18+** and **Python 3.11+**
+4. **Node.js 20+** and **Python 3.11+**
 
 ### Quick Deployment (VS Code Tasks)
 

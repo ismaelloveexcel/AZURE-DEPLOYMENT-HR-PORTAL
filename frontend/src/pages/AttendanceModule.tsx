@@ -1,6 +1,6 @@
 import { useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { useAuth } from '../hooks/useAuth'
+import { useAuthContext } from '../contexts/AuthContext'
 import { useAttendance } from '../hooks/useAttendance'
 import { exportAttendanceToCSV } from '../utils/exportToCSV'
 
@@ -18,7 +18,7 @@ import { exportAttendanceToCSV } from '../utils/exportToCSV'
  */
 export function AttendanceModule() {
   const navigate = useNavigate()
-  const { user } = useAuth()
+  const { user } = useAuthContext()
   const {
     attendanceStatus,
     attendanceRecords,

@@ -12,27 +12,14 @@ const AuthContext = createContext<AuthContextType | null>(null)
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null)
 
-  // Load non-sensitive user data from localStorage on mount
+  // Clear any stale user data on mount to ensure fresh login
+  // We don't persist tokens for security, so rehydrating partial user state
+  // would create a "logged in but unusable" state where API calls fail silently
   useEffect(() => {
     const savedUser = localStorage.getItem('hr_portal_user')
     if (savedUser) {
-      try {
-        const parsed = JSON.parse(savedUser) as {
-          id: number
-          name: string
-          role: string
-        }
-        // Reconstruct a User-compatible object without sensitive fields
-        setUser({
-          id: parsed.id,
-          employee_id: '', // employee_id is not persisted
-          name: parsed.name,
-          role: parsed.role,
-          token: '', // token is not persisted
-        })
-      } catch (e) {
-        localStorage.removeItem('hr_portal_user')
-      }
+      // Clear stale data - authentication always requires a valid token
+      localStorage.removeItem('hr_portal_user')
     }
   }, [])
 

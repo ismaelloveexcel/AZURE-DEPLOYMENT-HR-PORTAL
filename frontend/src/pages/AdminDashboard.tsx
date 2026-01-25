@@ -1,8 +1,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { EmployeeProfile } from '../components/EmployeeProfile'
-import { EOYAdminPanel } from '../components/EOYAdminPanel/EOYAdminPanel'
-import { useAuth } from '../hooks/useAuth'
+import { useAuthContext } from '../contexts/AuthContext'
 import { useEmployees } from '../hooks/useEmployees'
 import { API_BASE, fetchWithAuth } from '../utils/api'
 import { exportEmployeesToCSV } from '../utils/exportToCSV'
@@ -10,8 +9,8 @@ import type { FeatureToggle, AdminDashboard as AdminDashboardType, ComplianceAle
 
 export function AdminDashboard() {
   const navigate = useNavigate()
-  const { user, logout } = useAuth()
-  const { employees, loading, fetchEmployees, openEmployeeModal } = useEmployees(user)
+  const { user, logout } = useAuthContext()
+  const { employees, fetchEmployees } = useEmployees(user)
 
   const [activeTab, setActiveTab] = useState<'dashboard' | 'employees' | 'compliance' | 'recruitment' | 'settings'>('dashboard')
   const [employeeSearch, setEmployeeSearch] = useState('')

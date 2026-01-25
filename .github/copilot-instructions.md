@@ -56,7 +56,7 @@ This repository contains the **Secure Renewals HR Portal** - a full-stack web ap
 
 1. **Prerequisites:**
    - Python 3.11+ (with `uv` package manager)
-   - Node.js 18+
+   - Node.js 20+ (required for React Router v7)
    - PostgreSQL (or use SQLite for local dev)
 
 2. **Backend Setup:**

@@ -8,7 +8,7 @@ import { EmployeeProfile } from '../components/EmployeeProfile'
 
 export function ComplianceModule() {
   const navigate = useNavigate()
-  const { user, logout } = useAuthContext()
+  const { user } = useAuthContext()
   const [complianceAlerts, setComplianceAlerts] = useState<ComplianceAlerts | null>(null)
   const [loading, setLoading] = useState(false)
   const [viewingProfileId, setViewingProfileId] = useState<string | null>(null)
