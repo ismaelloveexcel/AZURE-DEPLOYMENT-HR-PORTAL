@@ -40,7 +40,17 @@ jobs:
       # ===== BICEP VALIDATION =====
       
       - name: Setup Azure CLI
-        uses: azure/setup-azd@v1.0.0
+        continue-on-error: true
+        run: |
+          # Azure CLI is pre-installed on GitHub runners
+          # Just verify it's available
+          if command -v az &> /dev/null; then
+            echo "Azure CLI version: $(az --version | head -1)"
+            echo "AZURE_CLI_AVAILABLE=true" >> $GITHUB_ENV
+          else
+            echo "Azure CLI not available - Bicep validation will use basic checks only"
+            echo "AZURE_CLI_AVAILABLE=false" >> $GITHUB_ENV
+          fi
       
       - name: Validate Bicep Templates
         id: bicep_validate
