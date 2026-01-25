@@ -101,3 +101,31 @@ class SystemSettingsRepository:
             .values(is_enabled=True, value="true")
         )
         return result.rowcount
+
+    async def upsert_setting(
+        self,
+        session: AsyncSession,
+        key: str,
+        value: str,
+        category: str = "admin",
+        description: str = "",
+    ) -> SystemSetting:
+        """Insert or update a setting by key."""
+        existing = await self.get_by_key(session, key)
+        if existing:
+            existing.value = value
+            existing.description = description
+            existing.category = category
+            await session.flush()
+            return existing
+        else:
+            setting = SystemSetting(
+                key=key,
+                value=value,
+                description=description,
+                is_enabled=True,
+                category=category,
+            )
+            session.add(setting)
+            await session.flush()
+            return setting

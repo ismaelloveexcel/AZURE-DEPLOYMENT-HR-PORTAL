@@ -1,17 +1,15 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 
 /**
  * AdminSettings Component
  * 
  * Provides a toggle-based configuration interface for non-technical HR admins.
  * 
- * TODO: Backend Integration Required
- * - Create API endpoints: GET/POST /api/admin/settings
- * - Persist settings to database (system_settings table)
- * - Load saved settings on component mount
- * - Sync settings across users
+ * Backend Integration:
+ * - GET /api/admin/settings - Load saved settings
+ * - PUT /api/admin/settings - Persist settings to database
  * 
- * Current State: UI prototype with local state only (settings lost on refresh)
+ * Settings are stored in the system_settings table and synced across users.
  */
 
 interface FieldConfig {
@@ -31,72 +29,119 @@ interface WorkflowConfig {
   category: string
 }
 
-interface AdminSettingsProps {
-  onClose: () => void
+interface ModuleConfig {
+  id: string
+  name: string
+  enabled: boolean
+  description: string
 }
 
-export const AdminSettings = ({ onClose }: AdminSettingsProps) => {
+interface AdminSettingsProps {
+  onClose: () => void
+  token?: string
+}
+
+// Default configurations (used as fallback if API fails)
+const DEFAULT_FIELDS: FieldConfig[] = [
+  // Employee Basic Fields
+  { id: 'name', name: 'Employee Name', category: 'Basic Info', required: true, visible: true, description: 'Full name of the employee' },
+  { id: 'email', name: 'Email Address', category: 'Basic Info', required: true, visible: true, description: 'Work email address' },
+  { id: 'department', name: 'Department', category: 'Basic Info', required: true, visible: true, description: 'Department assignment' },
+  { id: 'job_title', name: 'Job Title', category: 'Basic Info', required: true, visible: true, description: 'Position title' },
+  { id: 'location', name: 'Work Location', category: 'Basic Info', required: false, visible: true, description: 'Office location' },
+  { id: 'line_manager', name: 'Line Manager', category: 'Basic Info', required: false, visible: true, description: 'Reporting manager' },
+  // UAE Compliance Fields
+  { id: 'visa_number', name: 'Visa Number', category: 'UAE Compliance', required: true, visible: true, description: 'UAE residence visa number' },
+  { id: 'visa_expiry', name: 'Visa Expiry Date', category: 'UAE Compliance', required: true, visible: true, description: 'Visa expiration date' },
+  { id: 'emirates_id', name: 'Emirates ID', category: 'UAE Compliance', required: true, visible: true, description: 'Emirates ID number' },
+  { id: 'emirates_id_expiry', name: 'Emirates ID Expiry', category: 'UAE Compliance', required: true, visible: true, description: 'Emirates ID expiration' },
+  { id: 'medical_fitness', name: 'Medical Fitness', category: 'UAE Compliance', required: false, visible: true, description: 'Medical fitness certificate date' },
+  { id: 'iloe_status', name: 'ILOE Status', category: 'UAE Compliance', required: false, visible: true, description: 'Insurance status' },
+  // Contract Fields
+  { id: 'contract_type', name: 'Contract Type', category: 'Contract', required: true, visible: true, description: 'Employment contract type' },
+  { id: 'contract_start', name: 'Contract Start Date', category: 'Contract', required: true, visible: true, description: 'Contract start date' },
+  { id: 'contract_end', name: 'Contract End Date', category: 'Contract', required: false, visible: true, description: 'Contract end date' },
+  { id: 'probation_end', name: 'Probation End Date', category: 'Contract', required: false, visible: true, description: 'Probation end date' },
+  // Personal Fields
+  { id: 'date_of_birth', name: 'Date of Birth', category: 'Personal', required: true, visible: true, description: 'Employee date of birth' },
+  { id: 'nationality', name: 'Nationality', category: 'Personal', required: false, visible: true, description: 'Employee nationality' },
+  { id: 'passport_number', name: 'Passport Number', category: 'Personal', required: false, visible: true, description: 'Passport number' },
+  { id: 'emergency_contact', name: 'Emergency Contact', category: 'Personal', required: false, visible: true, description: 'Emergency contact' },
+]
+
+const DEFAULT_WORKFLOWS: WorkflowConfig[] = [
+  { id: 'onboarding', name: 'Employee Onboarding', enabled: true, description: 'New employee onboarding workflow', category: 'Onboarding' },
+  { id: 'offboarding', name: 'Employee Offboarding', enabled: true, description: 'Employee exit workflow', category: 'Offboarding' },
+  { id: 'contract_renewal', name: 'Contract Renewal', enabled: true, description: 'Contract renewal reminders', category: 'Compliance' },
+  { id: 'visa_renewal', name: 'Visa Renewal Alerts', enabled: true, description: 'Visa expiry notifications', category: 'Compliance' },
+  { id: 'medical_renewal', name: 'Medical Fitness Renewal', enabled: true, description: 'Medical certificate renewal', category: 'Compliance' },
+  { id: 'probation_review', name: 'Probation Review', enabled: true, description: 'Probation completion workflow', category: 'HR' },
+  { id: 'leave_approval', name: 'Leave Approval', enabled: true, description: 'Leave request approval', category: 'HR' },
+  { id: 'timesheet_approval', name: 'Timesheet Approval', enabled: false, description: 'Weekly timesheet approval', category: 'HR' },
+  { id: 'recruitment_pipeline', name: 'Recruitment Pipeline', enabled: true, description: 'Candidate tracking', category: 'Recruitment' },
+  { id: 'interview_scheduling', name: 'Interview Scheduling', enabled: true, description: 'Interview automation', category: 'Recruitment' },
+]
+
+const DEFAULT_MODULES: ModuleConfig[] = [
+  { id: 'employees', name: 'Employee Management', enabled: true, description: 'Core employee records' },
+  { id: 'renewals', name: 'Contract Renewals', enabled: true, description: 'Contract renewal tracking' },
+  { id: 'compliance', name: 'UAE Compliance', enabled: true, description: 'Visa, EID, medical tracking' },
+  { id: 'attendance', name: 'Attendance Tracking', enabled: true, description: 'Time and attendance' },
+  { id: 'leave', name: 'Leave Management', enabled: true, description: 'Leave requests and balances' },
+  { id: 'recruitment', name: 'Recruitment', enabled: true, description: 'Candidate management' },
+  { id: 'documents', name: 'Document Generation', enabled: true, description: 'Employment letters' },
+  { id: 'reports', name: 'Reports & Analytics', enabled: false, description: 'HR reports and dashboards' },
+]
+
+export const AdminSettings = ({ onClose, token }: AdminSettingsProps) => {
   const [activeTab, setActiveTab] = useState<'fields' | 'workflows' | 'modules' | 'appearance'>('fields')
   const [searchQuery, setSearchQuery] = useState('')
   const [isSaving, setIsSaving] = useState(false)
+  const [isLoading, setIsLoading] = useState(true)
   const [saveMessage, setSaveMessage] = useState('')
 
   // Field configurations
-  const [fieldConfigs, setFieldConfigs] = useState<FieldConfig[]>([
-    // Employee Basic Fields
-    { id: 'name', name: 'Employee Name', category: 'Basic Info', required: true, visible: true, description: 'Full name of the employee' },
-    { id: 'email', name: 'Email Address', category: 'Basic Info', required: true, visible: true, description: 'Work email address' },
-    { id: 'department', name: 'Department', category: 'Basic Info', required: true, visible: true, description: 'Department assignment' },
-    { id: 'job_title', name: 'Job Title', category: 'Basic Info', required: true, visible: true, description: 'Position title' },
-    { id: 'location', name: 'Work Location', category: 'Basic Info', required: false, visible: true, description: 'Office location' },
-    { id: 'line_manager', name: 'Line Manager', category: 'Basic Info', required: false, visible: true, description: 'Reporting manager' },
-    
-    // UAE Compliance Fields
-    { id: 'visa_number', name: 'Visa Number', category: 'UAE Compliance', required: true, visible: true, description: 'UAE residence visa number' },
-    { id: 'visa_expiry', name: 'Visa Expiry Date', category: 'UAE Compliance', required: true, visible: true, description: 'Visa expiration date' },
-    { id: 'emirates_id', name: 'Emirates ID', category: 'UAE Compliance', required: true, visible: true, description: 'Emirates ID number' },
-    { id: 'emirates_id_expiry', name: 'Emirates ID Expiry', category: 'UAE Compliance', required: true, visible: true, description: 'Emirates ID expiration' },
-    { id: 'medical_fitness', name: 'Medical Fitness', category: 'UAE Compliance', required: false, visible: true, description: 'Medical fitness certificate date' },
-    { id: 'iloe_status', name: 'ILOE Status', category: 'UAE Compliance', required: false, visible: true, description: 'Insurance status' },
-    
-    // Contract Fields
-    { id: 'contract_type', name: 'Contract Type', category: 'Contract', required: true, visible: true, description: 'Type of employment contract' },
-    { id: 'contract_start', name: 'Contract Start Date', category: 'Contract', required: true, visible: true, description: 'Employment start date' },
-    { id: 'contract_end', name: 'Contract End Date', category: 'Contract', required: false, visible: true, description: 'Contract expiration' },
-    { id: 'probation_status', name: 'Probation Status', category: 'Contract', required: false, visible: true, description: 'Probation period status' },
-    
-    // Personal Fields
-    { id: 'nationality', name: 'Nationality', category: 'Personal', required: false, visible: true, description: 'Country of citizenship' },
-    { id: 'gender', name: 'Gender', category: 'Personal', required: false, visible: true, description: 'Gender identification' },
-    { id: 'date_of_birth', name: 'Date of Birth', category: 'Personal', required: false, visible: true, description: 'Birth date' },
-    { id: 'emergency_contact', name: 'Emergency Contact', category: 'Personal', required: false, visible: true, description: 'Emergency contact info' },
-  ])
+  const [fieldConfigs, setFieldConfigs] = useState<FieldConfig[]>(DEFAULT_FIELDS)
 
   // Workflow configurations
-  const [workflowConfigs, setWorkflowConfigs] = useState<WorkflowConfig[]>([
-    { id: 'onboarding', name: 'Onboarding Process', enabled: true, description: 'New employee onboarding workflow', category: 'HR Processes' },
-    { id: 'offboarding', name: 'Offboarding Process', enabled: true, description: 'Employee exit workflow', category: 'HR Processes' },
-    { id: 'probation_review', name: 'Probation Review', enabled: true, description: 'Automatic probation period alerts', category: 'HR Processes' },
-    { id: 'contract_renewal', name: 'Contract Renewal Alerts', enabled: true, description: 'Contract expiry notifications', category: 'HR Processes' },
-    { id: 'visa_renewal', name: 'Visa Renewal Tracking', enabled: true, description: 'Visa expiry monitoring', category: 'UAE Compliance' },
-    { id: 'emirates_id_renewal', name: 'Emirates ID Tracking', enabled: true, description: 'Emirates ID expiry alerts', category: 'UAE Compliance' },
-    { id: 'medical_renewal', name: 'Medical Fitness Tracking', enabled: false, description: 'Medical certificate monitoring', category: 'UAE Compliance' },
-    { id: 'performance_review', name: 'Performance Reviews', enabled: false, description: 'Annual performance cycle', category: 'Performance' },
-    { id: 'recruitment_workflow', name: 'Recruitment Pipeline', enabled: true, description: 'Candidate tracking workflow', category: 'Recruitment' },
-    { id: 'approval_chain', name: 'Approval Chain', enabled: true, description: 'Multi-level approval process', category: 'Approvals' },
-  ])
+  const [workflowConfigs, setWorkflowConfigs] = useState<WorkflowConfig[]>(DEFAULT_WORKFLOWS)
 
   // Module configurations
-  const [moduleConfigs, setModuleConfigs] = useState([
-    { id: 'recruitment', name: 'Recruitment Module', enabled: true, description: 'Candidate management and hiring' },
-    { id: 'onboarding', name: 'Onboarding Module', enabled: true, description: 'New employee setup' },
-    { id: 'attendance', name: 'Attendance Tracking', enabled: true, description: 'Time and attendance' },
-    { id: 'performance', name: 'Performance Management', enabled: false, description: 'Performance reviews and goals' },
-    { id: 'insurance', name: 'Insurance Census', enabled: true, description: 'Health insurance management' },
-    { id: 'templates', name: 'Document Templates', enabled: true, description: 'HR document generation' },
-    { id: 'compliance_alerts', name: 'Compliance Alerts', enabled: true, description: 'UAE compliance monitoring' },
-    { id: 'employee_passes', name: 'Employee Passes', enabled: true, description: 'Digital passes system' },
-  ])
+  const [moduleConfigs, setModuleConfigs] = useState<ModuleConfig[]>(DEFAULT_MODULES)
+
+  // Load settings from backend on mount
+  useEffect(() => {
+    const loadSettings = async () => {
+      try {
+        const authToken = token || localStorage.getItem('token')
+        if (!authToken) {
+          setIsLoading(false)
+          return
+        }
+
+        const response = await fetch('/api/admin/settings', {
+          headers: {
+            'Authorization': `Bearer ${authToken}`,
+            'Content-Type': 'application/json',
+          },
+        })
+
+        if (response.ok) {
+          const data = await response.json()
+          if (data.fields?.length) setFieldConfigs(data.fields)
+          if (data.workflows?.length) setWorkflowConfigs(data.workflows)
+          if (data.modules?.length) setModuleConfigs(data.modules)
+        }
+      } catch (error) {
+        console.error('Failed to load admin settings:', error)
+        // Use defaults on error
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    loadSettings()
+  }, [token])
 
   // Filter fields by search and category
   const categories = [...new Set(fieldConfigs.map(f => f.category))]
@@ -143,10 +188,34 @@ export const AdminSettings = ({ onClose }: AdminSettingsProps) => {
 
   const handleSave = async () => {
     setIsSaving(true)
+    setSaveMessage('')
     try {
-      // In a real app, this would save to the backend
-      await new Promise(resolve => setTimeout(resolve, 1000))
-      setSaveMessage('Settings saved successfully!')
+      const authToken = token || localStorage.getItem('token')
+      if (!authToken) {
+        setSaveMessage('Authentication required')
+        setIsSaving(false)
+        return
+      }
+
+      const response = await fetch('/api/admin/settings', {
+        method: 'PUT',
+        headers: {
+          'Authorization': `Bearer ${authToken}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          fields: fieldConfigs,
+          workflows: workflowConfigs,
+          modules: moduleConfigs,
+        }),
+      })
+
+      if (response.ok) {
+        setSaveMessage('Settings saved successfully!')
+      } else {
+        const errorData = await response.json().catch(() => ({}))
+        setSaveMessage(errorData.detail || 'Failed to save settings')
+      }
       setTimeout(() => setSaveMessage(''), 3000)
     } catch {
       setSaveMessage('Failed to save settings')

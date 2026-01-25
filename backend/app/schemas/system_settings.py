@@ -65,3 +65,51 @@ class AdminDashboard(BaseModel):
     features_enabled: int = Field(..., description="Number of enabled features")
     features_total: int = Field(..., description="Total number of features")
     system_status: str = Field(..., description="System status: setup, active, maintenance")
+
+
+# ==================== AdminSettings API Schemas ====================
+
+class FieldConfig(BaseModel):
+    """Schema for field configuration in AdminSettings."""
+    
+    id: str = Field(..., description="Unique field identifier")
+    name: str = Field(..., description="Human-readable field name")
+    category: str = Field(..., description="Field category (Basic Info, UAE Compliance, Contract, Personal)")
+    required: bool = Field(..., description="Whether the field is required")
+    visible: bool = Field(..., description="Whether the field is visible")
+    description: str = Field(..., description="Field description")
+
+
+class WorkflowConfig(BaseModel):
+    """Schema for workflow configuration in AdminSettings."""
+    
+    id: str = Field(..., description="Unique workflow identifier")
+    name: str = Field(..., description="Human-readable workflow name")
+    enabled: bool = Field(..., description="Whether the workflow is enabled")
+    description: str = Field(..., description="Workflow description")
+    category: str = Field(..., description="Workflow category")
+
+
+class ModuleConfig(BaseModel):
+    """Schema for module configuration in AdminSettings."""
+    
+    id: str = Field(..., description="Unique module identifier")
+    name: str = Field(..., description="Human-readable module name")
+    enabled: bool = Field(..., description="Whether the module is enabled")
+    description: str = Field(..., description="Module description")
+
+
+class AdminSettingsResponse(BaseModel):
+    """Schema for full AdminSettings response."""
+    
+    fields: List[FieldConfig] = Field(default_factory=list, description="Field configurations")
+    workflows: List[WorkflowConfig] = Field(default_factory=list, description="Workflow configurations")
+    modules: List[ModuleConfig] = Field(default_factory=list, description="Module configurations")
+
+
+class AdminSettingsUpdate(BaseModel):
+    """Schema for updating AdminSettings."""
+    
+    fields: Optional[List[FieldConfig]] = Field(None, description="Field configurations to update")
+    workflows: Optional[List[WorkflowConfig]] = Field(None, description="Workflow configurations to update")
+    modules: Optional[List[ModuleConfig]] = Field(None, description="Module configurations to update")

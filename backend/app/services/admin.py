@@ -1,4 +1,4 @@
-from typing import Dict, List
+from typing import Dict, List, Optional
 
 from fastapi import HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -9,9 +9,14 @@ from app.repositories.employees import EmployeeRepository
 from app.repositories.renewals import RenewalRepository
 from app.schemas.system_settings import (
     AdminDashboard,
+    AdminSettingsResponse,
+    AdminSettingsUpdate,
     FeaturesByCategory,
     FeatureToggle,
     FeatureToggleUpdate,
+    FieldConfig,
+    ModuleConfig,
+    WorkflowConfig,
 )
 
 
@@ -158,6 +163,144 @@ class AdminService:
     async def is_feature_enabled(self, session: AsyncSession, key: str) -> bool:
         """Check if a specific feature is enabled."""
         return await self._settings.is_feature_enabled(session, key)
+
+    # ==================== AdminSettings API Methods ====================
+
+    def _get_default_fields(self) -> List[FieldConfig]:
+        """Return default field configurations."""
+        return [
+            # Basic Info
+            FieldConfig(id="name", name="Employee Name", category="Basic Info", required=True, visible=True, description="Full name of the employee"),
+            FieldConfig(id="email", name="Email Address", category="Basic Info", required=True, visible=True, description="Work email address"),
+            FieldConfig(id="department", name="Department", category="Basic Info", required=True, visible=True, description="Department assignment"),
+            FieldConfig(id="job_title", name="Job Title", category="Basic Info", required=True, visible=True, description="Position title"),
+            FieldConfig(id="employee_id", name="Employee ID", category="Basic Info", required=True, visible=True, description="Unique employee identifier"),
+            # UAE Compliance
+            FieldConfig(id="visa_number", name="Visa Number", category="UAE Compliance", required=False, visible=True, description="UAE visa number"),
+            FieldConfig(id="visa_expiry", name="Visa Expiry Date", category="UAE Compliance", required=False, visible=True, description="Visa expiration date"),
+            FieldConfig(id="emirates_id", name="Emirates ID", category="UAE Compliance", required=False, visible=True, description="Emirates ID number"),
+            FieldConfig(id="emirates_id_expiry", name="Emirates ID Expiry", category="UAE Compliance", required=False, visible=True, description="Emirates ID expiration date"),
+            FieldConfig(id="medical_fitness", name="Medical Fitness", category="UAE Compliance", required=False, visible=True, description="Medical fitness certificate"),
+            FieldConfig(id="iloe_status", name="ILOE Status", category="UAE Compliance", required=False, visible=True, description="Insurance Letter of Employment status"),
+            # Contract
+            FieldConfig(id="contract_type", name="Contract Type", category="Contract", required=True, visible=True, description="Employment contract type"),
+            FieldConfig(id="contract_start", name="Contract Start Date", category="Contract", required=True, visible=True, description="Contract start date"),
+            FieldConfig(id="contract_end", name="Contract End Date", category="Contract", required=False, visible=True, description="Contract end date"),
+            FieldConfig(id="probation_end", name="Probation End Date", category="Contract", required=False, visible=True, description="Probation period end date"),
+            FieldConfig(id="salary", name="Basic Salary", category="Contract", required=False, visible=False, description="Monthly basic salary"),
+            # Personal
+            FieldConfig(id="date_of_birth", name="Date of Birth", category="Personal", required=True, visible=True, description="Employee date of birth"),
+            FieldConfig(id="nationality", name="Nationality", category="Personal", required=False, visible=True, description="Employee nationality"),
+            FieldConfig(id="passport_number", name="Passport Number", category="Personal", required=False, visible=True, description="Passport number"),
+            FieldConfig(id="emergency_contact", name="Emergency Contact", category="Personal", required=False, visible=True, description="Emergency contact information"),
+        ]
+
+    def _get_default_workflows(self) -> List[WorkflowConfig]:
+        """Return default workflow configurations."""
+        return [
+            WorkflowConfig(id="onboarding", name="Employee Onboarding", enabled=True, description="New employee onboarding workflow", category="Onboarding"),
+            WorkflowConfig(id="offboarding", name="Employee Offboarding", enabled=True, description="Employee exit workflow", category="Offboarding"),
+            WorkflowConfig(id="contract_renewal", name="Contract Renewal", enabled=True, description="Contract renewal reminders and workflow", category="Compliance"),
+            WorkflowConfig(id="visa_renewal", name="Visa Renewal Alerts", enabled=True, description="Visa expiry notifications", category="Compliance"),
+            WorkflowConfig(id="medical_renewal", name="Medical Fitness Renewal", enabled=True, description="Medical certificate renewal reminders", category="Compliance"),
+            WorkflowConfig(id="probation_review", name="Probation Review", enabled=True, description="Probation period completion workflow", category="HR"),
+            WorkflowConfig(id="leave_approval", name="Leave Approval", enabled=True, description="Leave request approval workflow", category="HR"),
+            WorkflowConfig(id="timesheet_approval", name="Timesheet Approval", enabled=False, description="Weekly timesheet approval workflow", category="HR"),
+            WorkflowConfig(id="recruitment_pipeline", name="Recruitment Pipeline", enabled=True, description="Candidate tracking workflow", category="Recruitment"),
+            WorkflowConfig(id="interview_scheduling", name="Interview Scheduling", enabled=True, description="Interview scheduling automation", category="Recruitment"),
+        ]
+
+    def _get_default_modules(self) -> List[ModuleConfig]:
+        """Return default module configurations."""
+        return [
+            ModuleConfig(id="employees", name="Employee Management", enabled=True, description="Core employee records and profiles"),
+            ModuleConfig(id="renewals", name="Contract Renewals", enabled=True, description="Contract renewal tracking"),
+            ModuleConfig(id="compliance", name="UAE Compliance", enabled=True, description="Visa, EID, medical fitness tracking"),
+            ModuleConfig(id="attendance", name="Attendance Tracking", enabled=True, description="Time and attendance management"),
+            ModuleConfig(id="leave", name="Leave Management", enabled=True, description="Leave requests and balances"),
+            ModuleConfig(id="recruitment", name="Recruitment", enabled=True, description="Candidate and interview management"),
+            ModuleConfig(id="documents", name="Document Generation", enabled=True, description="Employment letters and certificates"),
+            ModuleConfig(id="reports", name="Reports & Analytics", enabled=False, description="HR reports and dashboards"),
+        ]
+
+    async def get_admin_settings(self, session: AsyncSession) -> AdminSettingsResponse:
+        """Get all admin settings for the AdminSettings UI component."""
+        # Try to load from database, fall back to defaults
+        fields_setting = await self._settings.get_by_key(session, "admin_settings_fields")
+        workflows_setting = await self._settings.get_by_key(session, "admin_settings_workflows")
+        modules_setting = await self._settings.get_by_key(session, "admin_settings_modules")
+        
+        # Use stored values or defaults
+        import json
+        
+        fields = self._get_default_fields()
+        if fields_setting and fields_setting.value:
+            try:
+                stored_fields = json.loads(fields_setting.value)
+                fields = [FieldConfig(**f) for f in stored_fields]
+            except (json.JSONDecodeError, TypeError):
+                pass
+        
+        workflows = self._get_default_workflows()
+        if workflows_setting and workflows_setting.value:
+            try:
+                stored_workflows = json.loads(workflows_setting.value)
+                workflows = [WorkflowConfig(**w) for w in stored_workflows]
+            except (json.JSONDecodeError, TypeError):
+                pass
+        
+        modules = self._get_default_modules()
+        if modules_setting and modules_setting.value:
+            try:
+                stored_modules = json.loads(modules_setting.value)
+                modules = [ModuleConfig(**m) for m in stored_modules]
+            except (json.JSONDecodeError, TypeError):
+                pass
+        
+        return AdminSettingsResponse(
+            fields=fields,
+            workflows=workflows,
+            modules=modules,
+        )
+
+    async def update_admin_settings(
+        self, session: AsyncSession, settings: AdminSettingsUpdate
+    ) -> AdminSettingsResponse:
+        """Update admin settings."""
+        import json
+        
+        if settings.fields is not None:
+            fields_json = json.dumps([f.model_dump() for f in settings.fields])
+            await self._settings.upsert_setting(
+                session,
+                key="admin_settings_fields",
+                value=fields_json,
+                category="admin",
+                description="Field configurations for AdminSettings UI",
+            )
+        
+        if settings.workflows is not None:
+            workflows_json = json.dumps([w.model_dump() for w in settings.workflows])
+            await self._settings.upsert_setting(
+                session,
+                key="admin_settings_workflows",
+                value=workflows_json,
+                category="admin",
+                description="Workflow configurations for AdminSettings UI",
+            )
+        
+        if settings.modules is not None:
+            modules_json = json.dumps([m.model_dump() for m in settings.modules])
+            await self._settings.upsert_setting(
+                session,
+                key="admin_settings_modules",
+                value=modules_json,
+                category="admin",
+                description="Module configurations for AdminSettings UI",
+            )
+        
+        await session.commit()
+        return await self.get_admin_settings(session)
 
 
 # Example: Automated compliance report export (placeholder)
