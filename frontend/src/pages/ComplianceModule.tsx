@@ -1,16 +1,14 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { User, ComplianceAlerts, ComplianceAlertItem } from '../types'
+import { useAuthContext } from '../contexts/AuthContext'
+import { ComplianceAlerts, ComplianceAlertItem } from '../types'
 import { API_BASE, fetchWithAuth } from '../utils/api'
 import { exportComplianceAlertsToCSV } from '../utils/exportToCSV'
 import { EmployeeProfile } from '../components/EmployeeProfile'
 
-interface ComplianceModuleProps {
-  user: User | null
-}
-
-export function ComplianceModule({ user }: ComplianceModuleProps) {
+export function ComplianceModule() {
   const navigate = useNavigate()
+  const { user, logout } = useAuthContext()
   const [complianceAlerts, setComplianceAlerts] = useState<ComplianceAlerts | null>(null)
   const [loading, setLoading] = useState(false)
   const [viewingProfileId, setViewingProfileId] = useState<string | null>(null)
