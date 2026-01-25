@@ -439,8 +439,8 @@ Guardian HR-UAE and OSS Scout are auto-selected by Copilot when tasks match thei
 
 - [Agent Integration Guide](../AGENT_INTEGRATION_GUIDE.md)
 - [Agent Governance](../AGENT_GOVERNANCE.md)
-- [Copilot Agents Guide](COPILOT_AGENTS.md)
-- [Quick Reference](.github/agents/QUICK_REFERENCE.md)
+- [Agents README](../.github/agents/README.md)
+- [Quick Reference](../.github/agents/QUICK_REFERENCE.md)
 
 ---
 
