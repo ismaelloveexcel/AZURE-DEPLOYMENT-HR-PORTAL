@@ -3,6 +3,7 @@ import App from './App'
 import { ComplianceModule } from './pages/ComplianceModule'
 import { AttendanceModule } from './pages/AttendanceModule'
 import { RecruitmentModule } from './pages/RecruitmentModule'
+import { OnboardingModule } from './pages/OnboardingModule'
 
 /**
  * Router wrapper for the HR Portal
@@ -19,6 +20,8 @@ import { RecruitmentModule } from './pages/RecruitmentModule'
  * - /compliance - Compliance alerts dashboard
  * - /attendance - Attendance tracking
  * - /recruitment - Recruitment management (positions, candidates, pipeline)
+ * - /onboarding - Onboarding management (HR view)
+ * - /public-onboarding/:token - Public onboarding form (no auth)
  * 
  * Planned extractions:
  * - /admin - Admin dashboard
@@ -35,6 +38,8 @@ export function RouterApp() {
         <Route path="/compliance" element={<ComplianceModule user={null} />} />
         <Route path="/attendance" element={<AttendanceModule />} />
         <Route path="/recruitment" element={<RecruitmentModule />} />
+        <Route path="/onboarding" element={<OnboardingModule />} />
+        <Route path="/public-onboarding/:token?" element={<OnboardingModule />} />
         
         {/* Default route - Existing App.tsx handles all other sections */}
         <Route path="*" element={<App />} />
