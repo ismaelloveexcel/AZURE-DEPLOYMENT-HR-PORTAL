@@ -2024,14 +2024,14 @@ const [passFormData, setPassFormData] = useState<PassFormData>({
   if (activeSection === 'secret-chamber') {
     if (user?.role !== 'admin') {
       return (
-        <div className="min-h-screen bg-gray-100 flex flex-col items-center justify-center p-8">
+        <div className="min-h-screen bg-primary-50 flex flex-col items-center justify-center p-8">
           {loginModal}
-          <div className="bg-white rounded-2xl shadow-lg p-8 max-w-md text-center">
-            <h2 className="text-xl font-semibold text-gray-800 mb-4">Access Denied</h2>
-            <p className="text-gray-600 mb-6">You need admin privileges to access this section.</p>
+          <div className="bg-white rounded-card shadow-card p-8 max-w-md text-center border border-primary-200">
+            <h2 className="text-xl font-semibold text-primary-800 mb-4">Access Denied</h2>
+            <p className="text-primary-600 mb-6">You need admin privileges to access this section.</p>
             <button
               onClick={() => handleNavigate('home')}
-              className="px-6 py-2 bg-emerald-500 text-white rounded-lg hover:bg-emerald-600 transition-colors"
+              className="px-6 py-2 bg-accent-green text-white rounded-button hover:bg-accent-green/90 transition-colors"
             >
               Back to Home
             </button>
@@ -2041,51 +2041,51 @@ const [passFormData, setPassFormData] = useState<PassFormData>({
     }
 
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-purple-900 to-gray-900 p-8">
+      <div className="min-h-screen bg-primary-50 p-8">
         {loginModal}
         <div className="max-w-4xl mx-auto">
           <div className="flex items-center justify-between mb-8">
             <div>
-              <p className="text-purple-300 text-sm tracking-widest uppercase mb-1">Secret Chamber</p>
-              <h1 className="text-2xl font-semibold text-white">System Configuration</h1>
+              <p className="text-accent-green text-sm tracking-widest uppercase mb-1 font-medium">Admin Settings</p>
+              <h1 className="text-2xl font-semibold text-primary-800">System Configuration</h1>
             </div>
             <div className="flex items-center gap-4">
-              <span className="text-sm text-purple-300">
+              <span className="text-sm text-primary-600">
                 {user?.name}
               </span>
               <button
                 onClick={() => setActiveSection('admin')}
-                className="px-4 py-2 text-purple-300 hover:text-white hover:bg-purple-800/50 rounded-lg transition-colors"
+                className="px-4 py-2 text-primary-600 hover:text-primary-800 hover:bg-primary-100 rounded-lg transition-colors"
               >
                 ← Back to Admin
               </button>
             </div>
           </div>
 
-          <div className="bg-white/10 backdrop-blur-sm rounded-2xl border border-purple-500/20 p-6">
-            <h2 className="text-lg font-semibold text-white mb-6 flex items-center gap-2">
-              <svg className="w-5 h-5 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
+          <div className="bg-white rounded-card border border-primary-200 p-6 shadow-card">
+            <h2 className="text-lg font-semibold text-primary-800 mb-6 flex items-center gap-2">
+              <svg className="w-5 h-5 text-accent-green" fill="none" stroke="currentColor" strokeWidth={1.5} viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
               </svg>
               Feature Toggles
             </h2>
             {chamberLoading ? (
-              <div className="text-center text-purple-300 py-8">Loading...</div>
+              <div className="text-center text-primary-600 py-8">Loading...</div>
             ) : features.length === 0 ? (
-              <div className="text-center text-purple-300 py-8">No features configured</div>
+              <div className="text-center text-primary-600 py-8">No features configured</div>
             ) : (
               <div className="space-y-3">
                 {features.map(feature => (
-                  <div key={feature.key} className="flex items-center justify-between p-4 bg-white/5 rounded-xl border border-purple-500/10 hover:border-purple-500/30 transition-colors">
+                  <div key={feature.key} className="flex items-center justify-between p-4 bg-primary-50 rounded-xl border border-primary-200 hover:border-accent-green/50 transition-colors">
                     <div>
-                      <p className="font-medium text-white">{feature.key}</p>
-                      <p className="text-sm text-purple-300">{feature.description}</p>
-                      <span className="text-xs text-purple-400">{feature.category}</span>
+                      <p className="font-medium text-primary-800">{feature.key}</p>
+                      <p className="text-sm text-primary-600">{feature.description}</p>
+                      <span className="text-xs text-accent-gray">{feature.category}</span>
                     </div>
                     <button
                       onClick={() => toggleFeature(feature.key, !feature.is_enabled)}
                       className={`relative inline-flex h-7 w-12 items-center rounded-full transition-colors ${
-                        feature.is_enabled ? 'bg-purple-500' : 'bg-gray-600'
+                        feature.is_enabled ? 'bg-accent-green' : 'bg-primary-300'
                       }`}
                     >
                       <span
@@ -2100,7 +2100,7 @@ const [passFormData, setPassFormData] = useState<PassFormData>({
             )}
           </div>
 
-          <p className="text-purple-400/50 text-xs text-center mt-8">
+          <p className="text-primary-400 text-xs text-center mt-8">
             This area is restricted to system administrators only.
           </p>
         </div>
@@ -2142,26 +2142,24 @@ const [passFormData, setPassFormData] = useState<PassFormData>({
         
         <button
           onClick={() => setActiveSection('secret-chamber')}
-          className="absolute bottom-6 right-6 p-3 rounded-2xl bg-gradient-to-br from-gray-100 to-gray-200 hover:from-purple-100 hover:to-purple-200 transition-all duration-300 group"
-          style={{ boxShadow: '0 4px 15px -3px rgba(0,0,0,0.1), inset 0 1px 0 rgba(255,255,255,0.8)' }}
-          title="Secret Chamber"
+          className="absolute bottom-6 right-6 p-3 rounded-xl bg-white border border-primary-200 hover:border-accent-green/50 hover:bg-primary-50 transition-all duration-300 group shadow-card"
+          title="Admin Settings"
         >
           <svg 
-            className="w-6 h-6 text-purple-300 group-hover:text-purple-500 transition-colors" 
+            className="w-6 h-6 text-accent-green" 
             fill="none" 
             stroke="currentColor" 
+            strokeWidth={1.5}
             viewBox="0 0 24 24"
           >
             <path 
               strokeLinecap="round" 
               strokeLinejoin="round" 
-              strokeWidth={1.5} 
               d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" 
             />
             <path 
               strokeLinecap="round" 
               strokeLinejoin="round" 
-              strokeWidth={1.5} 
               d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" 
             />
           </svg>
