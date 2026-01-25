@@ -139,15 +139,54 @@ jobs:
           
           # Wait for SCM container to stabilize after configuration changes
           # This prevents "SCM container restart" errors during deployment
-          echo "⏳ Waiting 30s for SCM container to stabilize..."
-          sleep 30
+          # Azure SCM container restarts can take 60-120 seconds to complete
+          echo "⏳ Waiting 90s for SCM container to stabilize..."
+          sleep 90
 
       - name: Deploy to Azure App Service
-        uses: azure/webapps-deploy@v3
-        with:
-          app-name: ${{ env.WEBAPP_NAME }}
-          package: deploy.zip
-          clean: true
+        run: |
+          echo "🚀 Deploying to Azure App Service..."
+          
+          # Deploy using Azure CLI with retry logic for SCM restart issues
+          MAX_ATTEMPTS=3
+          ATTEMPT=1
+          
+          while [ $ATTEMPT -le $MAX_ATTEMPTS ]; do
+            echo "📦 Deployment attempt $ATTEMPT of $MAX_ATTEMPTS..."
+            
+            # Use az webapp deploy for zip deployment
+            DEPLOY_OUTPUT=$(az webapp deploy \
+              --name "$WEBAPP_NAME" \
+              --resource-group "$RESOURCE_GROUP" \
+              --src-path deploy.zip \
+              --type zip \
+              --clean true \
+              --restart true \
+              --timeout 600 2>&1)
+            DEPLOY_EXIT_CODE=$?
+            
+            echo "$DEPLOY_OUTPUT"
+            
+            if [ $DEPLOY_EXIT_CODE -eq 0 ]; then
+              echo "✅ Deployment successful on attempt $ATTEMPT"
+              break
+            else
+              echo "⚠️ Deployment attempt $ATTEMPT failed (exit code: $DEPLOY_EXIT_CODE)"
+              
+              if [ $ATTEMPT -lt $MAX_ATTEMPTS ]; then
+                # SCM container may be restarting, wait before retry
+                # Use exponential backoff: 60s for retry 1, 120s for retry 2
+                WAIT_TIME=$((60 * ATTEMPT))
+                echo "⏳ Waiting ${WAIT_TIME}s before retry to allow SCM container to stabilize..."
+                sleep $WAIT_TIME
+              else
+                echo "❌ All deployment attempts failed"
+                exit 1
+              fi
+            fi
+            
+            ATTEMPT=$((ATTEMPT + 1))
+          done
 
       - name: Wait for deployment and Oryx build
         run: |
