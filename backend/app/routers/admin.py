@@ -7,6 +7,8 @@ from app.core.security import require_role
 from app.database import get_session
 from app.schemas.system_settings import (
     AdminDashboard,
+    AdminSettingsResponse,
+    AdminSettingsUpdate,
     FeaturesByCategory,
     FeatureToggle,
     FeatureToggleBulkUpdate,
@@ -184,3 +186,46 @@ async def check_feature_status(
     """
     is_enabled = await admin_service.is_feature_enabled(session, key)
     return {"key": key, "is_enabled": is_enabled}
+
+
+# ==================== AdminSettings API ====================
+
+@router.get(
+    "/settings",
+    response_model=AdminSettingsResponse,
+    summary="Get all admin settings (fields, workflows, modules)",
+)
+async def get_admin_settings(
+    role: str = Depends(require_role(["admin"])),
+    session: AsyncSession = Depends(get_session),
+):
+    """
+    Get all admin settings including field configurations, workflow settings,
+    and module toggles.
+    
+    This endpoint supports the AdminSettings UI component for non-technical
+    configuration management.
+    
+    **Admin only.**
+    """
+    return await admin_service.get_admin_settings(session)
+
+
+@router.put(
+    "/settings",
+    response_model=AdminSettingsResponse,
+    summary="Update admin settings",
+)
+async def update_admin_settings(
+    settings: AdminSettingsUpdate,
+    role: str = Depends(require_role(["admin"])),
+    session: AsyncSession = Depends(get_session),
+):
+    """
+    Update admin settings (fields, workflows, modules).
+    
+    Partial updates are supported - only include the sections you want to update.
+    
+    **Admin only.**
+    """
+    return await admin_service.update_admin_settings(session, settings)

@@ -423,9 +423,9 @@ export function EOYAdminPanel({ token, userId }: EOYAdminPanelProps) {
                   <p className="text-sm text-amber-600 font-medium">Pending</p>
                   <p className="text-3xl font-bold text-amber-700">{pendingCount}</p>
                 </div>
-                <div className="bg-gradient-to-br from-purple-50 to-purple-100 rounded-xl p-5">
-                  <p className="text-sm text-purple-600 font-medium">Shortlisted</p>
-                  <p className="text-3xl font-bold text-purple-700">{stats?.shortlisted_count || 0}</p>
+                <div className="bg-gradient-to-br from-teal-50 to-teal-100 rounded-xl p-5">
+                  <p className="text-sm text-teal-600 font-medium">Shortlisted</p>
+                  <p className="text-3xl font-bold text-teal-700">{stats?.shortlisted_count || 0}</p>
                 </div>
               </div>
 
@@ -545,7 +545,7 @@ export function EOYAdminPanel({ token, userId }: EOYAdminPanelProps) {
                     key={nomination.id}
                     className={`bg-white border rounded-xl p-5 cursor-pointer hover:shadow-md transition-shadow ${
                       nomination.status === 'winner' ? 'border-amber-300 bg-amber-50/50' :
-                      nomination.status === 'shortlisted' ? 'border-purple-200' :
+                      nomination.status === 'shortlisted' ? 'border-teal-200' :
                       'border-gray-200'
                     }`}
                     onClick={() => setSelectedNomination(nomination)}
@@ -565,7 +565,7 @@ export function EOYAdminPanel({ token, userId }: EOYAdminPanelProps) {
                       </div>
                       <span className={`px-3 py-1 rounded-full text-xs font-medium ${
                         nomination.status === 'winner' ? 'bg-amber-100 text-amber-700' :
-                        nomination.status === 'shortlisted' ? 'bg-purple-100 text-purple-700' :
+                        nomination.status === 'shortlisted' ? 'bg-teal-100 text-teal-700' :
                         nomination.status === 'not_selected' ? 'bg-slate-200 text-slate-900' :
                         'bg-blue-100 text-blue-700'
                       }`}>
@@ -609,9 +609,9 @@ export function EOYAdminPanel({ token, userId }: EOYAdminPanelProps) {
                       <p className="text-2xl font-bold text-gray-800">{report.total_nominations}</p>
                       <p className="text-xs text-gray-500 uppercase tracking-wider">Total Nominations</p>
                     </div>
-                    <div className="bg-purple-50 border border-purple-200 rounded-xl p-4 text-center">
-                      <p className="text-2xl font-bold text-purple-700">{report.shortlisted_count}</p>
-                      <p className="text-xs text-purple-600 uppercase tracking-wider">Shortlisted</p>
+                    <div className="bg-teal-50 border border-teal-200 rounded-xl p-4 text-center">
+                      <p className="text-2xl font-bold text-teal-700">{report.shortlisted_count}</p>
+                      <p className="text-xs text-teal-600 uppercase tracking-wider">Shortlisted</p>
                     </div>
                     <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 text-center">
                       <p className="text-2xl font-bold text-amber-700">{report.entries.filter(e => e.status === 'winner').length}</p>
@@ -637,7 +637,7 @@ export function EOYAdminPanel({ token, userId }: EOYAdminPanelProps) {
                       </thead>
                       <tbody className="divide-y divide-gray-100">
                         {report.entries.map((entry) => (
-                          <tr key={entry.id} className={`hover:bg-gray-50 ${entry.status === 'winner' ? 'bg-amber-50' : entry.status === 'shortlisted' ? 'bg-purple-50/30' : ''}`}>
+                          <tr key={entry.id} className={`hover:bg-gray-50 ${entry.status === 'winner' ? 'bg-amber-50' : entry.status === 'shortlisted' ? 'bg-teal-50/30' : ''}`}>
                             <td className="px-4 py-3 text-sm font-medium text-gray-900">#{entry.rank}</td>
                             <td className="px-4 py-3">
                               <div>
@@ -651,7 +651,7 @@ export function EOYAdminPanel({ token, userId }: EOYAdminPanelProps) {
                             <td className="px-4 py-3">
                               <span className={`px-2 py-1 rounded-full text-xs font-medium ${
                                 entry.status === 'winner' ? 'bg-amber-100 text-amber-700' :
-                                entry.status === 'shortlisted' ? 'bg-purple-100 text-purple-700' :
+                                entry.status === 'shortlisted' ? 'bg-teal-100 text-teal-700' :
                                 entry.status === 'not_selected' ? 'bg-slate-200 text-slate-900' :
                                 'bg-blue-100 text-blue-700'
                               }`}>
@@ -679,7 +679,7 @@ export function EOYAdminPanel({ token, userId }: EOYAdminPanelProps) {
                             <span className="text-sm text-gray-500">• {entry.nominee_job_title}</span>
                           </div>
                           <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                            entry.status === 'winner' ? 'bg-amber-100 text-amber-700' : 'bg-purple-100 text-purple-700'
+                            entry.status === 'winner' ? 'bg-amber-100 text-amber-700' : 'bg-teal-100 text-teal-700'
                           }`}>
                             {entry.status === 'winner' ? 'Winner' : 'Shortlisted'}
                           </span>
@@ -913,7 +913,7 @@ export function EOYAdminPanel({ token, userId }: EOYAdminPanelProps) {
                         <button
                           onClick={() => updateNominationStatus(selectedNomination.id, 'shortlisted')}
                           disabled={saving}
-                          className="flex-1 px-4 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors font-medium disabled:opacity-50"
+                          className="flex-1 px-4 py-3 bg-teal-600 text-white rounded-lg hover:bg-teal-700 transition-colors font-medium disabled:opacity-50"
                         >
                           Shortlist
                         </button>

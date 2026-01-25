@@ -75,7 +75,7 @@ const STAGE_COLORS: Record<string, { bg: string; text: string }> = {
   applied: { bg: 'bg-slate-100', text: 'text-slate-700' },
   application: { bg: 'bg-slate-100', text: 'text-slate-700' },
   screening: { bg: 'bg-blue-100', text: 'text-blue-700' },
-  shortlisted: { bg: 'bg-purple-100', text: 'text-purple-700' },
+  shortlisted: { bg: 'bg-teal-100', text: 'text-teal-700' },
   interview: { bg: 'bg-amber-100', text: 'text-amber-700' },
   offer: { bg: 'bg-emerald-100', text: 'text-emerald-700' },
   hired: { bg: 'bg-green-100', text: 'text-green-700' },
@@ -239,7 +239,7 @@ export function HRApplicantList({ token, onSelectCandidate, onBulkAction }: HRAp
     return (
       <div className="min-h-screen flex items-center justify-center bg-slate-50">
         <div className="text-center">
-          <div className="w-10 h-10 border-2 border-slate-300 border-t-purple-600 rounded-full animate-spin mx-auto mb-3"></div>
+          <div className="w-10 h-10 border-2 border-slate-300 border-t-teal-600 rounded-full animate-spin mx-auto mb-3"></div>
           <p className="text-slate-500 text-sm">Loading candidates...</p>
         </div>
       </div>
@@ -271,7 +271,7 @@ export function HRApplicantList({ token, onSelectCandidate, onBulkAction }: HRAp
             <select
               value={selectedRequest || ''}
               onChange={(e) => setSelectedRequest(e.target.value ? Number(e.target.value) : null)}
-              className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-purple-200"
+              className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-teal-200"
             >
               <option value="">All Positions ({candidates.length})</option>
               {requests.map(req => (
@@ -292,7 +292,7 @@ export function HRApplicantList({ token, onSelectCandidate, onBulkAction }: HRAp
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Search by name, email, or position..."
-              className="w-full pl-10 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-purple-200"
+              className="w-full pl-10 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-teal-200"
             />
           </div>
 
@@ -324,14 +324,14 @@ export function HRApplicantList({ token, onSelectCandidate, onBulkAction }: HRAp
 
       {/* Bulk Actions Bar */}
       {showBulkActions && (
-        <div className={`bg-purple-50 border-b border-purple-100 px-4 py-3 flex items-center justify-between sticky z-10`} style={{ top: `${BULK_ACTIONS_TOP_OFFSET}px` }}>
+        <div className={`bg-teal-50 border-b border-teal-100 px-4 py-3 flex items-center justify-between sticky z-10`} style={{ top: `${BULK_ACTIONS_TOP_OFFSET}px` }}>
           <div className="flex items-center gap-2">
-            <span className="text-xs font-medium text-purple-700">
+            <span className="text-xs font-medium text-teal-700">
               {selectedCandidates.size} selected
             </span>
             <button
               onClick={clearSelection}
-              className="text-xs text-purple-600 hover:text-purple-800"
+              className="text-xs text-teal-600 hover:text-teal-800"
             >
               Clear
             </button>
@@ -364,7 +364,7 @@ export function HRApplicantList({ token, onSelectCandidate, onBulkAction }: HRAp
         <div className="flex items-center gap-3">
           <button
             onClick={selectAllVisible}
-            className="text-xs text-purple-600 hover:text-purple-800"
+            className="text-xs text-teal-600 hover:text-teal-800"
           >
             Select All ({filteredCandidates.length})
           </button>
@@ -454,7 +454,7 @@ export function HRApplicantList({ token, onSelectCandidate, onBulkAction }: HRAp
               <div
                 key={candidate.id}
                 className={`bg-white rounded-xl border shadow-sm overflow-hidden transition-all ${
-                  isSelected ? 'border-purple-400 ring-2 ring-purple-100' : 'border-slate-100'
+                  isSelected ? 'border-teal-400 ring-2 ring-teal-100' : 'border-slate-100'
                 } ${candidate.on_hold ? 'border-l-4 border-l-amber-400' : ''}`}
               >
                 <div className="flex">
@@ -463,7 +463,7 @@ export function HRApplicantList({ token, onSelectCandidate, onBulkAction }: HRAp
                     <button
                       onClick={() => toggleCandidateSelection(candidate.id)}
                       className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-colors ${
-                        isSelected ? 'bg-purple-600 border-purple-600' : 'border-slate-300 hover:border-purple-400'
+                        isSelected ? 'bg-teal-600 border-teal-600' : 'border-slate-300 hover:border-teal-400'
                       }`}
                     >
                       {isSelected && (
@@ -577,7 +577,7 @@ export function HRApplicantList({ token, onSelectCandidate, onBulkAction }: HRAp
       <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 px-4 py-3">
         <div className="flex justify-between items-center text-xs text-slate-500">
           <span>Showing {filteredCandidates.length} of {candidates.length}</span>
-          <span className="text-purple-600 font-medium">HR Superuser Mode</span>
+          <span className="text-teal-600 font-medium">HR Superuser Mode</span>
         </div>
       </div>
     </div>

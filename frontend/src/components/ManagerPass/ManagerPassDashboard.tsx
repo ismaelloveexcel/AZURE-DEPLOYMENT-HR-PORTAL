@@ -82,7 +82,7 @@ export function ManagerPassDashboard({ managerId, token, onSelectPass }: Manager
     switch (status?.toLowerCase()) {
       case 'active': return { bg: 'bg-emerald-100', text: 'text-emerald-700' }
       case 'screening': return { bg: 'bg-blue-100', text: 'text-blue-700' }
-      case 'interviewing': return { bg: 'bg-purple-100', text: 'text-purple-700' }
+      case 'interviewing': return { bg: 'bg-teal-100', text: 'text-teal-700' }
       case 'filled': return { bg: 'bg-green-100', text: 'text-green-700' }
       case 'on_hold': return { bg: 'bg-amber-100', text: 'text-amber-700' }
       default: return { bg: 'bg-slate-100', text: 'text-slate-600' }

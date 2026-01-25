@@ -235,7 +235,7 @@ export function ApplicantProfile({
             <p className="text-[10px] text-slate-400 mb-2">Core Skills</p>
             <div className="flex flex-wrap gap-1.5">
               {cvData.core_skills.slice(0, 10).map((skill, idx) => (
-                <span key={idx} className="text-[10px] px-2 py-0.5 bg-purple-100 text-purple-700 rounded">
+                <span key={idx} className="text-[10px] px-2 py-0.5 bg-teal-100 text-teal-700 rounded">
                   {skill}
                 </span>
               ))}
@@ -262,7 +262,7 @@ export function ApplicantProfile({
         {isCandidate && !editMode && (
           <button
             onClick={() => setEditMode(true)}
-            className="text-xs text-purple-600 hover:text-purple-800"
+            className="text-xs text-teal-600 hover:text-teal-800"
           >
             Edit
           </button>
@@ -463,7 +463,7 @@ export function ApplicantProfile({
             </button>
             <button
               onClick={handleSave}
-              className="flex-1 py-2 bg-purple-600 text-white text-xs font-medium rounded-lg"
+              className="flex-1 py-2 bg-teal-600 text-white text-xs font-medium rounded-lg"
             >
               Save Changes
             </button>
@@ -645,7 +645,7 @@ export function ApplicantProfile({
             <div className="pt-3">
               <button
                 onClick={handleSave}
-                className="w-full py-2 bg-purple-600 text-white text-xs font-medium rounded-lg"
+                className="w-full py-2 bg-teal-600 text-white text-xs font-medium rounded-lg"
               >
                 Save Internal Notes
               </button>
@@ -724,7 +724,7 @@ export function ApplicantProfile({
           <button
             onClick={() => setActiveSection('profile')}
             className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-colors ${
-              activeSection === 'profile' ? 'bg-purple-100 text-purple-700' : 'text-slate-500 hover:bg-slate-100'
+              activeSection === 'profile' ? 'bg-teal-100 text-teal-700' : 'text-slate-500 hover:bg-slate-100'
             }`}
           >
             Profile
@@ -733,7 +733,7 @@ export function ApplicantProfile({
             <button
               onClick={() => setActiveSection('assessment')}
               className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-colors ${
-                activeSection === 'assessment' ? 'bg-purple-100 text-purple-700' : 'text-slate-500 hover:bg-slate-100'
+                activeSection === 'assessment' ? 'bg-teal-100 text-teal-700' : 'text-slate-500 hover:bg-slate-100'
               }`}
             >
               Assessment

@@ -598,7 +598,7 @@ export function NominationPass() {
                         <span className="text-gray-500">Status:</span>
                         <span className={`px-2 py-0.5 rounded-full text-[10px] font-medium ${
                           existingNomination.status === 'pending' ? 'bg-amber-100 text-amber-700' :
-                          existingNomination.status === 'shortlisted' ? 'bg-purple-100 text-purple-700' :
+                          existingNomination.status === 'shortlisted' ? 'bg-teal-100 text-teal-700' :
                           existingNomination.status === 'winner' ? 'bg-green-100 text-green-700' :
                           'bg-slate-200 text-slate-900'
                         }`}>

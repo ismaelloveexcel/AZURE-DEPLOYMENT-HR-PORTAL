@@ -668,25 +668,25 @@ export function EmployeeProfile({ employeeId, token, currentUserRole, currentUse
               </div>
 
               {/* Insurance */}
-              <div className="md:col-span-2 bg-gradient-to-br from-purple-50 to-violet-50 rounded-xl p-5 border border-purple-100">
-                <h4 className="font-semibold text-purple-900 flex items-center gap-2 mb-4">
+              <div className="md:col-span-2 bg-gradient-to-br from-teal-50 to-teal-50 rounded-xl p-5 border border-teal-100">
+                <h4 className="font-semibold text-teal-900 flex items-center gap-2 mb-4">
                   <span>🛡️</span> Insurance & ILOE
                 </h4>
                 <div className="grid grid-cols-2 gap-4 text-sm">
                   <div>
-                    <span className="text-purple-700">Medical Provider</span>
-                    <p className="text-purple-900 font-medium">{compliance?.medical_insurance_provider || '—'}</p>
+                    <span className="text-teal-700">Medical Provider</span>
+                    <p className="text-teal-900 font-medium">{compliance?.medical_insurance_provider || '—'}</p>
                   </div>
                   <div>
-                    <span className="text-purple-700">Category</span>
-                    <p className="text-purple-900 font-medium">{compliance?.medical_insurance_category || '—'}</p>
+                    <span className="text-teal-700">Category</span>
+                    <p className="text-teal-900 font-medium">{compliance?.medical_insurance_category || '—'}</p>
                   </div>
                   <div>
-                    <span className="text-purple-700">ILOE Status</span>
-                    <p className="text-purple-900 font-medium">{compliance?.iloe_status || '—'}</p>
+                    <span className="text-teal-700">ILOE Status</span>
+                    <p className="text-teal-900 font-medium">{compliance?.iloe_status || '—'}</p>
                   </div>
                   <div>
-                    <span className="text-purple-700">ILOE Expiry</span>
+                    <span className="text-teal-700">ILOE Expiry</span>
                     <p className={`font-medium ${getExpiryStatusColor(compliance?.iloe_days_until_expiry || null)}`}>
                       {formatDate(compliance?.iloe_expiry || null)}
                     </p>
