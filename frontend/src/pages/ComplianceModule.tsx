@@ -84,14 +84,14 @@ export function ComplianceModule({ user }: ComplianceModuleProps) {
           <div className="bg-white rounded-card shadow-card p-12 text-center">
             <p className="text-4xl mb-4">🔒</p>
             <p className="text-primary-600 mb-6">
-              Please sign in with HR or Admin access to view compliance alerts.
+              This feature requires authentication. Please access it from the main portal.
             </p>
-            <button
-              onClick={() => navigate('/admin')}
-              className="px-6 py-3 bg-accent-green text-white rounded-lg font-medium hover:bg-accent-green/90 transition-colors"
+            <a
+              href="/"
+              className="inline-block px-6 py-3 bg-accent-green text-white rounded-lg font-medium hover:bg-accent-green/90 transition-colors"
             >
-              Sign In
-            </button>
+              Go to Home
+            </a>
           </div>
         </div>
       </div>
