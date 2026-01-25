@@ -197,18 +197,42 @@ jobs:
         run: |
           echo "🔄 Running database migrations via Kudu..."
 
-          # Get publishing credentials
-          CREDS=$(az webapp deployment list-publishing-credentials \
-            --name "$WEBAPP_NAME" \
-            --resource-group "$RESOURCE_GROUP" \
-            --query "{username:publishingUserName, password:publishingPassword}" \
-            -o json)
+          # Get publishing credentials with retry logic
+          MAX_CRED_ATTEMPTS=3
+          CRED_ATTEMPT=1
+          
+          while [ $CRED_ATTEMPT -le $MAX_CRED_ATTEMPTS ]; do
+            echo "📋 Getting publishing credentials (attempt $CRED_ATTEMPT)..."
+            CREDS=$(az webapp deployment list-publishing-credentials \
+              --name "$WEBAPP_NAME" \
+              --resource-group "$RESOURCE_GROUP" \
+              --query "{username:publishingUserName, password:publishingPassword}" \
+              -o json 2>&1)
+            
+            if echo "$CREDS" | jq -e '.username' > /dev/null 2>&1; then
+              break
+            fi
+            
+            echo "⚠️ Failed to get credentials, retrying in 30s..."
+            sleep 30
+            CRED_ATTEMPT=$((CRED_ATTEMPT + 1))
+          done
 
           USERNAME=$(echo $CREDS | jq -r '.username')
           PASSWORD=$(echo $CREDS | jq -r '.password')
+          
+          if [ -z "$USERNAME" ] || [ "$USERNAME" = "null" ]; then
+            echo "❌ Failed to get publishing credentials after $MAX_CRED_ATTEMPTS attempts"
+            echo "⚠️ Continuing without migrations - they will run on app startup"
+            exit 0
+          fi
 
-          # Run migration command via Kudu API - use Oryx's venv path
+          # Run migration command via Kudu API with timeout
+          # Use Oryx's antenv path first (created by ENABLE_ORYX_BUILD=true)
+          echo "🔄 Executing migration command..."
           RESPONSE=$(curl -s -w "\n%{http_code}" \
+            --connect-timeout 30 \
+            --max-time 300 \
             -X POST \
             -u "$USERNAME:$PASSWORD" \
             -H "Content-Type: application/json" \
@@ -222,35 +246,57 @@ jobs:
           echo "$BODY" | jq -r '.Output // .Error // .' 2>/dev/null || echo "$BODY"
 
           if [ "$HTTP_CODE" = "200" ]; then
-            echo "✅ Migrations completed"
+            OUTPUT=$(echo "$BODY" | jq -r '.Output // ""' 2>/dev/null || echo "")
+            if echo "$OUTPUT" | grep -qiE "(error|failed|exception)"; then
+              echo "⚠️ Migration completed but output contains potential errors - check logs"
+            else
+              echo "✅ Migrations completed successfully"
+            fi
           else
-            echo "⚠️ Migration command returned HTTP $HTTP_CODE (may still be OK)"
+            echo "⚠️ Migration command returned HTTP $HTTP_CODE"
+            echo "⚠️ Migrations will be retried on app startup"
           fi
 
       - name: Restart App and Verify
         run: |
+          echo "🔄 Restarting app..."
           az webapp restart --name "$WEBAPP_NAME" --resource-group "$RESOURCE_GROUP"
-          echo "Waiting 60s for app to start..."
+          echo "⏳ Waiting 60s for app to start..."
           sleep 60
 
-          for i in 1 2 3; do
-            HTTP_STATUS=$(curl -s -o /tmp/resp.txt -w "%{http_code}" "$WEBAPP_URL/api/health/ping")
+          echo "🔍 Checking application health..."
+          for i in 1 2 3 4 5; do
+            HTTP_STATUS=$(curl -s -o /tmp/resp.txt -w "%{http_code}" \
+              --connect-timeout 10 \
+              --max-time 30 \
+              "$WEBAPP_URL/api/health/ping" 2>/dev/null || echo "000")
+            
             if [ "$HTTP_STATUS" = "200" ]; then
               echo "✅ Health check passed!"
               cat /tmp/resp.txt
 
-              # Check DB health
-              DB_STATUS=$(curl -s -o /tmp/db.txt -w "%{http_code}" "$WEBAPP_URL/api/health/db")
+              # Check DB health with timeout
+              DB_STATUS=$(curl -s -o /tmp/db.txt -w "%{http_code}" \
+                --connect-timeout 10 \
+                --max-time 60 \
+                "$WEBAPP_URL/api/health/db" 2>/dev/null || echo "000")
               echo ""
               echo "Database health (HTTP $DB_STATUS):"
               cat /tmp/db.txt | head -20
               exit 0
             fi
-            echo "Attempt $i: HTTP $HTTP_STATUS, retrying in 30s..."
+            
+            if [ "$HTTP_STATUS" = "000" ]; then
+              echo "Attempt $i: Connection failed (timeout/network error), retrying in 30s..."
+            else
+              echo "Attempt $i: HTTP $HTTP_STATUS, retrying in 30s..."
+            fi
             sleep 30
           done
 
-          echo "⚠️ Health check did not pass - check logs"
+          echo "⚠️ Health check did not pass after 5 attempts"
+          echo "📋 Fetching recent logs for debugging..."
+          az webapp log tail --name "$WEBAPP_NAME" --resource-group "$RESOURCE_GROUP" --timeout 10 2>/dev/null || true
           exit 0
 
       - name: Deployment Summary
