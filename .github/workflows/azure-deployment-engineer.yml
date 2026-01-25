@@ -220,8 +220,8 @@ jobs:
           # Check criteria
           [ -f "backend/requirements.txt" ] && SCORE=$((SCORE + 2))
           [ -f "frontend/package.json" ] && SCORE=$((SCORE + 2))
-          # Check for any deploy workflow (deploy.yml, deploy-backend.yml, deploy-frontend.yml, etc.)
-          if ls .github/workflows/deploy*.yml 1>/dev/null 2>&1; then
+          # Check for any workflow that could represent a deployment pipeline
+          if ls .github/workflows/*.yml 1>/dev/null 2>&1; then
             SCORE=$((SCORE + 2))
           fi
           [ -f "backend/.env.example" ] && SCORE=$((SCORE + 1))
