@@ -136,6 +136,11 @@ jobs:
             --output none
 
           echo "✅ App settings configured with version tracking"
+          
+          # Wait for SCM container to stabilize after configuration changes
+          # This prevents "SCM container restart" errors during deployment
+          echo "⏳ Waiting 30s for SCM container to stabilize..."
+          sleep 30
 
       - name: Deploy to Azure App Service
         uses: azure/webapps-deploy@v3
