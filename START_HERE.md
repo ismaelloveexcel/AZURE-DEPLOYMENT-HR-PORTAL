@@ -1,5 +1,10 @@
 # START HERE — Canonical Entry Point
 
+> **📖 Solo HR Guide:** See [docs/SOLO_HR_GUIDE.md](docs/SOLO_HR_GUIDE.md) for daily HR workflows.  
+> **🔧 Simplification:** See [SIMPLIFICATION_INDEX.md](SIMPLIFICATION_INDEX.md) to reduce complexity.
+
+---
+
 ## What this system is
 Secure Renewals HR Portal: a full-stack HR self-service and compliance platform for UAE private-sector employers. It runs on FastAPI (Python) + React (Vite) with PostgreSQL and targets Azure App Service.
 
