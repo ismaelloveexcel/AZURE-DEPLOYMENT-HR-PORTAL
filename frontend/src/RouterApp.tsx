@@ -2,6 +2,7 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import App from './App'
 import { ComplianceModule } from './pages/ComplianceModule'
 import { AttendanceModule } from './pages/AttendanceModule'
+import { RecruitmentModule } from './pages/RecruitmentModule'
 
 /**
  * Router wrapper for the HR Portal
@@ -17,9 +18,9 @@ import { AttendanceModule } from './pages/AttendanceModule'
  * Current extracted routes:
  * - /compliance - Compliance alerts dashboard
  * - /attendance - Attendance tracking
+ * - /recruitment - Recruitment management (positions, candidates, pipeline)
  * 
  * Planned extractions:
- * - /recruitment - Recruitment module
  * - /admin - Admin dashboard
  */
 export function RouterApp() {
@@ -33,6 +34,7 @@ export function RouterApp() {
         {/* Extracted modular pages */}
         <Route path="/compliance" element={<ComplianceModule user={null} />} />
         <Route path="/attendance" element={<AttendanceModule />} />
+        <Route path="/recruitment" element={<RecruitmentModule />} />
         
         {/* Default route - Existing App.tsx handles all other sections */}
         <Route path="*" element={<App />} />
