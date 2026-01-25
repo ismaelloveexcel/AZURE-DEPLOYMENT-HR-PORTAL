@@ -404,8 +404,8 @@ export function InterviewSlotProvider({
       
       {/* HR Notice */}
       {!canEdit && bookedCount > 0 && (
-        <div className="px-4 py-2 bg-purple-50 border-t border-purple-100">
-          <p className="text-xs text-purple-600">
+        <div className="px-4 py-2 bg-teal-50 border-t border-teal-100">
+          <p className="text-xs text-teal-600">
             <strong>Note:</strong> Only HR can modify booked slots or reschedule interviews.
           </p>
         </div>

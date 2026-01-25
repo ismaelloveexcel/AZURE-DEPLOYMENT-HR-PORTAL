@@ -1357,7 +1357,7 @@ const [passFormData, setPassFormData] = useState<PassFormData>({
                 {/* Address */}
                 <div>
                   <h3 className="text-lg font-medium text-primary-800 mb-4 flex items-center gap-2">
-                    <svg className="w-5 h-5 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg className="w-5 h-5 text-teal-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                     </svg>
@@ -3299,7 +3299,7 @@ const [passFormData, setPassFormData] = useState<PassFormData>({
                       <span className={`px-4 py-2 rounded-lg text-sm font-bold uppercase tracking-wide ${
                         selectedCandidate.stage === 'applied' ? 'bg-blue-500/20 text-blue-400 border border-blue-500/30' :
                         selectedCandidate.stage === 'screening' ? 'bg-amber-500/20 text-amber-400 border border-amber-500/30' :
-                        selectedCandidate.stage === 'interview' ? 'bg-purple-500/20 text-purple-400 border border-purple-500/30' :
+                        selectedCandidate.stage === 'interview' ? 'bg-teal-500/20 text-teal-400 border border-teal-500/30' :
                         selectedCandidate.stage === 'offer' ? 'bg-green-500/20 text-green-400 border border-green-500/30' :
                         selectedCandidate.stage === 'hired' ? 'bg-accent-green/20 text-accent-green border border-emerald-500/30' :
                         'bg-slate-500/20 text-slate-400 border border-slate-500/30'
@@ -3411,7 +3411,7 @@ const [passFormData, setPassFormData] = useState<PassFormData>({
                       {/* Education */}
                       <div className="bg-slate-800/40 rounded-xl p-5 border border-slate-700/50">
                         <div className="flex items-center gap-2 mb-4">
-                          <svg className="w-5 h-5 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <svg className="w-5 h-5 text-teal-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path d="M12 14l9-5-9-5-9 5 9 5z" />
                             <path d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z" />
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 14l9-5-9-5-9 5 9 5zm0 0l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14zm-4 6v-7.5l4-2.222" />
@@ -3852,7 +3852,7 @@ const [passFormData, setPassFormData] = useState<PassFormData>({
                         <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${
                           pass.pass_type === 'recruitment' ? 'bg-blue-100 text-blue-700' :
                           pass.pass_type === 'onboarding' ? 'bg-accent-green/10 text-accent-green' :
-                          pass.pass_type === 'visitor' ? 'bg-purple-100 text-purple-700' :
+                          pass.pass_type === 'visitor' ? 'bg-teal-100 text-teal-700' :
                           pass.pass_type === 'contractor' ? 'bg-orange-100 text-orange-700' :
                           'bg-primary-100 text-primary-700'
                         }`}>
@@ -3927,7 +3927,7 @@ const [passFormData, setPassFormData] = useState<PassFormData>({
                       <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${
                         viewingPass.pass_type === 'recruitment' ? 'bg-blue-100 text-blue-700' :
                         viewingPass.pass_type === 'onboarding' ? 'bg-accent-green/10 text-accent-green' :
-                        viewingPass.pass_type === 'visitor' ? 'bg-purple-100 text-purple-700' :
+                        viewingPass.pass_type === 'visitor' ? 'bg-teal-100 text-teal-700' :
                         viewingPass.pass_type === 'contractor' ? 'bg-orange-100 text-orange-700' :
                         'bg-primary-100 text-primary-700'
                       }`}>
@@ -4046,11 +4046,11 @@ const [passFormData, setPassFormData] = useState<PassFormData>({
               {/* Candidate Pass Card */}
               <button
                 onClick={() => setActiveSection('template-candidate')}
-                className="bg-white rounded-card shadow-card p-6 text-left hover:shadow-card transition-all border-l-4 border-purple-500"
+                className="bg-white rounded-card shadow-card p-6 text-left hover:shadow-card transition-all border-l-4 border-teal-500"
               >
                 <div className="flex items-start gap-4">
-                  <div className="w-14 h-14 bg-purple-100 rounded-xl flex items-center justify-center flex-shrink-0">
-                    <svg className="w-7 h-7 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <div className="w-14 h-14 bg-teal-100 rounded-xl flex items-center justify-center flex-shrink-0">
+                    <svg className="w-7 h-7 text-teal-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                     </svg>
                   </div>
@@ -4058,9 +4058,9 @@ const [passFormData, setPassFormData] = useState<PassFormData>({
                     <h3 className="text-lg font-semibold text-primary-800 mb-1">Candidate Pass</h3>
                     <p className="text-sm text-primary-600 mb-3">Candidate experience, HR visibility, recruitment timeline</p>
                     <div className="flex flex-wrap gap-2">
-                      <span className="px-2 py-1 bg-purple-50 text-purple-600 text-xs rounded-full">Stages</span>
-                      <span className="px-2 py-1 bg-purple-50 text-purple-600 text-xs rounded-full">Timeline</span>
-                      <span className="px-2 py-1 bg-purple-50 text-purple-600 text-xs rounded-full">Contact</span>
+                      <span className="px-2 py-1 bg-teal-50 text-teal-600 text-xs rounded-full">Stages</span>
+                      <span className="px-2 py-1 bg-teal-50 text-teal-600 text-xs rounded-full">Timeline</span>
+                      <span className="px-2 py-1 bg-teal-50 text-teal-600 text-xs rounded-full">Contact</span>
                     </div>
                   </div>
                 </div>
@@ -4199,8 +4199,8 @@ const [passFormData, setPassFormData] = useState<PassFormData>({
                       <p className="text-xs text-primary-600">Screen</p>
                     </div>
                     <div className="text-center">
-                      <div className="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-1">
-                        <span className="text-purple-600 font-bold text-sm">3</span>
+                      <div className="w-10 h-10 bg-teal-100 rounded-full flex items-center justify-center mx-auto mb-1">
+                        <span className="text-teal-600 font-bold text-sm">3</span>
                       </div>
                       <p className="text-xs text-primary-600">Assess</p>
                     </div>
@@ -4258,7 +4258,7 @@ const [passFormData, setPassFormData] = useState<PassFormData>({
             <div className="space-y-6">
               <div className="bg-white rounded-2xl shadow-card overflow-hidden max-w-md mx-auto">
                 {/* Header */}
-                <div className="bg-gradient-to-r from-purple-600 to-purple-700 p-6 text-white">
+                <div className="bg-gradient-to-r from-teal-600 to-teal-700 p-6 text-white">
                   <div className="flex items-start justify-between">
                     <div className="flex items-center gap-4">
                       <div className="w-16 h-16 bg-white/20 rounded-xl flex items-center justify-center">
@@ -4267,9 +4267,9 @@ const [passFormData, setPassFormData] = useState<PassFormData>({
                         </svg>
                       </div>
                       <div>
-                        <p className="text-purple-100 text-sm">Candidate</p>
+                        <p className="text-teal-100 text-sm">Candidate</p>
                         <p className="text-xl font-bold">[Candidate Name]</p>
-                        <p className="text-purple-200 text-sm">ID: [Candidate ID]</p>
+                        <p className="text-teal-200 text-sm">ID: [Candidate ID]</p>
                       </div>
                     </div>
                     <div className="w-16 h-16 bg-white rounded-lg flex items-center justify-center">
@@ -4351,7 +4351,7 @@ const [passFormData, setPassFormData] = useState<PassFormData>({
                 <div className="p-4">
                   <h4 className="text-sm font-semibold text-primary-600 uppercase mb-3">Next Actions</h4>
                   <div className="space-y-2">
-                    <button className="w-full p-3 bg-purple-50 text-purple-700 rounded-lg text-sm font-medium hover:bg-purple-100 transition-colors text-left flex items-center gap-2">
+                    <button className="w-full p-3 bg-teal-50 text-teal-700 rounded-lg text-sm font-medium hover:bg-teal-100 transition-colors text-left flex items-center gap-2">
                       <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
                       Attend Interview
                     </button>
@@ -4363,9 +4363,9 @@ const [passFormData, setPassFormData] = useState<PassFormData>({
                 </div>
               </div>
 
-              <div className="bg-purple-50 rounded-xl p-6 max-w-md mx-auto">
-                <h4 className="font-semibold text-purple-800 mb-2">Candidate Pass Template</h4>
-                <p className="text-sm text-purple-700">This template tracks candidate progress through recruitment stages, provides quick HR contact options, and shows clear next steps for the candidate.</p>
+              <div className="bg-teal-50 rounded-xl p-6 max-w-md mx-auto">
+                <h4 className="font-semibold text-teal-800 mb-2">Candidate Pass Template</h4>
+                <p className="text-sm text-teal-700">This template tracks candidate progress through recruitment stages, provides quick HR contact options, and shows clear next steps for the candidate.</p>
               </div>
             </div>
           )}
@@ -4528,7 +4528,7 @@ const [passFormData, setPassFormData] = useState<PassFormData>({
                       <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
                       Payslip
                     </button>
-                    <button className="p-3 bg-purple-50 text-purple-700 rounded-lg text-xs font-medium flex flex-col items-center gap-1 hover:bg-purple-100">
+                    <button className="p-3 bg-teal-50 text-teal-700 rounded-lg text-xs font-medium flex flex-col items-center gap-1 hover:bg-teal-100">
                       <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
                       Documents
                     </button>
@@ -4727,7 +4727,7 @@ const [passFormData, setPassFormData] = useState<PassFormData>({
           {recruitmentTab === 'request' && (
             <div className="bg-white rounded-card shadow-card p-8">
               <div className="text-center py-12">
-                <svg className="w-16 h-16 text-purple-200 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-16 h-16 text-teal-200 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                 </svg>
                 <h3 className="text-xl font-semibold text-primary-800 mb-2">Recruitment Requests</h3>
@@ -4741,7 +4741,7 @@ const [passFormData, setPassFormData] = useState<PassFormData>({
           {recruitmentTab === 'benefits' && (
             <div className="bg-white rounded-card shadow-card p-8">
               <div className="text-center py-12">
-                <svg className="w-16 h-16 text-purple-200 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-16 h-16 text-teal-200 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
                 <h3 className="text-xl font-semibold text-primary-800 mb-2">Benefits Information</h3>
@@ -5409,7 +5409,7 @@ const [passFormData, setPassFormData] = useState<PassFormData>({
                     </span>
                   )}
                   {attendanceDashboard.pending_overtime_approvals > 0 && (
-                    <span className="inline-flex items-center px-3 py-1 bg-purple-100 text-purple-700 rounded-full text-sm">
+                    <span className="inline-flex items-center px-3 py-1 bg-teal-100 text-teal-700 rounded-full text-sm">
                       {attendanceDashboard.pending_overtime_approvals} OT pending
                     </span>
                   )}
@@ -5463,7 +5463,7 @@ const [passFormData, setPassFormData] = useState<PassFormData>({
                       <td className="px-6 py-4 text-sm text-primary-600">
                         {record.total_hours ? `${record.total_hours}h` : '-'}
                         {record.overtime_hours && record.overtime_hours > 0 && (
-                          <span className="ml-1 text-purple-600">(+{record.overtime_hours}h OT)</span>
+                          <span className="ml-1 text-teal-600">(+{record.overtime_hours}h OT)</span>
                         )}
                       </td>
                       <td className="px-6 py-4">

@@ -348,7 +348,7 @@ export function getNextActionInfo(
 export function getActionOwnerStyle(actionOwner: ActionOwner): { bgClass: string; textClass: string } {
   switch (actionOwner) {
     case 'HR':
-      return { bgClass: 'bg-purple-100', textClass: 'text-purple-700' }
+      return { bgClass: 'bg-teal-100', textClass: 'text-teal-700' }
     case 'Candidate':
       return { bgClass: 'bg-blue-100', textClass: 'text-blue-700' }
     case 'Manager':

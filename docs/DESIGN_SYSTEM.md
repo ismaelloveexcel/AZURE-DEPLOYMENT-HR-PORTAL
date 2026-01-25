@@ -29,6 +29,12 @@
 | Green | `#10b981` | Icons (outline), success states, accents |
 | Gray | `#6b7280` | Secondary text, borders |
 
+### Secondary/Accent Colors
+| Name | Hex | Usage |
+|------|-----|-------|
+| Teal | `#0891b2` | Candidate Pass, interview stages, bulk actions, shortlisted status |
+| Blue | `#3b82f6` | Manager Pass template, links |
+
 ### Alert Colors
 | Name | Hex | Usage |
 |------|-----|-------|
@@ -40,6 +46,8 @@
 |------|-----|-------|
 | Light Gray | `#f8fafc` | Background alternates |
 | Border Gray | `#e2e8f0` | Dividers, input borders |
+
+> **Note:** Purple was replaced with Teal for a more corporate professional appearance. Teal provides excellent contrast, is distinct from our green accents, and conveys professionalism appropriate for HR/corporate contexts.
 
 ---
 
