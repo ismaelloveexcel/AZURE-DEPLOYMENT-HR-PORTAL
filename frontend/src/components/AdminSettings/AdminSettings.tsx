@@ -1,5 +1,19 @@
 import { useState } from 'react'
 
+/**
+ * AdminSettings Component
+ * 
+ * Provides a toggle-based configuration interface for non-technical HR admins.
+ * 
+ * TODO: Backend Integration Required
+ * - Create API endpoints: GET/POST /api/admin/settings
+ * - Persist settings to database (system_settings table)
+ * - Load saved settings on component mount
+ * - Sync settings across users
+ * 
+ * Current State: UI prototype with local state only (settings lost on refresh)
+ */
+
 interface FieldConfig {
   id: string
   name: string
