@@ -193,6 +193,13 @@ export function HomePage() {
       setShowLoginModal(true)
       return
     }
+    // If admin access is required and user is not admin, trigger admin re-auth
+    if (requiresAdmin && user.role !== 'admin') {
+      setPendingRoute(route)
+      setIsAdminLogin(true)
+      setShowLoginModal(true)
+      return
+    }
     navigate(route)
   }
 
