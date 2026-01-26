@@ -34,20 +34,20 @@ function LoginModal({ onClose, onLogin, error, loading, isAdminLogin }: LoginMod
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
           </svg>
         </button>
-        
+
         <div className="text-center mb-6">
-          <div className="w-16 h-16 rounded-full bg-accent-green flex items-center justify-center mx-auto mb-2">
+          <div className="w-16 h-16 rounded-full bg-accent-green/90 flex items-center justify-center mx-auto mb-2 shadow-soft-green">
             <span className="text-white font-semibold text-2xl">B</span>
           </div>
           <h2 className="text-xl font-semibold text-primary-800">
             {isAdminLogin ? 'Admin Sign In' : 'Sign In'}
           </h2>
         </div>
-        
+
         {error && (
           <div className="bg-red-50 text-red-600 p-3 rounded-lg mb-4 text-sm">{error}</div>
         )}
-        
+
         <form onSubmit={handleSubmit} className="space-y-4">
           {!isAdminLogin && (
             <div>
@@ -106,7 +106,7 @@ function LoginModal({ onClose, onLogin, error, loading, isAdminLogin }: LoginMod
           </button>
         </form>
         <p className="text-xs text-primary-600 text-center mt-4">
-          {isAdminLogin 
+          {isAdminLogin
             ? 'Enter the admin password to access the admin panel.'
             : 'First-time login? Use your date of birth (DDMMYYYY) as password.'
           }
@@ -119,7 +119,7 @@ function LoginModal({ onClose, onLogin, error, loading, isAdminLogin }: LoginMod
 export function HomePage() {
   const navigate = useNavigate()
   const { user, login, logout } = useAuthContext()
-  
+
   const [showLoginModal, setShowLoginModal] = useState(false)
   const [pendingRoute, setPendingRoute] = useState<string | null>(null)
   const [loginError, setLoginError] = useState<string | null>(null)
@@ -193,15 +193,23 @@ export function HomePage() {
       setShowLoginModal(true)
       return
     }
+    // If admin access is required and user is not admin, trigger admin re-auth
+    if (requiresAdmin && user.role !== 'admin') {
+      setPendingRoute(route)
+      setIsAdminLogin(true)
+      setShowLoginModal(true)
+      return
+    }
     navigate(route)
   }
 
   const handleLoginSubmit = async (employeeId: string, password: string, isAdmin: boolean) => {
     setLoginLoading(true)
     setLoginError(null)
-    
-    const loginEmployeeId = isAdmin ? 'BAYN00008' : employeeId
-    
+
+    const adminEmployeeId = import.meta.env.VITE_ADMIN_EMPLOYEE_ID || 'BAYN00008'
+    const loginEmployeeId = isAdmin ? adminEmployeeId : employeeId
+
     try {
       const res = await fetch(`${API_BASE}/auth/login`, {
         method: 'POST',
@@ -245,7 +253,7 @@ export function HomePage() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col bg-primary-50">
+    <div className="min-h-screen flex flex-col home-shell">
       {showLoginModal && (
         <LoginModal
           onClose={closeLoginModal}
@@ -255,15 +263,15 @@ export function HomePage() {
           isAdminLogin={isAdminLogin}
         />
       )}
-      
-      {/* Header */}
-      <header className="bg-white border-b border-primary-200 px-6 py-4">
+
+      <header className="home-header">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full bg-accent-green flex items-center justify-center">
-              <span className="text-white font-semibold text-sm">B</span>
+            <div className="brand-mark-soft">B</div>
+            <div>
+              <p className="text-lg font-semibold text-primary-900">Baynunah HR</p>
+              <p className="text-xs text-primary-500">Calm, single-screen ESS</p>
             </div>
-            <span className="text-xl font-medium text-primary-800">Baynunah HR</span>
           </div>
           {user && (
             <div className="flex items-center gap-4">
@@ -272,7 +280,7 @@ export function HomePage() {
               </span>
               <button
                 onClick={handleLogout}
-                className="text-sm text-accent-red hover:text-accent-red/80 font-medium"
+                className="ghost-link"
               >
                 Sign Out
               </button>
@@ -281,25 +289,20 @@ export function HomePage() {
         </div>
       </header>
 
-      {/* Main Content */}
-      <main className="flex-1 flex flex-col items-center justify-center px-6 py-12">
-        {/* Title */}
-        <div className="text-center mb-10">
-          <h1 className="text-3xl font-semibold text-primary-800 mb-2">Welcome to HR Portal</h1>
+      <main className="flex-1 flex flex-col items-center justify-center px-6 py-12 gap-10">
+        <div className="text-center space-y-2">
+          <h1 className="text-3xl font-semibold text-primary-900">Welcome to HR Portal</h1>
           <p className="text-primary-600">Select a portal to get started</p>
         </div>
 
-        {/* Portal Cards - Horizontal Row */}
         <div className="flex flex-wrap justify-center gap-5 max-w-6xl">
           {portalCards.map((portal) => (
             <button
               key={portal.id}
-              onClick={() => handleNavigate(portal.route)}
-              className="bg-white rounded-2xl p-6 w-48 flex flex-col items-center text-center shadow-sm hover:shadow-md transition-all duration-300 border border-primary-200 hover:border-primary-300"
+              onClick={() => handleNavigate(portal.route, portal.id === 'manager')}
+              className="home-card"
             >
-              <div className="w-16 h-16 rounded-xl flex items-center justify-center mb-4">
-                {portal.icon}
-              </div>
+              <div className="home-card__icon">{portal.icon}</div>
               <h3 className="font-semibold text-primary-800 mb-1">{portal.name}</h3>
               <p className="text-xs text-primary-500 leading-relaxed">{portal.description}</p>
             </button>
@@ -307,14 +310,13 @@ export function HomePage() {
         </div>
       </main>
 
-      {/* Admin Panel Bar - Always visible at bottom */}
-      <footer className="bg-white border-t border-primary-200 px-6 py-4">
+      <footer className="home-footer">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           <span className="text-sm font-medium text-primary-600">Admin Panel</span>
           <div className="flex gap-3">
             <button
               onClick={() => handleNavigate('/admin', true)}
-              className="bg-primary-100 hover:bg-primary-200 text-primary-700 rounded-lg px-4 py-2 flex items-center gap-2 transition-colors text-sm font-medium"
+              className="footer-chip"
             >
               <svg className="w-4 h-4 text-accent-green" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
@@ -324,7 +326,7 @@ export function HomePage() {
             </button>
             <button
               onClick={() => handleNavigate('/compliance')}
-              className="bg-accent-red/10 hover:bg-accent-red/20 text-accent-red rounded-lg px-4 py-2 flex items-center gap-2 transition-colors text-sm font-medium"
+              className="footer-chip danger"
             >
               <svg className="w-4 h-4 text-accent-red" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
@@ -333,7 +335,7 @@ export function HomePage() {
             </button>
             <button
               onClick={() => handleNavigate('/attendance')}
-              className="bg-primary-100 hover:bg-primary-200 text-primary-700 rounded-lg px-4 py-2 flex items-center gap-2 transition-colors text-sm font-medium"
+              className="footer-chip"
             >
               <svg className="w-4 h-4 text-accent-green" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
