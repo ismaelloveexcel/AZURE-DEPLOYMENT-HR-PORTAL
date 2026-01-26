@@ -200,7 +200,8 @@ export function HomePage() {
     setLoginLoading(true)
     setLoginError(null)
 
-    const loginEmployeeId = isAdmin ? 'BAYN00008' : employeeId
+    const adminEmployeeId = import.meta.env.VITE_ADMIN_EMPLOYEE_ID || 'BAYN00008'
+    const loginEmployeeId = isAdmin ? adminEmployeeId : employeeId
 
     try {
       const res = await fetch(`${API_BASE}/auth/login`, {
