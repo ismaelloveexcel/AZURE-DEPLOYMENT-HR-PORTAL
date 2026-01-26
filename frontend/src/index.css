@@ -120,3 +120,115 @@ tbody tr:hover {
 ::-webkit-scrollbar-thumb:hover {
   background: var(--color-gray);
 }
+
+/* Home (ESS) subtle theming */
+.home-shell {
+  background: linear-gradient(180deg, #f8fbff 0%, #f6f9ff 45%, #f9fcff 100%);
+  color: var(--color-dark-blue);
+}
+
+.home-header {
+  background: rgba(255, 255, 255, 0.94);
+  border-bottom: 1px solid #e2e8f0;
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.06);
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  backdrop-filter: blur(6px);
+  padding: 18px 24px;
+}
+
+.home-footer {
+  background: rgba(255, 255, 255, 0.95);
+  border-top: 1px solid #e2e8f0;
+  box-shadow: 0 -6px 20px rgba(15, 23, 42, 0.04);
+  padding: 14px 24px;
+}
+
+.brand-mark-soft {
+  width: 44px;
+  height: 44px;
+  border-radius: 14px;
+  background: linear-gradient(135deg, #0f1f3a, #1e3a8a);
+  color: #10b981;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 18px;
+  box-shadow: 0 12px 32px rgba(15, 31, 58, 0.22);
+}
+
+.home-card {
+  background: rgba(255, 255, 255, 0.92);
+  border: 1px solid #e2e8f0;
+  border-radius: 18px;
+  padding: 20px 16px;
+  width: 200px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 6px;
+  box-shadow: 0 12px 28px rgba(15, 23, 42, 0.08);
+  transition: transform 0.16s ease, box-shadow 0.16s ease, border-color 0.16s ease;
+}
+
+.home-card:hover {
+  transform: translateY(-2px);
+  border-color: rgba(16, 185, 129, 0.35);
+  box-shadow: 0 16px 34px rgba(15, 23, 42, 0.12);
+}
+
+.home-card__icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 14px;
+  background: rgba(16, 185, 129, 0.08);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #10b981;
+}
+
+.ghost-link {
+  color: #0f172a;
+  font-weight: 600;
+  padding: 8px 12px;
+  border-radius: 10px;
+  background: transparent;
+  transition: all 0.2s ease;
+}
+
+.ghost-link:hover {
+  background: rgba(16, 185, 129, 0.12);
+  color: #0f172a;
+}
+
+.footer-chip {
+  background: #f1f5f9;
+  color: #0f172a;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  padding: 8px 12px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 600;
+  transition: all 0.15s ease;
+}
+
+.footer-chip:hover {
+  border-color: rgba(16, 185, 129, 0.3);
+  box-shadow: 0 8px 18px rgba(15, 23, 42, 0.08);
+}
+
+.footer-chip.danger {
+  background: #fff1f2;
+  border-color: #fecdd3;
+  color: #b91c1c;
+}
+
+.shadow-soft-green {
+  box-shadow: 0 10px 22px rgba(16, 185, 129, 0.25);
+}
