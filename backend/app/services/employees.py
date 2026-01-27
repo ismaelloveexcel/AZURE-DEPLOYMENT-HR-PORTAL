@@ -774,8 +774,6 @@ class EmployeeService:
         Export employees to CSV with ALL fields (compliance, bank, contact).
         Returns CSV content as string.
         """
-        from app.models.employee_compliance import EmployeeCompliance
-        from app.models.employee_bank import EmployeeBank
         from sqlalchemy.orm import selectinload
         
         # Fetch employees with relationships

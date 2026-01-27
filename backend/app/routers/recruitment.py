@@ -1272,40 +1272,11 @@ async def get_evaluation(
 # ============================================================================
 
 @router.post(
-    "/candidates/bulk/stage",
-    response_model=BulkOperationResult,
-    summary="Bulk update candidate stages"
-)
-async def bulk_update_candidate_stage(
-    data: BulkCandidateStageUpdate,
-    role: str = Depends(require_role(["admin", "hr"])),
-    session: AsyncSession = Depends(get_session)
-):
-    """
-    Bulk update multiple candidates to a new stage.
-    
-    Efficiently moves multiple candidates through the pipeline at once,
-    reducing processing time for shortlisting and stage transitions.
-    
-    Maximum 100 candidates per request.
-
-    **Admin and HR only.**
-    """
-    try:
-        result = await recruitment_service.bulk_update_stage(
-            session, data.candidate_ids, data.new_stage, data.notes
-        )
-        return BulkOperationResult(**result)
-    except ValueError as e:
-        raise HTTPException(status_code=400, detail=str(e))
-
-
-@router.post(
     "/candidates/bulk/reject",
     response_model=BulkOperationResult,
     summary="Bulk reject candidates"
 )
-async def bulk_reject_candidates(
+async def bulk_reject_candidates_alt(
     data: BulkCandidateReject,
     role: str = Depends(require_role(["admin", "hr"])),
     session: AsyncSession = Depends(get_session)

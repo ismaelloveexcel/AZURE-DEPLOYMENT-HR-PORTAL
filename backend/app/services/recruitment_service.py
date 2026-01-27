@@ -1243,6 +1243,7 @@ class RecruitmentService:
         success_count = 0
         failed_count = 0
         failed_ids = []
+        now = datetime.now()
         
         for candidate_id in candidate_ids:
             try:
@@ -1253,12 +1254,12 @@ class RecruitmentService:
                     continue
                 
                 candidate.stage = new_stage
-                candidate.stage_changed_at = datetime.now()
+                candidate.stage_changed_at = now
                 candidate.status = new_stage  # Sync status with stage
                 
                 if notes:
                     # Append notes to recruiter_notes
-                    timestamp = datetime.now().strftime("%Y-%m-%d %H:%M")
+                    timestamp = now.strftime("%Y-%m-%d %H:%M")
                     note_entry = f"[{timestamp}] Stage changed to {new_stage}: {notes}"
                     if candidate.recruiter_notes:
                         candidate.recruiter_notes += f"\n{note_entry}"
@@ -1296,6 +1297,7 @@ class RecruitmentService:
         success_count = 0
         failed_count = 0
         failed_ids = []
+        now = datetime.now()
         
         for candidate_id in candidate_ids:
             try:
@@ -1307,11 +1309,11 @@ class RecruitmentService:
                 
                 candidate.stage = "rejected"
                 candidate.status = "rejected"
-                candidate.stage_changed_at = datetime.now()
+                candidate.stage_changed_at = now
                 candidate.rejection_reason = rejection_reason
                 
                 # Add note to recruiter_notes
-                timestamp = datetime.now().strftime("%Y-%m-%d %H:%M")
+                timestamp = now.strftime("%Y-%m-%d %H:%M")
                 note_entry = f"[{timestamp}] Rejected: {rejection_reason}"
                 if candidate.recruiter_notes:
                     candidate.recruiter_notes += f"\n{note_entry}"
