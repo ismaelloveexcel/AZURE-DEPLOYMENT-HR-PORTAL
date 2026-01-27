@@ -72,18 +72,30 @@
 **Deliverables:**
 - ✅ Enhanced CSV export with all fields
 - ✅ Bulk update capability
+- ✅ **Bulk import enhancements (multiple entity types)**
 - ✅ Employee search/filter endpoint
 - ✅ Employee status management (active/inactive)
 
+**Bulk Import Capabilities to Add:**
+1. **Employee bulk import** - ✅ EXISTS (needs enhancement)
+2. **Leave requests bulk import** - NEW (annual leave planning from Excel)
+3. **Compliance data bulk import** - NEW (visa, EID, medical dates)
+4. **Performance reviews bulk import** - NEW (annual review cycle data)
+5. **Document metadata bulk import** - NEW (existing doc tracking)
+
 **Files to modify:**
-- `backend/app/routers/employees.py` - Add bulk operations
-- `backend/app/services/employees.py` - Enhanced export
+- `backend/app/routers/employees.py` - Enhance import, add bulk operations
+- `backend/app/routers/leave.py` - Add bulk leave import endpoint
+- `backend/app/routers/employee_compliance.py` - Add bulk compliance import
+- `backend/app/routers/performance.py` - Add bulk review import
+- `backend/app/services/employees.py` - Enhanced export, bulk services
 - `backend/app/schemas/employee.py` - Add bulk schemas
 
 **Acceptance:**
 - Export includes all employee fields
 - Bulk update works correctly
 - Search endpoint functional
+- **Bulk imports support CSV/Excel with validation and error reporting**
 
 ---
 

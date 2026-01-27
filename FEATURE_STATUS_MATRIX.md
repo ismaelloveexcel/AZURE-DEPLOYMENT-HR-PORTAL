@@ -90,6 +90,17 @@
 | | Auto-Generation (NOC) | 🔴 | HIGH | 2 days |
 | | PDF Merge & Fill | 🔴 | CRITICAL | 1 week |
 | | Digital Signature | 🔴 | LOW | 1 week |
+| | **Bulk Import & Data Migration** | | | |
+| | Employee Bulk Import | ⚠️ | HIGH | 3 days |
+| | Compliance Data Import | 🔴 | HIGH | 2 days |
+| | Leave Requests Import | 🔴 | MEDIUM | 2 days |
+| | Performance Reviews Import | 🔴 | MEDIUM | 2 days |
+| | Document Metadata Import | 🔴 | LOW | 2 days |
+| | Public Holidays Import | 🔴 | LOW | 1 day |
+| | Import Preview & Validation | 🔴 | HIGH | 2 days |
+| | Excel (.xlsx) Support | 🔴 | MEDIUM | 2 days |
+| | Column Mapping UI | 🔴 | MEDIUM | 3 days |
+| | Error Report Download | 🔴 | HIGH | 1 day |
 | | **Requests & Approvals** | | | |
 | | Generic Request System | 🔴 | HIGH | 1 week |
 | | Approval Routing | 🔴 | HIGH | 3 days |

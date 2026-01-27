@@ -418,6 +418,106 @@ These features exist but need enhancement:
 
 ---
 
+## Bulk Import & Data Migration Features
+
+### Overview: Solo HR Time-Saver
+
+**Problem:** Solo HR often inherits data from Excel spreadsheets, external systems, or manual records. Manual re-entry is time-consuming and error-prone.
+
+**Solution:** Comprehensive bulk import capabilities for all major data types.
+
+**Time Saved:** 20-40 hours during initial setup, 2-4 hours/month for updates
+
+---
+
+### 🔄 Bulk Import Capabilities
+
+#### 1. **Employee Bulk Import** ✅ (PARTIALLY IMPLEMENTED)
+
+**Current Status:**
+- ✅ CSV import exists (`POST /api/employees/import`)
+- ✅ Supports two formats (Baynunah format + simple format)
+- ✅ Auto-detects format
+- ✅ Returns created/skipped/errors counts
+
+**Enhancements Needed:**
+- ⚠️ Add Excel (.xlsx) support (not just CSV)
+- ⚠️ Add preview before import (show first 10 rows)
+- ⚠️ Add field mapping UI (map CSV columns to database fields)
+- ⚠️ Add validation report download (errors in Excel format)
+- ⚠️ Add incremental import (update existing + add new)
+
+**CSV Format Example:**
+```csv
+employee_id,name,email,department,date_of_birth,job_title,line_manager,salary
+EMP001,John Smith,john@company.com,IT,15061990,Developer,MGR001,5000
+```
+
+**Time Saved:** 3 hours for 60 employees (vs manual entry)
+
+#### 2. **Compliance Data Bulk Import** 🔴 (NEW - HIGH PRIORITY)
+
+**Use Case:** Solo HR has visa/EID/medical data in Excel for 60+ employees
+
+**CSV Format Example:**
+```csv
+employee_id,visa_number,visa_expiry_date,eid_number,eid_expiry,medical_expiry,contract_start,contract_end
+EMP001,123456,2027-01-15,784-1234-5678901-2,2026-12-31,2026-06-30,2024-01-01,2026-12-31
+```
+
+**Time Saved:** 3 hours for 60 employees
+
+#### 3. **Leave Requests Bulk Import** 🔴 (NEW - MEDIUM PRIORITY)
+
+**Use Case:** Annual leave planning - pre-load approved leaves
+
+**CSV Format Example:**
+```csv
+employee_id,leave_type,start_date,end_date,days,status,notes
+EMP001,Annual,2026-06-01,2026-06-10,10,Approved,Summer vacation
+```
+
+**Time Saved:** 2 hours for annual planning
+
+#### 4. **Performance Reviews Bulk Import** 🔴 (NEW - MEDIUM PRIORITY)
+
+**Use Case:** Annual review cycle data from managers
+
+**CSV Format Example:**
+```csv
+employee_id,reviewer_id,overall_score,comments,review_date
+EMP001,MGR001,4.5,Excellent performance,2025-12-15
+```
+
+**Time Saved:** 3 hours for annual reviews
+
+#### 5. **Public Holidays Bulk Import** 🔴 (NEW - LOW PRIORITY)
+
+**CSV Format Example:**
+```csv
+date,name,is_recurring
+2026-01-01,New Year's Day,true
+2026-12-02,UAE National Day,true
+```
+
+**Time Saved:** 30 minutes setup
+
+### Common Import Features (All Imports)
+
+- **Preview mode** - Show first 10 rows before import
+- **Validation** - Check formats, references, duplicates
+- **Error report** - Downloadable Excel with errors highlighted
+- **Progress indicator** - For large imports (100+ records)
+- **Rollback option** - Undo recent import
+- **Audit logging** - Track who imported what
+
+### ROI: Bulk Import
+
+**Initial Setup:** ~8 hours saved  
+**Annual Ongoing:** ~25 hours/year saved
+
+---
+
 ## Priority Features to Build Next
 
 ### Phase 1: Critical Automation (Weeks 1-4)
