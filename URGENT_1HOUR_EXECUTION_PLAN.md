@@ -12,7 +12,7 @@
 **Status Assessment:**
 - ✅ **Recruitment:** 90% complete - needs final enhancements
 - ✅ **Employee Database:** 85% complete - needs export/import refinement
-- 🔴 **Leaver Planner:** 0% complete - NEW MODULE REQUIRED
+- ⚠️ **Leave Planner:** 80% complete - needs advanced features (ref: https://github.com/ismaelloveexcel/employee-leave-plann)
 - ⚠️ **Performance Appraisal:** 80% complete - needs completion workflow
 
 **Approach:** Parallel execution by specialized agents across 6 time blocks (10 minutes each)
@@ -67,51 +67,66 @@
 
 ### BLOCK 3-4: Minutes 20-40 (PARALLEL EXECUTION)
 
-#### Task 2A: Leaver Planner Module (NEW - 20 min)
+#### Task 2A: Leave Planner Enhancement (20 min) 
 **Agent:** `portal-engineer`  
-**Status:** NEW MODULE - critical priority  
+**Status:** Basic leave module exists (80% complete) - needs annual leave planning features  
+**Reference:** https://github.com/ismaelloveexcel/employee-leave-plann (complete leave planning system)
+
+**NOTE:** This is for annual leave/vacation planning, NOT employee exit ("leaver"). Current system has basic leave requests. Need to add:
+
 **Deliverables:**
-- ✅ Leaver model (resignation date, notice period, last day, reason, exit interview status)
-- ✅ Leaver router with CRUD operations
-- ✅ Leaver service with business logic
-- ✅ Integration with employee status
-- ✅ Exit checklist tracking
-- ✅ Clearance workflow
+- ✅ UAE 2026 public holidays integration
+- ✅ Leave balance tracking with offset days (carried over from previous year)
+- ✅ Visual calendar with leave visualization
+- ✅ Department leave calendar (team coordination)
+- ✅ Manager email notifications for leave requests
+- ✅ Leave request status tracking
+- ✅ Overlap detection and validation
+
+**Files to enhance:**
+- `backend/app/models/leave.py` - Add offset_days_used, public_holiday fields
+- `backend/app/routers/leave.py` - Add calendar endpoints, public holiday endpoints
+- `backend/app/services/leave_service.py` - Add balance calculation with offset, overlap detection
+- `backend/app/schemas/leave.py` - Add enhanced leave schemas
 
 **Files to create:**
-- `backend/app/models/leaver.py` - NEW
-- `backend/app/routers/leavers.py` - NEW
-- `backend/app/services/leaver_service.py` - NEW
-- `backend/app/schemas/leaver.py` - NEW
+- `backend/app/models/public_holiday.py` - UAE 2026 holidays (if not exists - check first)
+- `backend/app/routers/leave_calendar.py` - Calendar visualization endpoints
+- `backend/app/services/email_notifications.py` - Manager notification service
 
-**Files to modify:**
-- `backend/app/main.py` - Register leaver router
-- `backend/app/models/__init__.py` - Import leaver model
+**Key Features from Reference:**
+1. **2026 Calendar with UAE Public Holidays** - All 11 UAE holidays highlighted
+2. **Offset Days Usage** - Track and utilize carried-over days from 2025
+3. **Real-time Balance Calculation** - Total - (Approved + Pending) including offset
+4. **Manager Email Notifications** - Auto-notify on submission
+5. **Department Calendar View** - Show team leave (anonymized counts)
+6. **Overlap Detection** - Prevent double-booking
+7. **Visual Calendar Interface** - Month view with leave periods highlighted
 
-**Database migration:**
+**Database enhancements:**
 ```sql
-CREATE TABLE leavers (
+-- Add to leave table if not exists
+ALTER TABLE leaves ADD COLUMN IF NOT EXISTS offset_days_used INT DEFAULT 0;
+ALTER TABLE leaves ADD COLUMN IF NOT EXISTS manager_notified BOOLEAN DEFAULT FALSE;
+ALTER TABLE leaves ADD COLUMN IF NOT EXISTS overlaps_checked BOOLEAN DEFAULT TRUE;
+
+-- Public holidays table (if not exists)
+CREATE TABLE IF NOT EXISTS public_holidays (
     id SERIAL PRIMARY KEY,
-    employee_id VARCHAR(20) REFERENCES employees(employee_id),
-    resignation_date DATE NOT NULL,
-    notice_period_days INT DEFAULT 30,
-    last_working_day DATE NOT NULL,
-    reason VARCHAR(100),
-    exit_interview_completed BOOLEAN DEFAULT FALSE,
-    exit_interview_date DATE,
-    clearance_status VARCHAR(20) DEFAULT 'pending',
-    clearance_items JSONB,
-    created_by VARCHAR(20),
-    created_at TIMESTAMP DEFAULT NOW(),
-    updated_at TIMESTAMP DEFAULT NOW()
+    date DATE NOT NULL,
+    name VARCHAR(100) NOT NULL,
+    country_code VARCHAR(3) DEFAULT 'UAE',
+    year INT NOT NULL,
+    is_recurring BOOLEAN DEFAULT FALSE
 );
 ```
 
 **Acceptance:**
-- Can add leaver record for employee
-- Notice period auto-calculated
-- Exit checklist tracked
-- Employee status updates to "leaving"
+- Leave requests support offset days
+- Calendar endpoint returns leaves + public holidays
+- Manager notifications sent on submission
+- Overlap validation prevents conflicts
+- Balance calculation includes offset days
 
 ---
 
@@ -177,7 +192,7 @@ CREATE TABLE leavers (
 |------------|-------|------|----------|
 | 0-10 min | `portal-engineer` | Recruitment completion | HIGH |
 | 0-10 min | `portal-engineer` | Employee DB enhancement | HIGH |
-| 20-30 min | `portal-engineer` | Leaver module (NEW) | CRITICAL |
+| 20-30 min | `portal-engineer` | Leave planner enhancement | CRITICAL |
 | 30-40 min | `portal-engineer` | Performance completion | HIGH |
 | 40-50 min | `portal-engineer` | Integration testing | CRITICAL |
 | 50-60 min | `portal-engineer` | Documentation & prep | MEDIUM |
@@ -228,41 +243,51 @@ CREATE TABLE leavers (
 
 ---
 
-### 3. Leaver Planner 🔴 (0% → 100%) **NEW MODULE**
+### 3. Leave Planner (Annual Leave Management) ⚠️ (80% → 100%)
 
-**Required Features:**
-- [ ] Resignation recording
-- [ ] Notice period calculation
-- [ ] Last working day tracking
-- [ ] Exit interview scheduling
-- [ ] Clearance checklist
-- [ ] Document handover tracking
-- [ ] Equipment return tracking
-- [ ] Final settlement calculation
-- [ ] Leaver reports
+**Reference:** https://github.com/ismaelloveexcel/employee-leave-plann
 
-**Data Model:**
+**Current Status:**
+- ✅ Basic leave requests working
+- ⚠️ Missing advanced leave planning features
+
+**Required Enhancements:**
+- [ ] UAE 2026 public holidays integration (11 holidays)
+- [ ] Offset days tracking (carried over from 2025)
+- [ ] Visual calendar interface for leave planning
+- [ ] Manager email notifications on submission
+- [ ] Department leave calendar (team coordination)
+- [ ] Overlap detection and prevention
+- [ ] Enhanced balance calculation (regular + offset)
+- [ ] Leave request history with email notification status
+
+**Key Features from Reference Implementation:**
+1. **2026 Calendar View** - Interactive calendar showing available dates, public holidays, and existing leave
+2. **Offset Days Management** - Employees can use carried-over days from previous year
+3. **Real-time Balance Display** - Shows remaining days: Total - (Approved + Pending) - Including offset
+4. **Manager Notifications** - Automatic email to manager on leave request submission
+5. **Department Calendar** - Anonymized view showing team member absence counts
+6. **Smart Validation** - Prevents overlaps, past dates, exceeding balance
+
+**Data Model Enhancements:**
 ```python
-class Leaver:
-    employee_id: FK -> Employee
-    resignation_date: Date
-    notice_period_days: Int (default 30)
-    last_working_day: Date (auto-calc)
-    reason: Enum(personal, better_offer, relocation, health, retirement, termination)
-    exit_interview_completed: Bool
-    exit_interview_date: Date
-    exit_interview_notes: Text
-    clearance_status: Enum(pending, in_progress, completed)
-    clearance_items: JSON {
-        "documents": {"status": "pending", "completed_by": null},
-        "equipment": {"status": "pending", "completed_by": null},
-        "access_cards": {"status": "pending", "completed_by": null},
-        "keys": {"status": "pending", "completed_by": null}
-    }
-    final_settlement_status: Enum(pending, calculated, paid)
-    rehire_eligible: Bool
-    created_by: String
-    created_at: Timestamp
+# Enhance existing Leave model
+class Leave:
+    # ... existing fields ...
+    offset_days_used: Int (default 0)  # Days from carried-over balance
+    manager_email: String  # Email of approving manager
+    manager_notified: Bool (default False)  # Email sent confirmation
+    notification_sent_at: DateTime  # When email was sent
+    overlaps_checked: Bool (default True)  # Validation performed
+    
+# Add Public Holiday model
+class PublicHoliday:
+    id: Int
+    date: Date
+    name: String  # e.g., "UAE National Day"
+    country_code: String (default "UAE")
+    year: Int (2026)
+    is_recurring: Bool  # If it repeats annually
 ```
 
 ---
@@ -310,19 +335,21 @@ copilot agent portal-engineer "Enhance employee database:
 4. Test with sample data
 Files: backend/app/routers/employees.py, services/employees.py"
 
-# Block 3-4: Leaver Module (NEW) + Performance
-# Critical: Leaver module is completely new
+# Block 3-4: Leave Planner Enhancement + Performance
+# Reference: https://github.com/ismaelloveexcel/employee-leave-plann
 
-# Task 2A: Leaver Module (20 min - NEW)
-copilot agent portal-engineer "CREATE NEW leaver module from scratch:
-1. Create model: backend/app/models/leaver.py
-2. Create router: backend/app/routers/leavers.py
-3. Create service: backend/app/services/leaver_service.py
-4. Create schemas: backend/app/schemas/leaver.py
-5. Register in main.py
-6. Create migration
-7. Test full workflow
-Include: resignation tracking, notice period calc, exit checklist, clearance workflow"
+# Task 2A: Leave Planner Enhancement (20 min)
+copilot agent portal-engineer "ENHANCE existing leave module with advanced planning features:
+Reference: https://github.com/ismaelloveexcel/employee-leave-plann
+1. Add UAE 2026 public holidays (11 holidays)
+2. Add offset days tracking to leave model
+3. Add manager email notifications on submission
+4. Add calendar endpoints with leave + holidays
+5. Add overlap detection validation
+6. Enhance balance calculation (regular + offset)
+7. Test full leave planning workflow
+Files: backend/app/models/leave.py, routers/leave.py, services/leave_service.py
+Create: backend/app/models/public_holiday.py (if needed), services/email_notifications.py"
 
 # Task 2B: Performance (can run parallel)
 copilot agent portal-engineer "Complete performance appraisal:
@@ -370,7 +397,7 @@ copilot agent portal-engineer "Final documentation:
 
 ### Priority Order (if time runs out)
 
-1. **MUST HAVE:** Leaver module (new, critical business need)
+1. **MUST HAVE:** Leave planner enhancement (critical for UAE compliance & employee satisfaction)
 2. **MUST HAVE:** Recruitment completion (close to done)
 3. **SHOULD HAVE:** Performance completion (mostly done)
 4. **NICE TO HAVE:** Employee DB enhancements (working already)
@@ -382,7 +409,7 @@ copilot agent portal-engineer "Final documentation:
 ### Minimum Viable Completion (MVP)
 
 **By 60 minutes:**
-- [ ] Leaver module functional (add, view, update, exit checklist)
+- [ ] Leave planner enhanced (UAE holidays, offset days, notifications, calendar)
 - [ ] Recruitment bulk operations working
 - [ ] Performance cycle completes end-to-end
 - [ ] Employee export includes all fields
@@ -408,8 +435,8 @@ copilot agent portal-engineer "Final documentation:
 |------|------------|--------|-------|
 | T+10 | Recruitment endpoints done | ⏳ | |
 | T+10 | Employee export enhanced | ⏳ | |
-| T+30 | Leaver model created | ⏳ | |
-| T+30 | Leaver router functional | ⏳ | |
+| T+30 | Leave planner enhanced (holidays) | ⏳ | |
+| T+30 | Leave notifications working | ⏳ | |
 | T+40 | Performance completed | ⏳ | |
 | T+50 | All tests passing | ⏳ | |
 | T+60 | Code committed | ⏳ | |
@@ -418,68 +445,77 @@ copilot agent portal-engineer "Final documentation:
 
 ## 🔧 Technical Implementation Notes
 
-### Leaver Module - Quick Implementation Pattern
+### Leave Planner Enhancement - Quick Implementation Pattern
 
-**Step 1: Model** (5 min)
+**Reference:** https://github.com/ismaelloveexcel/employee-leave-plann
+
+**Step 1: Add Public Holidays Model** (3 min)
 ```python
-# backend/app/models/leaver.py
-from sqlalchemy import Column, Integer, String, Date, Boolean, JSON, ForeignKey
-from sqlalchemy.orm import relationship
-from datetime import datetime, timedelta
+# backend/app/models/public_holiday.py (if not exists)
+from sqlalchemy import Column, Integer, String, Date, Boolean
 
-class Leaver(Base):
-    __tablename__ = "leavers"
+class PublicHoliday(Base):
+    __tablename__ = "public_holidays"
     
     id = Column(Integer, primary_key=True)
-    employee_id = Column(String(20), ForeignKey("employees.employee_id"))
-    resignation_date = Column(Date, nullable=False)
-    notice_period_days = Column(Integer, default=30)
-    last_working_day = Column(Date, nullable=False)
-    reason = Column(String(100))
-    exit_interview_completed = Column(Boolean, default=False)
-    clearance_status = Column(String(20), default="pending")
-    clearance_items = Column(JSON, default={})
-    created_at = Column(DateTime, default=datetime.utcnow)
-    
-    employee = relationship("Employee", back_populates="leaver_record")
+    date = Column(Date, nullable=False, unique=True)
+    name = Column(String(100), nullable=False)
+    country_code = Column(String(3), default="UAE")
+    year = Column(Integer, nullable=False)
+    is_recurring = Column(Boolean, default=False)
+
+# Seed UAE 2026 holidays
+uae_2026_holidays = [
+    ("2026-01-01", "New Year's Day"),
+    ("2026-06-15", "Arafat Day (estimated)"),
+    ("2026-06-16", "Eid Al Adha (estimated)"),
+    ("2026-07-07", "Islamic New Year (estimated)"),
+    ("2026-09-15", "Prophet's Birthday (estimated)"),
+    ("2026-12-02", "National Day"),
+    ("2026-12-03", "National Day Holiday"),
+    # Add remaining holidays
+]
 ```
 
-**Step 2: Router** (5 min)
+**Step 2: Enhance Leave Model** (3 min)
 ```python
-# backend/app/routers/leavers.py
-from fastapi import APIRouter, Depends
-from app.core.security import require_role
-
-router = APIRouter(prefix="/leavers", tags=["leavers"])
-
-@router.post("/", response_model=LeaverResponse)
-async def create_leaver(data: LeaverCreate, ...):
-    return await leaver_service.create_leaver(session, data)
-
-@router.get("/", response_model=List[LeaverResponse])
-async def list_leavers(...):
-    return await leaver_service.list_leavers(session)
+# backend/app/models/leave.py - Add fields
+class Leave(Base):
+    # ... existing fields ...
+    offset_days_used = Column(Integer, default=0)
+    manager_email = Column(String(255))
+    manager_notified = Column(Boolean, default=False)
+    notification_sent_at = Column(DateTime)
+    overlaps_checked = Column(Boolean, default=True)
 ```
 
-**Step 3: Service** (5 min)
+**Step 3: Add Email Notification Service** (5 min)
 ```python
-# backend/app/services/leaver_service.py
-from datetime import timedelta
-
-class LeaverService:
-    async def create_leaver(self, db, data):
-        # Auto-calculate last working day
-        last_day = data.resignation_date + timedelta(days=data.notice_period_days)
-        leaver = Leaver(**data.dict(), last_working_day=last_day)
-        db.add(leaver)
-        await db.commit()
-        return leaver
+# backend/app/services/email_notifications.py
+async def send_leave_notification(employee, leave_request, manager_email):
+    """Send email to manager when leave is requested"""
+    # Use existing email service or FastAPI-Mail
+    pass
 ```
 
-**Step 4: Migration** (5 min)
+**Step 4: Add Calendar Endpoints** (5 min)
+```python
+# backend/app/routers/leave.py - Add endpoints
+@router.get("/calendar")
+async def get_leave_calendar(
+    year: int = 2026,
+    month: Optional[int] = None,
+    session: AsyncSession = Depends(get_session)
+):
+    """Get leaves + public holidays for calendar view"""
+    # Return combined data for UI calendar
+    pass
+```
+
+**Step 5: Migration** (4 min)
 ```bash
 cd backend
-uv run alembic revision --autogenerate -m "add_leaver_module"
+uv run alembic revision --autogenerate -m "enhance_leave_with_planning_features"
 uv run alembic upgrade head
 ```
 
@@ -501,7 +537,7 @@ After 60 minutes:
 ## 🎯 Immediate Next Steps (START NOW)
 
 1. **Minute 0:** Kick off portal-engineer for recruitment + employee DB
-2. **Minute 20:** Start leaver module creation (highest priority)
+2. **Minute 20:** Start leave planner enhancement (ref: https://github.com/ismaelloveexcel/employee-leave-plann)
 3. **Minute 40:** Begin integration testing
 4. **Minute 50:** Documentation and commit
 5. **Minute 60:** DONE - Review and deploy
@@ -511,4 +547,5 @@ After 60 minutes:
 **Status:** Ready to execute  
 **Priority:** URGENT  
 **Timeline:** 60 minutes from now  
-**Agent:** portal-engineer (primary executor)
+**Agent:** portal-engineer (primary executor)  
+**Reference:** https://github.com/ismaelloveexcel/employee-leave-plann (for leave planning features)
