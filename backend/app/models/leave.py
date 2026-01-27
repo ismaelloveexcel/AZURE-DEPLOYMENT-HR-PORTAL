@@ -69,13 +69,20 @@ class LeaveBalance(Base):
     adjustment: Mapped[Decimal] = mapped_column(Numeric(5, 2), default=Decimal("0"), nullable=False)
     adjustment_reason: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
     
+    # Offset days (carried over from previous year or compensatory leave)
+    offset_days_used: Mapped[Decimal] = mapped_column(Numeric(5, 2), default=Decimal("0"), nullable=False)
+    
     # Timestamps
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), nullable=False)
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False)
     
     @property
     def available(self) -> Decimal:
-        """Calculate available leave balance."""
+        """Calculate available leave balance including offset days.
+        
+        Formula: Total = Annual Entitlement + Carried Forward + Adjustment - Used - Pending
+        Offset days are tracked separately but reduce from carried forward when used.
+        """
         return self.entitlement + self.carried_forward + self.adjustment - self.used - self.pending
 
 
@@ -116,6 +123,14 @@ class LeaveRequest(Base):
     approved_by: Mapped[Optional[int]] = mapped_column(ForeignKey("employees.id"), nullable=True)
     approved_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
     rejection_reason: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    
+    # Manager notification tracking
+    manager_email: Mapped[Optional[str]] = mapped_column(String(255), nullable=True)
+    manager_notified: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
+    notification_sent_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
+    
+    # Validation flags
+    overlaps_checked: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
     
     # Emergency contact during leave
     emergency_contact: Mapped[Optional[str]] = mapped_column(String(200), nullable=True)
