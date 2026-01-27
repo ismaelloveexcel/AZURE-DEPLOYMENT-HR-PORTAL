@@ -7,6 +7,40 @@
 
 ---
 
+## 🎯 Critical Context: HR Assistance Tool for Solo HR
+
+**This is NOT an HRIS.** This is a **productivity tool for solo HR professionals** managing 60-100 employees.
+
+### What Solo HR Actually Needs
+
+**Current Reality:**
+- One person handling all HR functions
+- 30+ hours/week spent on repetitive admin tasks
+- Constant interruptions for "Where's my leave balance?" questions
+- Manual tracking of compliance deadlines
+- Time wasted creating routine documents
+
+**What This Portal Provides:**
+- ✅ **Automation** - Alerts, reminders, auto-generation (save 20+ hrs/week)
+- ✅ **Self-Service** - Employees find answers themselves (reduce interruptions 80%)
+- ✅ **Compliance Safety Net** - Never miss visa/document renewals
+- ✅ **Quick Wins** - Generate salary cert in 30 seconds vs 20 minutes
+
+**What This Portal Does NOT Provide:**
+- ❌ Full payroll calculation engine (use existing payroll service)
+- ❌ Complex analytics dashboards (Excel exports work fine)
+- ❌ Enterprise workforce planning (solo HR doesn't need this)
+- ❌ Advanced talent management (keep it simple)
+
+### Design Philosophy
+
+> **"Build tools that save HR time, not features that add complexity"**
+
+Every feature must answer: **"Does this save solo HR at least 1 hour per week?"**  
+If no, it's not a priority.
+
+---
+
 ## Executive Summary
 
 After reviewing all reference documents in the REFERENCES folder, I've analyzed three major blueprint versions and compared them with the current system implementation:

@@ -7,6 +7,26 @@
 
 ---
 
+## 🎯 Context: Solo HR Assistance Tool
+
+**CRITICAL REMINDER:** This is an **HR assistance tool for solo HR**, NOT a comprehensive HRIS.
+
+**What this means for implementation:**
+- ✅ **Prioritize:** Features that save solo HR time (automation, self-service)
+- ✅ **Keep Simple:** Good enough beats enterprise-perfect
+- ✅ **Focus:** Eliminate repetitive tasks, not build complete HR suite
+- ❌ **Avoid:** Complex workflows, extensive analytics, over-engineering
+
+**4 Features Selected Because They:**
+1. **Recruitment** - Eliminates manual candidate tracking chaos
+2. **Employee Database** - Central truth, reduces "Where's X info?" questions
+3. **Leave Planner** - Automates leave tracking, reduces back-and-forth
+4. **Performance** - Simple tracking, not complex talent management
+
+**NOT building:** Payroll engine, advanced analytics, complex approvals, enterprise features
+
+---
+
 ## ⚡ Executive Summary
 
 **Status Assessment:**
@@ -16,6 +36,8 @@
 - ⚠️ **Performance Appraisal:** 80% complete - needs completion workflow
 
 **Approach:** Parallel execution by specialized agents across 6 time blocks (10 minutes each)
+
+**Remember:** We're building practical HR tools, not enterprise software. If a feature doesn't directly save solo HR time, it's out of scope.
 
 ---
 

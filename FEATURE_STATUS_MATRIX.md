@@ -5,11 +5,30 @@
 
 ---
 
+## 🎯 HR Assistance Tool Context
+
+**IMPORTANT:** This matrix prioritizes features that **save solo HR time**, not comprehensive HRIS functionality.
+
+**Priority Criteria:**
+1. **HIGH** = Saves 2+ hours/week OR critical for UAE compliance
+2. **MEDIUM** = Saves 1+ hour/week OR improves employee experience significantly
+3. **LOW** = Nice-to-have OR enterprise features solo HR doesn't need
+
+**Out of Scope (Not Prioritized):**
+- Complex payroll calculations (use external service)
+- Advanced analytics/dashboards (Excel exports sufficient)
+- Enterprise talent management features
+- Sophisticated succession planning
+
+**Remember:** We're building practical time-saving tools for solo HR, not a full HRIS platform.
+
+---
+
 ## Legend
 - ✅ **Fully Implemented** - Feature is complete and working
 - ⚠️ **Partially Implemented** - Backend exists, needs frontend or enhancement
 - 🔴 **Missing** - Not implemented, in blueprint
-- 🤖 **Automation Needed** - Exists but manual, should be automated
+- 🤖 **Automation Needed** - Exists but manual, should be automated (KEY FOR SOLO HR)
 - 📱 **Mobile Needed** - Desktop only, needs mobile optimization
 
 ---

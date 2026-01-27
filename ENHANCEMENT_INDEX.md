@@ -6,9 +6,38 @@
 
 ---
 
+## 🎯 Core Principle: HR Assistance Tool, Not HRIS
+
+**IMPORTANT:** This portal is designed as an **HR assistance tool for solo HR professionals**, not a full Human Resources Information System (HRIS).
+
+**What this means:**
+- **Focus:** Time-saving automation and employee self-service
+- **Goal:** Reduce solo HR workload from 30 hours/week to 10 hours/week on admin tasks
+- **Approach:** Practical tools that eliminate repetitive tasks, not comprehensive HR management
+- **Philosophy:** "Good enough to save time" beats "enterprise-complete but complex"
+
+**What this IS:**
+- ✅ Compliance alert system (visa/document expiry)
+- ✅ Employee self-service portal (reduce interruptions)
+- ✅ Document auto-generation (salary certs, letters)
+- ✅ Leave request tracking
+- ✅ Recruitment pipeline management
+- ✅ Basic performance tracking
+
+**What this is NOT:**
+- ❌ Full payroll processing engine (visibility only)
+- ❌ Complex workforce analytics platform
+- ❌ Enterprise talent management suite
+- ❌ Comprehensive benefits administration
+- ❌ Advanced succession planning system
+
+**Design priority:** Features that directly save solo HR time > enterprise completeness
+
+---
+
 ## 📋 Document Overview
 
-This folder contains the complete analysis of reference blueprints and a comprehensive enhancement plan for the HR Portal. All documents were created from reviewing blueprints in the `REFERENCES/` folder.
+This folder contains the complete analysis of reference blueprints and a comprehensive enhancement plan for the HR Portal. All documents were created from reviewing blueprints in the `REFERENCES/` folder, with a focus on practical tools for solo HR productivity.
 
 ---
 
