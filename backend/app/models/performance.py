@@ -65,6 +65,10 @@ class PerformanceReview(Base):
     rating_label: Mapped[Optional[str]] = mapped_column(String(50), nullable=True)
     # Outstanding, Exceeds Expectations, Meets Expectations, Developing, Needs Improvement
     
+    # Reminder system
+    reminder_sent: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
+    reminder_sent_at: Mapped[Optional[datetime]] = mapped_column(DateTime, nullable=True)
+    
     created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now(), nullable=False)
     updated_at: Mapped[Optional[datetime]] = mapped_column(DateTime, onupdate=func.now(), nullable=True)
     

@@ -66,6 +66,102 @@ async def get_stats(
     return await recruitment_service.get_stats(session)
 
 
+@router.get("/metrics", response_model=RecruitmentMetrics, summary="Get detailed recruitment metrics")
+async def get_metrics(
+    role: str = Depends(require_role(["admin", "hr"])),
+    session: AsyncSession = Depends(get_session)
+):
+    """
+    Get detailed recruitment metrics with time-to-hire and source effectiveness.
+    
+    **Enhanced analytics including:**
+    - Average time-to-hire (in days)
+    - Candidates by stage and source
+    - Source effectiveness (conversion rates)
+    - Pipeline metrics
+    - Conversion rates at each stage
+    
+    **Admin and HR only.**
+    """
+    return await recruitment_service.get_recruitment_metrics(session)
+
+
+@router.post(
+    "/bulk-update",
+    response_model=BulkOperationResult,
+    summary="Bulk update candidate stages"
+)
+async def bulk_update_candidate_stage(
+    data: BulkCandidateStageUpdate,
+    role: str = Depends(require_role(["admin", "hr"])),
+    session: AsyncSession = Depends(get_session)
+):
+    """
+    Bulk update multiple candidates' stages at once.
+    
+    **Request body:**
+    ```json
+    {
+        "candidate_ids": [1, 2, 3, 4],
+        "new_stage": "interview",
+        "notes": "Moving to interview round"
+    }
+    ```
+    
+    **Valid stages:** applied, screening, interview, offer, hired, rejected
+    
+    **Returns:**
+    - `success_count`: Number of successfully updated candidates
+    - `failed_count`: Number of failed updates
+    - `failed_ids`: List of candidate IDs that failed
+    - `message`: Summary message
+    
+    **Admin and HR only.**
+    """
+    return await recruitment_service.bulk_update_candidate_stage(
+        session,
+        data.candidate_ids,
+        data.new_stage,
+        data.notes
+    )
+
+
+@router.post(
+    "/bulk-reject",
+    response_model=BulkOperationResult,
+    summary="Bulk reject candidates"
+)
+async def bulk_reject_candidates(
+    data: BulkCandidateReject,
+    role: str = Depends(require_role(["admin", "hr"])),
+    session: AsyncSession = Depends(get_session)
+):
+    """
+    Bulk reject multiple candidates with a reason.
+    
+    **Request body:**
+    ```json
+    {
+        "candidate_ids": [5, 6, 7],
+        "rejection_reason": "Not meeting minimum experience requirement"
+    }
+    ```
+    
+    All selected candidates will be:
+    - Moved to "rejected" stage
+    - Status set to "rejected"
+    - Rejection reason recorded
+    - Note added to recruiter notes
+    
+    **Admin and HR only.**
+    """
+    return await recruitment_service.bulk_reject_candidates(
+        session,
+        data.candidate_ids,
+        data.rejection_reason
+    )
+
+
 # ============================================================================
 # RECRUITMENT REQUESTS
 # ============================================================================

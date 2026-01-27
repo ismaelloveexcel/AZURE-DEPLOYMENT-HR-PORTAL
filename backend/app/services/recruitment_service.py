@@ -1227,5 +1227,170 @@ class RecruitmentService:
         }
 
 
+    async def bulk_update_candidate_stage(
+        self,
+        session: AsyncSession,
+        candidate_ids: List[int],
+        new_stage: str,
+        notes: Optional[str] = None
+    ) -> Dict[str, Any]:
+        """
+        Bulk update candidate stages.
+        
+        Returns:
+            {"success_count": int, "failed_count": int, "failed_ids": List[int], "message": str}
+        """
+        success_count = 0
+        failed_count = 0
+        failed_ids = []
+        
+        for candidate_id in candidate_ids:
+            try:
+                candidate = await self.get_candidate(session, candidate_id)
+                if not candidate:
+                    failed_count += 1
+                    failed_ids.append(candidate_id)
+                    continue
+                
+                candidate.stage = new_stage
+                candidate.stage_changed_at = datetime.now()
+                candidate.status = new_stage  # Sync status with stage
+                
+                if notes:
+                    # Append notes to recruiter_notes
+                    timestamp = datetime.now().strftime("%Y-%m-%d %H:%M")
+                    note_entry = f"[{timestamp}] Stage changed to {new_stage}: {notes}"
+                    if candidate.recruiter_notes:
+                        candidate.recruiter_notes += f"\n{note_entry}"
+                    else:
+                        candidate.recruiter_notes = note_entry
+                
+                success_count += 1
+                
+            except Exception as e:
+                logger.error(f"Failed to update candidate {candidate_id}: {str(e)}")
+                failed_count += 1
+                failed_ids.append(candidate_id)
+        
+        await session.commit()
+        
+        return {
+            "success_count": success_count,
+            "failed_count": failed_count,
+            "failed_ids": failed_ids,
+            "message": f"Successfully updated {success_count} candidates, {failed_count} failed"
+        }
+
+    async def bulk_reject_candidates(
+        self,
+        session: AsyncSession,
+        candidate_ids: List[int],
+        rejection_reason: str
+    ) -> Dict[str, Any]:
+        """
+        Bulk reject candidates with reason.
+        
+        Returns:
+            {"success_count": int, "failed_count": int, "failed_ids": List[int], "message": str}
+        """
+        success_count = 0
+        failed_count = 0
+        failed_ids = []
+        
+        for candidate_id in candidate_ids:
+            try:
+                candidate = await self.get_candidate(session, candidate_id)
+                if not candidate:
+                    failed_count += 1
+                    failed_ids.append(candidate_id)
+                    continue
+                
+                candidate.stage = "rejected"
+                candidate.status = "rejected"
+                candidate.stage_changed_at = datetime.now()
+                candidate.rejection_reason = rejection_reason
+                
+                # Add note to recruiter_notes
+                timestamp = datetime.now().strftime("%Y-%m-%d %H:%M")
+                note_entry = f"[{timestamp}] Rejected: {rejection_reason}"
+                if candidate.recruiter_notes:
+                    candidate.recruiter_notes += f"\n{note_entry}"
+                else:
+                    candidate.recruiter_notes = note_entry
+                
+                success_count += 1
+                
+            except Exception as e:
+                logger.error(f"Failed to reject candidate {candidate_id}: {str(e)}")
+                failed_count += 1
+                failed_ids.append(candidate_id)
+        
+        await session.commit()
+        
+        return {
+            "success_count": success_count,
+            "failed_count": failed_count,
+            "failed_ids": failed_ids,
+            "message": f"Successfully rejected {success_count} candidates, {failed_count} failed"
+        }
+
+    async def get_recruitment_metrics(self, session: AsyncSession) -> Dict[str, Any]:
+        """
+        Get detailed recruitment metrics including time-to-hire and source effectiveness.
+        
+        Enhanced version of get_stats with additional analytics.
+        """
+        # Get basic stats first
+        stats = await self.get_stats(session)
+        
+        # Calculate time-to-hire average (from created_at to offer stage)
+        time_to_hire_query = select(
+            func.avg(
+                func.extract('epoch', Candidate.stage_changed_at - Candidate.created_at) / 86400
+            )
+        ).where(
+            and_(
+                Candidate.stage == "offer",
+                Candidate.stage_changed_at.isnot(None)
+            )
+        )
+        time_to_hire_result = await session.execute(time_to_hire_query)
+        avg_time_to_hire = time_to_hire_result.scalar()
+        
+        # Calculate source effectiveness (conversion rate from applied to hired by source)
+        source_effectiveness = {}
+        
+        # Get all unique sources
+        sources_query = select(Candidate.source).distinct().where(Candidate.source.isnot(None))
+        sources_result = await session.execute(sources_query)
+        sources = [row[0] for row in sources_result.fetchall()]
+        
+        for source in sources:
+            total_count = (await session.execute(
+                select(func.count()).select_from(Candidate).where(Candidate.source == source)
+            )).scalar() or 0
+            
+            hired_count = (await session.execute(
+                select(func.count()).select_from(Candidate).where(
+                    and_(Candidate.source == source, Candidate.stage == "hired")
+                )
+            )).scalar() or 0
+            
+            conversion_rate = round((hired_count / total_count * 100), 1) if total_count > 0 else 0
+            
+            source_effectiveness[source] = {
+                "total": total_count,
+                "hired": hired_count,
+                "conversion_rate": conversion_rate
+            }
+        
+        # Merge with basic stats
+        return {
+            **stats,
+            "avg_time_to_hire_days": round(avg_time_to_hire, 1) if avg_time_to_hire else None,
+            "source_effectiveness": source_effectiveness
+        }
+
+
 # Singleton instance
 recruitment_service = RecruitmentService()

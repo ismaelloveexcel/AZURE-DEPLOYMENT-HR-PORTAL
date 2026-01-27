@@ -182,6 +182,11 @@ class Candidate(Base):
     # Rejection
     rejection_reason: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
 
+    # Offer tracking
+    offer_letter_sent: Mapped[Optional[bool]] = mapped_column(Boolean, default=False, nullable=True)
+    offer_details: Mapped[Optional[dict]] = mapped_column(JSON, nullable=True)  # {salary, position, benefits, etc}
+    offer_accepted: Mapped[Optional[bool]] = mapped_column(Boolean, nullable=True)
+
     # Notes (split)
     notes: Mapped[Optional[str]] = mapped_column(Text, nullable=True)  # Legacy - kept for migration
     recruiter_notes: Mapped[Optional[str]] = mapped_column(Text, nullable=True)  # HR-only

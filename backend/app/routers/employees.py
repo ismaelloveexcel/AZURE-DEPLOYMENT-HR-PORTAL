@@ -1,4 +1,5 @@
 from typing import List
+from datetime import datetime
 
 from fastapi import APIRouter, Depends, File, UploadFile, status, Query, Response
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -236,3 +237,109 @@ async def deactivate_employee(
     """
     success = await employee_service.deactivate_employee(session, employee_id)
     return {"success": success, "message": "Employee deactivated"}
+
+
+@router.get(
+    "/export",
+    summary="Export employees to CSV",
+)
+async def export_employees(
+    active_only: bool = Query(default=True, description="Export only active employees"),
+    role: str = Depends(require_role(["admin", "hr"])),
+    session: AsyncSession = Depends(get_session),
+):
+    """
+    Export all employees to CSV with complete data (compliance, bank, contact).
+    
+    Returns a downloadable CSV file with all employee fields including:
+    - Core employee data (name, email, department, job title)
+    - Compliance data (visa, Emirates ID, medical, ILOE, contract)
+    - Bank details (bank name, IBAN, account number)
+    
+    **Query parameters:**
+    - `active_only`: true (default) exports only active employees, false exports all
+    """
+    from fastapi.responses import StreamingResponse
+    from io import BytesIO
+    
+    csv_content = await employee_service.export_to_csv(session, active_only)
+    
+    # Create streaming response
+    output = BytesIO(csv_content.encode('utf-8'))
+    filename = f"employees_export_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv"
+    
+    return StreamingResponse(
+        output,
+        media_type="text/csv",
+        headers={"Content-Disposition": f"attachment; filename={filename}"}
+    )
+
+
+@router.post(
+    "/bulk-update-json",
+    summary="Bulk update employees (JSON)",
+)
+async def bulk_update_employees(
+    updates: List[dict],
+    role: str = Depends(require_role(["admin", "hr"])),
+    session: AsyncSession = Depends(get_session),
+):
+    """
+    Bulk update multiple employees at once (JSON body).
+    
+    Updates department, manager, status, job title, and location for multiple employees.
+    
+    **Request body format:**
+    ```json
+    [
+        {
+            "employee_id": "EMP001",
+            "department": "IT",
+            "job_title": "Senior Developer",
+            "line_manager_name": "Jane Smith",
+            "employment_status": "Active",
+            "location": "Abu Dhabi"
+        },
+        {
+            "employee_id": "EMP002",
+            "department": "HR",
+            "employment_status": "On Leave"
+        }
+    ]
+    ```
+    
+    **Returns:**
+    - `updated`: Count of successfully updated employees
+    - `not_found`: Count of employees not found
+    - `errors`: List of error messages (max 20)
+    """
+    return await employee_service.bulk_update_employees(session, updates)
+
+
+@router.get(
+    "/search",
+    response_model=List[EmployeeResponse],
+    summary="Advanced employee search",
+)
+async def search_employees(
+    q: str = Query(default="", description="Search query (name, employee_id, email, department)"),
+    department: str = Query(default=None, description="Filter by department"),
+    status: str = Query(default=None, description="Filter by status (active/inactive)"),
+    role: str = Depends(require_role(["admin", "hr", "viewer"])),
+    session: AsyncSession = Depends(get_session),
+):
+    """
+    Advanced search for employees.
+    
+    **Search capabilities:**
+    - Search by name, employee ID, email, or department (case-insensitive)
+    - Filter by specific department
+    - Filter by employment status (active/inactive)
+    
+    **Examples:**
+    - `/api/employees/search?q=john` - Find employees named John
+    - `/api/employees/search?department=IT` - All IT department employees
+    - `/api/employees/search?q=EMP001` - Find by employee ID
+    - `/api/employees/search?department=IT&status=active` - Active IT employees
+    """
+    return await employee_service.search_employees(session, q, department, status)
