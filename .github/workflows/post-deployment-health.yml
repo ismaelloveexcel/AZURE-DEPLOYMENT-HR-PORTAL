@@ -41,11 +41,11 @@ jobs:
             echo "✅ Backend is healthy (HTTP $RESPONSE)"
             echo "status=healthy" >> $GITHUB_OUTPUT
           else
-            # Try alternative health endpoint
-            echo "Trying alternative endpoint: $BACKEND_URL/health"
-            ALT_RESPONSE=$(curl -s -o /dev/null -w "%{http_code}" "$BACKEND_URL/health" --connect-timeout 10 --max-time 30 || echo "000")
+            # Try alternative health endpoint (root probe)
+            echo "Trying alternative endpoint: $BACKEND_URL/healthz"
+            ALT_RESPONSE=$(curl -s -o /dev/null -w "%{http_code}" "$BACKEND_URL/healthz" --connect-timeout 10 --max-time 30 || echo "000")
             if [ "$ALT_RESPONSE" = "200" ]; then
-              echo "✅ Backend is healthy via /health (HTTP $ALT_RESPONSE)"
+              echo "✅ Backend is healthy via /healthz (HTTP $ALT_RESPONSE)"
               echo "status=healthy" >> $GITHUB_OUTPUT
             else
               echo "❌ Backend health check failed (HTTP $RESPONSE / $ALT_RESPONSE)"
@@ -56,21 +56,21 @@ jobs:
       - name: Check frontend health
         id: frontend-health
         run: |
-          # Frontend is now served from backend at /static
-          # Use BACKEND_URL since frontend is bundled with backend
+          # Frontend is bundled with backend (build files in backend/static directory)
+          # and served at the root path "/" - not at a /static URL
           FRONTEND_URL="${{ secrets.FRONTEND_URL }}"
           if [ -z "$FRONTEND_URL" ]; then
-            # Default to backend URL since frontend is served from backend/static
+            # Default to backend URL since frontend is served at root path
             FRONTEND_URL="${{ secrets.BACKEND_URL }}"
             if [ -z "$FRONTEND_URL" ]; then
               FRONTEND_URL="https://hrportal-backend-new.azurewebsites.net"
             fi
-            echo "::notice::Frontend is served from backend. Checking: $FRONTEND_URL"
+            echo "::notice::Frontend is served from backend at root path. Checking: $FRONTEND_URL"
           fi
           
           echo "Checking frontend at $FRONTEND_URL"
           
-          # Check that the root path returns HTML (served from backend/static)
+          # Check that the root path returns HTML (SPA served from backend/static)
           RESPONSE=$(curl -s -o /tmp/frontend_response.txt -w "%{http_code}" "$FRONTEND_URL" --connect-timeout 10 --max-time 30 || echo "000")
           
           if [ "$RESPONSE" = "200" ]; then
@@ -80,8 +80,8 @@ jobs:
               echo "✅ Frontend is healthy (HTTP $RESPONSE, serving HTML)"
               echo "status=healthy" >> $GITHUB_OUTPUT
             else
-              echo "⚠️ Frontend returned 200 but may not be serving correct content"
-              echo "status=healthy" >> $GITHUB_OUTPUT
+              echo "❌ Frontend returned 200 but not serving correct HTML content (may be placeholder page)"
+              echo "status=unhealthy" >> $GITHUB_OUTPUT
             fi
           else
             echo "❌ Frontend health check failed (HTTP $RESPONSE)"
