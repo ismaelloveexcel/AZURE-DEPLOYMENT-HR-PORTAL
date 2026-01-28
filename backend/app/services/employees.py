@@ -8,6 +8,7 @@ from typing import List, Optional
 from fastapi import HTTPException, UploadFile, status
 import jwt
 from sqlalchemy.ext.asyncio import AsyncSession
+import logging
 
 from app.core.config import get_settings
 from app.models.employee import Employee
@@ -909,7 +910,12 @@ class EmployeeService:
                 updated += 1
                 
             except Exception as e:
-                errors.append(f"Employee {item.get('employee_id', 'unknown')}: {str(e)}")
+                logging.exception(
+                    "Failed to bulk update employee %s", item.get("employee_id", "unknown")
+                )
+                errors.append(
+                    f"Employee {item.get('employee_id', 'unknown')}: update failed"
+                )
         
         await session.commit()
         
