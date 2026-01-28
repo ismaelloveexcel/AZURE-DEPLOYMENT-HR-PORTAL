@@ -1,4 +1,4 @@
-"""Leave management router."""
+"""Leave management router with enhanced features and UAE compliance."""
 from datetime import date, datetime, timezone
 from typing import List, Optional
 
@@ -12,10 +12,13 @@ from app.core.config import get_settings
 from app.database import get_session
 from app.models.employee import Employee
 from app.models.leave import LeaveRequest, LeaveBalance, LEAVE_TYPES
+from app.models.public_holiday import PublicHoliday
 from app.schemas.leave import (
     LeaveBalanceResponse, LeaveBalanceSummary, LeaveRequestCreate,
-    LeaveRequestResponse, LeaveApprovalRequest, LeaveCalendarEntry
+    LeaveRequestResponse, LeaveApprovalRequest, LeaveCalendarEntry,
+    PublicHolidayResponse
 )
+from app.services.leave_service import get_leave_service
 
 router = APIRouter(prefix="/leave", tags=["Leave Management"])
 
@@ -131,36 +134,29 @@ async def create_leave_request(
     current_user: Employee = Depends(get_current_employee),
     session: AsyncSession = Depends(get_session)
 ):
-    """Create a new leave request."""
+    """Create a new leave request with enhanced validation."""
     from decimal import Decimal
     
-    if request.leave_type not in LEAVE_TYPES:
-        raise HTTPException(status_code=400, detail=f"Invalid leave type. Must be one of: {LEAVE_TYPES}")
+    # Get leave service
+    leave_service = await get_leave_service(session)
     
-    if request.end_date < request.start_date:
-        raise HTTPException(status_code=400, detail="End date must be after start date")
-    
-    # Check for overlapping requests
-    existing = await session.execute(
-        select(LeaveRequest).where(
-            and_(
-                LeaveRequest.employee_id == current_user.id,
-                LeaveRequest.status.in_(["pending", "approved"]),
-                LeaveRequest.start_date <= request.end_date,
-                LeaveRequest.end_date >= request.start_date
-            )
-        )
+    # Validate leave request
+    is_valid, error_msg, calculated_days = await leave_service.validate_leave_request(
+        employee_id=current_user.id,
+        leave_type=request.leave_type,
+        start_date=request.start_date,
+        end_date=request.end_date,
+        is_half_day=request.is_half_day
     )
-    if existing.scalar_one_or_none():
-        raise HTTPException(status_code=400, detail="Overlapping leave request already exists")
     
-    # Calculate days
-    if request.is_half_day:
-        total_days = Decimal("0.5")
-    else:
-        delta = (request.end_date - request.start_date).days + 1
-        total_days = Decimal(str(delta))
+    if not is_valid:
+        raise HTTPException(status_code=400, detail=error_msg)
     
+    # Get manager for notification
+    manager = await leave_service.get_manager_for_employee(current_user.id)
+    manager_email = manager.email if manager else None
+    
+    # Create leave request
     leave_request = LeaveRequest(
         employee_id=current_user.id,
         leave_type=request.leave_type,
@@ -168,16 +164,28 @@ async def create_leave_request(
         end_date=request.end_date,
         is_half_day=request.is_half_day,
         half_day_type=request.half_day_type,
-        total_days=total_days,
+        total_days=calculated_days,
         reason=request.reason,
         emergency_contact=request.emergency_contact,
         emergency_phone=request.emergency_phone,
-        status="pending"
+        status="pending",
+        manager_email=manager_email,
+        overlaps_checked=True
     )
     
     session.add(leave_request)
     await session.commit()
     await session.refresh(leave_request)
+    
+    # Send manager notification
+    if manager and manager.email:
+        notification_sent = await leave_service.send_manager_notification(
+            leave_request, current_user, manager
+        )
+        if notification_sent:
+            leave_request.manager_notified = True
+            leave_request.notification_sent_at = datetime.now(timezone.utc)
+            await session.commit()
     
     return LeaveRequestResponse(
         id=leave_request.id,
@@ -191,6 +199,7 @@ async def create_leave_request(
         total_days=leave_request.total_days,
         reason=leave_request.reason,
         status=leave_request.status,
+        manager_notified=leave_request.manager_notified,
         created_at=leave_request.created_at
     )
 
@@ -319,10 +328,28 @@ async def approve_leave_request(
 async def get_leave_calendar(
     start_date: date = Query(..., description="Calendar start date"),
     end_date: date = Query(..., description="Calendar end date"),
+    month: Optional[int] = Query(None, description="Filter by month (1-12)"),
+    year: Optional[int] = Query(None, description="Filter by year"),
+    include_holidays: bool = Query(True, description="Include public holidays"),
     current_user: Employee = Depends(get_current_employee),
     session: AsyncSession = Depends(get_session)
 ):
-    """Get leave calendar for a date range (approved leaves only)."""
+    """Get leave calendar for a date range with optional public holidays.
+    
+    Shows approved leaves only for transparency. Optionally filters by month/year.
+    If include_holidays is True, public holidays are included in the response.
+    """
+    # Apply month/year filters if provided
+    if month and year:
+        from calendar import monthrange
+        last_day = monthrange(year, month)[1]
+        start_date = date(year, month, 1)
+        end_date = date(year, month, last_day)
+    elif year:
+        start_date = date(year, 1, 1)
+        end_date = date(year, 12, 31)
+    
+    # Get approved leaves
     result = await session.execute(
         select(LeaveRequest, Employee).join(
             Employee, LeaveRequest.employee_id == Employee.id
@@ -336,7 +363,7 @@ async def get_leave_calendar(
     )
     leaves = result.all()
     
-    return [
+    calendar_entries = [
         LeaveCalendarEntry(
             employee_id=leave.employee_id,
             employee_name=emp.name,
@@ -344,7 +371,159 @@ async def get_leave_calendar(
             start_date=leave.start_date,
             end_date=leave.end_date,
             status=leave.status,
-            is_half_day=leave.is_half_day
+            is_half_day=leave.is_half_day,
+            is_holiday=False
         )
         for leave, emp in leaves
     ]
+    
+    # Add public holidays if requested
+    if include_holidays:
+        holiday_result = await session.execute(
+            select(PublicHoliday).where(
+                and_(
+                    PublicHoliday.is_active == True,
+                    PublicHoliday.start_date <= end_date,
+                    PublicHoliday.end_date >= start_date
+                )
+            ).order_by(PublicHoliday.start_date)
+        )
+        holidays = holiday_result.scalars().all()
+        
+        # Add holidays as calendar entries
+        for holiday in holidays:
+            calendar_entries.append(
+                LeaveCalendarEntry(
+                    employee_id=0,  # System entry
+                    employee_name=holiday.name,
+                    leave_type="public_holiday",
+                    start_date=holiday.start_date,
+                    end_date=holiday.end_date,
+                    status="approved",
+                    is_half_day=False,
+                    is_holiday=True
+                )
+            )
+    
+    # Sort by start date
+    calendar_entries.sort(key=lambda x: x.start_date)
+    
+    return calendar_entries
+
+
+@router.get("/holidays", response_model=List[PublicHolidayResponse])
+async def get_public_holidays(
+    year: int = Query(..., description="Year to fetch holidays for"),
+    current_user: Employee = Depends(get_current_employee),
+    session: AsyncSession = Depends(get_session)
+):
+    """Get all public holidays for a specific year."""
+    result = await session.execute(
+        select(PublicHoliday).where(
+            and_(
+                PublicHoliday.year == year,
+                PublicHoliday.is_active == True
+            )
+        ).order_by(PublicHoliday.start_date)
+    )
+    holidays = result.scalars().all()
+    
+    return [
+        PublicHolidayResponse(
+            id=h.id,
+            name=h.name,
+            name_arabic=h.name_arabic,
+            start_date=h.start_date,
+            end_date=h.end_date,
+            year=h.year,
+            holiday_type=h.holiday_type,
+            is_paid=h.is_paid,
+            description=h.description
+        )
+        for h in holidays
+    ]
+
+
+@router.get("/holidays/check/{check_date}")
+async def check_if_holiday(
+    check_date: date,
+    current_user: Employee = Depends(get_current_employee),
+    session: AsyncSession = Depends(get_session)
+):
+    """Check if a specific date is a public holiday.
+    
+    Returns holiday details if the date is a holiday, otherwise returns null.
+    """
+    result = await session.execute(
+        select(PublicHoliday).where(
+            and_(
+                PublicHoliday.is_active == True,
+                PublicHoliday.start_date <= check_date,
+                PublicHoliday.end_date >= check_date
+            )
+        )
+    )
+    holiday = result.scalar_one_or_none()
+    
+    if holiday:
+        return {
+            "is_holiday": True,
+            "holiday": PublicHolidayResponse(
+                id=holiday.id,
+                name=holiday.name,
+                name_arabic=holiday.name_arabic,
+                start_date=holiday.start_date,
+                end_date=holiday.end_date,
+                year=holiday.year,
+                holiday_type=holiday.holiday_type,
+                is_paid=holiday.is_paid,
+                description=holiday.description
+            )
+        }
+    
+    return {"is_holiday": False, "holiday": None}
+
+
+@router.get("/balance/summary", response_model=LeaveBalanceSummary)
+async def get_my_leave_balance(
+    year: int = Query(default=None, description="Year (defaults to current year)"),
+    current_user: Employee = Depends(get_current_employee),
+    session: AsyncSession = Depends(get_session)
+):
+    """Get leave balance summary for current user with offset days included."""
+    if not year:
+        year = date.today().year
+    
+    # Get balances
+    result = await session.execute(
+        select(LeaveBalance).where(
+            and_(
+                LeaveBalance.employee_id == current_user.id,
+                LeaveBalance.year == year
+            )
+        )
+    )
+    balances = result.scalars().all()
+    
+    return LeaveBalanceSummary(
+        employee_id=current_user.id,
+        employee_name=current_user.name,
+        year=year,
+        balances=[
+            LeaveBalanceResponse(
+                id=b.id,
+                employee_id=b.employee_id,
+                year=b.year,
+                leave_type=b.leave_type,
+                entitlement=b.entitlement,
+                carried_forward=b.carried_forward,
+                used=b.used,
+                pending=b.pending,
+                adjustment=b.adjustment,
+                adjustment_reason=b.adjustment_reason,
+                offset_days_used=b.offset_days_used,
+                available=b.available
+            )
+            for b in balances
+        ]
+    )

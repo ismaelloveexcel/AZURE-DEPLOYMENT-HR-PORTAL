@@ -18,6 +18,7 @@ class LeaveBalanceResponse(BaseModel):
     pending: Decimal
     adjustment: Decimal
     adjustment_reason: Optional[str] = None
+    offset_days_used: Decimal = Decimal("0")
     available: Decimal
     
     model_config = ConfigDict(from_attributes=True)
@@ -63,6 +64,8 @@ class LeaveRequestResponse(BaseModel):
     rejection_reason: Optional[str] = None
     emergency_contact: Optional[str] = None
     emergency_phone: Optional[str] = None
+    manager_notified: bool = False
+    notification_sent_at: Optional[datetime] = None
     created_at: datetime
     
     model_config = ConfigDict(from_attributes=True)
@@ -83,3 +86,19 @@ class LeaveCalendarEntry(BaseModel):
     end_date: date
     status: str
     is_half_day: bool = False
+    is_holiday: bool = False
+
+
+class PublicHolidayResponse(BaseModel):
+    """Public holiday response."""
+    id: int
+    name: str
+    name_arabic: Optional[str] = None
+    start_date: date
+    end_date: date
+    year: int
+    holiday_type: str
+    is_paid: bool
+    description: Optional[str] = None
+    
+    model_config = ConfigDict(from_attributes=True)

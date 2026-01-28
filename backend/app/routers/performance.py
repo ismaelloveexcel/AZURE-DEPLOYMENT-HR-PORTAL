@@ -215,3 +215,128 @@ async def get_team_reviews(
 ):
     reviews = await performance_service.get_manager_reviews(db, current_user.id)
     return reviews
+
+
+@router.post("/reviews/{review_id}/submit")
+async def submit_review(
+    review_id: int,
+    db: AsyncSession = Depends(get_session),
+    current_user: Employee = Depends(require_auth)
+):
+    """
+    Submit a review after self-assessment is complete.
+    
+    Transitions review from self_assessment to manager_review status.
+    Employee must complete self-assessment before submission.
+    """
+    review = await performance_service.get_review(db, review_id)
+    if not review:
+        raise HTTPException(status_code=404, detail="Review not found")
+    if review["employee_id"] != current_user.id and current_user.role not in ["admin", "hr"]:
+        raise HTTPException(status_code=403, detail="Not authorized")
+    
+    try:
+        updated = await performance_service.submit_review(db, review_id)
+        return {
+            "status": "submitted",
+            "review_id": updated.id,
+            "message": "Review submitted for manager approval"
+        }
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+
+@router.post("/reviews/{review_id}/approve")
+async def approve_review(
+    review_id: int,
+    db: AsyncSession = Depends(get_session),
+    current_user: Employee = Depends(require_auth)
+):
+    """
+    Manager approves the review (final approval).
+    
+    Transitions to completed status and calculates final rating.
+    Manager must complete manager review before approval.
+    """
+    review = await performance_service.get_review(db, review_id)
+    if not review:
+        raise HTTPException(status_code=404, detail="Review not found")
+    if review["reviewer_id"] != current_user.id and current_user.role not in ["admin", "hr"]:
+        raise HTTPException(status_code=403, detail="Not authorized to approve")
+    
+    try:
+        updated = await performance_service.approve_review(db, review_id, current_user.id)
+        return {
+            "status": "approved",
+            "review_id": updated.id,
+            "final_rating": float(updated.overall_rating) if updated.overall_rating else None,
+            "rating_label": updated.rating_label,
+            "message": "Review approved and completed"
+        }
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+
+@router.get("/reviews/{review_id}/final-rating")
+async def get_final_rating(
+    review_id: int,
+    db: AsyncSession = Depends(get_session),
+    current_user: Employee = Depends(require_auth)
+):
+    """
+    Get the final rating for a review with detailed breakdown.
+    
+    Returns:
+    - Final rating (1-5 scale)
+    - Rating label (Outstanding, Exceeds Expectations, etc.)
+    - Breakdown by competency with weights and scores
+    """
+    result = await performance_service.get_final_rating(db, review_id)
+    if "error" in result:
+        raise HTTPException(status_code=404, detail=result["error"])
+    return result
+
+
+@router.get("/reports/summary")
+async def get_performance_summary(
+    cycle_id: int = Query(..., description="Performance cycle ID"),
+    db: AsyncSession = Depends(get_session),
+    current_user: Employee = Depends(require_hr)
+):
+    """
+    Get performance cycle summary report.
+    
+    **Admin and HR only.**
+    
+    Returns:
+    - Cycle statistics (completed, pending, average rating)
+    - List of completed reviews with final ratings
+    - List of pending reviews with current status
+    """
+    result = await performance_service.get_cycle_summary(db, cycle_id)
+    if "error" in result:
+        raise HTTPException(status_code=404, detail=result["error"])
+    return result
+
+
+@router.get("/reports/employee/{employee_id}")
+async def get_employee_performance_history(
+    employee_id: int,
+    db: AsyncSession = Depends(get_session),
+    current_user: Employee = Depends(require_auth)
+):
+    """
+    Get performance review history for an employee.
+    
+    Returns all performance reviews across cycles with ratings and dates.
+    Employees can view their own history. Managers/HR can view any employee.
+    """
+    # Check authorization
+    if current_user.id != employee_id and current_user.role not in ["admin", "hr"]:
+        raise HTTPException(
+            status_code=403,
+            detail="Not authorized to view this employee's history"
+        )
+    
+    history = await performance_service.get_employee_history(db, employee_id)
+    return {"employee_id": employee_id, "reviews": history}

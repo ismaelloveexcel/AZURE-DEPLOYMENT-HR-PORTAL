@@ -71,13 +71,110 @@ class PublicHoliday(Base):
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False)
 
 
+# UAE 2026 Public Holidays (Official)
+# Based on UAE Federal Government announcements and Islamic calendar estimations
+# Total: 8 holidays (14 days including multi-day holidays like Eid and National Day)
+UAE_HOLIDAYS_2026 = [
+    {
+        "name": "New Year's Day",
+        "name_arabic": "رأس السنة الميلادية",
+        "start_date": date(2026, 1, 1),
+        "end_date": date(2026, 1, 1),
+        "year": 2026,
+        "holiday_type": "uae_official",
+        "is_paid": True,
+        "description": "New Year's Day - January 1"
+    },
+    {
+        "name": "Eid Al Fitr",
+        "name_arabic": "عيد الفطر",
+        "start_date": date(2026, 3, 20),
+        "end_date": date(2026, 3, 23),
+        "year": 2026,
+        "holiday_type": "uae_official",
+        "is_paid": True,
+        "description": "Eid Al Fitr - 4 days (approximate, subject to moon sighting)"
+    },
+    {
+        "name": "Arafat Day",
+        "name_arabic": "يوم عرفة",
+        "start_date": date(2026, 5, 26),
+        "end_date": date(2026, 5, 26),
+        "year": 2026,
+        "holiday_type": "uae_official",
+        "is_paid": True,
+        "description": "Arafat Day - Day before Eid Al Adha (approximate)"
+    },
+    {
+        "name": "Eid Al Adha",
+        "name_arabic": "عيد الأضحى",
+        "start_date": date(2026, 5, 27),
+        "end_date": date(2026, 5, 29),
+        "year": 2026,
+        "holiday_type": "uae_official",
+        "is_paid": True,
+        "description": "Eid Al Adha - 3 days (approximate, subject to moon sighting)"
+    },
+    {
+        "name": "Islamic New Year",
+        "name_arabic": "رأس السنة الهجرية",
+        "start_date": date(2026, 6, 16),
+        "end_date": date(2026, 6, 16),
+        "year": 2026,
+        "holiday_type": "uae_official",
+        "is_paid": True,
+        "description": "Hijri New Year 1448 (approximate)"
+    },
+    {
+        "name": "Prophet's Birthday",
+        "name_arabic": "المولد النبوي الشريف",
+        "start_date": date(2026, 8, 25),
+        "end_date": date(2026, 8, 25),
+        "year": 2026,
+        "holiday_type": "uae_official",
+        "is_paid": True,
+        "description": "Mawlid Al Nabi - Prophet Muhammad's Birthday (approximate)"
+    },
+    {
+        "name": "Commemoration Day",
+        "name_arabic": "يوم الشهيد",
+        "start_date": date(2026, 11, 30),
+        "end_date": date(2026, 11, 30),
+        "year": 2026,
+        "holiday_type": "uae_official",
+        "is_paid": True,
+        "description": "Martyrs' Day - November 30 (formerly Nov 30, moved to Dec 1 if on weekend)"
+    },
+    {
+        "name": "UAE National Day",
+        "name_arabic": "اليوم الوطني لدولة الإمارات",
+        "start_date": date(2026, 12, 2),
+        "end_date": date(2026, 12, 3),
+        "year": 2026,
+        "holiday_type": "uae_official",
+        "is_paid": True,
+        "description": "UAE National Day - December 2-3 (48th & 49th Anniversary)"
+    }
+]
+
+
 # Default UAE Public Holidays for a year (dates to be updated by HR)
 def get_default_uae_holidays(year: int) -> list:
     """Get default UAE public holiday templates for a year.
     
     Note: Islamic holidays are approximate and should be confirmed by HR
-    based on moon sighting announcements.
+    based on moon sighting announcements from the UAE Government.
+    
+    For 2026, use UAE_HOLIDAYS_2026 constant which contains 8 official holidays
+    (14 total days including multi-day holidays).
+    
+    Returns:
+        list: List of holiday dictionaries with dates and metadata
     """
+    if year == 2026:
+        return UAE_HOLIDAYS_2026
+    
+    # Fallback for other years - basic holidays only
     return [
         {
             "name": "New Year's Day",

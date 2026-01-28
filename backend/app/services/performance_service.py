@@ -390,6 +390,200 @@ class PerformanceService:
     async def get_manager_reviews(self, db: AsyncSession, manager_id: int) -> List[dict]:
         return await self.get_reviews(db, reviewer_id=manager_id)
 
+    async def submit_review(self, db: AsyncSession, review_id: int) -> Optional[PerformanceReview]:
+        """
+        Submit a review (mark as submitted, ready for manager approval).
+        Transitions from self_assessment to manager_review status.
+        """
+        review = await self.get_review(db, review_id)
+        if not review:
+            return None
+        
+        if not review.self_assessment_submitted:
+            raise ValueError("Self-assessment must be completed before submission")
+        
+        review.status = "manager_review"
+        await db.commit()
+        await db.refresh(review)
+        return review
+
+    async def approve_review(
+        self, db: AsyncSession, review_id: int, approved_by: int
+    ) -> Optional[PerformanceReview]:
+        """
+        Manager approves the review (final approval).
+        Transitions to completed status and calculates final rating.
+        """
+        review = await self.get_review(db, review_id)
+        if not review:
+            return None
+        
+        if not review.manager_review_submitted:
+            raise ValueError("Manager review must be completed before approval")
+        
+        # Calculate final rating from criteria
+        final_rating = await self.calculate_final_rating(db, review_id)
+        
+        review.status = "completed"
+        review.overall_rating = Decimal(str(final_rating))
+        review.rating_label = RATING_LABELS.get(round(final_rating), "Meets Expectations")
+        
+        await db.commit()
+        await db.refresh(review)
+        return review
+
+    async def calculate_final_rating(self, db: AsyncSession, review_id: int) -> float:
+        """
+        Calculate weighted average rating across all criteria.
+        Returns final rating as float (1-5 scale).
+        """
+        result = await db.execute(
+            select(PerformanceRating)
+            .where(PerformanceRating.review_id == review_id)
+        )
+        ratings = result.scalars().all()
+        
+        if not ratings:
+            return 3.0  # Default to "Meets Expectations" if no ratings
+        
+        # Calculate weighted average
+        total_weight = sum(r.weight for r in ratings if r.manager_rating is not None)
+        if total_weight == 0:
+            # Fallback to simple average if no weights
+            valid_ratings = [r.manager_rating for r in ratings if r.manager_rating is not None]
+            return sum(valid_ratings) / len(valid_ratings) if valid_ratings else 3.0
+        
+        weighted_sum = sum(
+            r.manager_rating * r.weight 
+            for r in ratings 
+            if r.manager_rating is not None
+        )
+        
+        return round(weighted_sum / total_weight, 2)
+
+    async def get_final_rating(self, db: AsyncSession, review_id: int) -> dict:
+        """
+        Get the final rating for a review with breakdown.
+        """
+        review = await self.get_review(db, review_id)
+        if not review:
+            return {"error": "Review not found"}
+        
+        result = await db.execute(
+            select(PerformanceRating)
+            .where(PerformanceRating.review_id == review_id)
+        )
+        ratings = result.scalars().all()
+        
+        breakdown = []
+        for rating in ratings:
+            breakdown.append({
+                "competency": rating.competency_name,
+                "category": rating.competency_category,
+                "weight": rating.weight,
+                "self_rating": rating.self_rating,
+                "manager_rating": rating.manager_rating,
+                "weighted_score": (rating.manager_rating or 0) * rating.weight / 100 if rating.manager_rating else 0
+            })
+        
+        final_rating = await self.calculate_final_rating(db, review_id)
+        
+        return {
+            "review_id": review_id,
+            "final_rating": final_rating,
+            "rating_label": RATING_LABELS.get(round(final_rating), "Meets Expectations"),
+            "breakdown": breakdown,
+            "status": review.status
+        }
+
+    async def get_cycle_summary(self, db: AsyncSession, cycle_id: int) -> dict:
+        """
+        Get summary report for a performance cycle (completed vs pending).
+        """
+        stats = await self.get_cycle_stats(db, cycle_id)
+        cycle = await self.get_cycle(db, cycle_id)
+        
+        if not cycle:
+            return {"error": "Cycle not found"}
+        
+        # Get employee details for completed reviews
+        result = await db.execute(
+            select(PerformanceReview, Employee)
+            .join(Employee, PerformanceReview.employee_id == Employee.id)
+            .where(
+                PerformanceReview.cycle_id == cycle_id,
+                PerformanceReview.status == "completed"
+            )
+        )
+        completed_reviews = []
+        for review, employee in result.fetchall():
+            completed_reviews.append({
+                "employee_id": employee.employee_id,
+                "employee_name": employee.name,
+                "department": employee.department,
+                "final_rating": float(review.overall_rating) if review.overall_rating else None,
+                "rating_label": review.rating_label,
+                "completed_at": review.manager_review_date
+            })
+        
+        # Get pending reviews
+        result = await db.execute(
+            select(PerformanceReview, Employee)
+            .join(Employee, PerformanceReview.employee_id == Employee.id)
+            .where(
+                PerformanceReview.cycle_id == cycle_id,
+                PerformanceReview.status != "completed"
+            )
+        )
+        pending_reviews = []
+        for review, employee in result.fetchall():
+            pending_reviews.append({
+                "employee_id": employee.employee_id,
+                "employee_name": employee.name,
+                "department": employee.department,
+                "status": review.status,
+                "self_assessment_submitted": review.self_assessment_submitted,
+                "manager_review_submitted": review.manager_review_submitted
+            })
+        
+        return {
+            "cycle_id": cycle_id,
+            "cycle_name": cycle.name,
+            "cycle_status": cycle.status,
+            "stats": stats,
+            "completed_reviews": completed_reviews,
+            "pending_reviews": pending_reviews
+        }
+
+    async def get_employee_history(self, db: AsyncSession, employee_id: int) -> List[dict]:
+        """
+        Get performance review history for an employee.
+        """
+        result = await db.execute(
+            select(PerformanceReview, PerformanceCycle)
+            .join(PerformanceCycle, PerformanceReview.cycle_id == PerformanceCycle.id)
+            .where(PerformanceReview.employee_id == employee_id)
+            .order_by(PerformanceCycle.start_date.desc())
+        )
+        
+        history = []
+        for review, cycle in result.fetchall():
+            history.append({
+                "cycle_id": cycle.id,
+                "cycle_name": cycle.name,
+                "cycle_type": cycle.cycle_type,
+                "review_id": review.id,
+                "status": review.status,
+                "final_rating": float(review.overall_rating) if review.overall_rating else None,
+                "rating_label": review.rating_label,
+                "self_assessment_date": review.self_assessment_date,
+                "manager_review_date": review.manager_review_date,
+                "start_date": cycle.start_date,
+                "end_date": cycle.end_date
+            })
+        
+        return history
+
 
 from sqlalchemy import Integer
 performance_service = PerformanceService()

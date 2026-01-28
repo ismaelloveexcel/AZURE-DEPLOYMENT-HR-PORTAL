@@ -8,6 +8,7 @@ from typing import List, Optional
 from fastapi import HTTPException, UploadFile, status
 import jwt
 from sqlalchemy.ext.asyncio import AsyncSession
+import logging
 
 from app.core.config import get_settings
 from app.models.employee import Employee
@@ -766,6 +767,204 @@ class EmployeeService:
             "errors": errors[:20],  # Limit errors returned
             "layer": update_layer,
         }
+
+    async def export_to_csv(
+        self, session: AsyncSession, active_only: bool = True
+    ) -> str:
+        """
+        Export employees to CSV with ALL fields (compliance, bank, contact).
+        Returns CSV content as string.
+        """
+        from sqlalchemy.orm import selectinload
+        
+        # Fetch employees with relationships
+        query = (
+            select(Employee)
+            .options(
+                selectinload(Employee.compliance),
+                selectinload(Employee.bank)
+            )
+            .order_by(Employee.name)
+        )
+        if active_only:
+            query = query.where(Employee.is_active.is_(True))
+        
+        result = await session.execute(query)
+        employees = result.scalars().all()
+        
+        # Build CSV
+        output = StringIO()
+        fieldnames = [
+            'employee_id', 'name', 'email', 'department', 'job_title', 'location',
+            'date_of_birth', 'gender', 'nationality', 'mobile_number', 'personal_email',
+            'joining_date', 'employment_status', 'role',
+            # Compliance fields
+            'visa_number', 'visa_issue_date', 'visa_expiry_date',
+            'emirates_id_number', 'emirates_id_expiry',
+            'medical_fitness_date', 'medical_fitness_expiry',
+            'iloe_status', 'iloe_expiry',
+            'contract_type', 'contract_start_date', 'contract_end_date',
+            # Bank fields
+            'bank_name', 'account_name', 'account_number', 'iban', 'swift_code',
+        ]
+        
+        writer = csv.DictWriter(output, fieldnames=fieldnames)
+        writer.writeheader()
+        
+        for emp in employees:
+            row = {
+                'employee_id': emp.employee_id,
+                'name': emp.name,
+                'email': emp.email or '',
+                'department': emp.department or '',
+                'job_title': emp.job_title or '',
+                'location': emp.location or '',
+                'date_of_birth': emp.date_of_birth.isoformat() if emp.date_of_birth else '',
+                'gender': emp.gender or '',
+                'nationality': emp.nationality or '',
+                'mobile_number': emp.mobile_number or '',
+                'personal_email': emp.personal_email or '',
+                'joining_date': emp.joining_date.isoformat() if emp.joining_date else '',
+                'employment_status': emp.employment_status or '',
+                'role': emp.role,
+            }
+            
+            # Add compliance fields
+            if emp.compliance:
+                row.update({
+                    'visa_number': emp.compliance.visa_number or '',
+                    'visa_issue_date': emp.compliance.visa_issue_date.isoformat() if emp.compliance.visa_issue_date else '',
+                    'visa_expiry_date': emp.compliance.visa_expiry_date.isoformat() if emp.compliance.visa_expiry_date else '',
+                    'emirates_id_number': emp.compliance.emirates_id_number or '',
+                    'emirates_id_expiry': emp.compliance.emirates_id_expiry.isoformat() if emp.compliance.emirates_id_expiry else '',
+                    'medical_fitness_date': emp.compliance.medical_fitness_date.isoformat() if emp.compliance.medical_fitness_date else '',
+                    'medical_fitness_expiry': emp.compliance.medical_fitness_expiry.isoformat() if emp.compliance.medical_fitness_expiry else '',
+                    'iloe_status': emp.compliance.iloe_status or '',
+                    'iloe_expiry': emp.compliance.iloe_expiry.isoformat() if emp.compliance.iloe_expiry else '',
+                    'contract_type': emp.compliance.contract_type or '',
+                    'contract_start_date': emp.compliance.contract_start_date.isoformat() if emp.compliance.contract_start_date else '',
+                    'contract_end_date': emp.compliance.contract_end_date.isoformat() if emp.compliance.contract_end_date else '',
+                })
+            else:
+                row.update({k: '' for k in [
+                    'visa_number', 'visa_issue_date', 'visa_expiry_date',
+                    'emirates_id_number', 'emirates_id_expiry',
+                    'medical_fitness_date', 'medical_fitness_expiry',
+                    'iloe_status', 'iloe_expiry',
+                    'contract_type', 'contract_start_date', 'contract_end_date'
+                ]})
+            
+            # Add bank fields
+            if emp.bank:
+                row.update({
+                    'bank_name': emp.bank.bank_name or '',
+                    'account_name': emp.bank.account_name or '',
+                    'account_number': emp.bank.account_number or '',
+                    'iban': emp.bank.iban or '',
+                    'swift_code': emp.bank.swift_code or '',
+                })
+            else:
+                row.update({k: '' for k in ['bank_name', 'account_name', 'account_number', 'iban', 'swift_code']})
+            
+            writer.writerow(row)
+        
+        return output.getvalue()
+
+    async def bulk_update_employees(
+        self, session: AsyncSession, updates: List[dict]
+    ) -> dict:
+        """
+        Bulk update multiple employees at once.
+        
+        Updates format: [{"employee_id": "EMP001", "department": "IT", "manager": "MGR001", "status": "Active"}]
+        """
+        updated = 0
+        not_found = 0
+        errors = []
+        
+        for item in updates:
+            try:
+                employee_id = item.get("employee_id")
+                if not employee_id:
+                    errors.append("Missing employee_id in update")
+                    continue
+                
+                employee = await self._repo.get_by_employee_id(session, employee_id)
+                if not employee:
+                    not_found += 1
+                    errors.append(f"Employee {employee_id} not found")
+                    continue
+                
+                # Update allowed fields
+                if "department" in item and item["department"]:
+                    employee.department = item["department"]
+                if "job_title" in item and item["job_title"]:
+                    employee.job_title = item["job_title"]
+                if "line_manager_name" in item:
+                    employee.line_manager_name = item["line_manager_name"]
+                if "employment_status" in item:
+                    employee.employment_status = item["employment_status"]
+                if "location" in item:
+                    employee.location = item["location"]
+                
+                updated += 1
+                
+            except Exception as e:
+                # Log the failure without including potentially sensitive employee identifiers
+                logging.exception(
+                    "Failed to bulk update an employee record"
+                )
+                errors.append(
+                    "Employee update failed"
+                )
+        
+        await session.commit()
+        
+        return {
+            "updated": updated,
+            "not_found": not_found,
+            "errors": errors[:20],
+        }
+
+    async def search_employees(
+        self, session: AsyncSession, q: str, department: Optional[str] = None, 
+        status: Optional[str] = None
+    ) -> List[EmployeeResponse]:
+        """
+        Advanced search for employees by name, employee_id, email, department.
+        """
+        from sqlalchemy import or_, and_
+        
+        conditions = []
+        
+        # Search query (name, employee_id, email)
+        if q:
+            search_term = f"%{q}%"
+            conditions.append(
+                or_(
+                    Employee.name.ilike(search_term),
+                    Employee.employee_id.ilike(search_term),
+                    Employee.email.ilike(search_term),
+                    Employee.department.ilike(search_term)
+                )
+            )
+        
+        # Filter by department
+        if department:
+            conditions.append(Employee.department == department)
+        
+        # Filter by status
+        if status:
+            if status.lower() == "active":
+                conditions.append(Employee.is_active.is_(True))
+            elif status.lower() == "inactive":
+                conditions.append(Employee.is_active.is_(False))
+        
+        query = select(Employee).where(and_(*conditions)).order_by(Employee.name)
+        result = await session.execute(query)
+        employees = result.scalars().all()
+        
+        return [EmployeeResponse.model_validate(e) for e in employees]
 
 
 employee_service = EmployeeService(EmployeeRepository())
