@@ -157,7 +157,7 @@ jobs:
             
             # Use az webapp deploy for zip deployment
             # Note: Using tee to show output in real-time while also capturing it
-            set +e  # Don't exit on error
+            # Capture exit code without set -e toggling by using || true pattern
             az webapp deploy \
               --name "$WEBAPP_NAME" \
               --resource-group "$RESOURCE_GROUP" \
@@ -166,15 +166,15 @@ jobs:
               --clean true \
               --restart true \
               --timeout 600 \
-              --verbose 2>&1 | tee /tmp/deploy_output.txt
+              --verbose 2>&1 | tee /tmp/deploy_output.txt || true
             DEPLOY_EXIT_CODE=${PIPESTATUS[0]}
-            set -e
             
             echo "⏰ End time: $(date -u +"%Y-%m-%d %H:%M:%S UTC")"
             echo "📋 Exit code: $DEPLOY_EXIT_CODE"
             
             if [ $DEPLOY_EXIT_CODE -eq 0 ]; then
               echo "✅ Deployment successful on attempt $ATTEMPT"
+              rm -f /tmp/deploy_output.txt 2>/dev/null || true
               break
             else
               echo "⚠️ Deployment attempt $ATTEMPT failed (exit code: $DEPLOY_EXIT_CODE)"
@@ -197,6 +197,7 @@ jobs:
                 echo "❌ All deployment attempts failed"
                 echo "📋 Last deployment output:"
                 cat /tmp/deploy_output.txt 2>/dev/null || true
+                rm -f /tmp/deploy_output.txt 2>/dev/null || true
                 exit 1
               fi
             fi

@@ -74,8 +74,9 @@ jobs:
           RESPONSE=$(curl -s -o /tmp/frontend_response.txt -w "%{http_code}" "$FRONTEND_URL" --connect-timeout 10 --max-time 30 || echo "000")
           
           if [ "$RESPONSE" = "200" ]; then
-            # Verify it's actually serving the frontend (contains HTML)
-            if grep -q "</html>" /tmp/frontend_response.txt 2>/dev/null; then
+            # Verify it's actually serving the frontend (contains proper HTML markers)
+            if grep -q "<!DOCTYPE html>" /tmp/frontend_response.txt 2>/dev/null || \
+               grep -q "<html" /tmp/frontend_response.txt 2>/dev/null; then
               echo "✅ Frontend is healthy (HTTP $RESPONSE, serving HTML)"
               echo "status=healthy" >> $GITHUB_OUTPUT
             else
@@ -86,6 +87,9 @@ jobs:
             echo "❌ Frontend health check failed (HTTP $RESPONSE)"
             echo "status=unhealthy" >> $GITHUB_OUTPUT
           fi
+          
+          # Cleanup temporary file
+          rm -f /tmp/frontend_response.txt 2>/dev/null || true
       
       - name: Check database connectivity
         id: database-health
