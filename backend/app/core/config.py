@@ -50,6 +50,16 @@ class Settings(BaseSettings):
         description="Minimum password length",
     )
     
+    # Operational passwords (for migrations and data processing)
+    default_employee_dob_password: Optional[str] = Field(
+        default=None,
+        description="Default DOB-format password for employee migrations (DDMMYYYY format)",
+    )
+    insurance_excel_password: Optional[str] = Field(
+        default=None,
+        description="Password for decrypting insurance census Excel files",
+    )
+    
     # Legacy Azure AD settings (kept for backwards compatibility)
     auth_issuer: str = Field(
         default="https://login.microsoftonline.com/<tenant-id>/v2.0",
