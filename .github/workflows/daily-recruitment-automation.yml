@@ -11,28 +11,40 @@ jobs:
     runs-on: ubuntu-latest
     
     steps:
+      - name: Check secrets configuration
+        id: check-secrets
+        env:
+          API_URL: ${{ secrets.AZURE_APP_URL }}
+          ADMIN_PASSWORD: ${{ secrets.ADMIN_PASSWORD }}
+        run: |
+          if [ -z "$API_URL" ] || [ -z "$ADMIN_PASSWORD" ]; then
+            echo "⚠️ Recruitment automation skipped - Required secrets not configured"
+            echo ""
+            echo "To enable daily recruitment automation, configure the following secrets:"
+            echo "  - AZURE_APP_URL: Your deployed app URL (e.g., https://your-app.azurewebsites.net)"
+            echo "  - ADMIN_PASSWORD: Password for admin account"
+            echo ""
+            echo "Optional:"
+            echo "  - ADMIN_USERNAME: Admin username (defaults to 'admin')"
+            echo ""
+            echo "Go to: Settings → Secrets and variables → Actions → New repository secret"
+            echo "secrets_configured=false" >> $GITHUB_OUTPUT
+          else
+            echo "✅ All required secrets are configured"
+            echo "secrets_configured=true" >> $GITHUB_OUTPUT
+          fi
+
       - name: Checkout code
+        if: steps.check-secrets.outputs.secrets_configured == 'true'
         uses: actions/checkout@v4
       
       - name: Run Daily Recruitment Tasks
+        if: steps.check-secrets.outputs.secrets_configured == 'true'
+        env:
+          API_URL: ${{ secrets.AZURE_APP_URL }}
+          ADMIN_USERNAME: ${{ secrets.ADMIN_USERNAME || 'admin' }}
+          ADMIN_PASSWORD: ${{ secrets.ADMIN_PASSWORD }}
         run: |
-          # Get the API base URL from secrets or environment
-          API_URL="${{ secrets.AZURE_APP_URL || vars.API_BASE_URL }}"
-          
-          if [ -z "$API_URL" ]; then
-            echo "Error: API_URL not configured"
-            exit 1
-          fi
-          
-          # Get admin credentials (should be stored as secrets)
-          ADMIN_USERNAME="${{ secrets.ADMIN_USERNAME || 'admin' }}"
-          ADMIN_PASSWORD="${{ secrets.ADMIN_PASSWORD }}"
-          
-          if [ -z "$ADMIN_PASSWORD" ]; then
-            echo "Error: ADMIN_PASSWORD not configured"
-            exit 1
-          fi
-          
           echo "Authenticating..."
           # Login to get JWT token
           TOKEN=$(curl -s -X POST "$API_URL/api/auth/login" \
@@ -68,11 +80,11 @@ jobs:
           fi
       
       - name: Notify on failure
-        if: failure()
+        if: failure() && steps.check-secrets.outputs.secrets_configured == 'true'
         run: |
           echo "⚠️ Daily recruitment automation failed!"
           echo "Please check the workflow logs and verify:"
-          echo "1. API_URL is correctly configured"
+          echo "1. AZURE_APP_URL is correctly configured"
           echo "2. ADMIN_PASSWORD secret is set"
           echo "3. Backend application is running"
           echo "4. Admin account has proper permissions"
