@@ -5,7 +5,7 @@ from typing import List, Optional
 from fastapi import APIRouter, Depends, Header, HTTPException, Query, status
 import jwt
 from jwt.exceptions import PyJWTError
-from sqlalchemy import and_, select, extract
+from sqlalchemy import and_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import get_settings
