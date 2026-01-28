@@ -2,6 +2,7 @@
 
 import os
 import json
+import logging
 from datetime import date, datetime
 from typing import Optional
 
@@ -21,6 +22,8 @@ from app.schemas.employee_document import (
     DocumentListResponse,
 )
 from app.auth.dependencies import require_auth, require_hr
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/api/employees", tags=["Employee Documents"])
 
@@ -352,8 +355,10 @@ async def perform_ocr(file_path: str, document_type: str) -> OCRExtractedData:
                             break
                         except ValueError:
                             continue
-                except:
-                    pass
+                except Exception as e:  # nosec B110
+                    # Expected: date parsing may fail for non-date strings, which is acceptable
+                    logger.debug(f"Date parsing failed for '{d}': {e}")
+                    continue
         
         return extracted
         

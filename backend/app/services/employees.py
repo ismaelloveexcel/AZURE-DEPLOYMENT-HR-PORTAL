@@ -86,7 +86,8 @@ def create_access_token(employee: Employee) -> str:
         "iat": datetime.now(timezone.utc),
     }
     secret = settings.auth_secret_key
-    if secret == "dev-secret-key-change-in-production":
+    # This is a comparison check for security warning, not hardcoding a secret
+    if secret == "dev-secret-key-change-in-production":  # nosec B105
         import logging
         logging.getLogger(__name__).warning(
             "SECURITY WARNING: Using default auth secret key. "
@@ -130,9 +131,10 @@ class EmployeeService:
         
         token = create_access_token(employee)
         
+        # OAuth2 standard token type, not a password
         return LoginResponse(
             access_token=token,
-            token_type="bearer",
+            token_type="bearer",  # nosec B106
             requires_password_change=not employee.password_changed,
             id=employee.id,
             employee_id=employee.employee_id,

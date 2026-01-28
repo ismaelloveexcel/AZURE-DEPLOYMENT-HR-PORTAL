@@ -13,14 +13,13 @@ import pandas as pd
 from app.database import get_session
 from app.models import InsuranceCensusRecord, InsuranceCensusImportBatch, Employee, MANDATORY_FIELDS, MANDATORY_FIELDS_FOR_RENEWAL
 from app.auth.dependencies import require_role
+from app.core.config import get_settings
 
 router = APIRouter(
     prefix="/insurance-census",
     tags=["insurance-census"],
     dependencies=[Depends(require_role(["admin", "hr"]))],
 )
-
-EXCEL_PASSWORD = "0001A"
 
 COLUMN_MAPPING = {
     'SR NO.': 'sr_no',
@@ -355,7 +354,8 @@ async def import_census_from_excel(
     if not file.filename.endswith(('.xls', '.xlsx')):
         raise HTTPException(status_code=400, detail="File must be an Excel file")
     
-    file_password = password or EXCEL_PASSWORD
+    settings = get_settings()
+    file_password = password or settings.excel_password
     
     try:
         content = await file.read()
