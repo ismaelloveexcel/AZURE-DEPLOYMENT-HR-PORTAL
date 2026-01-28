@@ -910,11 +910,18 @@ class EmployeeService:
                 updated += 1
                 
             except Exception as e:
+                raw_employee_id = item.get("employee_id")
+                if raw_employee_id:
+                    # Log a non-reversible representation of the employee identifier
+                    hashed_id = hashlib.sha256(str(raw_employee_id).encode("utf-8")).hexdigest()
+                    safe_employee_ref = f"hash={hashed_id[:12]}"
+                else:
+                    safe_employee_ref = "unknown"
                 logging.exception(
-                    "Failed to bulk update employee %s", item.get("employee_id", "unknown")
+                    "Failed to bulk update employee %s", safe_employee_ref
                 )
                 errors.append(
-                    f"Employee {item.get('employee_id', 'unknown')}: update failed"
+                    f"Employee {safe_employee_ref}: update failed"
                 )
         
         await session.commit()
