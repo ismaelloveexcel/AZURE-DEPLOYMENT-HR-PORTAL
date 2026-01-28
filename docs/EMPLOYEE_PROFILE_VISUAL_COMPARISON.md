@@ -120,8 +120,8 @@ export const EmployeeQuickStats = ({ employee }) => {
     {
       icon: '🛡️',
       label: 'Compliance',
-      value: getComplianceStatus(employee),
-      status: hasExpiringDocs(employee) ? 'alert' : 'ok'
+      value: getComplianceStatus(employee),  // Helper function - see implementation below
+      status: hasExpiringDocs(employee) ? 'alert' : 'ok'  // Helper function - see implementation below
     },
     {
       icon: '📄',
@@ -144,6 +144,28 @@ export const EmployeeQuickStats = ({ employee }) => {
       ))}
     </div>
   );
+};
+
+// Helper functions that need to be implemented:
+const getComplianceStatus = (employee) => {
+  // Check visa, EID, medical, ILOE expiry dates
+  const expiringDocs = [
+    employee.visa_expiry_date,
+    employee.emirates_id_expiry,
+    employee.medical_fitness_expiry,
+    employee.iloe_expiry
+  ].filter(date => {
+    if (!date) return false;
+    const daysUntil = Math.floor((new Date(date) - new Date()) / (1000 * 60 * 60 * 24));
+    return daysUntil <= 60;
+  });
+  
+  if (expiringDocs.length > 0) return `⚠️ ${expiringDocs.length} expiring`;
+  return '✅ OK';
+};
+
+const hasExpiringDocs = (employee) => {
+  return getComplianceStatus(employee).includes('expiring');
 };
 ```
 
@@ -262,7 +284,7 @@ const calculateAge = (dob: string): number => {
 **Code Sample:**
 ```python
 # backend/app/services/employees.py
-def calculate_profile_completion(employee: Employee) -> dict:
+async def calculate_profile_completion(employee: Employee) -> dict:
     """Calculate profile completion percentage."""
     required_fields = {
         # Basic (20%)
@@ -813,7 +835,24 @@ async def approve_request(
     """Approve request and move to next step or complete."""
     request = await get_request_by_id(db, request_id)
     
+    # Validate authorization: Ensure approver is authorized for this specific request
+    # Manager must be the employee's line manager for manager approval step
     if request.status == RequestStatus.PENDING_MANAGER:
+        if approver_role == "manager":
+            # Verify this manager is the employee's line manager
+            employee = request.employee
+            if employee.line_manager_id != approver_id:
+                raise HTTPException(
+                    status_code=403,
+                    detail="Only the employee's line manager can approve this request"
+                )
+        # Admin/HR can also approve at manager step
+        elif approver_role not in ["admin", "hr"]:
+            raise HTTPException(
+                status_code=403,
+                detail="Not authorized to approve manager-level requests"
+            )
+        
         request.manager_approved_at = datetime.now(timezone.utc)
         request.manager_approved_by = approver_id
         request.status = RequestStatus.PENDING_HR
@@ -827,6 +866,13 @@ async def approve_request(
         )
         
     elif request.status == RequestStatus.PENDING_HR:
+        # Only HR and admin can approve at HR step
+        if approver_role not in ["admin", "hr"]:
+            raise HTTPException(
+                status_code=403,
+                detail="Only HR or admin can approve HR-level requests"
+            )
+        
         request.hr_approved_at = datetime.now(timezone.utc)
         request.hr_approved_by = approver_id
         
@@ -843,6 +889,31 @@ async def approve_request(
                 template="request_approved",
                 data={"request": request}
             )
+    
+    elif request.status == RequestStatus.PENDING_FINANCE:
+        # Only admin can approve at finance step (or dedicated finance role if exists)
+        if approver_role != "admin":
+            raise HTTPException(
+                status_code=403,
+                detail="Only admin can approve finance-level requests"
+            )
+        
+        request.finance_approved_at = datetime.now(timezone.utc)
+        request.finance_approved_by = approver_id
+        request.status = RequestStatus.APPROVED
+        request.completed_at = datetime.now(timezone.utc)
+        await send_notification(
+            recipient=request.employee.email,
+            subject="Your request has been approved",
+            template="request_approved",
+            data={"request": request}
+        )
+    
+    else:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Request is not in a pending approval state (current: {request.status})"
+        )
     
     db.add(request)
     await db.commit()
@@ -1186,14 +1257,19 @@ async def bulk_approve_requests(
     approver_role: str = Depends(require_role(["admin", "hr", "manager"])),
     db: AsyncSession = Depends(get_session)
 ):
-    """Approve multiple requests at once."""
+    """Approve multiple requests at once, with per-request authorization checks."""
     approved = []
     failed = []
     
     for req_id in request_ids:
         try:
+            # The approve_request function now includes per-request authorization checks
+            # that verify the approver is authorized for each specific request
             request = await approve_request(db, req_id, approver_id, approver_role)
             approved.append(request.request_number)
+        except HTTPException as e:
+            # Capture authorization failures
+            failed.append({'request_id': req_id, 'error': e.detail})
         except Exception as e:
             failed.append({'request_id': req_id, 'error': str(e)})
     

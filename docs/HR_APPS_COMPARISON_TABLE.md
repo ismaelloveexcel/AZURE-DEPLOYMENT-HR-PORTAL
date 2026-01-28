@@ -79,6 +79,8 @@
 | **Adopt IceHRM** | 18 weeks | $108,000 | ❌ Build anyway | ❌ Not needed | ❌ Build anyway | -$108,000 |
 | **Continue Current Dev** | 10 weeks | $57,000 | Build $24k | N/A | Build $12k | $57k investment |
 
+**Cost assumptions:** All costs calculated assuming 2 developers working full-time (40 hours/week each) at $75/hour. Formula: weeks × 2 devs × 40 hours × $75/hour.
+
 **Conclusion:** Continuing current development is **47-52% more cost-effective** than adopting any existing system.
 
 ---
