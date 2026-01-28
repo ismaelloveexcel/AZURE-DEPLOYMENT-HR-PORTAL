@@ -9,7 +9,7 @@ Tests coverage:
 - Balance calculations including offset days
 """
 import pytest
-from datetime import date, datetime, timezone
+from datetime import date
 from decimal import Decimal
 from unittest.mock import AsyncMock, patch
 
@@ -18,7 +18,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.models.employee import Employee
 from app.models.leave import LeaveBalance, LeaveRequest
 from app.models.public_holiday import PublicHoliday, UAE_HOLIDAYS_2026
-from app.services.leave_service import LeaveService, LeaveValidationError
+from app.services.leave_service import LeaveService
 
 
 @pytest.fixture
