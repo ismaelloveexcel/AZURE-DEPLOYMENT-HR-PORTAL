@@ -847,7 +847,7 @@ async def seed_all_employees(
                     manager_updates += 1
                 except Exception as e:  # nosec B110
                     # Expected: Manager reference may not exist yet, which is acceptable
-                    logger.debug(f"Manager update failed for {emp['employee_id']}: {e}")
+                    logger.debug(f"Manager update failed for an employee record: {e}")
                     continue
 
         # Reset sequence to max id
