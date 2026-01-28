@@ -153,25 +153,39 @@ jobs:
           
           while [ $ATTEMPT -le $MAX_ATTEMPTS ]; do
             echo "📦 Deployment attempt $ATTEMPT of $MAX_ATTEMPTS..."
+            echo "⏰ Start time: $(date -u +"%Y-%m-%d %H:%M:%S UTC")"
             
             # Use az webapp deploy for zip deployment
-            DEPLOY_OUTPUT=$(az webapp deploy \
+            # Note: Using tee to show output in real-time while also capturing it
+            set +e  # Don't exit on error
+            az webapp deploy \
               --name "$WEBAPP_NAME" \
               --resource-group "$RESOURCE_GROUP" \
               --src-path deploy.zip \
               --type zip \
               --clean true \
               --restart true \
-              --timeout 600 2>&1)
-            DEPLOY_EXIT_CODE=$?
+              --timeout 600 \
+              --verbose 2>&1 | tee /tmp/deploy_output.txt
+            DEPLOY_EXIT_CODE=${PIPESTATUS[0]}
+            set -e
             
-            echo "$DEPLOY_OUTPUT"
+            echo "⏰ End time: $(date -u +"%Y-%m-%d %H:%M:%S UTC")"
+            echo "📋 Exit code: $DEPLOY_EXIT_CODE"
             
             if [ $DEPLOY_EXIT_CODE -eq 0 ]; then
               echo "✅ Deployment successful on attempt $ATTEMPT"
               break
             else
               echo "⚠️ Deployment attempt $ATTEMPT failed (exit code: $DEPLOY_EXIT_CODE)"
+              
+              # Check for specific error patterns
+              if grep -qi "SCM container restart" /tmp/deploy_output.txt 2>/dev/null; then
+                echo "🔄 Detected SCM container restart issue"
+              fi
+              if grep -qi "timeout" /tmp/deploy_output.txt 2>/dev/null; then
+                echo "⏰ Detected timeout issue"
+              fi
               
               if [ $ATTEMPT -lt $MAX_ATTEMPTS ]; then
                 # SCM container may be restarting, wait before retry
@@ -181,6 +195,8 @@ jobs:
                 sleep $WAIT_TIME
               else
                 echo "❌ All deployment attempts failed"
+                echo "📋 Last deployment output:"
+                cat /tmp/deploy_output.txt 2>/dev/null || true
                 exit 1
               fi
             fi

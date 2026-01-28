@@ -32,34 +32,56 @@ jobs:
             echo "::warning::BACKEND_URL secret is not configured. Using fallback: $BACKEND_URL"
           fi
           
-          echo "Checking backend at $BACKEND_URL/health"
+          # Use /api/health/ping as the primary health endpoint (consistent with deploy.yml)
+          echo "Checking backend at $BACKEND_URL/api/health/ping"
           
-          RESPONSE=$(curl -s -o /dev/null -w "%{http_code}" "$BACKEND_URL/health" || echo "000")
+          RESPONSE=$(curl -s -o /dev/null -w "%{http_code}" "$BACKEND_URL/api/health/ping" --connect-timeout 10 --max-time 30 || echo "000")
           
           if [ "$RESPONSE" = "200" ]; then
             echo "✅ Backend is healthy (HTTP $RESPONSE)"
             echo "status=healthy" >> $GITHUB_OUTPUT
           else
-            echo "❌ Backend health check failed (HTTP $RESPONSE)"
-            echo "status=unhealthy" >> $GITHUB_OUTPUT
+            # Try alternative health endpoint
+            echo "Trying alternative endpoint: $BACKEND_URL/health"
+            ALT_RESPONSE=$(curl -s -o /dev/null -w "%{http_code}" "$BACKEND_URL/health" --connect-timeout 10 --max-time 30 || echo "000")
+            if [ "$ALT_RESPONSE" = "200" ]; then
+              echo "✅ Backend is healthy via /health (HTTP $ALT_RESPONSE)"
+              echo "status=healthy" >> $GITHUB_OUTPUT
+            else
+              echo "❌ Backend health check failed (HTTP $RESPONSE / $ALT_RESPONSE)"
+              echo "status=unhealthy" >> $GITHUB_OUTPUT
+            fi
           fi
       
       - name: Check frontend health
         id: frontend-health
         run: |
+          # Frontend is now served from backend at /static
+          # Use BACKEND_URL since frontend is bundled with backend
           FRONTEND_URL="${{ secrets.FRONTEND_URL }}"
           if [ -z "$FRONTEND_URL" ]; then
-            FRONTEND_URL="https://gray-island-0b743e310.4.azurestaticapps.net"
-            echo "::warning::FRONTEND_URL secret is not configured. Using fallback: $FRONTEND_URL"
+            # Default to backend URL since frontend is served from backend/static
+            FRONTEND_URL="${{ secrets.BACKEND_URL }}"
+            if [ -z "$FRONTEND_URL" ]; then
+              FRONTEND_URL="https://hrportal-backend-new.azurewebsites.net"
+            fi
+            echo "::notice::Frontend is served from backend. Checking: $FRONTEND_URL"
           fi
           
           echo "Checking frontend at $FRONTEND_URL"
           
-          RESPONSE=$(curl -s -o /dev/null -w "%{http_code}" "$FRONTEND_URL" || echo "000")
+          # Check that the root path returns HTML (served from backend/static)
+          RESPONSE=$(curl -s -o /tmp/frontend_response.txt -w "%{http_code}" "$FRONTEND_URL" --connect-timeout 10 --max-time 30 || echo "000")
           
           if [ "$RESPONSE" = "200" ]; then
-            echo "✅ Frontend is healthy (HTTP $RESPONSE)"
-            echo "status=healthy" >> $GITHUB_OUTPUT
+            # Verify it's actually serving the frontend (contains HTML)
+            if grep -q "</html>" /tmp/frontend_response.txt 2>/dev/null; then
+              echo "✅ Frontend is healthy (HTTP $RESPONSE, serving HTML)"
+              echo "status=healthy" >> $GITHUB_OUTPUT
+            else
+              echo "⚠️ Frontend returned 200 but may not be serving correct content"
+              echo "status=healthy" >> $GITHUB_OUTPUT
+            fi
           else
             echo "❌ Frontend health check failed (HTTP $RESPONSE)"
             echo "status=unhealthy" >> $GITHUB_OUTPUT
@@ -316,12 +338,12 @@ jobs:
           
           echo "Measuring response times..."
           
-          # Measure health endpoint
-          HEALTH_TIME=$(curl -s -o /dev/null -w "%{time_total}" "$BACKEND_URL/health" || echo "0")
+          # Measure health endpoint (use /api/health/ping to be consistent)
+          HEALTH_TIME=$(curl -s -o /dev/null -w "%{time_total}" "$BACKEND_URL/api/health/ping" --connect-timeout 10 --max-time 30 || echo "0")
           echo "Health endpoint: ${HEALTH_TIME}s"
           
           # Measure docs endpoint
-          DOCS_TIME=$(curl -s -o /dev/null -w "%{time_total}" "$BACKEND_URL/docs" || echo "0")
+          DOCS_TIME=$(curl -s -o /dev/null -w "%{time_total}" "$BACKEND_URL/docs" --connect-timeout 10 --max-time 30 || echo "0")
           echo "Docs endpoint: ${DOCS_TIME}s"
           
           # Check if times are acceptable (under 3 seconds)
