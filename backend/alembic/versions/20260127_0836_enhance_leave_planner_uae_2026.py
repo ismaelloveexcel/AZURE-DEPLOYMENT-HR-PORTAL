@@ -18,7 +18,6 @@ UAE Compliance:
 from alembic import op
 import sqlalchemy as sa
 from datetime import date
-from sqlalchemy.dialects import postgresql
 
 # revision identifiers, used by Alembic.
 revision = '20260127_0836'
