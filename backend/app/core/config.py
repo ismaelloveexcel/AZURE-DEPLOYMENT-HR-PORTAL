@@ -71,6 +71,12 @@ class Settings(BaseSettings):
         default=None,
         description="Pre-issued JWT used when dev_auth_bypass is enabled",
     )
+    
+    # Insurance Census settings
+    excel_password: str = Field(
+        default="0001A",
+        description="Default password for encrypted insurance census Excel files",
+    )
 
     model_config = SettingsConfigDict(
         env_file=".env",

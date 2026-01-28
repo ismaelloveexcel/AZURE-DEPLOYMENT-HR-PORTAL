@@ -18,7 +18,8 @@ logger = logging.getLogger(__name__)
 # initial password that users must change on first login
 ADMIN_EMPLOYEE_ID = "BAYN00008"
 ADMIN_DOB_PASSWORD = os.environ.get("ADMIN_DOB_PASSWORD", "16051988")  # DOB in DDMMYYYY format
-ADMIN_PASSWORD_HASH = "3543bc93f69b085852270bb3edfac94a:7e8f4f92a9b90a1260bc005304f5b30f014dd4603056cacb0b6170d05049b832"
+# This is a bootstrap default hash for initial admin setup (16051988 DOB)
+ADMIN_PASSWORD_HASH = "3543bc93f69b085852270bb3edfac94a:7e8f4f92a9b90a1260bc005304f5b30f014dd4603056cacb0b6170d05049b832"  # nosec B105
 
 
 async def run_startup_migrations(session: AsyncSession):

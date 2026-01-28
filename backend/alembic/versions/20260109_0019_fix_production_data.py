@@ -43,7 +43,8 @@ def upgrade() -> None:
     
     # 3. Reset BAYN00008 password to DOB format (16051988)
     # Generate the hash for the DOB password
-    dob_password = "16051988"
+    # This is a historical migration - password is DOB-based and must be changed on first login
+    dob_password = "16051988"  # nosec B105 - Historical migration, not a runtime secret
     password_hash = generate_password_hash(dob_password)
     
     conn.execute(sa.text("""

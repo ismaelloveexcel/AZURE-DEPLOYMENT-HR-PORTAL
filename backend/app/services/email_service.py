@@ -97,8 +97,10 @@ class EmailService:
             if server:
                 try:
                     server.quit()
-                except Exception:
-                    pass
+                except Exception as e:  # nosec B110
+                    # Expected: SMTP quit may fail if connection already closed
+                    logger.debug(f"SMTP server quit failed (non-critical): {e}")
+
 
 
 # Singleton instance

@@ -26,7 +26,8 @@ class PassService:
     ) -> PassResponse:
         """Create a new pass."""
         # Default onboarding validity: 1 month
-        if data.pass_type == "onboarding":
+        # pass_type is an enum value for pass category, not a password
+        if data.pass_type == "onboarding":  # nosec B105
             from datetime import timedelta
             data = data.copy(update={"valid_until": data.valid_from + timedelta(days=30)})
         # Generate pass number

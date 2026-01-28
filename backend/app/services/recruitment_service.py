@@ -905,9 +905,10 @@ class RecruitmentService:
                 continue
 
         # Create pass
+        # pass_type is an enum value, not a password
         manager_pass = Pass(
             pass_number=pass_number,
-            pass_type='recruitment',  # Using existing pass type
+            pass_type='recruitment',  # nosec B106 - Using existing pass type
             full_name=request.hiring_manager_id or "Hiring Manager",
             department=request.department,
             position=request.position_title,
@@ -969,9 +970,10 @@ class RecruitmentService:
                 continue
 
         # Create pass
+        # pass_type is an enum value, not a password
         candidate_pass = Pass(
             pass_number=pass_number,
-            pass_type='recruitment',
+            pass_type='recruitment',  # nosec B106
             full_name=candidate.full_name,
             email=candidate.email,
             phone=candidate.phone,
