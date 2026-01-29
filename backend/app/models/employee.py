@@ -13,6 +13,7 @@ if TYPE_CHECKING:
     from app.models.employee_bank import EmployeeBank
     from app.models.employee_document import EmployeeDocument
     from app.models.onboarding_token import OnboardingToken
+    from app.models.request import Request
 
 
 class Employee(Base):
@@ -161,4 +162,7 @@ class Employee(Base):
     )
     renewals: Mapped[list["Renewal"]] = relationship(
         "Renewal", back_populates="employee", cascade="all, delete-orphan"
+    )
+    requests: Mapped[list["Request"]] = relationship(
+        "Request", back_populates="employee", cascade="all, delete-orphan"
     )

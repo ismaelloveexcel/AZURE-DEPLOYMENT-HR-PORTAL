@@ -7,6 +7,8 @@ import { AttendanceModule } from './pages/AttendanceModule'
 import { RecruitmentModule } from './pages/RecruitmentModule'
 import { OnboardingModule } from './pages/OnboardingModule'
 import { AdminDashboard } from './pages/AdminDashboard'
+import { TrackRequest } from './pages/TrackRequest'
+import { SubmitRequest } from './pages/SubmitRequest'
 
 /**
  * Router wrapper for the HR Portal - Phase 2 Complete
@@ -40,6 +42,10 @@ export function RouterApp() {
         <Routes>
           {/* Home page - Portal landing */}
           <Route path="/" element={<HomePage />} />
+          
+          {/* Phase 1: Request Tracking System (PUBLIC + AUTHENTICATED) */}
+          <Route path="/track" element={<TrackRequest />} />
+          <Route path="/requests/submit" element={<SubmitRequest />} />
           
           {/* Extracted modular pages */}
           <Route path="/admin" element={<AdminDashboard />} />

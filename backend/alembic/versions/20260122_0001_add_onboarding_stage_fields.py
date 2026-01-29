@@ -11,7 +11,7 @@ import sqlalchemy as sa
 
 # revision identifiers, used by Alembic.
 revision = "20260122_0001"
-down_revision = "20260108_0017_add_pass_feedback_table"
+down_revision = "20260116_0023"  # Fixed: was referencing wrong revision
 branch_labels = None
 depends_on = None
 
