@@ -1,5 +1,5 @@
 from functools import lru_cache
-from typing import List, Optional
+from typing import Dict, List, Optional
 
 from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
@@ -94,7 +94,7 @@ class Settings(BaseSettings):
             return ["*"]
         return [origin.strip() for origin in self.allowed_origins.split(",") if origin.strip()]
     
-    def get_version_info(self) -> dict:
+    def get_version_info(self) -> Dict[str, str]:
         """Get version and deployment information."""
         return {
             "version": self.app_version,
