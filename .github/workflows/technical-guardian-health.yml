@@ -26,12 +26,14 @@ jobs:
           # This handles Azure App Service cold starts gracefully
           MAX_ATTEMPTS=3
           ATTEMPT=1
+          LAST_BODY=""
           
           while [ $ATTEMPT -le $MAX_ATTEMPTS ]; do
             echo "Attempt $ATTEMPT of $MAX_ATTEMPTS..."
             RESPONSE=$(curl -s -w "\n%{http_code}" --connect-timeout 30 --max-time 60 https://hrportal-backend-new.azurewebsites.net/api/health/ping || echo "000")
             HTTP_CODE=$(echo "$RESPONSE" | tail -1)
             BODY=$(echo "$RESPONSE" | head -n -1)
+            LAST_BODY="$BODY"
             
             if [ "$HTTP_CODE" = "200" ]; then
               echo "http_code=$HTTP_CODE" >> $GITHUB_OUTPUT
@@ -50,7 +52,9 @@ jobs:
             ATTEMPT=$((ATTEMPT + 1))
           done
           
+          # Set outputs for failed state (for issue creation)
           echo "http_code=$HTTP_CODE" >> $GITHUB_OUTPUT
+          echo "response_body=$LAST_BODY" >> $GITHUB_OUTPUT
           echo "❌ Health check failed after $MAX_ATTEMPTS attempts with HTTP $HTTP_CODE"
           exit 1
       
@@ -127,22 +131,24 @@ jobs:
             body += '*This issue was automatically created by Technical Guardian Health Monitor*';
             
             // Check if there's already an open issue
+            // Note: listForRepo uses comma-separated string for labels filter
             const issues = await github.rest.issues.listForRepo({
               owner: context.repo.owner,
               repo: context.repo.repo,
               state: 'open',
-              labels: 'technical-guardian,health-check',
+              labels: 'technical-guardian,health-check',  // API expects comma-separated string
               per_page: 1
             });
             
             if (issues.data.length === 0) {
               // Create new issue
+              // Note: create API uses array for labels
               await github.rest.issues.create({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
                 title: '🚨 System Health Check Failed',
                 body: body,
-                labels: ['technical-guardian', 'health-check', 'critical', 'automated']
+                labels: ['technical-guardian', 'health-check', 'critical', 'automated']  // API expects array
               });
             } else {
               // Add comment to existing issue

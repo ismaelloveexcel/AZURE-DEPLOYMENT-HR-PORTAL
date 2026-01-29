@@ -33,16 +33,23 @@ jobs:
         continue-on-error: true
         run: |
           npm audit --json > audit.json 2>&1 || true
-          CRITICAL=$(cat audit.json | jq '.metadata.vulnerabilities.critical // 0' 2>/dev/null || echo "0")
-          HIGH=$(cat audit.json | jq '.metadata.vulnerabilities.high // 0' 2>/dev/null || echo "0")
+          # Validate JSON exists and is parseable before extracting values
+          if [ -f audit.json ] && jq empty audit.json 2>/dev/null; then
+            CRITICAL=$(jq '.metadata.vulnerabilities.critical // 0' audit.json 2>/dev/null || echo "0")
+            HIGH=$(jq '.metadata.vulnerabilities.high // 0' audit.json 2>/dev/null || echo "0")
+          else
+            CRITICAL="0"
+            HIGH="0"
+          fi
           echo "critical=$CRITICAL" >> $GITHUB_OUTPUT
           echo "high=$HIGH" >> $GITHUB_OUTPUT
       
       - name: Find stale branches
         id: stale-branches
         run: |
-          # Count branches older than 90 days (excluding main)
-          STALE_COUNT=$(git for-each-ref --format='%(refname:short) %(committerdate:relative)' refs/remotes/origin | grep -v "main\|HEAD" | grep -E '(month|year)' | wc -l || echo "0")
+          # Count branches older than 3 months (excluding main)
+          # Match patterns like "3 months", "4 months", "5 months", or any "year"
+          STALE_COUNT=$(git for-each-ref --format='%(refname:short) %(committerdate:relative)' refs/remotes/origin | grep -v "main\|HEAD" | grep -E '([3-9] months|[0-9]+ years|year ago)' | wc -l || echo "0")
           echo "stale_count=$STALE_COUNT" >> $GITHUB_OUTPUT
       
       - name: Create consolidated maintenance issue
