@@ -1,16 +1,22 @@
 name: Deploy Frontend to Azure Static Web Apps
 
-# ACTIVE: Supplementary frontend deploy with concurrency to avoid conflicts.
-# deploy.yml remains the primary deploy; this workflow is serialized via
-# frontend-deployment group and can still be run manually if needed.
+# DISABLED: This workflow is REDUNDANT with deploy.yml which handles both frontend and backend.
+# deploy.yml is the PRIMARY and ONLY deployment workflow that should be used.
+# This workflow was causing race conditions and conflicts when both ran on push to main.
+#
+# Keeping for reference only - can be deleted in future cleanup.
+#
+# If you need to deploy frontend separately, manually trigger deploy.yml
+# or use the Azure Portal directly.
+
 on:
-  push:
-    branches: [main]
-    paths:
-      - 'frontend/**'
-      - 'staticwebapp.config.json'
-  # PR deploys disabled to avoid exhausting SWA staging environments
-  workflow_dispatch:
+  # DISABLED - DO NOT ENABLE - Use deploy.yml instead
+  # push:
+  #   branches: [main]
+  #   paths:
+  #     - 'frontend/**'
+  #     - 'staticwebapp.config.json'
+  workflow_dispatch:  # Manual trigger only for emergencies
 
 concurrency:
   group: frontend-deployment

@@ -10,7 +10,7 @@ from sqlalchemy import select, func, and_, or_
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.security import require_role
-from app.db.session import get_session
+from app.database import get_session
 from app.models.employee import Employee
 
 router = APIRouter(prefix="/dashboard", tags=["dashboard"])
