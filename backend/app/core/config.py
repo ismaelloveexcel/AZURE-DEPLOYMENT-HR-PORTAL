@@ -1,5 +1,5 @@
 from functools import lru_cache
-from typing import List, Optional
+from typing import Dict, List, Optional
 
 from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
@@ -10,6 +10,11 @@ class Settings(BaseSettings):
     app_env: str = Field(default="development", description="Current runtime environment")
     api_prefix: str = Field(default="/api", description="API prefix for routing")
     log_level: str = Field(default="INFO", description="Logging level")
+    
+    # Version/Revision tracking
+    git_commit_sha: Optional[str] = Field(default=None, description="Git commit SHA from deployment")
+    build_timestamp: Optional[str] = Field(default=None, description="Build timestamp from deployment")
+    app_version: str = Field(default="dev", description="Application version")
     database_url: str = Field(
         default="postgresql+asyncpg://postgres:postgres@localhost:5432/secure_renewals",
         description="PostgreSQL connection string using asyncpg driver",
@@ -88,6 +93,15 @@ class Settings(BaseSettings):
         if not self.allowed_origins:
             return ["*"]
         return [origin.strip() for origin in self.allowed_origins.split(",") if origin.strip()]
+    
+    def get_version_info(self) -> Dict[str, str]:
+        """Get version and deployment information."""
+        return {
+            "version": self.app_version,
+            "git_commit": self.git_commit_sha or "unknown",
+            "build_timestamp": self.build_timestamp or "unknown",
+            "environment": self.app_env
+        }
 
 
 @lru_cache()
