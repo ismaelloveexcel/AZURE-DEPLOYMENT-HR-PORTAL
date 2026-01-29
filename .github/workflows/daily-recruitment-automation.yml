@@ -51,7 +51,7 @@ jobs:
 
       - name: Checkout code
         if: steps.check-secrets.outputs.secrets_configured == 'true'
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
       
       - name: Run Daily Recruitment Tasks
         if: steps.check-secrets.outputs.secrets_configured == 'true'
