@@ -1,10 +1,19 @@
 name: Azure Debugger - Deployment Failure Monitor
 
+# DISABLED: This workflow was auto-creating issues for every deployment failure,
+# contributing to issue spam. It's kept for reference but disabled.
+# 
+# If you need deployment failure analysis, manually review workflow logs instead
+# or re-enable this workflow selectively.
+#
+# Related issue from this workflow: #108 (Deployment Failure: Deploy to Azure)
+# Note: Health check issues (#96-99, #105-106, #126) are from post-deployment-health.yml
 on:
-  workflow_run:
-    workflows: ["Deploy to Azure", "CI"]
-    types: [completed]
-  workflow_dispatch:  # Allow manual triggering
+  # DISABLED - causes issue spam
+  # workflow_run:
+  #   workflows: ["Deploy to Azure", "CI"]
+  #   types: [completed]
+  workflow_dispatch:  # Manual trigger only
 
 permissions:
   contents: read
@@ -16,7 +25,8 @@ jobs:
   analyze-failure:
     name: Analyze Deployment Failures
     runs-on: ubuntu-latest
-    if: ${{ github.event.workflow_run.conclusion == 'failure' || github.event_name == 'workflow_dispatch' }}
+    # Only runs on manual dispatch now
+    if: ${{ github.event_name == 'workflow_dispatch' }}
     
     steps:
       - name: Checkout code
