@@ -2,7 +2,9 @@ name: Technical Guardian - Health Monitor
 
 on:
   schedule:
-    - cron: '*/15 * * * *'  # Every 15 minutes
+    # REDUCED: Changed from every 15 minutes to every 6 hours to reduce noise
+    # Previous setting (*/15 * * * *) was creating 96 workflow runs per day
+    - cron: '0 */6 * * *'  # Every 6 hours (4 times per day)
   workflow_dispatch:  # Allow manual triggering
 
 permissions:
@@ -15,43 +17,81 @@ jobs:
     runs-on: ubuntu-latest
     
     steps:
-      - name: Check API Health
+      - name: Check API Health (with retries)
         id: api_health
         run: |
-          echo "Checking API health endpoint..."
-          RESPONSE=$(curl -s -w "\n%{http_code}" https://hrportal-backend-new.azurewebsites.net/api/health/ping || echo "000")
-          HTTP_CODE=$(echo "$RESPONSE" | tail -1)
-          BODY=$(echo "$RESPONSE" | head -n -1)
+          echo "Checking API health endpoint with retry logic..."
+          
+          # Retry logic: 3 attempts with 30-second waits
+          # This handles Azure App Service cold starts gracefully
+          MAX_ATTEMPTS=3
+          ATTEMPT=1
+          
+          while [ $ATTEMPT -le $MAX_ATTEMPTS ]; do
+            echo "Attempt $ATTEMPT of $MAX_ATTEMPTS..."
+            RESPONSE=$(curl -s -w "\n%{http_code}" --connect-timeout 30 --max-time 60 https://hrportal-backend-new.azurewebsites.net/api/health/ping || echo "000")
+            HTTP_CODE=$(echo "$RESPONSE" | tail -1)
+            BODY=$(echo "$RESPONSE" | head -n -1)
+            
+            if [ "$HTTP_CODE" = "200" ]; then
+              echo "http_code=$HTTP_CODE" >> $GITHUB_OUTPUT
+              echo "response_body=$BODY" >> $GITHUB_OUTPUT
+              echo "✅ Health check passed on attempt $ATTEMPT"
+              exit 0
+            fi
+            
+            echo "Attempt $ATTEMPT failed with HTTP $HTTP_CODE"
+            
+            if [ $ATTEMPT -lt $MAX_ATTEMPTS ]; then
+              echo "Waiting 30 seconds before retry (may be cold start)..."
+              sleep 30
+            fi
+            
+            ATTEMPT=$((ATTEMPT + 1))
+          done
           
           echo "http_code=$HTTP_CODE" >> $GITHUB_OUTPUT
-          echo "response_body=$BODY" >> $GITHUB_OUTPUT
-          
-          if [ "$HTTP_CODE" != "200" ]; then
-            echo "❌ Health check failed with HTTP $HTTP_CODE"
-            exit 1
-          fi
-          echo "✅ Health check passed"
+          echo "❌ Health check failed after $MAX_ATTEMPTS attempts with HTTP $HTTP_CODE"
+          exit 1
       
-      - name: Check Database Health
+      - name: Check Database Health (with retries)
         id: db_health
         if: success()
         run: |
-          echo "Checking database health endpoint..."
-          RESPONSE=$(curl -s -w "\n%{http_code}" https://hrportal-backend-new.azurewebsites.net/api/health/db || echo "000")
-          HTTP_CODE=$(echo "$RESPONSE" | tail -1)
-          BODY=$(echo "$RESPONSE" | head -n -1)
+          echo "Checking database health endpoint with retry logic..."
+          
+          MAX_ATTEMPTS=3
+          ATTEMPT=1
+          
+          while [ $ATTEMPT -le $MAX_ATTEMPTS ]; do
+            echo "Attempt $ATTEMPT of $MAX_ATTEMPTS..."
+            RESPONSE=$(curl -s -w "\n%{http_code}" --connect-timeout 30 --max-time 60 https://hrportal-backend-new.azurewebsites.net/api/health/db || echo "000")
+            HTTP_CODE=$(echo "$RESPONSE" | tail -1)
+            BODY=$(echo "$RESPONSE" | head -n -1)
+            
+            if [ "$HTTP_CODE" = "200" ]; then
+              echo "http_code=$HTTP_CODE" >> $GITHUB_OUTPUT
+              
+              # Check if employee count is reasonable
+              EMPLOYEE_COUNT=$(echo "$BODY" | jq -r '.employee_count // 0' 2>/dev/null || echo "0")
+              echo "employee_count=$EMPLOYEE_COUNT" >> $GITHUB_OUTPUT
+              echo "✅ Database health check passed on attempt $ATTEMPT (Employees: $EMPLOYEE_COUNT)"
+              exit 0
+            fi
+            
+            echo "Attempt $ATTEMPT failed with HTTP $HTTP_CODE"
+            
+            if [ $ATTEMPT -lt $MAX_ATTEMPTS ]; then
+              echo "Waiting 30 seconds before retry..."
+              sleep 30
+            fi
+            
+            ATTEMPT=$((ATTEMPT + 1))
+          done
           
           echo "http_code=$HTTP_CODE" >> $GITHUB_OUTPUT
-          
-          if [ "$HTTP_CODE" != "200" ]; then
-            echo "❌ Database health check failed with HTTP $HTTP_CODE"
-            exit 1
-          fi
-          
-          # Check if employee count is reasonable
-          EMPLOYEE_COUNT=$(echo "$BODY" | jq -r '.employee_count // 0' 2>/dev/null || echo "0")
-          echo "employee_count=$EMPLOYEE_COUNT" >> $GITHUB_OUTPUT
-          echo "✅ Database health check passed (Employees: $EMPLOYEE_COUNT)"
+          echo "❌ Database health check failed after $MAX_ATTEMPTS attempts with HTTP $HTTP_CODE"
+          exit 1
       
       - name: Create Issue on Health Check Failure
         if: failure()
