@@ -62,9 +62,8 @@ class RequestService:
         )
         
         db.add(request)
-        await db.flush()
-        await db.refresh(request)
-        await db.commit()
+        await db.commit()  # Commit first
+        await db.refresh(request)  # Then refresh
         
         return RequestResponse.model_validate(request)
     

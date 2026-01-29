@@ -81,6 +81,16 @@ export const TrackRequest = () => {
   };
 
   const getStatusSteps = (currentStatus: string) => {
+    // Handle rejected status separately
+    if (currentStatus === 'rejected') {
+      return [
+        { name: 'Submitted', completed: true, current: false },
+        { name: 'Reviewing', completed: true, current: false },
+        { name: 'Rejected', completed: true, current: true }
+      ];
+    }
+    
+    // Normal progression
     const steps = ['submitted', 'reviewing', 'approved', 'completed'];
     const currentIndex = steps.indexOf(currentStatus);
     
@@ -111,8 +121,9 @@ export const TrackRequest = () => {
               type="text"
               placeholder="REF-2026-001"
               value={reference}
-              onChange={(e) => setReference(e.target.value.toUpperCase())}
-              onKeyPress={handleKeyPress}
+              onChange={(e) => setReference(e.target.value)}
+              onBlur={(e) => setReference(e.target.value.toUpperCase())}
+              onKeyDown={handleKeyPress}
               disabled={loading}
               className="w-full px-4 py-3 pr-12 border border-gray-300 rounded-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-gray-900 focus:border-gray-900 disabled:bg-gray-50 disabled:cursor-not-allowed"
             />

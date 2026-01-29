@@ -12,6 +12,7 @@
  */
 
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Check, ArrowLeft } from 'lucide-react';
 
 const requestTypes = [
@@ -26,6 +27,7 @@ const requestTypes = [
 ];
 
 export const SubmitRequest = () => {
+  const navigate = useNavigate();
   const [requestType, setRequestType] = useState('');
   const [details, setDetails] = useState('');
   const [loading, setLoading] = useState(false);
@@ -116,8 +118,14 @@ export const SubmitRequest = () => {
             </div>
             <button
               onClick={() => {
-                navigator.clipboard.writeText(reference);
-                alert('Reference number copied to clipboard');
+                try {
+                  navigator.clipboard.writeText(reference);
+                  // Could use a toast notification here in the future
+                  alert('Reference number copied to clipboard');
+                } catch (err) {
+                  // Fallback for browsers without clipboard API
+                  console.error('Failed to copy to clipboard:', err);
+                }
               }}
               className="mt-3 text-sm text-gray-600 hover:text-gray-900"
             >
@@ -134,7 +142,7 @@ export const SubmitRequest = () => {
           {/* Action Buttons */}
           <div className="space-y-3">
             <button
-              onClick={() => window.location.href = `/track?ref=${reference}`}
+              onClick={() => navigate(`/track?ref=${reference}`)}
               className="w-full px-4 py-3 bg-gray-900 text-white rounded-sm hover:bg-gray-800 transition-colors"
             >
               Track Request
