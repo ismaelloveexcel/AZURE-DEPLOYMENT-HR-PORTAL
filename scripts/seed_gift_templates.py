@@ -1,5 +1,12 @@
 """Seed script to populate 5 gift templates for GiftForge MVP."""
 import asyncio
+import sys
+from pathlib import Path
+
+# Add backend to path
+backend_path = Path(__file__).parent.parent / "backend"
+sys.path.insert(0, str(backend_path))
+
 from app.database import AsyncSessionLocal
 from app.models.gift import GiftTemplate
 

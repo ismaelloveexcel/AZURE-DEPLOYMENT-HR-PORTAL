@@ -1,7 +1,7 @@
 """Add gift tables for GiftForge MVP
 
 Revision ID: 20260130_giftforge
-Revises: 20260103_0007_add_templates_and_indexes
+Revises: 20260127_1200_add_offer_tracking_and_reminder_fields
 Create Date: 2026-01-30 22:10:00.000000
 
 """
@@ -11,7 +11,7 @@ from sqlalchemy.dialects import postgresql
 
 # revision identifiers, used by Alembic.
 revision = '20260130_giftforge'
-down_revision = '20260103_0007_add_templates_and_indexes'
+down_revision = '20260127_1200_add_offer_tracking_and_reminder_fields'
 branch_labels = None
 depends_on = None
 
@@ -25,12 +25,12 @@ def upgrade() -> None:
         sa.Column('description', sa.Text(), nullable=False),
         sa.Column('category', sa.String(length=50), nullable=False),
         sa.Column('preview_image', sa.String(length=500), nullable=False),
-        sa.Column('questionnaire_fields', postgresql.JSON(astext_type=sa.Text()), nullable=False),
-        sa.Column('template_structure', postgresql.JSON(astext_type=sa.Text()), nullable=False),
+        sa.Column('questionnaire_fields', sa.JSON(), nullable=False),
+        sa.Column('template_structure', sa.JSON(), nullable=False),
         sa.Column('is_active', sa.Boolean(), nullable=False, server_default='true'),
         sa.Column('display_order', sa.Integer(), nullable=False, server_default='0'),
-        sa.Column('created_at', sa.DateTime(timezone=True), nullable=False, server_default=sa.text('now()')),
-        sa.Column('updated_at', sa.DateTime(timezone=True), nullable=False, server_default=sa.text('now()')),
+        sa.Column('created_at', sa.DateTime(timezone=True), nullable=False, server_default=sa.text('CURRENT_TIMESTAMP')),
+        sa.Column('updated_at', sa.DateTime(timezone=True), nullable=False, server_default=sa.text('CURRENT_TIMESTAMP')),
         sa.PrimaryKeyConstraint('id')
     )
     op.create_index(op.f('ix_gift_templates_category'), 'gift_templates', ['category'], unique=False)
@@ -45,7 +45,7 @@ def upgrade() -> None:
         sa.Column('recipient_name', sa.String(length=200), nullable=False),
         sa.Column('occasion', sa.String(length=100), nullable=False),
         sa.Column('custom_message', sa.Text(), nullable=True),
-        sa.Column('questionnaire_data', postgresql.JSON(astext_type=sa.Text()), nullable=False),
+        sa.Column('questionnaire_data', sa.JSON(), nullable=False),
         sa.Column('generated_content', sa.Text(), nullable=True),
         sa.Column('generation_status', sa.String(length=20), nullable=False, server_default='pending'),
         sa.Column('rejection_reason', sa.String(length=500), nullable=True),
@@ -54,8 +54,8 @@ def upgrade() -> None:
         sa.Column('creator_email', sa.String(length=255), nullable=True),
         sa.Column('creator_ip', sa.String(length=50), nullable=True),
         sa.Column('view_count', sa.Integer(), nullable=False, server_default='0'),
-        sa.Column('created_at', sa.DateTime(timezone=True), nullable=False, server_default=sa.text('now()')),
-        sa.Column('updated_at', sa.DateTime(timezone=True), nullable=False, server_default=sa.text('now()')),
+        sa.Column('created_at', sa.DateTime(timezone=True), nullable=False, server_default=sa.text('CURRENT_TIMESTAMP')),
+        sa.Column('updated_at', sa.DateTime(timezone=True), nullable=False, server_default=sa.text('CURRENT_TIMESTAMP')),
         sa.Column('delivered_at', sa.DateTime(timezone=True), nullable=True),
         sa.PrimaryKeyConstraint('id')
     )
