@@ -1,4 +1,5 @@
 import os
+import re
 from pathlib import Path
 from contextlib import asynccontextmanager
 from fastapi import FastAPI, Request
@@ -19,6 +20,10 @@ settings = get_settings()
 logger = get_logger(__name__)
 
 limiter = Limiter(key_func=get_remote_address)
+
+# Pre-compile regex for Vite content-hash pattern detection
+# Matches filenames like: index-BZjW1sN-.js, vendor-DgUtky3n.js
+VITE_HASH_PATTERN = re.compile(r'-[a-zA-Z0-9_\-]{8,}\.(js|css)$')
 
 
 @asynccontextmanager
@@ -199,12 +204,20 @@ def create_app() -> FastAPI:
                 Hashed files (containing hashes like index-BZjW1sN-.js) can be cached forever
                 since they change with content. Non-hashed files should not be cached.
                 """
-                asset_file = assets_dir / file_path
+                # Security: Prevent path traversal attacks
+                # Resolve the path and ensure it's within assets_dir
+                try:
+                    asset_file = (assets_dir / file_path).resolve()
+                    # Ensure the resolved path is within assets_dir
+                    asset_file.relative_to(assets_dir.resolve())
+                except (ValueError, RuntimeError):
+                    # Path is outside assets_dir or invalid
+                    return JSONResponse(status_code=404, content={"detail": "Asset not found"})
+                
                 if asset_file.exists() and asset_file.is_file():
                     # Check if filename contains a hash (Vite pattern: name-hash.ext)
                     # Example: index-BZjW1sN-.js, vendor-DgUtky3n.js
-                    import re
-                    has_hash = re.search(r'-[a-zA-Z0-9_-]{8,}\.(js|css)$', file_path)
+                    has_hash = VITE_HASH_PATTERN.search(file_path)
                     
                     if has_hash:
                         # Hashed files: cache aggressively (1 year)
@@ -217,6 +230,12 @@ def create_app() -> FastAPI:
                         headers = {
                             "Cache-Control": "public, max-age=3600",
                         }
+                    
+                    # Set explicit Content-Type to prevent MIME type sniffing
+                    if file_path.endswith('.js'):
+                        headers["Content-Type"] = "application/javascript"
+                    elif file_path.endswith('.css'):
+                        headers["Content-Type"] = "text/css"
                     
                     return FileResponse(str(asset_file), headers=headers)
                 return JSONResponse(status_code=404, content={"detail": "Asset not found"})
