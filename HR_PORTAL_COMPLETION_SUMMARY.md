@@ -369,8 +369,8 @@ import { Avatar } from '../components/Avatar'
 #### First Login
 1. Go to deployed URL
 2. Click admin icon or enter employee ID
-3. Password: Date of birth (DDMMYYYY)
-4. Change password when prompted
+3. Enter the initial password provided securely by HR or in your onboarding email
+4. On first login, follow the prompt to set a new, strong password
 
 #### Common Tasks
 - **Import Employees:** Employees tab → Upload CSV
