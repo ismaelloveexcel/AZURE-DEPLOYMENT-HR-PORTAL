@@ -12,6 +12,7 @@ import { LoginModal } from './components/LoginModal'
 import { Avatar } from './components/Avatar'
 import { StatusBadge, getStatusVariant } from './components/StatusBadge'
 import { DashboardCard } from './components/DashboardCard'
+import { EmptyState } from './components/EmptyState'
 import { useDebounce } from './hooks/useDebounce'
 import { 
   exportEmployeesToCSV, 
@@ -1869,10 +1870,9 @@ const [passFormData, setPassFormData] = useState<PassFormData>({
             {loading ? (
               <div className="p-8 text-center text-primary-600">Loading employees...</div>
             ) : employees.length === 0 ? (
-              <div className="p-8 text-center">
-                <p className="text-primary-600 mb-4">No employees found</p>
-                <p className="text-sm text-primary-300">Add employees via CSV import or the admin panel</p>
-              </div>
+              <EmptyState 
+                message="No employees found" 
+              />
             ) : (
               <table className="w-full">
                 <thead className="bg-primary-50 border-b border-primary-200">
@@ -3824,11 +3824,9 @@ const [passFormData, setPassFormData] = useState<PassFormData>({
             {passesLoading && passes.length === 0 ? (
               <div className="p-8 text-center text-primary-600">Loading passes...</div>
             ) : passes.filter(p => passFilter === 'all' || p.status === passFilter).length === 0 ? (
-              <div className="p-8 text-center">
-                <p className="text-primary-600 mb-2">
-                  {passFilter === 'all' ? 'No passes generated yet' : `No ${passFilter} passes`}
-                </p>
-              </div>
+              <EmptyState 
+                message={passFilter === 'all' ? 'No passes generated yet' : `No ${passFilter} passes`}
+              />
             ) : (
               <table className="w-full">
                 <thead className="bg-primary-50 border-b border-emerald-100">
@@ -4925,10 +4923,7 @@ const [passFormData, setPassFormData] = useState<PassFormData>({
             {onboardingLoading && onboardingTokens.length === 0 ? (
               <div className="p-8 text-center text-primary-600">Loading...</div>
             ) : onboardingTokens.length === 0 ? (
-              <div className="p-8 text-center">
-                <p className="text-primary-600">No onboarding invites yet</p>
-                <p className="text-sm text-primary-300 mt-1">Click "Invite New Joiner" to create one</p>
-              </div>
+              <EmptyState message="No onboarding invites yet" />
             ) : (
               <table className="w-full">
                 <thead className="bg-primary-50 border-b border-primary-200">
