@@ -361,15 +361,15 @@ jobs:
           LINES_CHANGED=$(git diff origin/main...HEAD | wc -l)
           
           # Count code files (Python, TypeScript, JavaScript)
-          CODE_FILES=$(git diff --name-only origin/main...HEAD | grep -E '\.(py|tsx?|jsx?)$' | wc -l)
+          CODE_FILES=$(git diff --name-only origin/main...HEAD | grep -cE '\.(py|tsx?|jsx?)$' || true)
           CODE_LINES=$(git diff origin/main...HEAD -- '*.py' '*.ts' '*.tsx' '*.js' '*.jsx' | wc -l)
           
           # Count documentation files
-          DOC_FILES=$(git diff --name-only origin/main...HEAD | grep -E '\.(md|txt)$' | wc -l)
+          DOC_FILES=$(git diff --name-only origin/main...HEAD | grep -cE '\.(md|txt)$' || true)
           DOC_LINES=$(git diff origin/main...HEAD -- '*.md' '*.txt' | wc -l)
           
           # Count config/infrastructure files
-          CONFIG_FILES=$(git diff --name-only origin/main...HEAD | grep -E '\.(yml|yaml|json|toml|ini|cfg)$' | wc -l)
+          CONFIG_FILES=$(git diff --name-only origin/main...HEAD | grep -cE '\.(yml|yaml|json|toml|ini|cfg)$' || true)
           
           # Calculate percentages
           if [ $FILES_CHANGED -gt 0 ]; then
