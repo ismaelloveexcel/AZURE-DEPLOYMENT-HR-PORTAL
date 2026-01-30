@@ -8,6 +8,10 @@ import { ManagerPass } from './components/ManagerPass'
 import { NominationPass } from './components/NominationPass'
 import { Performance } from './components/Performance'
 import { TemplateList } from './components/Templates/TemplateList'
+import { LoginModal } from './components/LoginModal'
+import { Avatar } from './components/Avatar'
+import { StatusBadge, getStatusVariant } from './components/StatusBadge'
+import { DashboardCard } from './components/DashboardCard'
 import { useDebounce } from './hooks/useDebounce'
 import { 
   exportEmployeesToCSV, 
@@ -1116,101 +1120,23 @@ const [passFormData, setPassFormData] = useState<PassFormData>({
     }
   }, [candidateSearchQuery, activeSection, adminTab, user, debouncedFetchRecruitmentCandidates])
 
-  const loginModal = showLoginModal ? (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-card shadow-card p-8 w-full max-w-md relative">
-        <button
-          onClick={closeLoginModal}
-          type="button"
-          className="absolute top-4 right-4 text-primary-300 hover:text-primary-600 transition-colors"
-        >
-          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-          </svg>
-        </button>
-        
-        <div className="text-center mb-6">
-          <img src="/assets/logo.png" alt="Baynunah" className="h-8 mx-auto mb-2" />
-          <h2 className="text-xl font-semibold text-primary-800">
-            {isAdminLogin ? 'Admin Sign In' : 'Sign In'}
-          </h2>
-        </div>
-        
-        {error && (
-          <div className="bg-red-50 text-red-600 p-3 rounded-lg mb-4 text-sm">{error}</div>
-        )}
-        
-        <form onSubmit={handleLogin} className="space-y-4" data-testid="login-form">
-          {!isAdminLogin && (
-            <div>
-              <label htmlFor="employee-id" className="block text-sm font-medium text-primary-700 mb-1">Employee ID</label>
-              <input
-                id="employee-id"
-                name="employee_id"
-                type="text"
-                value={employeeId}
-                onChange={e => setEmployeeId(e.target.value)}
-                className="w-full px-4 py-2 border border-primary-200 rounded-lg focus:ring-2 focus:ring-accent-green focus:border-accent-green"
-                placeholder="e.g., BAYN00008"
-                required
-                autoComplete="username"
-                data-testid="employee-id-input"
-              />
-            </div>
-          )}
-          <div>
-            <label htmlFor="password" className="block text-sm font-medium text-primary-700 mb-1">
-              {isAdminLogin ? 'Admin Password' : 'Password'}
-            </label>
-            <div className="relative">
-              <input
-                id="password"
-                name="password"
-                type={showPassword ? 'text' : 'password'}
-                value={password}
-                onChange={e => setPassword(e.target.value)}
-                className="w-full px-4 py-2 pr-12 border border-primary-200 rounded-lg focus:ring-2 focus:ring-accent-green focus:border-accent-green"
-                placeholder={isAdminLogin ? 'Enter admin password' : 'First login: DOB as DDMMYYYY'}
-                required
-                autoComplete="current-password"
-                data-testid="password-input"
-              />
-              <button
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-primary-600 hover:text-primary-700"
-              >
-                {showPassword ? (
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
-                  </svg>
-                ) : (
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                  </svg>
-                )}
-              </button>
-            </div>
-          </div>
-          <button
-            type="submit"
-            disabled={loading}
-            className="btn-submit w-full"
-            data-testid="sign-in-button"
-          >
-            {loading ? 'Signing in...' : 'Sign In'}
-          </button>
-        </form>
-        <p className="text-xs text-primary-600 text-center mt-4">
-          {isAdminLogin 
-            ? 'Enter the admin password to access the admin panel.'
-            : 'First-time login? Use your date of birth (DDMMYYYY) as password.'
-          }
-        </p>
-      </div>
-    </div>
-  ) : null
+  // Use new LoginModal component
+  const loginModal = (
+    <LoginModal
+      isOpen={showLoginModal}
+      isAdminLogin={isAdminLogin}
+      employeeId={employeeId}
+      password={password}
+      error={error || ''}
+      loading={loading}
+      showPassword={showPassword}
+      onClose={closeLoginModal}
+      onLogin={handleLogin}
+      onEmployeeIdChange={setEmployeeId}
+      onPasswordChange={setPassword}
+      onTogglePassword={() => setShowPassword(!showPassword)}
+    />
+  )
 
   // Universal loader for all loading states
   if (loading || passesLoading || onboardingLoading || attendanceLoading || chamberLoading) {
@@ -1968,29 +1894,33 @@ const [passFormData, setPassFormData] = useState<PassFormData>({
                       onClick={() => (user?.role === 'admin' || user?.role === 'hr') && openEmployeeModal(emp)}
                     >
                       <td className="px-6 py-4 text-sm font-medium text-primary-900">{emp.employee_id}</td>
-                      <td className="px-6 py-4 text-sm text-primary-900">{emp.name}</td>
+                      <td className="px-6 py-4">
+                        <div className="flex items-center gap-3">
+                          <Avatar name={emp.name} size="sm" />
+                          <span className="text-sm text-primary-900">{emp.name}</span>
+                        </div>
+                      </td>
                       <td className="px-6 py-4 text-sm text-primary-600">{emp.job_title || '-'}</td>
                       <td className="px-6 py-4 text-sm text-primary-600">{emp.department || '-'}</td>
                       <td className="px-6 py-4">
-                        <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${
-                          emp.employment_status === 'Active' ? 'bg-green-100 text-green-700' :
-                          emp.employment_status === 'Terminated' ? 'bg-red-100 text-red-700' :
-                          emp.employment_status === 'Resigned' ? 'bg-primary-100 text-primary-700' :
-                          'bg-yellow-100 text-yellow-700'
-                        }`}>
-                          {emp.employment_status || (emp.is_active ? 'Active' : 'Inactive')}
-                        </span>
+                        <StatusBadge 
+                          variant={getStatusVariant(emp.employment_status || (emp.is_active ? 'Active' : 'Inactive'))}
+                          label={emp.employment_status || (emp.is_active ? 'Active' : 'Inactive')}
+                        />
                       </td>
                       <td className="px-6 py-4">
-                        <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${
-                          emp.profile_status === 'complete' ? 'bg-accent-green/10 text-accent-green' :
-                          emp.profile_status === 'pending_review' ? 'bg-blue-100 text-blue-700' :
-                          'bg-slate-200 text-slate-900'
-                        }`}>
-                          {emp.profile_status === 'complete' ? 'Complete' :
-                           emp.profile_status === 'pending_review' ? 'Pending Review' :
-                           'Incomplete'}
-                        </span>
+                        <StatusBadge
+                          variant={
+                            emp.profile_status === 'complete' ? 'success' :
+                            emp.profile_status === 'pending_review' ? 'info' :
+                            'warning'
+                          }
+                          label={
+                            emp.profile_status === 'complete' ? 'Complete' :
+                            emp.profile_status === 'pending_review' ? 'Pending Review' :
+                            'Incomplete'
+                          }
+                        />
                       </td>
                       <td className="px-6 py-4">
                         <div className="flex items-center gap-2">
@@ -2282,22 +2212,51 @@ const [passFormData, setPassFormData] = useState<PassFormData>({
             <>
               {dashboard && (
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-                  <div className="bg-white rounded-xl shadow p-6">
-                    <p className="text-sm text-primary-600">Total Employees</p>
-                    <p className="text-3xl font-semibold text-primary-800">{dashboard.total_employees}</p>
-                  </div>
-                  <div className="bg-white rounded-xl shadow p-6">
-                    <p className="text-sm text-primary-600">Active Employees</p>
-                    <p className="text-3xl font-semibold text-accent-green">{dashboard.active_employees}</p>
-                  </div>
-                  <div className="bg-white rounded-xl shadow p-6">
-                    <p className="text-sm text-primary-600">Pending Renewals</p>
-                    <p className="text-3xl font-semibold text-amber-600">{dashboard.pending_renewals}</p>
-                  </div>
-                  <div className="bg-white rounded-xl shadow p-6">
-                    <p className="text-sm text-primary-600">Features Enabled</p>
-                    <p className="text-3xl font-semibold text-blue-600">{dashboard.features_enabled}/{dashboard.features_total}</p>
-                  </div>
+                  <DashboardCard
+                    title="Total Employees"
+                    value={dashboard.total_employees}
+                    variant="info"
+                    icon={
+                      <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+                      </svg>
+                    }
+                    onClick={() => setAdminTab('employees')}
+                  />
+                  <DashboardCard
+                    title="Active Employees"
+                    value={dashboard.active_employees}
+                    variant="success"
+                    icon={
+                      <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                    }
+                    subtitle="Currently working"
+                  />
+                  <DashboardCard
+                    title="Pending Renewals"
+                    value={dashboard.pending_renewals}
+                    variant="warning"
+                    icon={
+                      <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                    }
+                    onClick={() => setAdminTab('compliance')}
+                  />
+                  <DashboardCard
+                    title="Features Enabled"
+                    value={`${dashboard.features_enabled}/${dashboard.features_total}`}
+                    variant="default"
+                    icon={
+                      <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                      </svg>
+                    }
+                    subtitle="System configuration"
+                  />
                 </div>
               )}
 
