@@ -1,4 +1,4 @@
-import React, { useState, FormEvent } from 'react'
+import React, { FormEvent } from 'react'
 
 interface LoginModalProps {
   isOpen: boolean
