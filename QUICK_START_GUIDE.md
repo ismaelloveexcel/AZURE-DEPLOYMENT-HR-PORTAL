@@ -152,7 +152,8 @@ Blue    = Info metrics (system features)
 
 ### Login Issues
 - ✅ Check employee ID spelling (e.g., BAYN00008)
-- ✅ Password is date of birth: DDMMYYYY (e.g., 15031990)
+- ✅ Use the secure password provided by HR or set during first login
+- ✅ If you forgot your password, contact HR for a password reset
 - ✅ Clear browser cache if needed
 - ✅ Try different browser
 
@@ -331,7 +332,7 @@ Total urgent items needing attention (expired + expiring soon)
 The HR Portal is designed to make your life easier. Start with the basics and explore features as you go.
 
 **Key Takeaways:**
-1. ✅ Login with employee ID + DOB password
+1. ✅ Login with your employee ID and secure password
 2. ✅ Dashboard shows what needs attention
 3. ✅ Red badges = urgent, green = OK
 4. ✅ CSV import for bulk operations
