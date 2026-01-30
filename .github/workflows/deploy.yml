@@ -521,7 +521,7 @@ jobs:
           echo "If login issues persist, reset admin:"
           echo "curl -X POST $WEBAPP_URL/api/health/reset-admin-password -H 'X-Admin-Secret: YOUR_AUTH_SECRET_KEY'"
           echo ""
-          echo "Admin login: BAYN00008 / 16051988"
+          echo "Admin credentials are stored securely in Azure App Settings"
 
       - name: Create Deployment Report Issue
         if: success()
@@ -611,7 +611,7 @@ jobs:
             
             3. **Login & Test**
                - URL: https://hrportal-backend-new.azurewebsites.net
-               - Admin: BAYN00008 / 16051988
+               - Admin: Use configured admin credentials (stored securely in Azure App Settings)
                - Test key features: employee list, dashboard, etc.
             
             ---
