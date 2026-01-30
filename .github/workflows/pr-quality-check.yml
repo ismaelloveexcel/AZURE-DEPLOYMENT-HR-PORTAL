@@ -353,46 +353,187 @@ jobs:
         with:
           fetch-depth: 0
       
-      - name: Check PR size
+      - name: Analyze PR size and composition
         id: size-check
         run: |
+          # Count all files
           FILES_CHANGED=$(git diff --name-only origin/main...HEAD | wc -l)
           LINES_CHANGED=$(git diff origin/main...HEAD | wc -l)
           
+          # Count code files (Python, TypeScript, JavaScript)
+          CODE_FILES=$(git diff --name-only origin/main...HEAD | grep -cE '\.(py|tsx?|jsx?)$' || true)
+          CODE_LINES=$(git diff origin/main...HEAD -- '*.py' '*.ts' '*.tsx' '*.js' '*.jsx' | wc -l)
+          
+          # Count documentation files
+          DOC_FILES=$(git diff --name-only origin/main...HEAD | grep -cE '\.(md|txt)$' || true)
+          DOC_LINES=$(git diff origin/main...HEAD -- '*.md' '*.txt' | wc -l)
+          
+          # Count config/infrastructure files
+          CONFIG_FILES=$(git diff --name-only origin/main...HEAD | grep -cE '\.(yml|yaml|json|toml|ini|cfg)$' || true)
+          
+          # Calculate percentages
+          if [ $FILES_CHANGED -gt 0 ]; then
+            DOC_PERCENTAGE=$((DOC_FILES * 100 / FILES_CHANGED))
+          else
+            DOC_PERCENTAGE=0
+          fi
+          
           echo "files_changed=$FILES_CHANGED" >> $GITHUB_OUTPUT
           echo "lines_changed=$LINES_CHANGED" >> $GITHUB_OUTPUT
+          echo "code_files=$CODE_FILES" >> $GITHUB_OUTPUT
+          echo "code_lines=$CODE_LINES" >> $GITHUB_OUTPUT
+          echo "doc_files=$DOC_FILES" >> $GITHUB_OUTPUT
+          echo "doc_lines=$DOC_LINES" >> $GITHUB_OUTPUT
+          echo "config_files=$CONFIG_FILES" >> $GITHUB_OUTPUT
+          echo "doc_percentage=$DOC_PERCENTAGE" >> $GITHUB_OUTPUT
           
-          if [ $FILES_CHANGED -gt 20 ] || [ $LINES_CHANGED -gt 500 ]; then
-            echo "pr_too_large=true" >> $GITHUB_OUTPUT
+          # Determine PR size category
+          # Medium: >15 files or >500 lines
+          # Large: >30 files or >1000 lines  
+          # Very Large: >50 files or >2000 lines
+          
+          # Exception: If >60% docs, increase tolerance
+          if [ $DOC_PERCENTAGE -gt 60 ]; then
+            # Documentation-heavy PR - more lenient thresholds
+            if [ $FILES_CHANGED -gt 50 ] || [ $CODE_LINES -gt 1500 ]; then
+              echo "size_category=very-large" >> $GITHUB_OUTPUT
+              echo "show_warning=true" >> $GITHUB_OUTPUT
+            elif [ $FILES_CHANGED -gt 30 ] || [ $CODE_LINES -gt 800 ]; then
+              echo "size_category=large" >> $GITHUB_OUTPUT
+              echo "show_warning=true" >> $GITHUB_OUTPUT
+            else
+              echo "size_category=acceptable" >> $GITHUB_OUTPUT
+              echo "show_warning=false" >> $GITHUB_OUTPUT
+            fi
+          else
+            # Regular PR - standard thresholds
+            if [ $FILES_CHANGED -gt 50 ] || [ $LINES_CHANGED -gt 2000 ]; then
+              echo "size_category=very-large" >> $GITHUB_OUTPUT
+              echo "show_warning=true" >> $GITHUB_OUTPUT
+            elif [ $FILES_CHANGED -gt 30 ] || [ $LINES_CHANGED -gt 1000 ]; then
+              echo "size_category=large" >> $GITHUB_OUTPUT
+              echo "show_warning=true" >> $GITHUB_OUTPUT
+            elif [ $FILES_CHANGED -gt 15 ] || [ $LINES_CHANGED -gt 500 ]; then
+              echo "size_category=medium" >> $GITHUB_OUTPUT
+              echo "show_warning=true" >> $GITHUB_OUTPUT
+            else
+              echo "size_category=small" >> $GITHUB_OUTPUT
+              echo "show_warning=false" >> $GITHUB_OUTPUT
+            fi
           fi
 
-      - name: Post Size Warning
-        if: steps.size-check.outputs.pr_too_large == 'true'
+      - name: Post Size Guidance
+        if: steps.size-check.outputs.show_warning == 'true'
         uses: actions/github-script@v7
         with:
           script: |
             const filesChanged = '${{ steps.size-check.outputs.files_changed }}';
             const linesChanged = '${{ steps.size-check.outputs.lines_changed }}';
+            const codeFiles = '${{ steps.size-check.outputs.code_files }}';
+            const codeLines = '${{ steps.size-check.outputs.code_lines }}';
+            const docFiles = '${{ steps.size-check.outputs.doc_files }}';
+            const docLines = '${{ steps.size-check.outputs.doc_lines }}';
+            const configFiles = '${{ steps.size-check.outputs.config_files }}';
+            const sizeCategory = '${{ steps.size-check.outputs.size_category }}';
+            const docPercentage = '${{ steps.size-check.outputs.doc_percentage }}';
             
-            const comment = `## 📏 Large PR Detected
+            let emoji = '📏';
+            let title = 'PR Size Notice';
+            let severity = '';
+            let recommendations = '';
             
-            **Files changed**: ${filesChanged}
-            **Lines changed**: ${linesChanged}
+            if (sizeCategory === 'very-large') {
+              emoji = '🚨';
+              title = 'Very Large PR Detected';
+              severity = '**Severity**: 🔴 High - This PR may be difficult to review thoroughly';
+              recommendations = `
+            ### 🚨 Strong Recommendations:
             
-            ### This PR is quite large. Consider:
+            1. **Consider breaking this into multiple PRs**:
+               - Separate backend and frontend changes
+               - Split by feature or module
+               - Create a feature branch and make smaller PRs against it
             
-            - **Breaking it into smaller PRs** - Easier to review, faster to merge
-            - **Separating concerns** - Backend changes, frontend changes, docs in separate PRs
-            - **Feature flags** - Deploy incomplete features behind flags
+            2. **If this must be one PR**:
+               - Add a detailed architecture diagram
+               - Include a testing matrix
+               - Schedule a live walkthrough for reviewers
+               - Add inline comments explaining key changes
+               - Consider feature flags for incremental rollout
+            `;
+            } else if (sizeCategory === 'large') {
+              emoji = '⚠️';
+              title = 'Large PR Detected';
+              severity = '**Severity**: 🟡 Medium - Review may take longer';
+              recommendations = `
+            ### ⚠️ Recommendations:
             
-            ### Benefits of smaller PRs:
-            - ✅ Faster reviews
-            - ✅ Easier to spot issues
-            - ✅ Less merge conflicts
-            - ✅ Safer to revert if needed
-            - ✅ Better for learning/onboarding
+            1. **Consider splitting if possible**:
+               - Can documentation updates be a separate PR?
+               - Can refactoring be done before/after feature work?
+               - Can tests be added incrementally?
             
-            **Note**: If this is genuinely one atomic change, that's fine! But please add extra documentation to help reviewers.
+            2. **Help reviewers**:
+               - Add detailed PR description with examples
+               - Include before/after screenshots for UI changes
+               - Highlight the most critical changes
+               - Test thoroughly before requesting review
+            `;
+            } else {
+              emoji = '📊';
+              title = 'Medium-Sized PR';
+              severity = '**Severity**: 🟢 Low - Size is manageable but worth noting';
+              recommendations = `
+            ### 📊 Tips for Easier Review:
+            
+            - Ensure PR description clearly explains the changes
+            - Add screenshots for any UI changes
+            - Call out any breaking changes or migrations
+            - Verify all tests pass before requesting review
+            `;
+            }
+            
+            const docNote = parseInt(docPercentage) > 50 
+              ? `\n> 📚 **Note**: ${docPercentage}% of this PR is documentation, which is great for maintainability!`
+              : '';
+            
+            const comment = `## ${emoji} ${title}
+            
+            ${severity}
+            
+            ### 📊 PR Composition
+            
+            | Category | Files | Lines |
+            |----------|-------|-------|
+            | **Total** | ${filesChanged} | ${linesChanged} |
+            | Code (py/ts/tsx/js) | ${codeFiles} | ${codeLines} |
+            | Documentation (md/txt) | ${docFiles} | ${docLines} |
+            | Config (yml/json/etc) | ${configFiles} | - |
+            ${docNote}
+            
+            ${recommendations}
+            
+            ### Benefits of Smaller PRs
+            - ✅ Faster, more thorough reviews
+            - ✅ Easier to identify bugs and issues
+            - ✅ Lower risk of merge conflicts
+            - ✅ Safer to revert if problems arise
+            - ✅ Better for team learning and knowledge sharing
+            
+            ### When Large PRs Are Acceptable
+            
+            Large PRs are sometimes necessary and acceptable:
+            - ✅ **Database migrations** with corresponding code changes
+            - ✅ **Generated code** (lock files, builds) with minimal source changes
+            - ✅ **Major refactoring** that must be atomic
+            - ✅ **Comprehensive documentation** updates
+            - ✅ **Security fixes** that touch many files
+            
+            If this PR falls into one of these categories, please note it in the description!
+            
+            ---
+            
+            💡 **Need help splitting this PR?** Check out our [Contributing Guide](../CONTRIBUTING.md#pull-request-process) for tips on structuring changes.
             `;
             
             github.rest.issues.createComment({
