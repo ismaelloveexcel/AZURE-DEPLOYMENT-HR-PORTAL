@@ -427,92 +427,92 @@ jobs:
             }
             
             const report = `## 🚀 Deployment #${{ github.run_number }} - ${deploymentType}
-            
-            **Status:** ✅ Successful  
-            **Deployed:** ${new Date().toISOString()}  
-            **Version:** ${{ github.run_number }}  
-            **Commit:** ${{ github.sha }}
-            
-            ---
-            
-            ### 📋 What Was Deployed
-            
-            **Type:** ${deploymentType}  
-            **Branch:** ${{ github.ref_name }}  
-            **Deployed by:** ${{ github.actor }}
-            
-            **Changed Files:** ${changedFiles.length} files
-            ${changedFiles.slice(0, 10).map(f => `- ${f}`).join('\n')}
-            ${changedFiles.length > 10 ? `\n_...and ${changedFiles.length - 10} more files_` : ''}
-            
-            ---
-            
-            ### 👀 Will I See Changes?
-            
-            ${userImpact}
-            
-            **Visual Changes:** ${visualChanges}
-            
-            ---
-            
-            ### ✅ Verification Steps
-            
-            1. **Clear Browser Cache**
-               - Chrome/Edge: Press \`Ctrl+Shift+R\` (Windows) or \`Cmd+Shift+R\` (Mac)
-               - This forces a fresh download of all files
-            
-            2. **Check Version**
-               \`\`\`bash
-               curl https://hrportal-backend-new.azurewebsites.net/api/health/ping
-               \`\`\`
-               Should show: \`"version": "${{ github.run_number }}"\`
-            
-            3. **Login & Test**
-               - URL: https://hrportal-backend-new.azurewebsites.net
-               - Admin: BAYN00008 / 16051988
-               - Test key features: employee list, dashboard, etc.
-            
-            ---
-            
-            ### 🔍 Deployment Health
-            
-            - ✅ Frontend Build: Success (2.14s)
-            - ✅ Backend Package: Success
-            - ✅ Azure Deployment: Success
-            - ✅ Health Checks: Passed
-            - ✅ Database: Connected
-            
-            ---
-            
-            ### 📚 Useful Links
-            
-            - [App URL](https://hrportal-backend-new.azurewebsites.net)
-            - [API Docs](https://hrportal-backend-new.azurewebsites.net/docs)
-            - [Health Check](https://hrportal-backend-new.azurewebsites.net/api/health/ping)
-            - [Workflow Run](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})
-            
-            ---
-            
-            ### 🆘 Troubleshooting
-            
-            **Issue:** Still seeing old UI after deployment
-            **Solution:** 
-            1. Hard refresh browser (Ctrl+Shift+R)
-            2. Clear browser cache completely
-            3. Try incognito/private window
-            4. Check version matches: ${{ github.run_number }}
-            
-            **Issue:** Login not working
-            **Solution:**
-            \`\`\`bash
-            curl -X POST https://hrportal-backend-new.azurewebsites.net/api/health/reset-admin-password \\
-              -H 'X-Admin-Secret: YOUR_AUTH_SECRET_KEY'
-            \`\`\`
-            
-            ---
-            
-            _This deployment report was automatically generated. Close this issue once verified._
-            `;
+
+**Status:** ✅ Successful  
+**Deployed:** ${new Date().toISOString()}  
+**Version:** ${{ github.run_number }}  
+**Commit:** ${{ github.sha }}
+
+---
+
+### 📋 What Was Deployed
+
+**Type:** ${deploymentType}  
+**Branch:** ${{ github.ref_name }}  
+**Deployed by:** ${{ github.actor }}
+
+**Changed Files:** ${changedFiles.length} files
+${changedFiles.slice(0, 10).map(f => `- ${f}`).join('\n')}
+${changedFiles.length > 10 ? `\n_...and ${changedFiles.length - 10} more files_` : ''}
+
+---
+
+### 👀 Will I See Changes?
+
+${userImpact}
+
+**Visual Changes:** ${visualChanges}
+
+---
+
+### ✅ Verification Steps
+
+1. **Clear Browser Cache**
+   - Chrome/Edge: Press \`Ctrl+Shift+R\` (Windows) or \`Cmd+Shift+R\` (Mac)
+   - This forces a fresh download of all files
+
+2. **Check Version**
+   \`\`\`bash
+   curl https://hrportal-backend-new.azurewebsites.net/api/health/ping
+   \`\`\`
+   Should show: \`"version": "${{ github.run_number }}"\`
+
+3. **Login & Test**
+   - URL: https://hrportal-backend-new.azurewebsites.net
+   - Admin: BAYN00008 / 16051988
+   - Test key features: employee list, dashboard, etc.
+
+---
+
+### 🔍 Deployment Health
+
+- ✅ Frontend Build: Success (2.14s)
+- ✅ Backend Package: Success
+- ✅ Azure Deployment: Success
+- ✅ Health Checks: Passed
+- ✅ Database: Connected
+
+---
+
+### 📚 Useful Links
+
+- [App URL](https://hrportal-backend-new.azurewebsites.net)
+- [API Docs](https://hrportal-backend-new.azurewebsites.net/docs)
+- [Health Check](https://hrportal-backend-new.azurewebsites.net/api/health/ping)
+- [Workflow Run](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})
+
+---
+
+### 🆘 Troubleshooting
+
+**Issue:** Still seeing old UI after deployment
+**Solution:** 
+1. Hard refresh browser (Ctrl+Shift+R)
+2. Clear browser cache completely
+3. Try incognito/private window
+4. Check version matches: ${{ github.run_number }}
+
+**Issue:** Login not working
+**Solution:**
+\`\`\`bash
+curl -X POST https://hrportal-backend-new.azurewebsites.net/api/health/reset-admin-password \\
+  -H 'X-Admin-Secret: YOUR_AUTH_SECRET_KEY'
+\`\`\`
+
+---
+
+_This deployment report was automatically generated. Close this issue once verified._
+`;
             
             // Create issue
             await github.rest.issues.create({
