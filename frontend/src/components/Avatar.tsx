@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState, useEffect } from 'react'
 
 interface AvatarProps {
   name: string
@@ -17,6 +17,7 @@ const sizeClasses = {
 /**
  * Avatar component with initials fallback
  * Displays user photo or generates initials from name
+ * Gracefully handles image loading errors
  */
 export const Avatar: React.FC<AvatarProps> = ({ 
   name, 
@@ -24,6 +25,13 @@ export const Avatar: React.FC<AvatarProps> = ({
   size = 'md', 
   className = '' 
 }) => {
+  const [imgError, setImgError] = useState(false)
+
+  // Reset error state when src changes to allow new images to load
+  useEffect(() => {
+    setImgError(false)
+  }, [src])
+
   const getInitials = (fullName: string): string => {
     const trimmed = fullName.trim()
     if (!trimmed) return 'NA'
@@ -44,7 +52,7 @@ export const Avatar: React.FC<AvatarProps> = ({
 
   const initials = getInitials(name)
 
-  // Generate a consistent color based on name
+  // Generate a consistent color based on name with safe 32-bit integer handling
   const getColorFromName = (str: string): string => {
     const colors = [
       'bg-blue-100 text-blue-700',
@@ -56,27 +64,32 @@ export const Avatar: React.FC<AvatarProps> = ({
     ]
     let hash = 0
     for (let i = 0; i < str.length; i++) {
-      hash = str.charCodeAt(i) + ((hash << 5) - hash)
+      // Force 32-bit integer to prevent overflow issues
+      hash = ((hash << 5) - hash + str.charCodeAt(i)) | 0
     }
     return colors[Math.abs(hash) % colors.length]
   }
 
   const baseClasses = `rounded-full flex items-center justify-center font-semibold ${sizeClasses[size]}`
 
-  if (src) {
+  // Show image only if src is provided and no loading error occurred
+  if (src && !imgError) {
     return (
       <img
         src={src}
-        alt={name}
+        alt={name || 'User avatar'}
+        onError={() => setImgError(true)}
         className={`${baseClasses} object-cover border-2 border-white shadow-sm ${className}`}
       />
     )
   }
 
+  // Fallback to initials display
   return (
     <div
       className={`${baseClasses} ${getColorFromName(name)} border-2 border-white shadow-sm ${className}`}
-      title={name}
+      title={name || 'User'}
+      aria-label={`Avatar for ${name || 'user'}`}
     >
       {initials}
     </div>
