@@ -7,6 +7,32 @@
 
 ---
 
+## 📦 Deployment Type & User Impact
+
+**Select ONE deployment type:**
+- [ ] 🎨 **Frontend Feature** - New UI components/pages integrated and visible to users
+- [ ] 🧩 **Frontend Components** - New components added but NOT yet integrated (invisible)
+- [ ] ⚙️ **Backend Feature** - New API endpoints/logic (no UI changes)
+- [ ] 🔧 **Infrastructure** - Deployment/config changes only
+- [ ] 📚 **Documentation** - Documentation updates only
+- [ ] 🐛 **Bug Fix** - Fixes existing functionality
+
+**Will users see changes?**
+- [ ] ✅ **YES** - Users WILL see visual/functional changes (requires browser refresh)
+- [ ] ⚠️ **MAYBE** - Changes added but need integration PR to be visible
+- [ ] ❌ **NO** - Backend/infrastructure only, no visible changes
+
+**If YES, describe what users will see:**
+- 
+- 
+- 
+
+**Integration plan (if MAYBE selected):**
+- [ ] Follow-up PR planned: #___
+- [ ] Integration steps documented in: _____
+
+---
+
 ## 2) Research Shortlist (Top 3–5)
 For each candidate:
 - **Repo:**
@@ -56,6 +82,8 @@ For each candidate:
 - [ ] Accessibility checks (contrast, focus order, keyboard nav)
 - [ ] Security review (secrets, permission scopes)
 - [ ] Performance sanity (largest screens, low-end device)
+- [ ] Frontend build tested locally (if applicable)
+- [ ] Manual verification completed (if UI changes)
 
 ---
 
@@ -64,3 +92,4 @@ For each candidate:
 - **Feature flags / config:**
 - **Monitoring / telemetry:**
 - **Post-deploy checks:**
+- **Browser cache warning:** (Require Ctrl+Shift+R after deployment? YES/NO)
