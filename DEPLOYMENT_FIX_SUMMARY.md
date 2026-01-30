@@ -105,7 +105,7 @@ MAX_ATTEMPTS=4
 
 **Benefits:**
 - Additional resilience against transient failures
-- Statistically, 4 attempts cover 99.9% of transient Azure issues
+- With 4 attempts and smart backoff, expected to handle most transient Azure service issues
 
 #### 5. Implemented Kudu REST API Fallback
 ```yaml
@@ -267,7 +267,7 @@ az webapp deploy \
 
 - [Azure Deployment Guide](docs/AZURE_DEPLOYMENT_REFERENCE_GUIDE.md)
 - [GitHub Actions Workflows](.github/workflows/)
-- [Deployment Issues](#126, #108, #106, #105, #99, #98, #97, #96, #93)
+- Related Issues: #126, #108, #106, #105, #99, #98, #97, #96, #93
 
 ## Conclusion
 

@@ -245,16 +245,17 @@ jobs:
               echo "⚠️ az webapp deploy attempt $ATTEMPT failed (exit code: $DEPLOY_EXIT_CODE)"
               
               # Enhanced error pattern detection
+              # Priority order: SCM restart > Lock > Timeout > Unknown
               ERROR_TYPE=""
               if grep -qi "SCM container restart" /tmp/deploy_output.txt 2>/dev/null; then
                 ERROR_TYPE="SCM_RESTART"
-                echo "🔄 Detected SCM container restart issue"
-              elif grep -qi "timeout\|timed out" /tmp/deploy_output.txt 2>/dev/null; then
-                ERROR_TYPE="TIMEOUT"
-                echo "⏰ Detected timeout issue"
+                echo "🔄 Detected SCM container restart issue (highest priority)"
               elif grep -qi "conflict\|locked" /tmp/deploy_output.txt 2>/dev/null; then
                 ERROR_TYPE="LOCK"
                 echo "🔒 Detected deployment lock/conflict"
+              elif grep -qi "timeout\|timed out" /tmp/deploy_output.txt 2>/dev/null; then
+                ERROR_TYPE="TIMEOUT"
+                echo "⏰ Detected timeout issue"
               else
                 ERROR_TYPE="UNKNOWN"
                 echo "❓ Unknown error type"
@@ -274,7 +275,12 @@ jobs:
                 USERNAME=$(echo $CREDS | jq -r '.username // empty')
                 PASSWORD=$(echo $CREDS | jq -r '.password // empty')
                 
-                if [ -n "$USERNAME" ] && [ "$USERNAME" != "null" ]; then
+                # Mask password in logs for security
+                if [ -n "$PASSWORD" ]; then
+                  echo "::add-mask::$PASSWORD"
+                fi
+                
+                if [ -n "$USERNAME" ]; then
                   echo "📤 Uploading via Kudu API..."
                   KUDU_RESPONSE=$(curl -s -w "\n%{http_code}" \
                     --connect-timeout 60 \
@@ -303,12 +309,16 @@ jobs:
               
               if [ $ATTEMPT -lt $MAX_ATTEMPTS ]; then
                 # Enhanced backoff strategy based on error type
+                # Progressive backoff based on error type and attempt number
                 if [ "$ERROR_TYPE" = "SCM_RESTART" ]; then
-                  WAIT_TIME=120  # SCM needs longer stabilization
+                  BASE_WAIT=120  # SCM needs longer stabilization
+                  WAIT_TIME=$((BASE_WAIT + (ATTEMPT - 1) * 30))  # Add 30s per attempt
                 elif [ "$ERROR_TYPE" = "TIMEOUT" ]; then
-                  WAIT_TIME=60   # Timeout might just need retry
+                  BASE_WAIT=60   # Timeout might just need retry
+                  WAIT_TIME=$((BASE_WAIT + (ATTEMPT - 1) * 20))  # Add 20s per attempt
                 elif [ "$ERROR_TYPE" = "LOCK" ]; then
-                  WAIT_TIME=90   # Wait for lock to clear
+                  BASE_WAIT=90   # Wait for lock to clear
+                  WAIT_TIME=$((BASE_WAIT + (ATTEMPT - 1) * 30))  # Add 30s per attempt
                 else
                   WAIT_TIME=$((60 * ATTEMPT))  # Exponential backoff for unknown
                 fi
@@ -317,8 +327,14 @@ jobs:
                 sleep $WAIT_TIME
               else
                 echo "❌ All deployment attempts failed (including fallback)"
-                echo "📋 Last deployment output:"
-                cat /tmp/deploy_output.txt 2>/dev/null | tail -100 || true
+                echo "📋 Deployment output (first 30 + last 70 lines for diagnostics):"
+                if [ -f /tmp/deploy_output.txt ]; then
+                  echo "=== First 30 lines ==="
+                  head -30 /tmp/deploy_output.txt 2>/dev/null || true
+                  echo ""
+                  echo "=== Last 70 lines ==="
+                  tail -70 /tmp/deploy_output.txt 2>/dev/null || true
+                fi
                 rm -f /tmp/deploy_output.txt 2>/dev/null || true
               fi
             fi
