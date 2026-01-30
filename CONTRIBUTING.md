@@ -205,9 +205,13 @@ Every Pull Request automatically receives:
 - Reminds about non-technical user guidance
 
 **✅ PR Size Analysis**:
-- Warns if PR is too large (>20 files or >500 lines)
-- Suggests breaking into smaller PRs
-- Provides guidance on optimal PR structure
+- Analyzes PR composition (code, docs, config)
+- Categorizes PR size (small, medium, large, very large)
+- Provides specific recommendations based on category
+- More lenient for documentation-heavy PRs
+- Acknowledges when large PRs are necessary
+
+**See**: [PR Size Guidelines](#pr-size-guidelines) for detailed information about optimal PR sizing.
 
 **See**: [Copilot Agent System Guide](docs/COPILOT_AGENT_SYSTEM_GUIDE.md) for detailed information about automated reviews.
 
@@ -594,9 +598,123 @@ SQL injection vulnerability in renewal search functionality.
 
 ## Pull Request Process
 
+### PR Size Guidelines
+
+**Why PR size matters:**
+- Smaller PRs get reviewed faster
+- Issues are easier to identify
+- Less risk of merge conflicts
+- Safer to revert if needed
+- Better for team learning
+
+#### Check Your PR Size Locally
+
+Before creating a PR, use our helper script to analyze your changes:
+
+```bash
+./scripts/check-pr-size.sh
+```
+
+This will show you:
+- Total files and lines changed
+- Breakdown by file type (code, docs, config)
+- Size category (small, medium, large, very large)
+- Specific recommendations
+
+#### PR Size Categories
+
+| Category | Thresholds | Status | Guidance |
+|----------|-----------|--------|----------|
+| **Small** | ≤15 files or ≤500 lines | 🟢 Ideal | Perfect size for quick review |
+| **Medium** | ≤30 files or ≤1000 lines | 🟡 OK | Acceptable, add clear description |
+| **Large** | ≤50 files or ≤2000 lines | 🟠 Caution | Consider splitting if possible |
+| **Very Large** | >50 files or >2000 lines | 🔴 Warning | Should usually be split |
+
+**Special case - Documentation-heavy PRs:** If >60% of your PR is documentation, the thresholds are more lenient since docs are easier to review.
+
+#### When Large PRs Are Acceptable
+
+Some changes genuinely need to be large. Large PRs are acceptable for:
+
+✅ **Database migrations** with corresponding code changes  
+✅ **Generated code** updates (lock files, builds) with minimal source changes  
+✅ **Major refactoring** that must be atomic to work  
+✅ **Comprehensive documentation** updates  
+✅ **Security fixes** that touch many files  
+✅ **Framework upgrades** requiring changes across the codebase
+
+If your PR falls into these categories, **note it clearly in the PR description** and add extra documentation to help reviewers.
+
+#### How to Split Large PRs
+
+If your PR is large and doesn't fall into the exceptions above, consider these strategies:
+
+1. **Separate by concern:**
+   - Backend changes → One PR
+   - Frontend changes → Another PR
+   - Documentation updates → Third PR
+
+2. **Create a feature branch:**
+   - Make a `feature/big-change` branch from `main`
+   - Create smaller PRs targeting the feature branch
+   - Final PR merges feature branch to `main`
+
+3. **Split by module or component:**
+   - Database schema changes → First PR
+   - API endpoints → Second PR
+   - UI components → Third PR
+   - Integration and tests → Fourth PR
+
+4. **Use feature flags:**
+   - Deploy incomplete features behind flags
+   - Enable incrementally as pieces are completed
+   - Each piece can be a separate PR
+
+5. **Refactor then feature:**
+   - Preparatory refactoring → One PR
+   - New feature using refactored code → Second PR
+
+#### Example: Splitting a Large PR
+
+**❌ Bad: One 50-file PR**
+```
+PR #123: Implement complete leave management system
+- 15 backend files (new models, endpoints, services)
+- 20 frontend files (forms, components, pages)
+- 10 test files
+- 5 documentation files
+```
+
+**✅ Good: Four focused PRs**
+```
+PR #123: Add leave database models and repository
+- 5 backend files (models, migrations, repositories)
+- Tests for models
+
+PR #124: Add leave management API endpoints  
+- 5 backend files (routers, services, schemas)
+- API integration tests
+Dependencies: #123
+
+PR #125: Add leave management UI components
+- 20 frontend files (forms, components, pages)
+- Component tests
+Dependencies: #124
+
+PR #126: Add leave management documentation
+- 5 documentation files
+- User guide updates
+Dependencies: #125
+```
+
 ### Before Submitting
 
-1. **Test your changes:**
+1. **Check PR size:**
+   ```bash
+   ./scripts/check-pr-size.sh
+   ```
+
+2. **Test your changes:**
    ```bash
    # Backend
    cd backend
@@ -607,13 +725,13 @@ SQL injection vulnerability in renewal search functionality.
    npm run lint
    ```
 
-2. **Review your changes:**
+3. **Review your changes:**
    ```bash
    git status
    git diff
    ```
 
-3. **Commit your changes:**
+4. **Commit your changes:**
    ```bash
    git add .
    git commit -m "feat: Add new feature description"
