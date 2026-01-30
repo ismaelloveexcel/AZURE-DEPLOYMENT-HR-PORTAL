@@ -1,4 +1,6 @@
 import React from 'react';
+import { Avatar } from './Avatar';
+import { StatusBadge } from './StatusBadge';
 
 export type Section = 
   | 'home' 
@@ -16,6 +18,9 @@ interface NavigationProps {
   activeSection: string;
   onNavigate: (section: Section) => void;
   userRole?: string;
+  userName?: string;
+  userAvatar?: string | null;
+  onLogout?: () => void;
 }
 
 interface NavItem {
@@ -26,7 +31,14 @@ interface NavItem {
   badge?: number; // Optional badge count
 }
 
-export const Navigation: React.FC<NavigationProps> = ({ activeSection, onNavigate, userRole }) => {
+export const Navigation: React.FC<NavigationProps> = ({ 
+  activeSection, 
+  onNavigate, 
+  userRole,
+  userName = 'Guest User',
+  userAvatar = null,
+  onLogout
+}) => {
   const navItems: NavItem[] = [
     {
       id: 'home',
@@ -112,20 +124,61 @@ export const Navigation: React.FC<NavigationProps> = ({ activeSection, onNavigat
     return item.roles.includes(userRole);
   });
 
+  // Get role display with proper formatting
+  const getRoleDisplay = (role?: string): string => {
+    if (!role) return 'Employee'
+    return role.charAt(0).toUpperCase() + role.slice(1)
+  }
+
+  // Get role badge variant
+  const getRoleBadgeVariant = (role?: string): 'warning' | 'info' | 'success' => {
+    if (role === 'admin') return 'info' // Blue for admin (high privilege)
+    if (role === 'hr') return 'warning' // Amber for HR (important role)
+    return 'success' // Green for regular employee
+  }
+
   return (
-    <nav className="bg-white border-r border-primary-200 w-64 flex-shrink-0 flex flex-col">
+    <nav className="bg-white border-r border-primary-200 w-64 flex-shrink-0 flex flex-col shadow-sm">
+      {/* Brand Header */}
       <div className="p-6 border-b border-primary-200">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-full bg-accent-green flex items-center justify-center">
-            <span className="text-white font-semibold text-sm">B</span>
+          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-accent-green to-emerald-600 flex items-center justify-center shadow-sm">
+            <span className="text-white font-bold text-lg">B</span>
           </div>
           <div>
-            <h1 className="text-lg font-semibold text-primary-800">Baynunah HR</h1>
-            <p className="text-xs text-primary-500">ESS Portal</p>
+            <h1 className="text-lg font-bold text-primary-800">Baynunah HR</h1>
+            <p className="text-xs text-primary-500 font-medium">ESS Portal</p>
           </div>
         </div>
       </div>
 
+      {/* User Profile Section */}
+      <div className="p-4 border-b border-primary-200 bg-gradient-to-br from-primary-50 to-white">
+        <div className="flex items-center gap-3 mb-2">
+          <Avatar name={userName} src={userAvatar} size="md" />
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-semibold text-primary-800 truncate">{userName}</p>
+            <StatusBadge 
+              variant={getRoleBadgeVariant(userRole)} 
+              label={getRoleDisplay(userRole)}
+              size="sm"
+            />
+          </div>
+        </div>
+        {onLogout && (
+          <button
+            onClick={onLogout}
+            className="w-full mt-2 px-3 py-1.5 text-xs font-medium text-primary-600 hover:text-primary-800 hover:bg-white border border-primary-200 rounded-lg transition-all duration-200 flex items-center justify-center gap-2"
+          >
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+            </svg>
+            Sign Out
+          </button>
+        )}
+      </div>
+
+      {/* Navigation Menu */}
       <div className="flex-1 overflow-y-auto py-4">
         <ul className="space-y-1 px-3">
           {visibleItems.map((item) => {
@@ -135,19 +188,19 @@ export const Navigation: React.FC<NavigationProps> = ({ activeSection, onNavigat
                 <button
                   onClick={() => onNavigate(item.id)}
                   className={`
-                    w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200
+                    w-full flex items-center gap-3 px-4 py-2.5 rounded-lg transition-all duration-200
                     ${isActive 
-                      ? 'bg-accent-green text-white shadow-sm' 
-                      : 'text-primary-700 hover:bg-primary-50'
+                      ? 'bg-gradient-to-r from-accent-green to-emerald-600 text-white shadow-md border-l-4 border-emerald-300' 
+                      : 'text-primary-700 hover:bg-primary-50 hover:border-l-4 hover:border-accent-green/30'
                     }
                   `}
                 >
                   <span className={isActive ? 'text-white' : 'text-primary-500'}>
                     {item.icon}
                   </span>
-                  <span className="font-medium text-sm">{item.label}</span>
+                  <span className="font-medium text-sm flex-1 text-left">{item.label}</span>
                   {item.badge && (
-                    <span className="ml-auto bg-accent-red text-white text-xs font-semibold px-2 py-0.5 rounded-full">
+                    <span className="bg-red-500 text-white text-xs font-bold px-2 py-0.5 rounded-full shadow-sm">
                       {item.badge}
                     </span>
                   )}
@@ -158,10 +211,11 @@ export const Navigation: React.FC<NavigationProps> = ({ activeSection, onNavigat
         </ul>
       </div>
 
-      <div className="p-4 border-t border-primary-200">
-        <div className="text-xs text-primary-500 text-center">
-          <p>Version 1.0.0</p>
-          <p className="mt-1">© 2025 Baynunah HR</p>
+      {/* Footer */}
+      <div className="p-4 border-t border-primary-200 bg-primary-50">
+        <div className="text-xs text-primary-500 text-center space-y-1">
+          <p className="font-medium text-primary-600">Version 1.0.0</p>
+          <p className="text-primary-400">© 2025 Baynunah HR</p>
         </div>
       </div>
     </nav>
