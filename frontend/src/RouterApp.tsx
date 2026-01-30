@@ -7,6 +7,7 @@ import { AttendanceModule } from './pages/AttendanceModule'
 import { RecruitmentModule } from './pages/RecruitmentModule'
 import { OnboardingModule } from './pages/OnboardingModule'
 import { AdminDashboard } from './pages/AdminDashboard'
+import { GiftForgePage } from './pages/GiftForgePage'
 
 /**
  * Router wrapper for the HR Portal - Phase 2 Complete
@@ -40,6 +41,10 @@ export function RouterApp() {
         <Routes>
           {/* Home page - Portal landing */}
           <Route path="/" element={<HomePage />} />
+          
+          {/* GiftForge MVP */}
+          <Route path="/giftforge" element={<GiftForgePage />} />
+          <Route path="/giftforge/:code" element={<GiftForgePage />} />
           
           {/* Extracted modular pages */}
           <Route path="/admin" element={<AdminDashboard />} />
