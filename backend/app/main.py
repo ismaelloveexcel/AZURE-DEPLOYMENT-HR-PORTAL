@@ -101,6 +101,7 @@ def create_app() -> FastAPI:
     from app.routers import templates, audit_logs, notifications, activity_logs
     from app.routers import employee_compliance, employee_bank, employee_documents
     from app.routers import recruitment, interview  # , performance
+    from app.routers import gifts  # GiftForge MVP
     app.include_router(templates.router, prefix=settings.api_prefix)
     app.include_router(audit_logs.router, prefix=settings.api_prefix)
     app.include_router(notifications.router, prefix=settings.api_prefix)
@@ -112,6 +113,8 @@ def create_app() -> FastAPI:
     app.include_router(recruitment.router, prefix=settings.api_prefix)
     # Interview scheduling
     app.include_router(interview.router, prefix=settings.api_prefix)
+    # GiftForge MVP module
+    app.include_router(gifts.router, prefix=settings.api_prefix)
     
     # SIMPLIFICATION: Commented out low-usage features for solo HR
     # To re-enable, uncomment the imports and include_router lines below
