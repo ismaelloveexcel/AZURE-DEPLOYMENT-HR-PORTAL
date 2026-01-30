@@ -54,13 +54,14 @@ node_modules/
 pnpm-lock.yaml
 npm-debug.log*
 
-# Frontend build
+# Frontend build (source)
 frontend/dist/
 frontend/.vite/
 
 # Backend build artifacts (generated from frontend build)
-backend/static/assets/*.js
-backend/static/assets/*.css
+# IMPORTANT: We need to track the built JS/CSS files for Azure deployment
+# backend/static/assets/*.js
+# backend/static/assets/*.css
 
 # Backend
 backend/.env

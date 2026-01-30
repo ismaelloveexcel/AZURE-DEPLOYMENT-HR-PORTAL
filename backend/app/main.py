@@ -1,4 +1,5 @@
 import os
+import re
 from pathlib import Path
 from contextlib import asynccontextmanager
 from fastapi import FastAPI, Request
@@ -19,6 +20,10 @@ settings = get_settings()
 logger = get_logger(__name__)
 
 limiter = Limiter(key_func=get_remote_address)
+
+# Pre-compile regex for Vite content-hash pattern detection
+# Matches filenames like: index-BZjW1sN-.js, vendor-DgUtky3n.js
+VITE_HASH_PATTERN = re.compile(r'-[a-zA-Z0-9_\-]{8,}\.(js|css)$')
 
 
 @asynccontextmanager
@@ -191,7 +196,49 @@ def create_app() -> FastAPI:
     if static_dir:
         assets_dir = static_dir / "assets"
         if assets_dir.exists():
-            app.mount("/assets", StaticFiles(directory=str(assets_dir)), name="assets")
+            # Custom route for assets with proper cache headers
+            @app.get("/assets/{file_path:path}")
+            async def serve_assets(file_path: str):
+                """Serve static assets with optimal caching strategy.
+                
+                Hashed files (containing hashes like index-BZjW1sN-.js) can be cached forever
+                since they change with content. Non-hashed files should not be cached.
+                """
+                # Security: Prevent path traversal attacks
+                # Resolve the path and ensure it's within assets_dir
+                try:
+                    asset_file = (assets_dir / file_path).resolve()
+                    # Ensure the resolved path is within assets_dir
+                    asset_file.relative_to(assets_dir.resolve())
+                except (ValueError, RuntimeError):
+                    # Path is outside assets_dir or invalid
+                    return JSONResponse(status_code=404, content={"detail": "Asset not found"})
+                
+                if asset_file.exists() and asset_file.is_file():
+                    # Check if filename contains a hash (Vite pattern: name-hash.ext)
+                    # Example: index-BZjW1sN-.js, vendor-DgUtky3n.js
+                    has_hash = VITE_HASH_PATTERN.search(file_path)
+                    
+                    if has_hash:
+                        # Hashed files: cache aggressively (1 year)
+                        # These files are immutable - new content = new hash = new filename
+                        headers = {
+                            "Cache-Control": "public, max-age=31536000, immutable",
+                        }
+                    else:
+                        # Non-hashed files (images, etc): short cache
+                        headers = {
+                            "Cache-Control": "public, max-age=3600",
+                        }
+                    
+                    # Set explicit Content-Type to prevent MIME type sniffing
+                    if file_path.endswith('.js'):
+                        headers["Content-Type"] = "application/javascript"
+                    elif file_path.endswith('.css'):
+                        headers["Content-Type"] = "text/css"
+                    
+                    return FileResponse(str(asset_file), headers=headers)
+                return JSONResponse(status_code=404, content={"detail": "Asset not found"})
         
         @app.get("/{full_path:path}")
         async def serve_spa(full_path: str):
@@ -202,11 +249,13 @@ def create_app() -> FastAPI:
             index_file = static_dir / "index.html"
             if index_file.exists():
                 # Prevent stale cached index.html so new builds show immediately
+                # CRITICAL: index.html must NEVER be cached, as it references the hashed assets
                 return FileResponse(
                     str(index_file),
                     headers={
                         "Cache-Control": "no-store, no-cache, must-revalidate",
                         "Pragma": "no-cache",
+                        "Expires": "0",
                     },
                 )
             return JSONResponse(status_code=404, content={"detail": "Frontend not built"})
