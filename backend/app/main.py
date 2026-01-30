@@ -191,7 +191,35 @@ def create_app() -> FastAPI:
     if static_dir:
         assets_dir = static_dir / "assets"
         if assets_dir.exists():
-            app.mount("/assets", StaticFiles(directory=str(assets_dir)), name="assets")
+            # Custom route for assets with proper cache headers
+            @app.get("/assets/{file_path:path}")
+            async def serve_assets(file_path: str):
+                """Serve static assets with optimal caching strategy.
+                
+                Hashed files (containing hashes like index-BZjW1sN-.js) can be cached forever
+                since they change with content. Non-hashed files should not be cached.
+                """
+                asset_file = assets_dir / file_path
+                if asset_file.exists() and asset_file.is_file():
+                    # Check if filename contains a hash (Vite pattern: name-hash.ext)
+                    # Example: index-BZjW1sN-.js, vendor-DgUtky3n.js
+                    import re
+                    has_hash = re.search(r'-[a-zA-Z0-9_-]{8,}\.(js|css)$', file_path)
+                    
+                    if has_hash:
+                        # Hashed files: cache aggressively (1 year)
+                        # These files are immutable - new content = new hash = new filename
+                        headers = {
+                            "Cache-Control": "public, max-age=31536000, immutable",
+                        }
+                    else:
+                        # Non-hashed files (images, etc): short cache
+                        headers = {
+                            "Cache-Control": "public, max-age=3600",
+                        }
+                    
+                    return FileResponse(str(asset_file), headers=headers)
+                return JSONResponse(status_code=404, content={"detail": "Asset not found"})
         
         @app.get("/{full_path:path}")
         async def serve_spa(full_path: str):
@@ -202,11 +230,13 @@ def create_app() -> FastAPI:
             index_file = static_dir / "index.html"
             if index_file.exists():
                 # Prevent stale cached index.html so new builds show immediately
+                # CRITICAL: index.html must NEVER be cached, as it references the hashed assets
                 return FileResponse(
                     str(index_file),
                     headers={
                         "Cache-Control": "no-store, no-cache, must-revalidate",
                         "Pragma": "no-cache",
+                        "Expires": "0",
                     },
                 )
             return JSONResponse(status_code=404, content={"detail": "Frontend not built"})
