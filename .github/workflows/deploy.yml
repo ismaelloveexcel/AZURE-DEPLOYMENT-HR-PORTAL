@@ -272,8 +272,8 @@ jobs:
                   --query "{username:publishingUserName, password:publishingPassword}" \
                   -o json 2>/dev/null || echo '{}')
                 
-                USERNAME=$(echo $CREDS | jq -r '.username // empty')
-                PASSWORD=$(echo $CREDS | jq -r '.password // empty')
+                USERNAME=$(echo "$CREDS" | jq -r '.username // empty')
+                PASSWORD=$(echo "$CREDS" | jq -r '.password // empty')
                 
                 # Mask password in logs for security
                 if [ -n "$PASSWORD" ]; then
@@ -284,7 +284,7 @@ jobs:
                   echo "📤 Uploading via Kudu API..."
                   KUDU_RESPONSE=$(curl -s -w "\n%{http_code}" \
                     --connect-timeout 60 \
-                    --max-time 600 \
+                    --max-time 900 \
                     -X POST \
                     -u "$USERNAME:$PASSWORD" \
                     -H "Content-Type: application/zip" \

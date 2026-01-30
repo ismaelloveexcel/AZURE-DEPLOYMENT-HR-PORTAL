@@ -211,7 +211,7 @@ If the fix causes issues:
 ### Option 1: Revert the Changes
 ```bash
 cd /path/to/repo
-git revert 812350f  # Revert this commit
+git revert <merge_commit>  # Revert the PR merge commit
 git push origin main
 ```
 
