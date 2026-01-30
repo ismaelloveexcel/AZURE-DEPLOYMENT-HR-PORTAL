@@ -441,13 +441,13 @@ SENDGRID_API_KEY=<for-email-notifications>
 ### Quick Reference Card
 
 #### Login Credentials (First Time)
-- **Employee ID:** Your employee ID (e.g., BAYN00008)
-- **Password:** Date of birth as DDMMYYYY
-- **Change Password:** Prompted on first login
+- **Account Details:** You will receive your employee ID and a one-time setup link or temporary password via a secure channel (e.g., email, SMS, or IT ticket).
+- **First Login:** Use the provided one-time link or temporary password to sign in and complete your account setup.
+- **Change Password:** You will be required to set a strong, unique password on first login.
 
 #### Admin Access
-- **Admin ID:** BAYN00008 (hardcoded in App.tsx)
-- **Admin Password:** Contact system admin
+- **Admin Accounts:** Admin and HR roles are assigned to named individual accounts; there is no shared or hardcoded admin ID.
+- **Initial Admin Credentials:** Initial admin access is provisioned by the system owner and delivered via a secure, out-of-band process, and must be changed on first login.
 
 #### Key Features
 1. **Employees:** View, add, edit, import from CSV
