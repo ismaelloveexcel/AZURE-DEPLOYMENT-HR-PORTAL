@@ -15,28 +15,28 @@
 # Create archive directory
 mkdir -p archive/status-reports
 
-# Move status/completion documents
-mv FINAL_STATUS_REPORT.md archive/status-reports/
-mv FINAL_STATUS_CHECK.md archive/status-reports/
-mv FINAL_SUMMARY.md archive/status-reports/
-mv FINAL_DEPLOYMENT_STATUS.md archive/status-reports/
-mv DEPLOYMENT_STATUS_SUMMARY.md archive/status-reports/
-mv TASK_COMPLETION_SUMMARY.md archive/status-reports/
-mv DELIVERABLES_SUMMARY.md archive/status-reports/
-mv MVP_FINAL_STATUS.md archive/status-reports/
-mv PHASE1_COMPLETE.md archive/status-reports/
-mv PHASE1_SUMMARY.md archive/status-reports/
-mv PHASE2_COMPLETE.md archive/status-reports/
-mv PHASE2_SUMMARY.md archive/status-reports/
-mv IMPLEMENTATION_COMPLETE.md archive/status-reports/
-mv SUPERVISOR_STATUS_SUMMARY.md archive/status-reports/
-mv REPO_STEWARD_REPORT.md archive/status-reports/
-mv SELF_SCORING_REPORT.md archive/status-reports/
-mv IMPLEMENTATION_SUMMARY_OLD.md archive/status-reports/
-mv NOTHING_LEFT_UNATTENDED.md archive/status-reports/
+# Move status/completion documents - explicit list to avoid accidents
+git mv FINAL_STATUS_REPORT.md archive/status-reports/
+git mv FINAL_STATUS_CHECK.md archive/status-reports/
+git mv FINAL_SUMMARY.md archive/status-reports/
+git mv FINAL_DEPLOYMENT_STATUS.md archive/status-reports/
+git mv DEPLOYMENT_STATUS_SUMMARY.md archive/status-reports/
+git mv TASK_COMPLETION_SUMMARY.md archive/status-reports/
+git mv DELIVERABLES_SUMMARY.md archive/status-reports/
+git mv MVP_FINAL_STATUS.md archive/status-reports/
+git mv PHASE1_COMPLETE.md archive/status-reports/
+git mv PHASE1_SUMMARY.md archive/status-reports/
+git mv PHASE2_COMPLETE.md archive/status-reports/
+git mv PHASE2_SUMMARY.md archive/status-reports/
+git mv IMPLEMENTATION_COMPLETE.md archive/status-reports/
+git mv SUPERVISOR_STATUS_SUMMARY.md archive/status-reports/
+git mv REPO_STEWARD_REPORT.md archive/status-reports/
+git mv SELF_SCORING_REPORT.md archive/status-reports/
+git mv IMPLEMENTATION_SUMMARY_OLD.md archive/status-reports/
+git mv NOTHING_LEFT_UNATTENDED.md archive/status-reports/
 
-# Add .gitignore entry
-echo "archive/" >> .gitignore
+# Ensure archive directory is tracked in git (do NOT add it to .gitignore)
+touch archive/.gitkeep
 ```
 
 **Result:** 18 status files archived, cleaner root directory
@@ -241,26 +241,31 @@ mv MERGE_UI_CHANGES.md docs/ui/
 
 ## Phase 3: Update Documentation Index (1-2 hours)
 
-### Step 3.1: Create docs/README.md (30 min)
+### Step 3.1: Update docs/README.md (30 min)
+
+**Action:** Update the existing `docs/README.md` to include comprehensive navigation while preserving the canonical structure.
 
 ```bash
-cat > docs/README.md << 'EOF'
-# Documentation Index
+# Backup existing README
+cp docs/README.md docs/README.md.backup
 
-## 🚀 Getting Started
-1. **[Azure Deployment Guide](AZURE_DEPLOYMENT_REFERENCE_GUIDE.md)** - THE authoritative deployment guide
-2. **[Solo HR Guide](SOLO_HR_GUIDE.md)** - Daily HR workflows for solo operators
-3. **[Contributing](../CONTRIBUTING.md)** - How to contribute to this project
+# Update docs/README.md to include more comprehensive navigation
+cat >> docs/README.md << 'EOF'
 
 ## 📖 User Guides
 - [HR Admin Onboarding](HR_ADMIN_ONBOARDING.md)
 - [HR User Guide](HR_USER_GUIDE.md)
 - [HR Portal FAQ](HR_PORTAL_FAQ.md)
+- [Solo HR Guide](SOLO_HR_GUIDE.md) - Daily HR workflows for solo operators
+
+## 🚀 Deployment & Operations
+- **[Azure Deployment Reference Guide](AZURE_DEPLOYMENT_REFERENCE_GUIDE.md)** ⭐ (The only supported path)
+- [Azure OIDC Setup](AZURE_OIDC_SETUP.md)
+- [Deployment Workflow](DEPLOYMENT_WORKFLOW_GUIDE.md)
 
 ## 🏗️ Architecture & Design
 - [Architecture Overview](../ARCHITECTURE_OVERVIEW.md)
 - [Design System](DESIGN_SYSTEM.md)
-- [Agent Governance](../.github/agents/AGENT_GOVERNANCE.md)
 
 ## 🔒 Security & Compliance
 - [Security Policy](../SECURITY.md) ⭐
@@ -276,11 +281,7 @@ cat > docs/README.md << 'EOF'
 ## 🛠️ Development
 - [Backend Troubleshooting](BACKEND_TROUBLESHOOTING.md)
 - [Simplification Guide](SIMPLIFICATION_GUIDE.md)
-
-## 📦 Deployment & Operations
-- **[Azure Deployment Reference Guide](AZURE_DEPLOYMENT_REFERENCE_GUIDE.md)** ⭐
-- [Azure OIDC Setup](AZURE_OIDC_SETUP.md)
-- [Deployment Workflow](DEPLOYMENT_WORKFLOW_GUIDE.md)
+- [Agent Governance](../.github/agents/AGENT_GOVERNANCE.md)
 
 ## 📊 Planning & Roadmap
 - [Planning Documents](planning/)
@@ -288,7 +289,7 @@ cat > docs/README.md << 'EOF'
 ---
 
 ⭐ = Essential reading  
-All other deployment guides are archived for historical reference.
+Legacy or overlapping docs are informational only once marked deprecated.
 EOF
 ```
 
@@ -409,9 +410,9 @@ node_modules/
 *.log
 build/
 dist/
-.vscode/*
-!.vscode/tasks.json
-!.vscode/launch.json
+
+# Note: .vscode/ is currently tracked per repo convention (see .gitignore:35-38)
+# If changing this convention, document rationale and update existing .gitignore comments
 ```
 
 ---

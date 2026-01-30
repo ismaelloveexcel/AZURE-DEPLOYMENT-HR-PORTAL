@@ -78,7 +78,12 @@ The repository contains an excessive number of documentation files (87 .md files
 1. **Archive obsolete status reports**
    ```bash
    mkdir -p archive/status-reports
-   mv *STATUS*.md *SUMMARY*.md *COMPLETE*.md archive/status-reports/
+   # Review and update the explicit file list below before running
+   git mv FINAL_STATUS_REPORT.md FINAL_STATUS_CHECK.md FINAL_SUMMARY.md \
+          FINAL_DEPLOYMENT_STATUS.md DEPLOYMENT_STATUS_SUMMARY.md \
+          TASK_COMPLETION_SUMMARY.md DELIVERABLES_SUMMARY.md \
+          MVP_FINAL_STATUS.md PHASE1_COMPLETE.md PHASE2_COMPLETE.md \
+          IMPLEMENTATION_COMPLETE.md archive/status-reports/
    ```
 
 2. **Consolidate deployment documentation**
