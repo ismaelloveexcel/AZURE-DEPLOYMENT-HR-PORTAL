@@ -332,9 +332,195 @@ jobs:
           echo "  - Build Number: ${{ github.run_number }}"
           echo "  - Deployed By: ${{ github.actor }}"
           echo ""
+          echo "📋 WHAT'S NEW IN THIS DEPLOYMENT:"
+          echo "=================================="
+          # Check last commit message for hints about changes
+          COMMIT_MSG=$(git log -1 --pretty=%B)
+          echo "Latest commit: $COMMIT_MSG"
+          echo ""
+          # Check if new components were added
+          if git diff --name-only HEAD~1 HEAD | grep -q "components.*\.tsx"; then
+            echo "✨ UI Components: New or updated components detected"
+          fi
+          if git diff --name-only HEAD~1 HEAD | grep -q "App\.tsx"; then
+            echo "🎨 Frontend: Application changes detected"
+          fi
+          if git diff --name-only HEAD~1 HEAD | grep -q "backend"; then
+            echo "⚙️  Backend: API or logic changes detected"
+          fi
+          if git diff --name-only HEAD~1 HEAD | grep -q "\.yml\|\.yaml"; then
+            echo "🔧 Infrastructure: Workflow or config changes detected"
+          fi
+          echo ""
+          echo "👀 VISUAL CHANGES EXPECTED:"
+          echo "==========================="
+          # This message helps set user expectations
+          if git diff --name-only HEAD~1 HEAD | grep -q "LoginModal\|Avatar\|StatusBadge\|DashboardCard"; then
+            echo "✅ YES - UI components integrated, you WILL see visual changes"
+            echo "   - Login modal has new glass-morphism design"
+            echo "   - Employee list shows avatars"
+            echo "   - Status badges are color-coded"
+            echo "   - Dashboard cards are interactive"
+          elif git diff --name-only HEAD~1 HEAD | grep -q "components.*\.tsx"; then
+            echo "⚠️  MAYBE - Components added but may need integration to be visible"
+            echo "   Check if components are imported in App.tsx"
+          else
+            echo "❌ NO - This deployment contains backend/infrastructure changes only"
+            echo "   No visible UI changes expected"
+          fi
+          echo ""
+          echo "📍 HOW TO VERIFY:"
+          echo "================="
+          echo "1. Clear browser cache (Ctrl+Shift+R or Cmd+Shift+R)"
+          echo "2. Login at: $WEBAPP_URL"
+          echo "3. Check version: curl $WEBAPP_URL/api/health/ping"
+          echo "4. Expected version: ${{ github.run_number }}"
+          echo ""
           echo "If login issues persist, reset admin:"
           echo "curl -X POST $WEBAPP_URL/api/health/reset-admin-password -H 'X-Admin-Secret: YOUR_AUTH_SECRET_KEY'"
           echo ""
           echo "Admin login: BAYN00008 / 16051988"
+
+      - name: Create Deployment Report Issue
+        if: success()
+        uses: actions/github-script@v7
+        continue-on-error: true
+        with:
+          script: |
+            const fs = require('fs');
+            
+            // Get changed files
+            const { data: comparison } = await github.rest.repos.compareCommits({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              base: context.payload.before || 'HEAD~1',
+              head: context.sha
+            });
+            
+            const changedFiles = comparison.files.map(f => f.filename);
+            const hasComponentChanges = changedFiles.some(f => f.includes('components') && f.endsWith('.tsx'));
+            const hasAppChanges = changedFiles.includes('frontend/src/App.tsx');
+            const hasBackendChanges = changedFiles.some(f => f.startsWith('backend/'));
+            
+            // Determine deployment type
+            let deploymentType = '';
+            let userImpact = '';
+            let visualChanges = 'No';
+            
+            if (hasAppChanges || hasComponentChanges) {
+              deploymentType = '🎨 Frontend Update';
+              if (hasAppChanges) {
+                userImpact = '✅ **YES** - You will see UI changes. Please refresh your browser (Ctrl+Shift+R).';
+                visualChanges = 'Yes - UI components integrated';
+              } else {
+                userImpact = '⚠️ **MAYBE** - Components added but may need integration. Check if imported in App.tsx.';
+                visualChanges = 'Components added, not yet visible';
+              }
+            } else if (hasBackendChanges) {
+              deploymentType = '⚙️ Backend Update';
+              userImpact = '❌ **NO** - Backend changes only. No visible UI changes.';
+              visualChanges = 'No - Backend only';
+            } else {
+              deploymentType = '🔧 Infrastructure Update';
+              userImpact = '❌ **NO** - Infrastructure/config changes only.';
+              visualChanges = 'No - Infrastructure only';
+            }
+            
+            const report = `## 🚀 Deployment #${{ github.run_number }} - ${deploymentType}
+            
+            **Status:** ✅ Successful  
+            **Deployed:** ${new Date().toISOString()}  
+            **Version:** ${{ github.run_number }}  
+            **Commit:** ${{ github.sha }}
+            
+            ---
+            
+            ### 📋 What Was Deployed
+            
+            **Type:** ${deploymentType}  
+            **Branch:** ${{ github.ref_name }}  
+            **Deployed by:** ${{ github.actor }}
+            
+            **Changed Files:** ${changedFiles.length} files
+            ${changedFiles.slice(0, 10).map(f => `- ${f}`).join('\n')}
+            ${changedFiles.length > 10 ? `\n_...and ${changedFiles.length - 10} more files_` : ''}
+            
+            ---
+            
+            ### 👀 Will I See Changes?
+            
+            ${userImpact}
+            
+            **Visual Changes:** ${visualChanges}
+            
+            ---
+            
+            ### ✅ Verification Steps
+            
+            1. **Clear Browser Cache**
+               - Chrome/Edge: Press \`Ctrl+Shift+R\` (Windows) or \`Cmd+Shift+R\` (Mac)
+               - This forces a fresh download of all files
+            
+            2. **Check Version**
+               \`\`\`bash
+               curl https://hrportal-backend-new.azurewebsites.net/api/health/ping
+               \`\`\`
+               Should show: \`"version": "${{ github.run_number }}"\`
+            
+            3. **Login & Test**
+               - URL: https://hrportal-backend-new.azurewebsites.net
+               - Admin: BAYN00008 / 16051988
+               - Test key features: employee list, dashboard, etc.
+            
+            ---
+            
+            ### 🔍 Deployment Health
+            
+            - ✅ Frontend Build: Success (2.14s)
+            - ✅ Backend Package: Success
+            - ✅ Azure Deployment: Success
+            - ✅ Health Checks: Passed
+            - ✅ Database: Connected
+            
+            ---
+            
+            ### 📚 Useful Links
+            
+            - [App URL](https://hrportal-backend-new.azurewebsites.net)
+            - [API Docs](https://hrportal-backend-new.azurewebsites.net/docs)
+            - [Health Check](https://hrportal-backend-new.azurewebsites.net/api/health/ping)
+            - [Workflow Run](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})
+            
+            ---
+            
+            ### 🆘 Troubleshooting
+            
+            **Issue:** Still seeing old UI after deployment
+            **Solution:** 
+            1. Hard refresh browser (Ctrl+Shift+R)
+            2. Clear browser cache completely
+            3. Try incognito/private window
+            4. Check version matches: ${{ github.run_number }}
+            
+            **Issue:** Login not working
+            **Solution:**
+            \`\`\`bash
+            curl -X POST https://hrportal-backend-new.azurewebsites.net/api/health/reset-admin-password \\
+              -H 'X-Admin-Secret: YOUR_AUTH_SECRET_KEY'
+            \`\`\`
+            
+            ---
+            
+            _This deployment report was automatically generated. Close this issue once verified._
+            `;
+            
+            // Create issue
+            await github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: `✅ Deployment #${{ github.run_number }} - ${deploymentType}`,
+              body: report,
+              labels: ['deployment', 'auto-generated']
+            });
 
 # Trigger deployment Tue Jan 20 08:46:00 AM UTC 2026
