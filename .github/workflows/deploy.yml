@@ -106,6 +106,40 @@ jobs:
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
+      - name: Pre-deployment Health Check
+        run: |
+          echo "🔍 Running pre-deployment health check..."
+          
+          # Check if App Service is running and responsive
+          APP_STATE=$(az webapp show \
+            --name "$WEBAPP_NAME" \
+            --resource-group "$RESOURCE_GROUP" \
+            --query "state" -o tsv)
+          
+          echo "App Service state: $APP_STATE"
+          
+          if [ "$APP_STATE" != "Running" ]; then
+            echo "⚠️ App Service is not in Running state, attempting to start..."
+            az webapp start --name "$WEBAPP_NAME" --resource-group "$RESOURCE_GROUP"
+            echo "⏳ Waiting 30s for app to start..."
+            sleep 30
+          fi
+          
+          # Check if SCM site is accessible
+          echo "🔍 Verifying SCM site accessibility..."
+          SCM_CHECK=$(curl -s -o /dev/null -w "%{http_code}" \
+            --connect-timeout 10 \
+            --max-time 20 \
+            "https://$WEBAPP_NAME.scm.azurewebsites.net/" 2>/dev/null || echo "000")
+          
+          if [ "$SCM_CHECK" = "200" ] || [ "$SCM_CHECK" = "401" ]; then
+            echo "✅ SCM site is accessible (HTTP $SCM_CHECK)"
+          else
+            echo "⚠️ SCM site returned HTTP $SCM_CHECK, but continuing..."
+          fi
+          
+          echo "✅ Pre-deployment health check complete"
+
       - name: Configure App Settings
         run: |
           ALLOWED_ORIGINS="${{ secrets.ALLOWED_ORIGINS }}"
@@ -138,26 +172,56 @@ jobs:
           echo "✅ App settings configured with version tracking"
           
           # Wait for SCM container to stabilize after configuration changes
+          # Azure best practice: Wait 120-180s after config changes for SCM container to fully restart
           # This prevents "SCM container restart" errors during deployment
-          # Azure SCM container restarts can take 60-120 seconds to complete
-          echo "⏳ Waiting 90s for SCM container to stabilize..."
-          sleep 90
+          echo "⏳ Waiting 150s for SCM container to stabilize after config changes..."
+          sleep 150
+          
+          # Verify SCM container is ready before deployment
+          echo "🔍 Checking SCM container readiness..."
+          MAX_SCM_CHECKS=5
+          SCM_CHECK=1
+          SCM_READY=false
+          
+          while [ $SCM_CHECK -le $MAX_SCM_CHECKS ]; do
+            echo "SCM readiness check $SCM_CHECK/$MAX_SCM_CHECKS..."
+            SCM_STATUS=$(curl -s -o /dev/null -w "%{http_code}" \
+              --connect-timeout 10 \
+              --max-time 30 \
+              "https://$WEBAPP_NAME.scm.azurewebsites.net/api/settings" 2>/dev/null || echo "000")
+            
+            if [ "$SCM_STATUS" = "200" ] || [ "$SCM_STATUS" = "401" ]; then
+              echo "✅ SCM container is ready (HTTP $SCM_STATUS)"
+              SCM_READY=true
+              break
+            fi
+            
+            if [ $SCM_CHECK -lt $MAX_SCM_CHECKS ]; then
+              echo "⏳ SCM not ready yet (HTTP $SCM_STATUS), waiting 30s..."
+              sleep 30
+            fi
+            SCM_CHECK=$((SCM_CHECK + 1))
+          done
+          
+          if [ "$SCM_READY" = "false" ]; then
+            echo "⚠️ SCM container readiness uncertain, proceeding with deployment..."
+          fi
 
       - name: Deploy to Azure App Service
         run: |
           echo "🚀 Deploying to Azure App Service..."
           
-          # Deploy using Azure CLI with retry logic for SCM restart issues
-          MAX_ATTEMPTS=3
+          # Deploy using Azure CLI with enhanced retry logic
+          MAX_ATTEMPTS=4
           ATTEMPT=1
+          DEPLOYMENT_SUCCESS=false
           
           while [ $ATTEMPT -le $MAX_ATTEMPTS ]; do
             echo "📦 Deployment attempt $ATTEMPT of $MAX_ATTEMPTS..."
             echo "⏰ Start time: $(date -u +"%Y-%m-%d %H:%M:%S UTC")"
             
-            # Use az webapp deploy for zip deployment
-            # Note: Using tee to show output in real-time while also capturing it
-            # Capture exit code without set -e toggling by using || true pattern
+            # Primary method: az webapp deploy with increased timeout
+            # Increased from 600s to 900s (15 minutes) for Oryx build + large deployments
             az webapp deploy \
               --name "$WEBAPP_NAME" \
               --resource-group "$RESOURCE_GROUP" \
@@ -165,7 +229,7 @@ jobs:
               --type zip \
               --clean true \
               --restart true \
-              --timeout 600 \
+              --timeout 900 \
               --verbose 2>&1 | tee /tmp/deploy_output.txt || true
             DEPLOY_EXIT_CODE=${PIPESTATUS[0]}
             
@@ -173,37 +237,115 @@ jobs:
             echo "📋 Exit code: $DEPLOY_EXIT_CODE"
             
             if [ $DEPLOY_EXIT_CODE -eq 0 ]; then
-              echo "✅ Deployment successful on attempt $ATTEMPT"
+              echo "✅ Deployment successful via az webapp deploy on attempt $ATTEMPT"
+              DEPLOYMENT_SUCCESS=true
               rm -f /tmp/deploy_output.txt 2>/dev/null || true
               break
             else
-              echo "⚠️ Deployment attempt $ATTEMPT failed (exit code: $DEPLOY_EXIT_CODE)"
+              echo "⚠️ az webapp deploy attempt $ATTEMPT failed (exit code: $DEPLOY_EXIT_CODE)"
               
-              # Check for specific error patterns
+              # Enhanced error pattern detection
+              # Priority order: SCM restart > Lock > Timeout > Unknown
+              ERROR_TYPE=""
               if grep -qi "SCM container restart" /tmp/deploy_output.txt 2>/dev/null; then
-                echo "🔄 Detected SCM container restart issue"
-              fi
-              if grep -qi "timeout" /tmp/deploy_output.txt 2>/dev/null; then
+                ERROR_TYPE="SCM_RESTART"
+                echo "🔄 Detected SCM container restart issue (highest priority)"
+              elif grep -qi "conflict\|locked" /tmp/deploy_output.txt 2>/dev/null; then
+                ERROR_TYPE="LOCK"
+                echo "🔒 Detected deployment lock/conflict"
+              elif grep -qi "timeout\|timed out" /tmp/deploy_output.txt 2>/dev/null; then
+                ERROR_TYPE="TIMEOUT"
                 echo "⏰ Detected timeout issue"
+              else
+                ERROR_TYPE="UNKNOWN"
+                echo "❓ Unknown error type"
+              fi
+              
+              # Try fallback method on last attempt if primary method keeps failing
+              if [ $ATTEMPT -eq $MAX_ATTEMPTS ]; then
+                echo "🔄 Trying fallback: Kudu REST API deployment..."
+                
+                # Get publishing credentials
+                CREDS=$(az webapp deployment list-publishing-credentials \
+                  --name "$WEBAPP_NAME" \
+                  --resource-group "$RESOURCE_GROUP" \
+                  --query "{username:publishingUserName, password:publishingPassword}" \
+                  -o json 2>/dev/null || echo '{}')
+                
+                USERNAME=$(echo $CREDS | jq -r '.username // empty')
+                PASSWORD=$(echo $CREDS | jq -r '.password // empty')
+                
+                # Mask password in logs for security
+                if [ -n "$PASSWORD" ]; then
+                  echo "::add-mask::$PASSWORD"
+                fi
+                
+                if [ -n "$USERNAME" ]; then
+                  echo "📤 Uploading via Kudu API..."
+                  KUDU_RESPONSE=$(curl -s -w "\n%{http_code}" \
+                    --connect-timeout 60 \
+                    --max-time 600 \
+                    -X POST \
+                    -u "$USERNAME:$PASSWORD" \
+                    -H "Content-Type: application/zip" \
+                    --data-binary @deploy.zip \
+                    "https://$WEBAPP_NAME.scm.azurewebsites.net/api/zipdeploy?isAsync=false" || echo "000")
+                  
+                  KUDU_HTTP_CODE=$(echo "$KUDU_RESPONSE" | tail -1)
+                  
+                  if [ "$KUDU_HTTP_CODE" = "200" ] || [ "$KUDU_HTTP_CODE" = "202" ]; then
+                    echo "✅ Fallback deployment via Kudu API successful!"
+                    DEPLOYMENT_SUCCESS=true
+                    # Restart app after Kudu deployment
+                    az webapp restart --name "$WEBAPP_NAME" --resource-group "$RESOURCE_GROUP" || true
+                    break
+                  else
+                    echo "❌ Kudu API deployment also failed (HTTP $KUDU_HTTP_CODE)"
+                  fi
+                else
+                  echo "❌ Could not get publishing credentials for fallback method"
+                fi
               fi
               
               if [ $ATTEMPT -lt $MAX_ATTEMPTS ]; then
-                # SCM container may be restarting, wait before retry
-                # Use exponential backoff: 60s for retry 1, 120s for retry 2
-                WAIT_TIME=$((60 * ATTEMPT))
-                echo "⏳ Waiting ${WAIT_TIME}s before retry to allow SCM container to stabilize..."
+                # Enhanced backoff strategy based on error type
+                # Progressive backoff based on error type and attempt number
+                if [ "$ERROR_TYPE" = "SCM_RESTART" ]; then
+                  BASE_WAIT=120  # SCM needs longer stabilization
+                  WAIT_TIME=$((BASE_WAIT + (ATTEMPT - 1) * 30))  # Add 30s per attempt
+                elif [ "$ERROR_TYPE" = "TIMEOUT" ]; then
+                  BASE_WAIT=60   # Timeout might just need retry
+                  WAIT_TIME=$((BASE_WAIT + (ATTEMPT - 1) * 20))  # Add 20s per attempt
+                elif [ "$ERROR_TYPE" = "LOCK" ]; then
+                  BASE_WAIT=90   # Wait for lock to clear
+                  WAIT_TIME=$((BASE_WAIT + (ATTEMPT - 1) * 30))  # Add 30s per attempt
+                else
+                  WAIT_TIME=$((60 * ATTEMPT))  # Exponential backoff for unknown
+                fi
+                
+                echo "⏳ Waiting ${WAIT_TIME}s before retry..."
                 sleep $WAIT_TIME
               else
-                echo "❌ All deployment attempts failed"
-                echo "📋 Last deployment output:"
-                cat /tmp/deploy_output.txt 2>/dev/null || true
+                echo "❌ All deployment attempts failed (including fallback)"
+                echo "📋 Deployment output (first 30 + last 70 lines for diagnostics):"
+                if [ -f /tmp/deploy_output.txt ]; then
+                  echo "=== First 30 lines ==="
+                  head -30 /tmp/deploy_output.txt 2>/dev/null || true
+                  echo ""
+                  echo "=== Last 70 lines ==="
+                  tail -70 /tmp/deploy_output.txt 2>/dev/null || true
+                fi
                 rm -f /tmp/deploy_output.txt 2>/dev/null || true
-                exit 1
               fi
             fi
             
             ATTEMPT=$((ATTEMPT + 1))
           done
+          
+          if [ "$DEPLOYMENT_SUCCESS" = "false" ]; then
+            echo "❌ DEPLOYMENT FAILED after all attempts"
+            exit 1
+          fi
 
       - name: Wait for deployment and Oryx build
         run: |
