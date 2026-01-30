@@ -15,8 +15,8 @@ URL: [Your deployed Azure URL]
 
 ### Step 2: First Login
 - **Employee ID:** BAYN00008 (admin) or your employee ID
-- **Password:** Date of birth (DDMMYYYY format, e.g., 15031990)
-- **Action:** Change password when prompted
+- **Password:** Use the secure temporary password you received from HR or set via the one-time onboarding link (never use date of birth as a password).
+- **Action:** Change password when prompted to a strong, unique password
 
 ### Step 3: Explore Main Features
 1. **Dashboard** - Overview of system status
