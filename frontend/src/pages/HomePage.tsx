@@ -1,5 +1,6 @@
 import { FormEvent, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { BrandLogo } from "../components/BrandLogo";
 import { useAuthContext } from "../contexts/AuthContext";
 
 type Section = "manager" | "candidate" | "onboarding" | "employee" | "agency";
@@ -56,8 +57,8 @@ function LoginModal({
         </button>
 
         <div className="text-center mb-6">
-          <div className="w-16 h-16 rounded-full bg-accent-green/90 flex items-center justify-center mx-auto mb-2 shadow-soft-green">
-            <span className="text-white font-semibold text-2xl">B</span>
+          <div className="flex flex-col items-center gap-3">
+            <BrandLogo size="sm" stacked className="mx-auto" />
           </div>
           <h2 className="text-xl font-semibold text-primary-800">
             {isAdminLogin ? "Admin Sign In" : "Sign In"}
@@ -391,27 +392,36 @@ export function HomePage() {
 
       <header className="home-header">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="brand-mark-soft">B</div>
-            <div>
-              <p className="text-lg font-semibold text-primary-900">
-                Baynunah HR
-              </p>
-              <p className="text-xs text-primary-500">
-                Calm, single-screen ESS
-              </p>
-            </div>
-          </div>
-          {user && (
-            <div className="flex items-center gap-4">
-              <span className="text-sm text-primary-600">
-                {user.name} ({user.role})
-              </span>
-              <button onClick={handleLogout} className="ghost-link">
-                Sign Out
+          <BrandLogo variant="light" />
+          <div className="flex items-center gap-4">
+            {user ? (
+              <>
+                <span className="text-sm text-white/80">
+                  Welcome back,{" "}
+                  <strong className="text-white">{user.name}</strong>
+                </span>
+                <button
+                  type="button"
+                  onClick={handleLogout}
+                  className="ghost-link"
+                >
+                  Sign Out
+                </button>
+              </>
+            ) : (
+              <button
+                type="button"
+                className="ghost-link"
+                onClick={() => {
+                  setIsAdminLogin(false);
+                  setPendingRoute(null);
+                  setShowLoginModal(true);
+                }}
+              >
+                Sign In
               </button>
-            </div>
-          )}
+            )}
+          </div>
         </div>
       </header>
 

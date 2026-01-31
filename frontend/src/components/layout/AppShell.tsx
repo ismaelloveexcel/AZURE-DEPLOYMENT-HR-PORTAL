@@ -1,11 +1,12 @@
 import { ReactNode, useMemo } from "react";
 import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import { useAuthContext } from "../../contexts/AuthContext";
+import { BrandLogo } from "../BrandLogo";
 
 interface NavItem {
   label: string;
   to: string;
-  icon: JSX.Element;
+  icon: ReactNode;
   roles?: Array<"admin" | "hr" | "viewer">;
 }
 
@@ -145,8 +146,12 @@ export function AppShell({
 
   const filteredNav = useMemo(() => {
     if (!user) return [] as NavItem[];
+    const normalizedRole: "admin" | "hr" | "viewer" =
+      user.role === "admin" || user.role === "hr" || user.role === "viewer"
+        ? user.role
+        : "viewer";
     return NAV_ITEMS.filter(
-      (item) => !item.roles || item.roles.includes(user.role),
+      (item) => !item.roles || item.roles.includes(normalizedRole),
     );
   }, [user]);
 
@@ -157,37 +162,29 @@ export function AppShell({
           <button
             type="button"
             onClick={() => navigate("/")}
-            className="flex items-center gap-3"
+            className="flex items-center"
           >
-            <span className="brand-badge">B</span>
-            <span className="text-left">
-              <span className="block text-xs uppercase tracking-[0.4em] text-primary-300">
-                Baynunah
-              </span>
-              <span className="block text-base font-semibold text-primary-900">
-                HR Experience Hub
-              </span>
-            </span>
+            <BrandLogo variant="light" />
           </button>
           <div className="flex items-center gap-4">
             {user ? (
               <>
-                <div className="text-sm text-primary-600 text-right">
-                  <p className="font-semibold text-primary-800">{user.name}</p>
-                  <p className="text-xs uppercase tracking-[0.2em] text-primary-300">
+                <div className="text-sm text-right text-white/80">
+                  <p className="font-semibold text-white">{user.name}</p>
+                  <p className="text-xs uppercase tracking-[0.2em] text-white/60">
                     {user.role}
                   </p>
                 </div>
                 <button
                   type="button"
-                  className="btn btn--ghost"
+                  className="btn btn--ghost-inverted"
                   onClick={() => navigate("/")}
                 >
                   <span>Portal Home</span>
                 </button>
                 <button
                   type="button"
-                  className="btn btn--outline"
+                  className="btn btn--outline-inverted"
                   onClick={logout}
                 >
                   Sign Out
@@ -196,7 +193,7 @@ export function AppShell({
             ) : (
               <button
                 type="button"
-                className="btn btn--primary"
+                className="btn btn--outline-inverted"
                 onClick={() => navigate("/")}
               >
                 Sign In

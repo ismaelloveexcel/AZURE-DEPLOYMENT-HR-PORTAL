@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { EmployeeProfile } from "../components/EmployeeProfile";
 import { AppShell } from "../components/layout/AppShell";
 import { useAuthContext } from "../contexts/AuthContext";
+import { BrandLogo } from "../components/BrandLogo";
 import { ComplianceAlertItem, ComplianceAlerts } from "../types";
 import { API_BASE, fetchWithAuth } from "../utils/api";
 import { exportComplianceAlertsToCSV } from "../utils/exportToCSV";
@@ -148,7 +149,7 @@ export function ComplianceModule() {
       >
         <section className="surface-section text-center">
           <div className="mx-auto flex max-w-md flex-col items-center gap-4">
-            <div className="brand-badge">B</div>
+            <BrandLogo size="sm" stacked variant="dark" />
             <p className="text-lg font-semibold text-primary-800">
               Secure access required
             </p>
