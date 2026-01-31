@@ -22,6 +22,12 @@
   --color-warning: #f97316;
   --color-danger: #ef4444;
 
+  /* Logo-specific colors */
+  --color-logo-primary: #102038;
+  --color-logo-accent: #2563eb;
+  --color-logo-light-primary: #ffffff;
+  --color-logo-light-accent: #92C5FF;
+
   /* Surfaces */
   --color-shell: #f5f7fb;
   --color-shell-gradient-top: #eef3ff;

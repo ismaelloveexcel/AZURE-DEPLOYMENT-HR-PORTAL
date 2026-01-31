@@ -345,7 +345,9 @@ export function HomePage() {
         throw new Error(detail || `Login failed (${res.status})`);
       }
       if (!data) {
-        throw new Error("Login response missing payload");
+        throw new Error(
+          "Login failed: server returned empty response. Please check server logs or try again."
+        );
       }
       const loggedInUser = {
         id: data.id,

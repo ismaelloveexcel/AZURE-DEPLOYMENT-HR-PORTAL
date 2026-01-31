@@ -26,8 +26,13 @@ export function BrandLogo({
 }: BrandLogoProps) {
   const iconSize = SIZE_MAP[size];
   const isLight = variant === "light";
-  const iconFill = isLight ? "#ffffff" : "#102038";
-  const accentFill = isLight ? "#92C5FF" : "#2563eb";
+  // Use CSS custom properties for maintainable brand colors
+  const iconFill = isLight
+    ? "var(--color-logo-light-primary, #ffffff)"
+    : "var(--color-logo-primary, #102038)";
+  const accentFill = isLight
+    ? "var(--color-logo-light-accent, #92C5FF)"
+    : "var(--color-logo-accent, #2563eb)";
 
   return (
     <div

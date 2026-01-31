@@ -7,6 +7,58 @@ import { ComplianceAlertItem, ComplianceAlerts } from "../types";
 import { API_BASE, fetchWithAuth } from "../utils/api";
 import { exportComplianceAlertsToCSV } from "../utils/exportToCSV";
 
+/**
+ * Tone-based styling configuration for compliance alerts
+ */
+const toneStyles = {
+  danger: {
+    cardShadow: "",
+    dot: "bg-rose-500",
+    banner: "border-rose-100 bg-rose-50",
+    chip: "bg-rose-100 text-rose-600 border border-rose-200",
+    chipClass: "chip chip--danger text-xs",
+    priority: "Immediate",
+  },
+  warning: {
+    cardShadow: "",
+    dot: "bg-orange-500",
+    banner: "border-orange-100 bg-orange-50",
+    chip: "bg-orange-100 text-orange-600 border border-orange-200",
+    chipClass: "chip chip--warning text-xs",
+    priority: "Urgent",
+  },
+  amber: {
+    cardShadow: "",
+    dot: "bg-amber-500",
+    banner: "border-amber-100 bg-amber-50",
+    chip: "bg-amber-100 text-amber-600 border border-amber-200",
+    chipClass:
+      "chip text-xs bg-amber-100 text-amber-600 border border-amber-200",
+    priority: "Planned",
+  },
+  info: {
+    cardShadow: "",
+    dot: "bg-sky-500",
+    banner: "border-sky-100 bg-sky-50",
+    chip: "bg-sky-100 text-sky-600 border border-sky-200",
+    chipClass: "chip text-xs bg-sky-100 text-sky-600 border border-sky-200",
+    priority: "Monitor",
+  },
+} as const;
+
+/**
+ * Format deadline text for compliance alerts
+ */
+const formatDeadline = (alert: ComplianceAlertItem) => {
+  if (alert.days_until_expiry < 0) {
+    return `Expired ${Math.abs(alert.days_until_expiry)} days ago`;
+  }
+  if (alert.days_until_expiry === 0) {
+    return "Expires today";
+  }
+  return `${alert.days_until_expiry} days`;
+};
+
 export function ComplianceModule() {
   const { user } = useAuthContext();
   const [complianceAlerts, setComplianceAlerts] =
@@ -406,49 +458,3 @@ export function ComplianceModule() {
     </>
   );
 }
-
-const toneStyles = {
-  danger: {
-    cardShadow: "",
-    dot: "bg-rose-500",
-    banner: "border-rose-100 bg-rose-50",
-    chip: "bg-rose-100 text-rose-600 border border-rose-200",
-    chipClass: "chip chip--danger text-xs",
-    priority: "Immediate",
-  },
-  warning: {
-    cardShadow: "",
-    dot: "bg-orange-500",
-    banner: "border-orange-100 bg-orange-50",
-    chip: "bg-orange-100 text-orange-600 border border-orange-200",
-    chipClass: "chip chip--warning text-xs",
-    priority: "Urgent",
-  },
-  amber: {
-    cardShadow: "",
-    dot: "bg-amber-500",
-    banner: "border-amber-100 bg-amber-50",
-    chip: "bg-amber-100 text-amber-600 border border-amber-200",
-    chipClass:
-      "chip text-xs bg-amber-100 text-amber-600 border border-amber-200",
-    priority: "Planned",
-  },
-  info: {
-    cardShadow: "",
-    dot: "bg-sky-500",
-    banner: "border-sky-100 bg-sky-50",
-    chip: "bg-sky-100 text-sky-600 border border-sky-200",
-    chipClass: "chip text-xs bg-sky-100 text-sky-600 border border-sky-200",
-    priority: "Monitor",
-  },
-} as const;
-
-const formatDeadline = (alert: ComplianceAlertItem) => {
-  if (alert.days_until_expiry < 0) {
-    return `Expired ${Math.abs(alert.days_until_expiry)} days ago`;
-  }
-  if (alert.days_until_expiry === 0) {
-    return "Expires today";
-  }
-  return `${alert.days_until_expiry} days`;
-};

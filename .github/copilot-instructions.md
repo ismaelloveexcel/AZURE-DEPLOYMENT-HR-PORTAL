@@ -35,3 +35,14 @@ Support the UAE-focused Secure Renewals HR Portal; compliance accuracy beats fea
 ## Contribution Expectations
 - Keep PRs narrow, document manual testing, and refresh docs under [docs](docs) when behavior shifts.
 - Never commit secrets, avoid string-built SQL, and lean on repository helpers for database work.
+
+## See Also: Extended Copilot Guidance
+
+The detailed guidance that previously lived in this file has been split into focused documents. When making non-trivial changes, especially around security or architecture, review:
+
+- **docs/architecture.md** — 3-layer backend pattern, async conventions, and feature module examples.
+- **docs/security.md** — Input sanitization (`sanitize_text`), SQL injection prevention, JWT auth flow, and sensitive-data handling.
+- **docs/troubleshooting.md** — Common login issues, async/sync pitfalls, database connectivity, and migration conflicts.
+- **docs/AZURE_DEPLOYMENT_REFERENCE_GUIDE.md** — Deployment, CI/CD, and environment configuration details.
+
+The `hr-portal-chief` agent file is expected to complement these repo-wide standards (not override them). If any guidance appears to conflict, prefer the patterns documented here and in the architecture/security docs, and update the agent file in a follow-up PR to keep them aligned.

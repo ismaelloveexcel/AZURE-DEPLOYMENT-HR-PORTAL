@@ -35,11 +35,20 @@ def hash_password(password: str) -> str:
     return f"{salt}:{key.hex()}"
 
 
-def verify_password(password: str, hashed: str) -> bool:
-    """Verify password against hash."""
+def verify_password(password: str, hashed: str, employee_id: Optional[str] = None) -> bool:
+    """Verify password against hash.
+    
+    Args:
+        password: Plain text password to verify
+        hashed: Stored password hash
+        employee_id: Optional employee ID for logging purposes
+    """
+    logger = logging.getLogger(__name__)
     if not hashed:
-        logger = logging.getLogger(__name__)
-        logger.error("Password hash missing for employee during login check")
+        log_msg = "Password hash missing for employee during login check"
+        if employee_id:
+            log_msg += f" (employee_id: {employee_id})"
+        logger.error(log_msg)
         return False
     try:
         salt, stored_key = hashed.split(':')
@@ -47,16 +56,18 @@ def verify_password(password: str, hashed: str) -> bool:
         key = hashlib.pbkdf2_hmac('sha256', password.encode(), salt.encode(), iterations)
         return key.hex() == stored_key
     except ValueError:
-        logger = logging.getLogger(__name__)
         if hashlib.sha256(password.encode()).hexdigest() == hashed:
-            logger.warning(
-                "Legacy unsalted password detected. User should change password."
-            )
+            log_msg = "Legacy unsalted password detected. User should change password."
+            if employee_id:
+                log_msg += f" (employee_id: {employee_id})"
+            logger.warning(log_msg)
             return True
         return False
     except Exception as exc:
-        logger = logging.getLogger(__name__)
-        logger.error(f"Password verification error: {type(exc).__name__}")
+        log_msg = f"Password verification error: {type(exc).__name__}"
+        if employee_id:
+            log_msg += f" (employee_id: {employee_id})"
+        logger.error(log_msg)
         return False
 
 
@@ -126,7 +137,7 @@ class EmployeeService:
                 detail="Account is deactivated",
             )
         
-        if not verify_password(request.password, employee.password_hash):
+        if not verify_password(request.password, employee.password_hash, employee.employee_id):
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail="Invalid employee ID or password",
@@ -159,7 +170,7 @@ class EmployeeService:
                 detail="Employee not found",
             )
         
-        if not verify_password(request.current_password, employee.password_hash):
+        if not verify_password(request.current_password, employee.password_hash, employee.employee_id):
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="Current password is incorrect",
