@@ -38,9 +38,9 @@ export function AppShell({
     // Validate and normalize role with explicit error logging
     const userRole = user.role;
     const validRoles = ["admin", "hr", "viewer"] as const;
-    const normalizedRole: "admin" | "hr" | "viewer" = validRoles.includes(
-      userRole as any
-    )
+    // Type-safe check without using 'as any'
+    const isValidRole = (validRoles as readonly string[]).includes(userRole);
+    const normalizedRole: "admin" | "hr" | "viewer" = isValidRole
       ? (userRole as "admin" | "hr" | "viewer")
       : (() => {
           // Log invalid role for debugging - this indicates a data integrity issue
