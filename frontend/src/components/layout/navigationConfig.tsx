@@ -19,6 +19,10 @@ export interface NavItem {
   roles?: Array<"admin" | "hr" | "viewer">;
 }
 
+/**
+ * Icon library for navigation items
+ * Exported for potential reuse in other components (e.g., page headers, breadcrumbs)
+ */
 export const navIcon = {
   dashboard: (
     <svg
