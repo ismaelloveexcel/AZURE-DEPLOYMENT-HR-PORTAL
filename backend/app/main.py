@@ -103,6 +103,11 @@ def create_app() -> FastAPI:
     app.include_router(onboarding.router, prefix=settings.api_prefix)
     app.include_router(attendance.router, prefix=settings.api_prefix)
     app.include_router(admin.router, prefix=settings.api_prefix)
+    
+    # Phase 1: Request Tracking System (HR Command Center foundation)
+    from app.routers import requests as requests_router
+    app.include_router(requests_router.router, prefix=settings.api_prefix)
+    
     from app.routers import templates, audit_logs, notifications, activity_logs
     from app.routers import employee_compliance, employee_bank, employee_documents
     from app.routers import recruitment, interview  # , performance
