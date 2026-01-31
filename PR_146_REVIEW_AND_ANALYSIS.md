@@ -8,6 +8,24 @@
 **Review Comments:** 13 unresolved review threads from automated reviewer  
 **Changes:** +3,885 / -2,728 lines across 16 files  
 
+**Evidence:**  
+- Metrics taken from GitHub's PR diff view for [PR #146](https://github.com/ismaelloveexcel/AZURE-DEPLOYMENT-HR-PORTAL/pull/146) (base: [PR #145](https://github.com/ismaelloveexcel/AZURE-DEPLOYMENT-HR-PORTAL/pull/145))
+- Reproducible locally with:
+
+  ```bash
+  # From a clean working tree
+  git fetch origin
+  # Checkout PR #146 branch
+  git checkout copilot/enhance-portal-functionality
+
+  # Show line/file change summary vs main
+  git diff --stat origin/main...HEAD
+
+  # Simulate merge to count conflicts (no commit created)
+  git reset --hard HEAD
+  git merge --no-commit --no-ff origin/main || echo "Conflicts detected"
+  ```
+
 ---
 
 ## 🔴 Critical Issues (Must Fix Before Merge)
@@ -17,9 +35,9 @@
 **Impact:** PR cannot be merged until all conflicts are resolved
 
 The following categories of files have conflicts:
-- **Configuration files (14):** `.github/copilot-instructions.md`, workflows, `.gitignore`, `.vscode/extensions.json`, etc.
-- **Backend code (15):** `config.py`, `employees.py`, `startup_migrations.py`, routers, services
-- **Frontend code (7):** `App.tsx`, `HomePage.tsx`, `AttendanceModule.tsx`, `ComplianceModule.tsx`, etc.
+- **Configuration files (14):** `.github/copilot-instructions.md`, `.github/workflows/ci.yml`, `.gitignore`, `.vscode/extensions.json`, etc.
+- **Backend code (15):** `backend/app/core/config.py`, `backend/app/services/employees.py`, `backend/app/startup_migrations.py`, other backend routers and services
+- **Frontend code (7):** `frontend/src/App.tsx`, `frontend/src/pages/HomePage.tsx`, `frontend/src/pages/AttendanceModule.tsx`, `frontend/src/pages/ComplianceModule.tsx`, etc.
 - **Static assets (1):** `backend/static/index.html`
 
 **Root Cause:** This PR was branched from an older commit and main has moved forward significantly with PR #145.
@@ -196,14 +214,19 @@ git fetch origin main
 git rebase origin/main
 # Resolve conflicts file by file
 # Test thoroughly
+# Update the PR branch (requires force push)
+git push --force-with-lease origin copilot/enhance-portal-functionality
 ```
 
 **Pros:** Clean linear history, easier to review individual conflicts  
-**Cons:** Time-consuming (37 files), requires careful testing
+**Cons:** Time-consuming (37 files), requires careful testing, force push requires coordination with team
+
+**Note:** The `--force-with-lease` flag is safer than `--force` as it ensures no one else has pushed to the branch since you last fetched.
 
 ### Option 2: Merge Main into Branch
 ```bash
 git checkout copilot/enhance-portal-functionality
+git fetch origin main
 git merge origin/main
 # Resolve conflicts in merge commit
 # Test thoroughly
