@@ -119,7 +119,12 @@ async def seed_nomination_settings(session: AsyncSession):
     """Seed default nomination settings if not present."""
     settings = get_settings()
     if settings.database_url.startswith("sqlite"):
-        logger.info("Skipping nomination settings seed for SQLite (development mode)")
+        logger.info(
+            "Skipping nomination settings seed for SQLite (development mode). "
+            "PostgreSQL-specific operations (e.g., JSON operators, advanced constraints) "
+            "will only run against PostgreSQL databases. For full migration testing, "
+            "run with a local PostgreSQL instance (e.g., via docker-compose) matching production."
+        )
         return
     try:
         result = await session.execute(
@@ -279,7 +284,12 @@ async def backfill_line_manager_ids(session: AsyncSession):
     """Backfill line_manager_id from line_manager_name for nominations system."""
     settings = get_settings()
     if settings.database_url.startswith("sqlite"):
-        logger.info("Skipping line_manager_id backfill for SQLite (development mode)")
+        logger.warning(
+            "Skipping line_manager_id backfill startup migration because SQLite is in use. "
+            "PostgreSQL-specific logic (e.g., regexp_replace, UPDATE ... FROM) will only run "
+            "against a PostgreSQL database. For full migration testing, run the app with a "
+            "local PostgreSQL instance (e.g., via docker-compose) matching production."
+        )
         return
     # Check how many employees have line_manager_name but no line_manager_id
     check_result = await session.execute(

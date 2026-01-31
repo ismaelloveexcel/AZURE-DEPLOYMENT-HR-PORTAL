@@ -30,6 +30,6 @@
     "christian-kohler.path-intellisense",
     "visualstudioexptteam.vscodeintellicode",
     "streetsidesoftware.code-spell-checker",
-    "github.vscode-github-actions"
+    "github.vscode-github-actions",
   ]
 }

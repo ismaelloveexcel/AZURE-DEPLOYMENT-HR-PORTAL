@@ -23,7 +23,12 @@ class Settings(BaseSettings):
     app_version: str = Field(default="dev", description="Application version")
     database_url: str = Field(
         default="sqlite:///./secure_renewals.db",
-        description="Database connection string; defaults to local SQLite for development",
+        description=(
+            "Database connection string. Defaults to SQLite for simple local development. "
+            "Production uses PostgreSQL. Override via DATABASE_URL environment variable "
+            "(e.g., postgresql+asyncpg://user:pass@localhost:5432/hr_portal for local PostgreSQL). "
+            "For full migration testing and production parity, use PostgreSQL via docker-compose."
+        ),
     )
     # Store as plain string to avoid pydantic_settings JSON parsing issues
     # Use get_allowed_origins_list() to get the parsed list

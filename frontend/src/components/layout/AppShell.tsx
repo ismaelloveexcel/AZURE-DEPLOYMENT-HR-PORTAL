@@ -2,13 +2,7 @@ import { ReactNode, useMemo } from "react";
 import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import { useAuthContext } from "../../contexts/AuthContext";
 import { BrandLogo } from "../BrandLogo";
-
-interface NavItem {
-  label: string;
-  to: string;
-  icon: ReactNode;
-  roles?: Array<"admin" | "hr" | "viewer">;
-}
+import { NAV_ITEMS, type NavItem } from "./navigationConfig";
 
 interface AppShellProps {
   title: string;
@@ -17,123 +11,17 @@ interface AppShellProps {
   children: ReactNode;
 }
 
-const navIcon = {
-  dashboard: (
-    <svg
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth={1.6}
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <rect x="3" y="3" width="7" height="7" rx="1" />
-      <rect x="14" y="3" width="7" height="7" rx="1" />
-      <rect x="14" y="14" width="7" height="7" rx="1" />
-      <rect x="3" y="14" width="7" height="7" rx="1" />
-    </svg>
-  ),
-  compliance: (
-    <svg
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth={1.6}
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <path d="M9 11l3 3L22 4" />
-      <path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11" />
-    </svg>
-  ),
-  attendance: (
-    <svg
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth={1.6}
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <circle cx="12" cy="12" r="8" />
-      <path d="M12 8v4l2.5 1.5" />
-    </svg>
-  ),
-  recruitment: (
-    <svg
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth={1.6}
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <path d="M8 7a4 4 0 118 0 4 4 0 01-8 0z" />
-      <path d="M3 21v-1a6 6 0 016-6h6a6 6 0 016 6v1" />
-    </svg>
-  ),
-  onboarding: (
-    <svg
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth={1.6}
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <path d="M12 6v12" />
-      <path d="M16 10l-4-4-4 4" />
-      <path d="M8 14l4 4 4-4" />
-    </svg>
-  ),
-  home: (
-    <svg
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth={1.6}
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <path d="M3 9.5l9-7 9 7" />
-      <path d="M9 22V12h6v10" />
-    </svg>
-  ),
-};
-
-const NAV_ITEMS: NavItem[] = [
-  {
-    label: "Overview",
-    to: "/admin",
-    icon: navIcon.dashboard,
-    roles: ["admin", "hr"],
-  },
-  {
-    label: "Compliance",
-    to: "/compliance",
-    icon: navIcon.compliance,
-    roles: ["admin", "hr"],
-  },
-  {
-    label: "Attendance",
-    to: "/attendance",
-    icon: navIcon.attendance,
-    roles: ["admin", "hr", "viewer"],
-  },
-  {
-    label: "Recruitment",
-    to: "/recruitment",
-    icon: navIcon.recruitment,
-    roles: ["admin", "hr"],
-  },
-  {
-    label: "Onboarding",
-    to: "/onboarding",
-    icon: navIcon.onboarding,
-    roles: ["admin", "hr"],
-  },
-];
-
+/**
+ * AppShell - Main layout component with sidebar navigation
+ * 
+ * Provides consistent layout structure for authenticated pages.
+ * Navigation items are configured in navigationConfig.tsx for easier maintenance.
+ * 
+ * TODO: Add mobile responsiveness
+ * - The sidebar uses fixed 280px width which may not work well on mobile
+ * - Consider adding a hamburger menu/drawer pattern for screens < 768px
+ * - Mobile navigation should overlay content rather than push it
+ */
 export function AppShell({
   title,
   subtitle,
@@ -146,10 +34,22 @@ export function AppShell({
 
   const filteredNav = useMemo(() => {
     if (!user) return [] as NavItem[];
-    const normalizedRole: "admin" | "hr" | "viewer" =
-      user.role === "admin" || user.role === "hr" || user.role === "viewer"
-        ? user.role
-        : "viewer";
+    
+    // Validate and normalize role with explicit error logging
+    const userRole = user.role;
+    const validRoles = ["admin", "hr", "viewer"] as const;
+    // Type-safe check without using 'as any'
+    const isValidRole = (validRoles as readonly string[]).includes(userRole);
+    const normalizedRole: "admin" | "hr" | "viewer" = isValidRole
+      ? (userRole as "admin" | "hr" | "viewer")
+      : (() => {
+          // Log invalid role for debugging - this indicates a data integrity issue
+          console.error(
+            `Invalid user role detected: "${userRole}" for user ${user.employee_id}. Defaulting to "viewer".`
+          );
+          return "viewer";
+        })();
+    
     return NAV_ITEMS.filter(
       (item) => !item.roles || item.roles.includes(normalizedRole),
     );

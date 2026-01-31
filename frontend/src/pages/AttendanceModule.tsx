@@ -6,6 +6,77 @@ import { useAttendance } from "../hooks/useAttendance";
 import { exportAttendanceToCSV } from "../utils/exportToCSV";
 
 /**
+ * Work mode options for attendance tracking
+ */
+const WORK_MODE_OPTIONS = [
+  {
+    value: "office" as const,
+    label: "Office",
+    description: "Clock in from Baynunah HQ or satellite offices.",
+    icon: (
+      <svg
+        className="h-5 w-5"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth={1.6}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      >
+        <path d="M3 21h18" />
+        <path d="M5 21V4a1 1 0 011-1h12a1 1 0 011 1v17" />
+        <path d="M9 21V9h6v12" />
+      </svg>
+    ),
+    activeClass: "border-emerald-300 text-emerald-600 shadow-soft-green",
+    iconWrapperActiveClass: "border-emerald-200 bg-emerald-50 text-emerald-600",
+  },
+  {
+    value: "wfh" as const,
+    label: "Remote (WFH)",
+    description: "Approved home-based or remote working arrangement.",
+    icon: (
+      <svg
+        className="h-5 w-5"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth={1.6}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      >
+        <path d="M3 11l9-7 9 7" />
+        <path d="M5 12v7a1 1 0 001 1h3m4 0h3a1 1 0 001-1v-7" />
+        <path d="M9 21V9h6v12" />
+      </svg>
+    ),
+    activeClass: "border-sky-300 text-sky-600 shadow-soft-green",
+    iconWrapperActiveClass: "border-sky-200 bg-sky-50 text-sky-600",
+  },
+  {
+    value: "field" as const,
+    label: "Field / Client",
+    description: "On client site, field work, or business travel.",
+    icon: (
+      <svg
+        className="h-5 w-5"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth={1.6}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      >
+        <path d="M21 10c0 6-9 12-9 12S3 16 3 10a9 9 0 0118 0z" />
+        <circle cx="12" cy="10" r="3" />
+      </svg>
+    ),
+    activeClass: "border-amber-300 text-amber-600 shadow-soft-green",
+    iconWrapperActiveClass: "border-amber-200 bg-amber-50 text-amber-600",
+  },
+] as const;
+
+/**
  * AttendanceModule - Dedicated page for employee attendance tracking
  *
  * Features:
@@ -531,71 +602,3 @@ export function AttendanceModule() {
     </AppShell>
   );
 }
-
-const WORK_MODE_OPTIONS = [
-  {
-    value: "office" as const,
-    label: "Office",
-    description: "Clock in from Baynunah HQ or satellite offices.",
-    icon: (
-      <svg
-        className="h-5 w-5"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth={1.6}
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      >
-        <path d="M3 21h18" />
-        <path d="M5 21V4a1 1 0 011-1h12a1 1 0 011 1v17" />
-        <path d="M9 21V9h6v12" />
-      </svg>
-    ),
-    activeClass: "border-emerald-300 text-emerald-600 shadow-soft-green",
-    iconWrapperActiveClass: "border-emerald-200 bg-emerald-50 text-emerald-600",
-  },
-  {
-    value: "wfh" as const,
-    label: "Remote (WFH)",
-    description: "Approved home-based or remote working arrangement.",
-    icon: (
-      <svg
-        className="h-5 w-5"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth={1.6}
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      >
-        <path d="M3 11l9-7 9 7" />
-        <path d="M5 12v7a1 1 0 001 1h3m4 0h3a1 1 0 001-1v-7" />
-        <path d="M9 21V9h6v12" />
-      </svg>
-    ),
-    activeClass: "border-sky-300 text-sky-600 shadow-soft-green",
-    iconWrapperActiveClass: "border-sky-200 bg-sky-50 text-sky-600",
-  },
-  {
-    value: "field" as const,
-    label: "Field / Client",
-    description: "On client site, field work, or business travel.",
-    icon: (
-      <svg
-        className="h-5 w-5"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth={1.6}
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      >
-        <path d="M21 10c0 6-9 12-9 12S3 16 3 10a9 9 0 0118 0z" />
-        <circle cx="12" cy="10" r="3" />
-      </svg>
-    ),
-    activeClass: "border-amber-300 text-amber-600 shadow-soft-green",
-    iconWrapperActiveClass: "border-amber-200 bg-amber-50 text-amber-600",
-  },
-] as const;
