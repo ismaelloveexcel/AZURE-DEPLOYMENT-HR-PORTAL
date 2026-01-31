@@ -1,318 +1,453 @@
-import { useEffect, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { useAuthContext } from '../contexts/AuthContext'
-import { ComplianceAlerts, ComplianceAlertItem } from '../types'
-import { API_BASE, fetchWithAuth } from '../utils/api'
-import { exportComplianceAlertsToCSV } from '../utils/exportToCSV'
-import { EmployeeProfile } from '../components/EmployeeProfile'
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { EmployeeProfile } from "../components/EmployeeProfile";
+import { AppShell } from "../components/layout/AppShell";
+import { useAuthContext } from "../contexts/AuthContext";
+import { ComplianceAlertItem, ComplianceAlerts } from "../types";
+import { API_BASE, fetchWithAuth } from "../utils/api";
+import { exportComplianceAlertsToCSV } from "../utils/exportToCSV";
 
 export function ComplianceModule() {
-  const navigate = useNavigate()
-  const { user } = useAuthContext()
-  const [complianceAlerts, setComplianceAlerts] = useState<ComplianceAlerts | null>(null)
-  const [loading, setLoading] = useState(false)
-  const [viewingProfileId, setViewingProfileId] = useState<string | null>(null)
+  const { user } = useAuthContext();
+  const [complianceAlerts, setComplianceAlerts] =
+    useState<ComplianceAlerts | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [viewingProfileId, setViewingProfileId] = useState<string | null>(null);
 
-  const fetchComplianceAlerts = async () => {
-    if (!user || (user.role !== 'admin' && user.role !== 'hr')) return
-    setLoading(true)
+  const isAdminOrHR = user?.role === "admin" || user?.role === "hr";
+
+  const fetchComplianceAlerts = useCallback(async () => {
+    if (!user || !isAdminOrHR) return;
+    setLoading(true);
     try {
-      const res = await fetchWithAuth(`${API_BASE}/employees/compliance/alerts`, {
-        token: user.token,
-        role: user.role,
-      })
+      const res = await fetchWithAuth(
+        `${API_BASE}/employees/compliance/alerts`,
+        {
+          token: user.token,
+          role: user.role,
+        },
+      );
       if (res.ok) {
-        const data = await res.json()
-        setComplianceAlerts(data)
+        const data = await res.json();
+        setComplianceAlerts(data);
       }
     } catch (err) {
-      console.error('Failed to fetch compliance alerts:', err)
+      console.error("Failed to fetch compliance alerts:", err);
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  }, [user, isAdminOrHR]);
 
   useEffect(() => {
-    fetchComplianceAlerts()
-  }, [])
+    if (user && isAdminOrHR) {
+      fetchComplianceAlerts();
+    }
+  }, [user, isAdminOrHR, fetchComplianceAlerts]);
 
   const formatDate = (dateStr: string) => {
-    return new Date(dateStr).toLocaleDateString('en-GB', { 
-      day: '2-digit', 
-      month: 'short', 
-      year: 'numeric' 
-    })
-  }
+    return new Date(dateStr).toLocaleDateString("en-GB", {
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+    });
+  };
 
-  const renderAlertRow = (alert: ComplianceAlertItem) => (
-    <tr key={`${alert.employee_id}-${alert.document_type}`} className="hover:bg-primary-50">
-      <td className="px-6 py-4">
-        <p className="text-sm font-medium text-primary-900">{alert.employee_name}</p>
-        <p className="text-xs text-primary-600">{alert.employee_id}</p>
-      </td>
-      <td className="px-6 py-4 text-sm text-primary-700">{alert.document_type}</td>
-      <td className="px-6 py-4 text-sm text-primary-700">{formatDate(alert.expiry_date)}</td>
-      <td className="px-6 py-4">
-        <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${
-          alert.days_until_expiry < 0 ? 'bg-red-100 text-red-700' :
-          alert.days_until_expiry <= 30 ? 'bg-orange-100 text-orange-700' :
-          alert.days_until_expiry <= 60 ? 'bg-yellow-100 text-yellow-700' :
-          'bg-amber-100 text-amber-700'
-        }`}>
-          {alert.days_until_expiry < 0 
-            ? `Expired ${Math.abs(alert.days_until_expiry)} days ago` 
-            : `${alert.days_until_expiry} days`}
-        </span>
-      </td>
-      <td className="px-6 py-4">
-        <button
-          onClick={() => setViewingProfileId(alert.employee_id)}
-          className="text-accent-green hover:text-accent-green text-sm font-medium"
-        >
-          View Profile
-        </button>
-      </td>
-    </tr>
-  )
+  const handleExport = useCallback(() => {
+    const allAlerts = [
+      ...(complianceAlerts?.expired ?? []),
+      ...(complianceAlerts?.days_7 ?? []),
+      ...(complianceAlerts?.days_30 ?? []),
+      ...(complianceAlerts?.days_custom ?? []),
+    ];
+    if (allAlerts.length === 0) return;
+    exportComplianceAlertsToCSV(allAlerts);
+  }, [complianceAlerts]);
 
-  if (!user || (user.role !== 'admin' && user.role !== 'hr')) {
+  const totalAlerts = useMemo(() => {
+    if (!complianceAlerts) return 0;
     return (
-      <div className="min-h-screen bg-primary-100 p-8">
-        <div className="max-w-6xl mx-auto">
-          <div className="bg-white rounded-card shadow-card p-12 text-center">
-            <p className="text-4xl mb-4">🔒</p>
-            <p className="text-primary-600 mb-6">
-              This feature requires authentication. Please access it from the main portal.
+      complianceAlerts.expired.length +
+      (complianceAlerts.days_7?.length ?? 0) +
+      (complianceAlerts.days_30?.length ?? 0) +
+      (complianceAlerts.days_custom?.length ?? 0)
+    );
+  }, [complianceAlerts]);
+
+  const summaryCards = useMemo(
+    () => [
+      {
+        label: "Expired",
+        value: complianceAlerts?.expired.length ?? 0,
+        tone: "danger" as const,
+        helper: "Immediate action required",
+      },
+      {
+        label: "Due in 7 days",
+        value: complianceAlerts?.days_7?.length ?? 0,
+        tone: "warning" as const,
+        helper: "Critical renewal window",
+      },
+      {
+        label: "Due in 30 days",
+        value: complianceAlerts?.days_30?.length ?? 0,
+        tone: "amber" as const,
+        helper: "Plan renewal workflow",
+      },
+      {
+        label: "Due in 60 days",
+        value: complianceAlerts?.days_custom?.length ?? 0,
+        tone: "info" as const,
+        helper: "Long-range visibility",
+      },
+    ],
+    [complianceAlerts],
+  );
+
+  const alertSections = useMemo(
+    () => [
+      {
+        key: "expired",
+        title: "Expired Documents",
+        description:
+          "Documents past their validity. Follow up immediately to avoid MOHRE penalties.",
+        tone: "danger" as const,
+        data: complianceAlerts?.expired ?? [],
+      },
+      {
+        key: "days_7",
+        title: "Expiring Within 7 Days",
+        description:
+          "Critical alerts due this week. Prepare renewal files and confirm bookings.",
+        tone: "warning" as const,
+        data: complianceAlerts?.days_7 ?? [],
+      },
+      {
+        key: "days_30",
+        title: "Expiring Within 30 Days",
+        description:
+          "Upcoming renewals requiring HR scheduling and employee notifications.",
+        tone: "amber" as const,
+        data: complianceAlerts?.days_30 ?? [],
+      },
+      {
+        key: "days_custom",
+        title: "Expiring Within 60 Days",
+        description:
+          "Early visibility for staggered renewals and agency coordination.",
+        tone: "info" as const,
+        data: complianceAlerts?.days_custom ?? [],
+      },
+    ],
+    [complianceAlerts],
+  );
+
+  if (!user) {
+    return (
+      <AppShell
+        title="Compliance Alerts"
+        subtitle="Track UAE document validity windows, renewal deadlines, and HR risk status."
+      >
+        <section className="surface-section text-center">
+          <div className="mx-auto flex max-w-md flex-col items-center gap-4">
+            <div className="brand-badge">B</div>
+            <p className="text-lg font-semibold text-primary-800">
+              Secure access required
             </p>
-            <a
-              href="/"
-              className="inline-block px-6 py-3 bg-accent-green text-white rounded-lg font-medium hover:bg-accent-green/90 transition-colors"
-            >
-              Go to Home
-            </a>
+            <p className="text-sm text-primary-600">
+              Sign in through the HR portal to review compliance expiries and
+              legal obligations.
+            </p>
           </div>
-        </div>
-      </div>
-    )
+        </section>
+      </AppShell>
+    );
   }
+
+  if (!isAdminOrHR) {
+    return (
+      <AppShell
+        title="Compliance Alerts"
+        subtitle="Only HR and Admin roles can access Emirates ID, visa, and medical renewal data."
+      >
+        <section className="surface-section text-center">
+          <div className="mx-auto flex max-w-lg flex-col items-center gap-4">
+            <span className="chip chip--danger text-xs">Restricted Area</span>
+            <p className="text-lg font-semibold text-primary-800">
+              Access limited to HR & Admin
+            </p>
+            <p className="text-sm text-primary-600">
+              Contact the HR operations team if you believe you require
+              visibility on compliance alerts.
+            </p>
+          </div>
+        </section>
+      </AppShell>
+    );
+  }
+
+  const actions = (
+    <>
+      <button
+        type="button"
+        className="btn btn--ghost"
+        onClick={fetchComplianceAlerts}
+        disabled={loading}
+      >
+        <svg
+          className="h-4 w-4"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth={1.8}
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        >
+          <path d="M21 2v6h-6" />
+          <path d="M3 12a9 9 0 0115-6" />
+          <path d="M3 22v-6h6" />
+          <path d="M21 12a9 9 0 01-15 6" />
+        </svg>
+        <span>Refresh</span>
+      </button>
+      <button
+        type="button"
+        className="btn btn--primary"
+        onClick={handleExport}
+        disabled={loading || totalAlerts === 0}
+      >
+        <svg
+          className="h-4 w-4"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth={1.8}
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        >
+          <path d="M8 17l4 4 4-4" />
+          <path d="M12 12v9" />
+          <path d="M4 4h16v8H4z" />
+        </svg>
+        <span>Export Alerts</span>
+      </button>
+    </>
+  );
 
   return (
-    <div className="min-h-screen bg-primary-100 p-8">
-      <div className="max-w-6xl mx-auto">
-        <div className="flex items-center justify-between mb-6">
-          <div className="flex items-center gap-4">
-            <button
-              onClick={() => navigate('/')}
-              className="text-primary-600 hover:text-primary-700"
-            >
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-              </svg>
-            </button>
-            <h1 className="text-2xl font-semibold text-primary-800">Compliance Alerts</h1>
-          </div>
-          <div className="flex items-center gap-4">
-            <button
-              onClick={fetchComplianceAlerts}
-              className="px-4 py-2 bg-white text-primary-700 border border-primary-200 rounded-lg text-sm font-medium hover:bg-primary-50 transition-colors"
-            >
-              Refresh
-            </button>
-            <button
-              onClick={() => {
-                const allAlerts = [
-                  ...(complianceAlerts?.expired || []),
-                  ...(complianceAlerts?.days_7 || []),
-                  ...(complianceAlerts?.days_30 || []),
-                  ...(complianceAlerts?.days_custom || [])
-                ]
-                exportComplianceAlertsToCSV(allAlerts)
-              }}
-              className="px-4 py-2 bg-accent-green text-white rounded-lg text-sm font-medium hover:bg-accent-green/90 transition-colors flex items-center gap-2"
-            >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-              </svg>
-              Export to Excel
-            </button>
-          </div>
-            <div className="text-sm text-primary-600">
-              {user?.name} ({user?.role})
-            </div>
+    <>
+      {viewingProfileId && user?.token && (
+        <EmployeeProfile
+          employeeId={viewingProfileId}
+          token={user.token}
+          currentUserRole={user.role}
+          currentUserId={user.employee_id}
+          onClose={() => setViewingProfileId(null)}
+        />
+      )}
+
+      <AppShell
+        title="Compliance Command Center"
+        subtitle="Visa, Emirates ID, medical fitness, and insurance expiries tracked for UAE labour compliance."
+        actions={actions}
+      >
+        <div className="space-y-8">
+          {loading && !complianceAlerts ? (
+            <section className="surface-section text-center text-sm text-primary-500">
+              Loading compliance data…
+            </section>
+          ) : (
+            <>
+              <section className="surface-section">
+                <div className="flex flex-wrap items-center justify-between gap-4 border-b border-slate-200 pb-6">
+                  <div>
+                    <p className="text-sm uppercase tracking-[0.18em] text-primary-400">
+                      UAE compliance snapshot
+                    </p>
+                    <h2 className="mt-2 text-2xl font-semibold text-primary-900">
+                      Expiries Overview
+                    </h2>
+                    <p className="mt-1 text-sm text-primary-500">
+                      Monitor 60-day horizon across visa, Emirates ID, medical
+                      fitness, and insurance requirements.
+                    </p>
+                  </div>
+                  <span className="chip text-xs">
+                    Total alerts: {totalAlerts}
+                  </span>
+                </div>
+
+                <div className="mt-6 stat-grid stat-grid--four">
+                  {summaryCards.map((card) => (
+                    <div
+                      key={card.label}
+                      className={`stat-card ${toneStyles[card.tone].cardShadow}`}
+                    >
+                      <div className="flex items-center gap-2 text-sm font-medium text-primary-600">
+                        <span
+                          className={`h-2.5 w-2.5 rounded-full ${toneStyles[card.tone].dot}`}
+                        />
+                        {card.label}
+                      </div>
+                      <div className="stat-value">{card.value}</div>
+                      <p className="text-sm text-primary-500">{card.helper}</p>
+                    </div>
+                  ))}
+                </div>
+              </section>
+
+              {alertSections.map(
+                (section) =>
+                  section.data.length > 0 && (
+                    <section
+                      key={section.key}
+                      className="surface-section space-y-5"
+                    >
+                      <div
+                        className={`rounded-2xl border px-5 py-4 ${toneStyles[section.tone].banner}`}
+                      >
+                        <div className="flex flex-wrap items-start justify-between gap-4">
+                          <div>
+                            <p className="text-xs uppercase tracking-[0.2em] text-primary-400">
+                              {section.data.length} records
+                            </p>
+                            <h3 className="mt-2 text-lg font-semibold text-primary-900">
+                              {section.title}
+                            </h3>
+                            <p className="mt-1 text-sm text-primary-600 max-w-2xl">
+                              {section.description}
+                            </p>
+                          </div>
+                          <span
+                            className={`chip text-xs ${toneStyles[section.tone].chip}`}
+                          >
+                            Priority: {toneStyles[section.tone].priority}
+                          </span>
+                        </div>
+                      </div>
+
+                      <div className="-mx-4 overflow-x-auto">
+                        <table className="min-w-full divide-y divide-slate-100">
+                          <thead className="bg-slate-50 text-xs font-semibold uppercase tracking-wide text-slate-500">
+                            <tr>
+                              <th className="px-4 py-3 text-left">Employee</th>
+                              <th className="px-4 py-3 text-left">Document</th>
+                              <th className="px-4 py-3 text-left">Expiry</th>
+                              <th className="px-4 py-3 text-left">Status</th>
+                              <th className="px-4 py-3 text-right">Action</th>
+                            </tr>
+                          </thead>
+                          <tbody className="divide-y divide-slate-100 text-sm">
+                            {section.data.map((alert) => (
+                              <tr
+                                key={`${alert.employee_id}-${alert.document_type}`}
+                                className="transition hover:bg-slate-50/60"
+                              >
+                                <td className="px-4 py-4">
+                                  <p className="font-medium text-primary-800">
+                                    {alert.employee_name}
+                                  </p>
+                                  <p className="text-xs text-primary-500">
+                                    {alert.employee_id}
+                                  </p>
+                                </td>
+                                <td className="px-4 py-4 text-primary-600">
+                                  {alert.document_type}
+                                </td>
+                                <td className="px-4 py-4 text-primary-600">
+                                  {formatDate(alert.expiry_date)}
+                                </td>
+                                <td className="px-4 py-4">
+                                  <span
+                                    className={`${toneStyles[section.tone].chipClass}`}
+                                  >
+                                    {formatDeadline(alert)}
+                                  </span>
+                                </td>
+                                <td className="px-4 py-4 text-right">
+                                  <button
+                                    type="button"
+                                    className="text-sm font-semibold text-emerald-600 transition hover:text-emerald-700"
+                                    onClick={() =>
+                                      setViewingProfileId(alert.employee_id)
+                                    }
+                                  >
+                                    View profile
+                                  </button>
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    </section>
+                  ),
+              )}
+
+              {complianceAlerts && totalAlerts === 0 && (
+                <section className="surface-section text-center">
+                  <div className="mx-auto flex max-w-md flex-col items-center gap-4">
+                    <span className="chip chip--success text-xs">
+                      All clear
+                    </span>
+                    <p className="text-lg font-semibold text-primary-800">
+                      No pending renewals in the next 60 days
+                    </p>
+                    <p className="text-sm text-primary-600">
+                      Continue monitoring Emirates ID, visa, medical fitness,
+                      insurance, and contract expiry schedules weekly.
+                    </p>
+                  </div>
+                </section>
+              )}
+            </>
+          )}
         </div>
-
-        {loading && !complianceAlerts ? (
-          <div className="text-center py-12 text-primary-600">Loading compliance data...</div>
-        ) : (
-          <>
-            {/* Summary Cards */}
-            <div className="grid grid-cols-4 gap-4 mb-6">
-              <div className="bg-red-50 rounded-xl p-4 border border-red-100">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-red-100 rounded-lg flex items-center justify-center text-red-600 text-lg">⚠️</div>
-                  <div>
-                    <p className="text-2xl font-bold text-red-700">{complianceAlerts?.expired.length || 0}</p>
-                    <p className="text-xs text-red-600">Expired</p>
-                  </div>
-                </div>
-              </div>
-              <div className="bg-orange-50 rounded-xl p-4 border border-orange-100">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center text-orange-600 text-lg">🔶</div>
-                  <div>
-                    <p className="text-2xl font-bold text-orange-700">{complianceAlerts?.days_7?.length || 0}</p>
-                    <p className="text-xs text-orange-600">Within 7 days</p>
-                  </div>
-                </div>
-              </div>
-              <div className="bg-yellow-50 rounded-xl p-4 border border-yellow-100">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-yellow-100 rounded-lg flex items-center justify-center text-yellow-600 text-lg">🟡</div>
-                  <div>
-                    <p className="text-2xl font-bold text-yellow-700">{complianceAlerts?.days_30?.length || 0}</p>
-                    <p className="text-xs text-yellow-600">Within 30 days</p>
-                  </div>
-                </div>
-              </div>
-              <div className="bg-amber-50 rounded-xl p-4 border border-amber-100">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-amber-100 rounded-lg flex items-center justify-center text-amber-600 text-lg">📋</div>
-                  <div>
-                    <p className="text-2xl font-bold text-amber-700">{complianceAlerts?.days_custom?.length || 0}</p>
-                    <p className="text-xs text-amber-600">Within 60 days</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Expired Documents */}
-            {complianceAlerts?.expired && complianceAlerts.expired.length > 0 && (
-              <div className="bg-white rounded-card shadow-card mb-6">
-                <div className="px-6 py-4 border-b border-primary-100 bg-red-50 rounded-t-xl">
-                  <h2 className="text-lg font-semibold text-red-700 flex items-center gap-2">
-                    <span>⚠️</span> Expired Documents ({complianceAlerts.expired.length})
-                  </h2>
-                  <p className="text-sm text-red-600 mt-1">These documents have expired and require immediate attention</p>
-                </div>
-                <table className="w-full">
-                  <thead className="bg-primary-50 text-xs text-primary-600 uppercase">
-                    <tr>
-                      <th className="px-6 py-3 text-left">Employee</th>
-                      <th className="px-6 py-3 text-left">Document</th>
-                      <th className="px-6 py-3 text-left">Expiry Date</th>
-                      <th className="px-6 py-3 text-left">Status</th>
-                      <th className="px-6 py-3 text-left">Action</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-gray-100">
-                    {complianceAlerts.expired.map(renderAlertRow)}
-                  </tbody>
-                </table>
-              </div>
-            )}
-
-            {/* Expiring in 7 Days */}
-            {complianceAlerts?.days_7 && complianceAlerts.days_7.length > 0 && (
-              <div className="bg-white rounded-card shadow-card mb-6">
-                <div className="px-6 py-4 border-b border-primary-100 bg-orange-50 rounded-t-xl">
-                  <h2 className="text-lg font-semibold text-orange-700 flex items-center gap-2">
-                    <span>🔶</span> Expiring Within 7 Days ({complianceAlerts.days_7.length})
-                  </h2>
-                  <p className="text-sm text-orange-600 mt-1">Urgent - documents that need immediate attention</p>
-                </div>
-                <table className="w-full">
-                  <thead className="bg-primary-50 text-xs text-primary-600 uppercase">
-                    <tr>
-                      <th className="px-6 py-3 text-left">Employee</th>
-                      <th className="px-6 py-3 text-left">Document</th>
-                      <th className="px-6 py-3 text-left">Expiry Date</th>
-                      <th className="px-6 py-3 text-left">Days Left</th>
-                      <th className="px-6 py-3 text-left">Action</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-gray-100">
-                    {complianceAlerts.days_7.map(renderAlertRow)}
-                  </tbody>
-                </table>
-              </div>
-            )}
-
-            {/* Expiring in 30 Days */}
-            {complianceAlerts?.days_30 && complianceAlerts.days_30.length > 0 && (
-              <div className="bg-white rounded-card shadow-card mb-6">
-                <div className="px-6 py-4 border-b border-primary-100 bg-yellow-50 rounded-t-xl">
-                  <h2 className="text-lg font-semibold text-yellow-700 flex items-center gap-2">
-                    <span>🟡</span> Expiring Within 30 Days ({complianceAlerts.days_30.length})
-                  </h2>
-                  <p className="text-sm text-yellow-600 mt-1">Documents that need to be renewed soon</p>
-                </div>
-                <table className="w-full">
-                  <thead className="bg-primary-50 text-xs text-primary-600 uppercase">
-                    <tr>
-                      <th className="px-6 py-3 text-left">Employee</th>
-                      <th className="px-6 py-3 text-left">Document</th>
-                      <th className="px-6 py-3 text-left">Expiry Date</th>
-                      <th className="px-6 py-3 text-left">Days Left</th>
-                      <th className="px-6 py-3 text-left">Action</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-gray-100">
-                    {complianceAlerts.days_30.map(renderAlertRow)}
-                  </tbody>
-                </table>
-              </div>
-            )}
-
-            {/* Expiring in 60 Days */}
-            {complianceAlerts?.days_custom && complianceAlerts.days_custom.length > 0 && (
-              <div className="bg-white rounded-card shadow-card mb-6">
-                <div className="px-6 py-4 border-b border-primary-100 bg-amber-50 rounded-t-xl">
-                  <h2 className="text-lg font-semibold text-amber-700 flex items-center gap-2">
-                    <span>📋</span> Expiring Within 60 Days ({complianceAlerts.days_custom.length})
-                  </h2>
-                </div>
-                <table className="w-full">
-                  <thead className="bg-primary-50 text-xs text-primary-600 uppercase">
-                    <tr>
-                      <th className="px-6 py-3 text-left">Employee</th>
-                      <th className="px-6 py-3 text-left">Document</th>
-                      <th className="px-6 py-3 text-left">Expiry Date</th>
-                      <th className="px-6 py-3 text-left">Days Left</th>
-                      <th className="px-6 py-3 text-left">Action</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-gray-100">
-                    {complianceAlerts.days_custom.map(renderAlertRow)}
-                  </tbody>
-                </table>
-              </div>
-            )}
-
-            {/* No Alerts */}
-            {complianceAlerts && 
-              (complianceAlerts.expired.length + 
-               (complianceAlerts.days_7?.length || 0) + 
-               (complianceAlerts.days_30?.length || 0) + 
-               (complianceAlerts.days_custom?.length || 0)) === 0 && (
-              <div className="bg-white rounded-card shadow-card p-12 text-center">
-                <p className="text-4xl mb-4">✅</p>
-                <p className="text-xl font-semibold text-accent-green mb-2">All Clear!</p>
-                <p className="text-primary-600">No documents are expired or expiring within the next 90 days.</p>
-              </div>
-            )}
-          </>
-        )}
-
-        {viewingProfileId && (
-          <EmployeeProfile
-            employeeId={viewingProfileId}
-            token={user.token}
-            currentUserRole={user.role}
-            currentUserId={user.employee_id}
-            onClose={() => setViewingProfileId(null)}
-          />
-        )}
-      </div>
-    </div>
-  )
+      </AppShell>
+    </>
+  );
 }
+
+const toneStyles = {
+  danger: {
+    cardShadow: "",
+    dot: "bg-rose-500",
+    banner: "border-rose-100 bg-rose-50",
+    chip: "bg-rose-100 text-rose-600 border border-rose-200",
+    chipClass: "chip chip--danger text-xs",
+    priority: "Immediate",
+  },
+  warning: {
+    cardShadow: "",
+    dot: "bg-orange-500",
+    banner: "border-orange-100 bg-orange-50",
+    chip: "bg-orange-100 text-orange-600 border border-orange-200",
+    chipClass: "chip chip--warning text-xs",
+    priority: "Urgent",
+  },
+  amber: {
+    cardShadow: "",
+    dot: "bg-amber-500",
+    banner: "border-amber-100 bg-amber-50",
+    chip: "bg-amber-100 text-amber-600 border border-amber-200",
+    chipClass:
+      "chip text-xs bg-amber-100 text-amber-600 border border-amber-200",
+    priority: "Planned",
+  },
+  info: {
+    cardShadow: "",
+    dot: "bg-sky-500",
+    banner: "border-sky-100 bg-sky-50",
+    chip: "bg-sky-100 text-sky-600 border border-sky-200",
+    chipClass: "chip text-xs bg-sky-100 text-sky-600 border border-sky-200",
+    priority: "Monitor",
+  },
+} as const;
+
+const formatDeadline = (alert: ComplianceAlertItem) => {
+  if (alert.days_until_expiry < 0) {
+    return `Expired ${Math.abs(alert.days_until_expiry)} days ago`;
+  }
+  if (alert.days_until_expiry === 0) {
+    return "Expires today";
+  }
+  return `${alert.days_until_expiry} days`;
+};

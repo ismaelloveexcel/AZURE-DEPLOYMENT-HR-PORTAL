@@ -37,19 +37,26 @@ def hash_password(password: str) -> str:
 
 def verify_password(password: str, hashed: str) -> bool:
     """Verify password against hash."""
+    if not hashed:
+        logger = logging.getLogger(__name__)
+        logger.error("Password hash missing for employee during login check")
+        return False
     try:
         salt, stored_key = hashed.split(':')
         iterations = 100000
         key = hashlib.pbkdf2_hmac('sha256', password.encode(), salt.encode(), iterations)
         return key.hex() == stored_key
     except ValueError:
-        import logging
         logger = logging.getLogger(__name__)
         if hashlib.sha256(password.encode()).hexdigest() == hashed:
             logger.warning(
                 "Legacy unsalted password detected. User should change password."
             )
             return True
+        return False
+    except Exception as exc:
+        logger = logging.getLogger(__name__)
+        logger.error(f"Password verification error: {type(exc).__name__}")
         return False
 
 
