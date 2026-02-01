@@ -365,7 +365,7 @@ jobs:
       
       - name: Upload Infrastructure Report
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: infrastructure-report
           path: infra-report.md
